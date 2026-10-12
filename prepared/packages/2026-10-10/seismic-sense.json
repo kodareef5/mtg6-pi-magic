@@ -1,0 +1,83 @@
+{
+	"card": "Seismic Sense",
+	"generated": "2026-10-10",
+	"source": "82d34d75c95539f7e706eaa2b29798a4bf835f916fd4e7c7a23479a1c93246bf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seismic Sense",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Seismic Sense",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Seismic Sense",
+				"basis": "Look at the top X cards of your library, where X is the number of lands you control. You may reveal a creature or land card from among them and put it into your hand. Put the rest on the bottom of your library in a random order.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": {
+								"count": {
+									"types": [
+										"land"
+									],
+									"controller": "you"
+								}
+							},
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"types": [
+								"creature",
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

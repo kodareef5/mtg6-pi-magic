@@ -1,0 +1,204 @@
+{
+	"card": "Artist's Talent",
+	"generated": "2026-10-10",
+	"source": "c7913cb7ed6613261a9f21c3737d060d2551833898ac22159329deb7703202fc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Artist's Talent",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a noncreature spell, you may discard a card. If you do, draw a card.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{2}{R}: Level 2",
+				"cost": {
+					"mana": "{2}{R}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 1,
+							"atMost": 1
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Noncreature spells you cast cost {1} less to cast.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 2
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "cost",
+							"basis": "Noncreature spells you cast cost {1} less to cast.",
+							"cast": {
+								"zones": [
+									"stack"
+								],
+								"controller": "you",
+								"types": [
+									"artifact",
+									"battle",
+									"enchantment",
+									"instant",
+									"kindred",
+									"planeswalker",
+									"sorcery"
+								],
+								"not": {
+									"types": [
+										"creature"
+									]
+								}
+							},
+							"reduce": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{2}{R}: Level 3",
+				"cost": {
+					"mana": "{2}{R}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 2,
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "If a source you control would deal noncombat damage to an opponent or a permanent an opponent controls, it deals that much damage plus 2 instead.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 3
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "damage-rule",
+							"basis": "If a source you control would deal noncombat damage to an opponent or a permanent an opponent controls, it deals that much damage plus 2 instead.",
+							"mode": "add",
+							"amount": 2,
+							"combat": false,
+							"from": {
+								"controller": "you"
+							},
+							"to": {
+								"player": "opponent"
+							}
+						},
+						{
+							"kind": "damage-rule",
+							"basis": "If a source you control would deal noncombat damage to an opponent or a permanent an opponent controls, it deals that much damage plus 2 instead.",
+							"mode": "add",
+							"amount": 2,
+							"combat": false,
+							"from": {
+								"controller": "you"
+							},
+							"to": {
+								"object": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "opponent"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,126 @@
+{
+	"card": "Quandrix Charm",
+	"generated": "2026-10-10",
+	"source": "2053f84135ee7ae8a0bf6fc2b11009e8b242b46b5b479ab1b3947db4d9495337",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Quandrix Charm",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Quandrix Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Quandrix Charm — counter unless its controller pays {2}",
+				"basis": "Choose one — ... Counter target spell unless its controller pays {2}.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{2}"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Quandrix Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Quandrix Charm — destroy an enchantment",
+				"basis": "Choose one — ... Destroy target enchantment.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Quandrix Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Quandrix Charm — set a creature's base power and toughness to 5/5",
+				"basis": "Choose one — ... Target creature has base power and toughness 5/5 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 5,
+								"toughness": 5
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

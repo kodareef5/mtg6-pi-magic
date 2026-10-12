@@ -1,0 +1,131 @@
+{
+	"card": "Ordeal of Nylea",
+	"generated": "2026-10-10",
+	"source": "8d441a97654aecbcea1cf3f9a753a2309e4d084460335733fbe2295395042362",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ordeal of Nylea",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever enchanted creature attacks, put a +1/+1 counter on it. Then if it has three or more +1/+1 counters on it, sacrifice this Aura.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "attached"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "event:object",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice",
+							"if": {
+								"amount": {
+									"counters": "+1/+1",
+									"on": "event:object"
+								},
+								"atLeast": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When you sacrifice this Aura, search your library for up to two basic land cards, put them onto the battlefield tapped, then shuffle.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"types": [
+									"land"
+								],
+								"supertypes": [
+									"basic"
+								]
+							},
+							"count": 2,
+							"upTo": true,
+							"as": "lands"
+						},
+						{
+							"do": "move",
+							"what": "bound:lands",
+							"to": "battlefield",
+							"tapped": true,
+							"controller": "you",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ordeal of Nylea",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ordeal of Nylea enchanting a creature",
+				"basis": "Enchant creature",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

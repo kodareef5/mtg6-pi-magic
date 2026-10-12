@@ -1,0 +1,229 @@
+{
+	"card": "Dion, Bahamut's Dominant // Bahamut, Warden of Light",
+	"generated": "2026-10-10",
+	"source": "7931428d26d7bcaeaa3bdf9420f9b93e0611b26046027418ccb10f07f271a1d7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dion, Bahamut's Dominant // Bahamut, Warden of Light",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Dragonfire Dive — During your turn, Dion and other Knights you control have flying.",
+				"kind": "continuous",
+				"if": {
+					"turn": "self"
+				},
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"any": [
+						{
+							"is": "this"
+						},
+						{
+							"subtypes": [
+								"Knight"
+							],
+							"controller": "you",
+							"other": true
+						}
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "When Dion enters, create a 2/2 white Knight creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Knight Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Knight"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "I, II — Wings of Light — Put a +1/+1 counter on each other creature you control. Those creatures gain flying until end of turn.",
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"count": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you",
+									"other": true
+								}
+							},
+							"as": "creatures"
+						},
+						{
+							"do": "counters",
+							"on": "bound:creatures",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "modify",
+							"what": "bound:creatures",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "III — Gigaflare — Destroy target permanent. Exile Bahamut, then return it to the battlefield (front face up).",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "exile",
+							"reason": "exile",
+							"as": "bahamut"
+						},
+						{
+							"do": "move",
+							"what": "bound:bahamut",
+							"to": "battlefield",
+							"face": 0,
+							"controller": "owner:bound:bahamut",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Dion, Bahamut's Dominant // Bahamut, Warden of Light",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Dion and return it transformed",
+				"basis": "{4}{W}{W}, {T}: Exile Dion, then return it to the battlefield transformed under its owner's control. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}{W}{W}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "exile",
+						"reason": "exile",
+						"as": "dion"
+					},
+					{
+						"do": "move",
+						"what": "bound:dion",
+						"to": "battlefield",
+						"face": 1,
+						"controller": "owner:bound:dion",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

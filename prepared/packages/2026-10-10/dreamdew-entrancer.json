@@ -1,0 +1,77 @@
+{
+	"card": "Dreamdew Entrancer",
+	"generated": "2026-10-10",
+	"source": "fcbe84e7e6ab94d64cf02af9606258ddb6beca072193582195b57e8cc3a83fd7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dreamdew Entrancer",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, tap up to one target creature and put three stun counters on it. If you control that creature, draw two cards.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "tap",
+							"what": "target:0"
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "stun",
+							"amount": 3
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"is": "target:0",
+								"matches": {
+									"controller": "you"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

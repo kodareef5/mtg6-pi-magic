@@ -1,0 +1,91 @@
+{
+	"card": "Topiary Lecturer",
+	"generated": "2026-10-10",
+	"source": "2cd2a066fbba6bfa0e45d56e0c11fb6a406b6ac51a932bbfeced91c0898582fb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Topiary Lecturer",
+		"registers": [
+			{
+				"basis": "Increment (Whenever you cast a spell, if the amount of mana you spent is greater than this creature's power or toughness, put a +1/+1 counter on this creature.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"if": {
+					"any": [
+						{
+							"amount": {
+								"manaSpent": "event:object"
+							},
+							"atLeast": {
+								"sum": [
+									{
+										"power": "this"
+									},
+									1
+								]
+							}
+						},
+						{
+							"amount": {
+								"manaSpent": "event:object"
+							},
+							"atLeast": {
+								"sum": [
+									{
+										"toughness": "this"
+									},
+									1
+								]
+							}
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add an amount of {G} equal to this creature's power.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"times": {
+					"power": "this"
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,86 @@
+{
+	"card": "Honored Dreyleader",
+	"generated": "2026-10-10",
+	"source": "ede712ae19258669518e8dec386ea6852722ab8e675d64a83693e2d51525838c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Honored Dreyleader",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, put a +1/+1 counter on it for each other Squirrel and/or Food you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": {
+								"count": {
+									"subtypes": [
+										"Squirrel",
+										"Food"
+									],
+									"controller": "you",
+									"other": true
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Squirrel or Food you control enters, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Squirrel",
+							"Food"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

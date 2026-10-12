@@ -1,0 +1,81 @@
+{
+	"card": "Questing Druid // Seek the Beast",
+	"generated": "2026-10-10",
+	"source": "13f3dfd9dfc2c43fc82f0feb1672c2bb0758059b7b3249f53be42c05aae598e4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Questing Druid // Seek the Beast",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever you cast a spell that's white, blue, black, or red, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"colors": [
+							"W",
+							"U",
+							"B",
+							"R"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Questing Druid // Seek the Beast",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Seek the Beast",
+				"basis": "Exile the top two cards of your library. Until your next end step, you may play those cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 2,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": {
+							"nextEndStep": "you"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,100 @@
+{
+	"card": "Borough Backup",
+	"generated": "2026-10-10",
+	"source": "0bb0188366cc9f9213aa44f14cb70f97ddbcf00f119952b79aa14cc3d632ab25",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Borough Backup",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Borough Backup",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Borough Backup",
+				"basis": "Create two 3/2 white Hero creature tokens with vigilance.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Hero Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Hero"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 3,
+							"toughness": 2,
+							"words": [
+								"vigilance"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Borough Backup",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Basic landcycle Borough Backup",
+				"basis": "Basic landcycling {2} ({2}, Discard this card: Search your library for a basic land card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,207 @@
+{
+	"card": "Pit of Offerings",
+	"generated": "2026-10-10",
+	"source": "608a3e803b9a807db86ea5706f1e4f21388a44cf3f57cda1a8a0ae8f39709e37",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pit of Offerings",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "When this land enters, exile up to three target cards from graveyards.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								]
+							},
+							"count": 3,
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"link": true
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add one mana of any of the exiled cards' colors.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"exile"
+							],
+							"linked": true,
+							"colors": [
+								"W"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any of the exiled cards' colors.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"exile"
+							],
+							"linked": true,
+							"colors": [
+								"U"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any of the exiled cards' colors.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"exile"
+							],
+							"linked": true,
+							"colors": [
+								"B"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any of the exiled cards' colors.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"exile"
+							],
+							"linked": true,
+							"colors": [
+								"R"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any of the exiled cards' colors.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"exile"
+							],
+							"linked": true,
+							"colors": [
+								"G"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any of the exiled cards' colors.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"exile"
+							],
+							"linked": true,
+							"colors": [
+								"W",
+								"U",
+								"B",
+								"R",
+								"G"
+							]
+						}
+					},
+					"atMost": 0
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

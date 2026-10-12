@@ -1,0 +1,87 @@
+{
+	"card": "Encouraging Aviator // Jump",
+	"generated": "2026-10-10",
+	"source": "0abadce6ded6c162ea4f57095e2ceb81a171e360e4829db7bd749cbdda3b2a61",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Encouraging Aviator // Jump",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever this creature attacks, it becomes prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "prepare",
+							"what": "this",
+							"prepared": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Encouraging Aviator // Jump",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Jump",
+				"basis": "Target creature gains flying until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

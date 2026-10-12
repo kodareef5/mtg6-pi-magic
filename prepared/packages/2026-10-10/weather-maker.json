@@ -1,0 +1,102 @@
+{
+	"card": "Weather Maker",
+	"generated": "2026-10-10",
+	"source": "97e7fc7b89231180815b96702eec326462ebd8cf7bf1e4da11484e705511f963",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Weather Maker",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, put a charge counter on this artifact.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "charge",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			},
+			{
+				"basis": "{T}, Remove two charge counters from this artifact: Add {C}{C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true,
+					"counters": {
+						"kind": "charge",
+						"count": 2
+					}
+				},
+				"colors": [
+					"C",
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Weather Maker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Remove three charge counters to deal 3 damage to any target",
+				"basis": "{T}, Remove three charge counters from this artifact: It deals 3 damage to any target.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"counters": {
+						"kind": "charge",
+						"count": 3
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

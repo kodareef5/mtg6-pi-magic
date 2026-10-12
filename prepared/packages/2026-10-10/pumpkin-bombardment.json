@@ -1,0 +1,86 @@
+{
+	"card": "Pumpkin Bombardment",
+	"generated": "2026-10-10",
+	"source": "02ca806293dbff4a56740e328d9925b28d02386d43d6cfa609d606769f622cc5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pumpkin Bombardment",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pumpkin Bombardment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pumpkin Bombardment discarding a card",
+				"basis": "As an additional cost to cast this spell, discard a card or pay {2}. ... Pumpkin Bombardment deals 3 damage to target creature.",
+				"timing": "spell",
+				"cost": {
+					"discard": 1
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Pumpkin Bombardment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pumpkin Bombardment paying the additional {2}",
+				"basis": "As an additional cost to cast this spell, discard a card or pay {2}. ... Pumpkin Bombardment deals 3 damage to target creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "additional-mana",
+							"mana": "{2}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

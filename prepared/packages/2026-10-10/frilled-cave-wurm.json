@@ -23,6 +23,7 @@
 								"graveyard"
 							],
 							"owner": "you",
+							"token": false,
 							"types": [
 								"artifact",
 								"battle",

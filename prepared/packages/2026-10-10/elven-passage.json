@@ -1,0 +1,92 @@
+{
+	"card": "Elven Passage",
+	"generated": "2026-10-10",
+	"source": "dd8a0d9dd412c2e12fde9b9cecef399ed7d0412e6972dc6c089209fc95173dee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elven Passage",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Elven Passage",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Search for a basic land, then optionally behold an Elf to untap it",
+				"basis": "{T}, Pay 1 life, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle. You may behold an Elf. If you do, untap that land. (To behold an Elf, choose an Elf you control or reveal an Elf card from your hand.)",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"life": 1,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"supertypes": [
+								"basic"
+							],
+							"types": [
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve",
+						"as": "land"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"show": {
+								"choose": {
+									"zones": [
+										"battlefield",
+										"hand"
+									],
+									"controller": "you",
+									"subtypes": [
+										"Elf"
+									]
+								},
+								"count": 1
+							}
+						},
+						"may": true,
+						"as": "beheld"
+					},
+					{
+						"do": "untap",
+						"what": "bound:land",
+						"if": {
+							"bound": "beheld"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

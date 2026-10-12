@@ -1,0 +1,125 @@
+{
+	"card": "Illvoi Light Jammer",
+	"generated": "2026-10-10",
+	"source": "be90ae09c8420083d45106e3b4765bb286954902527da087a19bb1d549bfbe0c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Illvoi Light Jammer",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this Equipment enters, attach it to target creature you control. That creature gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "target:0"
+						},
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"hexproof"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +1/+2.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 2
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Illvoi Light Jammer",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Illvoi Light Jammer",
+				"basis": "Equip {3}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

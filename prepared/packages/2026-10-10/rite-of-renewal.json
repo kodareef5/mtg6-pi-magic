@@ -1,0 +1,93 @@
+{
+	"card": "Rite of Renewal",
+	"generated": "2026-10-10",
+	"source": "d042cbe5f07dcbba0fe3fd0df22d6931fd3f9cbc9386bc6b46383ace09124478",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rite of Renewal",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Rite of Renewal",
+				"basis": "Return up to two target permanent cards from your graveyard to your hand. Target player shuffles up to four target cards from their graveyard into their library. Exile Rite of Renewal.",
+				"source": {
+					"card": "Rite of Renewal",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					},
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "target:1",
+							"token": false
+						},
+						"count": 4,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "perform",
+						"who": "target:1",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:2",
+								"to": "library",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "target:1"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "this",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

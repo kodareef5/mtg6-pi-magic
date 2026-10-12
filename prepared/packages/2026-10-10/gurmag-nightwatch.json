@@ -1,0 +1,72 @@
+{
+	"card": "Gurmag Nightwatch",
+	"generated": "2026-10-10",
+	"source": "839283a1a64e88a3fb8b536e9f100b308dbab1ee723b839901aaafbf41296b96",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gurmag Nightwatch",
+		"registers": [
+			{
+				"basis": "When this creature enters, look at the top three cards of your library. You may put one of those cards back on top of your library. Put the rest into your graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 3,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "kept"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"what": "bound:kept",
+							"position": "top"
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"not": {
+									"is": "bound:kept"
+								}
+							},
+							"to": "graveyard",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

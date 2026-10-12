@@ -1,0 +1,64 @@
+{
+	"card": "University Campus",
+	"generated": "2026-10-10",
+	"source": "034acbca71254d5abb6311ab64e5a23dc93d1d1fe3696cd400a7a28e94451b2f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "University Campus",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {W} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"basis": "{T}: Add {W} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Activate University Campus to surveil 1",
+				"basis": "{4}, {T}: Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"source": {
+					"card": "University Campus",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

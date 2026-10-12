@@ -1,0 +1,92 @@
+{
+	"card": "U.S.Agent, John Walker",
+	"generated": "2026-10-10",
+	"source": "17298840b36134ac4862923e240a407b7773ed606ec7126c3ace440aecf73f1c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "U.S.Agent, John Walker",
+		"registers": [
+			{
+				"basis": "When U.S.Agent enters, create a colorless Equipment artifact token named Sturdy Shield with \"Equipped creature gets +1/+2\" and equip {2}. Attach it to U.S.Agent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"as": "shield",
+							"spec": {
+								"name": "Sturdy Shield",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Equipment"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "When U.S.Agent enters, create a colorless Equipment artifact token named Sturdy Shield with \"Equipped creature gets +1/+2\" and equip {2}. Attach it to U.S.Agent.",
+										"kind": "continuous",
+										"affects": {
+											"is": "attached",
+											"types": [
+												"creature"
+											]
+										},
+										"change": {
+											"power": 1,
+											"toughness": 2
+										}
+									},
+									{
+										"basis": "When U.S.Agent enters, create a colorless Equipment artifact token named Sturdy Shield with \"Equipped creature gets +1/+2\" and equip {2}. Attach it to U.S.Agent.",
+										"kind": "activated",
+										"cost": {
+											"mana": "{2}"
+										},
+										"speed": "sorcery",
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"types": [
+															"creature"
+														],
+														"controller": "you"
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "attach",
+													"what": "this",
+													"to": "target:0"
+												}
+											]
+										}
+									}
+								]
+							}
+						},
+						{
+							"do": "attach",
+							"what": "bound:shield",
+							"to": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

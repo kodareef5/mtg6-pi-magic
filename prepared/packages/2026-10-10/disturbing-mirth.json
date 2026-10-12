@@ -1,0 +1,82 @@
+{
+	"card": "Disturbing Mirth",
+	"generated": "2026-10-10",
+	"source": "0b0dbe113cf46b9bd90e154e38aaddd03e32f1bf0518c1e938744d56195a7e42",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Disturbing Mirth",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this enchantment enters, you may sacrifice another enchantment or creature. If you do, draw two cards.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"types": [
+											"enchantment",
+											"creature"
+										],
+										"other": true
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"bound": "sacrificed"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When you sacrifice this enchantment, manifest dread. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "manifest-dread",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

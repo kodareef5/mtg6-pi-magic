@@ -1,0 +1,96 @@
+{
+	"card": "Robot Domination",
+	"generated": "2026-10-10",
+	"source": "1c81bf42a087d8ea34c3302573bcbbcd0c3a83786a2faad56f2f1314dbad2d22",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Robot Domination",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more creature cards are put into your graveyard from anywhere, you draw a card, lose 1 life, and put a plan counter on this enchantment.",
+				"event": {
+					"on": "enters",
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"types": [
+							"creature"
+						],
+						"token": false
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "plan",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When the third plan counter is put on this enchantment, sacrifice it and create three 2/2 colorless Robot Villain artifact creature tokens.",
+				"event": {
+					"on": "counters",
+					"counter": "plan",
+					"reaches": 3,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						},
+						{
+							"do": "token",
+							"count": 3,
+							"spec": {
+								"name": "Robot Villain Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Robot",
+									"Villain"
+								],
+								"colors": [],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,112 @@
+{
+	"card": "Sporogenic Infection",
+	"generated": "2026-10-10",
+	"source": "36fdee4138986156526d4088b253497080ef798f10913b35bf1e0812ffacc2a8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sporogenic Infection",
+		"registers": [
+			{
+				"basis": "When this Aura enters, target player sacrifices a creature of their choice other than enchanted creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "target:0",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "target:0",
+								"not": {
+									"is": "attached"
+								}
+							},
+							"count": 1,
+							"as": "sacrifice"
+						},
+						{
+							"do": "move",
+							"what": "bound:sacrifice",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						}
+					]
+				}
+			},
+			{
+				"basis": "When enchanted creature is dealt damage, destroy it.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"received": true,
+					"of": {
+						"is": "attached"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "event:object"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sporogenic Infection",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Sporogenic Infection enchanting a creature",
+				"basis": "Enchant creature",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

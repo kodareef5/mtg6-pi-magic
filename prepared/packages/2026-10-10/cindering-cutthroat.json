@@ -1,0 +1,57 @@
+{
+	"card": "Cindering Cutthroat",
+	"generated": "2026-10-10",
+	"source": "03dbd15e4607bfcd2ec64e99a6971f2ba8779a94316aa2981511a41fa8c0efb0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cindering Cutthroat",
+		"registers": [
+			{
+				"basis": "This creature enters with a +1/+1 counter on it if an opponent lost life this turn.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": 1
+				},
+				"if": {
+					"amount": {
+						"history": "life-lost",
+						"by": "opponent"
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cindering Cutthroat",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Gain menace until end of turn",
+				"basis": "{1}{B/R}: This creature gains menace until end of turn. (It can't be blocked except by two or more creatures.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B/R}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"menace"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

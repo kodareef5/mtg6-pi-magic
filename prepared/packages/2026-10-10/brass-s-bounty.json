@@ -1,0 +1,67 @@
+{
+	"card": "Brass's Bounty",
+	"generated": "2026-10-10",
+	"source": "8ac3ac04234a1a6b781f6bbb5115aa89af37c8e7b968aa9c33c17c33530b3066",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brass's Bounty",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Brass's Bounty",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Brass's Bounty",
+				"basis": "For each land you control, create a Treasure token. (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							}
+						},
+						"spec": {
+							"name": "Treasure Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

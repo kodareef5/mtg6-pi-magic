@@ -1,0 +1,64 @@
+{
+	"card": "Guarded Heir",
+	"generated": "2026-10-10",
+	"source": "7664313c3fef8d3a11bffe2741b5e1fca41265da2839fe6c9fc4885cbcd50a40",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Guarded Heir",
+		"registers": [
+			{
+				"basis": "Lifelink (Damage dealt by this creature also causes you to gain that much life.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create two 3/3 white Knight creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Knight Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Knight"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,109 @@
+{
+	"card": "Doc Ock's Henchmen",
+	"generated": "2026-10-10",
+	"source": "ab48717484f2d945dbc9eb4b804e047fdf408959527ff0d22a03147e23a3b66e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Doc Ock's Henchmen",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature attacks, it connives. (Draw a card, then discard a card. If you discarded a nonland card, put a +1/+1 counter on this creature.)",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "controller:this",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "controller:this",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "controller:this"
+							},
+							"count": 1,
+							"as": "connive-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:connive-card",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"is": "bound:discarded",
+								"matches": {
+									"zones": [
+										"graveyard",
+										"exile",
+										"battlefield",
+										"stack",
+										"command",
+										"outside"
+									],
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"instant",
+										"kindred",
+										"planeswalker",
+										"sorcery"
+									],
+									"not": {
+										"types": [
+											"land"
+										]
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

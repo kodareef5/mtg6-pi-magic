@@ -1,0 +1,93 @@
+{
+	"card": "Yoshimaru, Scrappy Stray",
+	"generated": "2026-10-10",
+	"source": "d5239ae0230216084327a6db2efbdf9255d06fbcabbf226e4fd9ab6bc66a7da0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Yoshimaru, Scrappy Stray",
+		"registers": [
+			{
+				"basis": "When Yoshimaru enters, another target creature you control fights up to one target creature an opponent controls. (Each deals damage equal to its power to the other.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						},
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "fight",
+							"a": "target:0",
+							"b": "target:1"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Put a +1/+1 counter on target nonlegendary creature.",
+				"basis": "{6}: Put a +1/+1 counter on target nonlegendary creature.",
+				"source": {
+					"card": "Yoshimaru, Scrappy Stray",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"not": {
+								"supertypes": [
+									"legendary"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

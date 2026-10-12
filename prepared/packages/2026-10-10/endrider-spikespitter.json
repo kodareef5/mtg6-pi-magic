@@ -1,0 +1,90 @@
+{
+	"card": "Endrider Spikespitter",
+	"generated": "2026-10-10",
+	"source": "55b0830efff5f2052035c02131b4d417b60355223cc153827d9b12208685b528",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Endrider Spikespitter",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Reach",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — At the beginning of your upkeep, exile the top card of your library. You may play that card this turn.",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "Max speed — At the beginning of your upkeep, exile the top card of your library. You may play that card this turn.",
+							"event": {
+								"on": "step",
+								"step": "upkeep",
+								"whose": "you"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": {
+											"top": 1,
+											"of": "you"
+										},
+										"to": "exile",
+										"reason": "exile",
+										"as": "exiled"
+									},
+									{
+										"do": "permit",
+										"what": "bound:exiled",
+										"who": "you",
+										"until": "end-of-turn"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

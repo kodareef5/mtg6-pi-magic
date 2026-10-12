@@ -1,0 +1,87 @@
+{
+	"card": "Curse-Marred Demon",
+	"generated": "2026-10-10",
+	"source": "01ce49f41cb49937244e9fd934cfa939e9d1db3c5665999300f2d893bb3d063c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Curse-Marred Demon",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, search your library for a card, put it into your hand, shuffle, then discard a card at random.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you"
+							},
+							"count": 1,
+							"as": "searched"
+						},
+						{
+							"do": "move",
+							"what": "bound:searched",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"owner": "you"
+							},
+							"count": 1,
+							"random": true,
+							"as": "discarded"
+						},
+						{
+							"do": "move",
+							"what": "bound:discarded",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

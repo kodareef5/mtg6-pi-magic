@@ -1,0 +1,69 @@
+{
+	"card": "Veteran Beastrider",
+	"generated": "2026-10-10",
+	"source": "4f27928a7a2b796b5591171fee000296254430bbc88439f099fa8ff65ea1171a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Veteran Beastrider",
+		"registers": [
+			{
+				"basis": "At the beginning of your end step, untap each creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "untap",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Veteran Beastrider",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give creatures you control +1/+1 until end of turn.",
+				"basis": "{2}{G}{W}: Creatures you control get +1/+1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{G}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

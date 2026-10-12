@@ -1,0 +1,74 @@
+{
+	"card": "Take Out the Trash",
+	"generated": "2026-10-10",
+	"source": "4756035a91df770ef52014f7a3de73f05245dd8402484b98f7c3015b1288e0c3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Take Out the Trash",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Take Out the Trash",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Take Out the Trash",
+				"basis": "Take Out the Trash deals 3 damage to target creature or planeswalker. If you control a Raccoon, you may discard a card. If you do, draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"discard": 1
+						},
+						"may": true,
+						"if": {
+							"amount": {
+								"count": {
+									"controller": "you",
+									"subtypes": [
+										"Raccoon"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						"as": "discarded"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"bound": "discarded"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

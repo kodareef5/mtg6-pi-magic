@@ -1,0 +1,65 @@
+{
+	"card": "Charging Hooligan",
+	"generated": "2026-10-10",
+	"source": "5ed7d4bbc25d272856ca0374ee8e67538a9da7fc7e5196993c33640f9b6d8cc9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Charging Hooligan",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, it gets +1/+0 until end of turn for each attacking creature. If a Rat is attacking, this creature gains trample until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"attacking": true
+									}
+								}
+							}
+						},
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"trample"
+								]
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"subtypes": [
+											"Rat"
+										],
+										"attacking": true
+									}
+								},
+								"atLeast": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

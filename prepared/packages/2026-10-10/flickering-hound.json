@@ -1,0 +1,61 @@
+{
+	"card": "Flickering Hound",
+	"generated": "2026-10-10",
+	"source": "67806b6024ee856e99f77d799cae7975da58133ca3162b186519bf9f92a03859",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Flickering Hound",
+		"registers": [
+			{
+				"basis": "Whenever you cast a creature spell, exile up to one other target creature you control, then return that card to the battlefield under its owner's control.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"creature"
+						]
+					},
+					"by": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "move",
+							"what": "bound:exiled",
+							"to": "battlefield",
+							"controller": "owner:bound:exiled",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

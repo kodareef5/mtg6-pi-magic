@@ -1,0 +1,172 @@
+{
+	"card": "Archdruid's Charm",
+	"generated": "2026-10-10",
+	"source": "5071a9ab5fa73112b8a54e139da69d4ea1a705b1a109bfbb50228e0561b336ca",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Archdruid's Charm",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Archdruid's Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Search for a creature or land",
+				"basis": "Choose one — ... • Search your library for a creature or land card and reveal it. Put it onto the battlefield tapped if it's a land card. Otherwise, put it into your hand. Then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"creature",
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "card"
+					},
+					{
+						"do": "move",
+						"what": "bound:card",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve",
+						"if": {
+							"is": "bound:card",
+							"matches": {
+								"zones": [
+									"library"
+								],
+								"types": [
+									"land"
+								]
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:card",
+						"to": "hand",
+						"reason": "resolve",
+						"if": {
+							"is": "bound:card",
+							"matches": {
+								"zones": [
+									"library"
+								],
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						}
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Archdruid's Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put a counter on your creature, then have it damage an opposing creature",
+				"basis": "Choose one — ... • Put a +1/+1 counter on target creature you control. It deals damage equal to its power to target creature you don't control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Archdruid's Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Exile an artifact or enchantment",
+				"basis": "Choose one — ... • Exile target artifact or enchantment.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

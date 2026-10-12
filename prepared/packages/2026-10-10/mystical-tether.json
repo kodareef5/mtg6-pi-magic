@@ -1,0 +1,75 @@
+{
+	"card": "Mystical Tether",
+	"generated": "2026-10-10",
+	"source": "e98f2517c9b36b4ee52d0fc09da38706f85443eab28b684930a2ece32d387552",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mystical Tether",
+		"registers": [
+			{
+				"basis": "When this enchantment enters, exile target artifact or creature an opponent controls until this enchantment leaves the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mystical Tether",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mystical Tether with flash by paying an additional {2}",
+				"basis": "You may cast this spell as though it had flash if you pay {2} more to cast it.",
+				"timing": "spell",
+				"speed": "instant",
+				"cost": {
+					"additional": [
+						{
+							"name": "flash",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

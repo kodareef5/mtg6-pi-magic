@@ -1,0 +1,102 @@
+{
+	"card": "Gold Pan",
+	"generated": "2026-10-10",
+	"source": "f2fa2c3efd2e22616d3dd75ee785ec3ea66096c44f672b95c04c5a7bb08c72fd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gold Pan",
+		"registers": [
+			{
+				"basis": "When this Equipment enters, create a Treasure token. (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Equip Gold Pan",
+				"basis": "Equip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)",
+				"source": {
+					"card": "Gold Pan",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{1}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

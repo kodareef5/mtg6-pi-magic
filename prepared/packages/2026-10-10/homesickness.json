@@ -1,0 +1,60 @@
+{
+	"card": "Homesickness",
+	"generated": "2026-10-10",
+	"source": "80cdeeb88f629c725056f95dd8b1d934d2d8e226520052aaf5b1458cac8783ea",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Homesickness",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Homesickness",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Target player draws two cards; tap up to two target creatures and put a stun counter on each.",
+				"basis": "Target player draws two cards. Tap up to two target creatures. Put a stun counter on each of them. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 2
+					},
+					{
+						"do": "tap",
+						"what": "target:1"
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "stun",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

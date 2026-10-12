@@ -1,0 +1,94 @@
+{
+	"card": "Salt Road Skirmish",
+	"generated": "2026-10-10",
+	"source": "c6d4af2187273a01dc97470c409aad9b7a5f6103d99a0119c63b83194bfa9955",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Salt Road Skirmish",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Salt Road Skirmish",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target creature, create two Warrior tokens, grant them temporary haste, and sacrifice them at the next end step.",
+				"basis": "Destroy target creature. Create two 1/1 red Warrior creature tokens. They gain haste until end of turn. Sacrifice them at the beginning of the next end step.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"zones": [
+								"battlefield"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 2,
+						"as": "warriors",
+						"spec": {
+							"name": "Warrior Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Warrior"
+							],
+							"colors": [
+								"R"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "modify",
+						"what": "bound:warriors",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:warriors",
+									"to": "graveyard",
+									"reason": "sacrifice"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

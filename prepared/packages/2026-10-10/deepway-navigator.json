@@ -1,0 +1,87 @@
+{
+	"card": "Deepway Navigator",
+	"generated": "2026-10-10",
+	"source": "2df494a8d62d412f719260fa74bdbe49cf6c7814862ca51755ab72353f303b38",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deepway Navigator",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, untap each other Merfolk you control.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "untap",
+							"every": {
+								"subtypes": [
+									"Merfolk"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "As long as you attacked with three or more Merfolk this turn, Merfolk you control get +1/+0.",
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"of": {
+							"subtypes": [
+								"Merfolk"
+							]
+						},
+						"by": "you"
+					},
+					"atLeast": 3
+				},
+				"affects": {
+					"subtypes": [
+						"Merfolk"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"power": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

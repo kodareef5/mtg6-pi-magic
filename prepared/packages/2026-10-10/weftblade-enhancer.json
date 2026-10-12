@@ -1,0 +1,92 @@
+{
+	"card": "Weftblade Enhancer",
+	"generated": "2026-10-10",
+	"source": "c1899cd2473ddcbcdba9a549cbeb05463741838a16ac83c339ff928dfa765ea5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Weftblade Enhancer",
+		"registers": [
+			{
+				"basis": "When this creature enters, put a +1/+1 counter on each of up to two target creatures.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"count": 2,
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"hand"
+					],
+					"controller": "self",
+					"card": "Weftblade Enhancer"
+				},
+				"claim": "Cast Weftblade Enhancer for its warp cost",
+				"basis": "Warp {2}{W} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+				"timing": "spell",
+				"cost": {
+					"alternative": "warp",
+					"mana": "{2}{W}"
+				},
+				"instructions": [
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "this",
+									"to": "exile",
+									"reason": "exile",
+									"as": "warped"
+								},
+								{
+									"do": "permit",
+									"what": "bound:warped",
+									"who": "owner",
+									"from": "next-turn",
+									"until": "indefinite"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,79 @@
+{
+	"card": "Elvenking's Halls",
+	"generated": "2026-10-10",
+	"source": "092666712c9c7103fc36fd7e39f479f75c51ec6cbc5ec46807f7ac3b5c6d7306",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elvenking's Halls",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {G} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add {G} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Elvenking's Halls",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put two +1/+1 counters on target Elf you control.",
+				"basis": "{2}{G}{U}, {T}, Sacrifice this land: Put two +1/+1 counters on target Elf you control. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}{G}{U}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Elf"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

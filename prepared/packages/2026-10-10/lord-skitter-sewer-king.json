@@ -1,0 +1,86 @@
+{
+	"card": "Lord Skitter, Sewer King",
+	"generated": "2026-10-10",
+	"source": "3fcc0b22e6c0e0bbc144e187477db15a015343521e42b8c1f3f6fbb897bd19dd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lord Skitter, Sewer King",
+		"registers": [
+			{
+				"basis": "Whenever another Rat you control enters, exile up to one target card from an opponent's graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Rat"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "opponent",
+								"token": false
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of combat on your turn, create a 1/1 black Rat creature token with \"This token can't block.\"",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Rat Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Rat"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"can't block"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,81 @@
+{
+	"card": "Malamet Veteran",
+	"generated": "2026-10-10",
+	"source": "7a5072e99a10798d568482b305a2320bfaeb8bd8eabcae9e43bdd1911a9cd9b9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Malamet Veteran",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Descend 4 — Whenever this creature attacks, if there are four or more permanent cards in your graveyard, put a +1/+1 counter on target creature.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							],
+							"token": false
+						}
+					},
+					"atLeast": 4
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

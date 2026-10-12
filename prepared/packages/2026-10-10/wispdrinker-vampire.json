@@ -1,0 +1,100 @@
+{
+	"card": "Wispdrinker Vampire",
+	"generated": "2026-10-10",
+	"source": "c55a36b279beef1215f3af5d6aa983fa40a9192d4ac8fe8052fb075c1c1899c2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wispdrinker Vampire",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another creature you control with power 2 or less enters, each opponent loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true,
+						"power": {
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Wispdrinker Vampire",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant deathtouch and lifelink to creatures you control with power 2 or less until end of turn.",
+				"basis": "{5}{W}{B}: Creatures you control with power 2 or less gain deathtouch and lifelink until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}{W}{B}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"power": {
+								"atMost": 2
+							}
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"deathtouch",
+								"lifelink"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

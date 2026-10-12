@@ -1,0 +1,107 @@
+{
+	"card": "Lead Pipe",
+	"generated": "2026-10-10",
+	"source": "b649ff62437bada60eea7401feb6c974750ec111b3805e1f068260469895af1d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lead Pipe",
+		"registers": [
+			{
+				"basis": "Equipped creature gets +2/+0.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2
+				}
+			},
+			{
+				"basis": "Whenever equipped creature dies, each opponent loses 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "attached",
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lead Pipe",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Lead Pipe to draw a card",
+				"basis": "{2}, Sacrifice this Equipment: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Lead Pipe",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Lead Pipe",
+				"basis": "Equip {2}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

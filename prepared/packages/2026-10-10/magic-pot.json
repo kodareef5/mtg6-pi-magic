@@ -1,0 +1,89 @@
+{
+	"card": "Magic Pot",
+	"generated": "2026-10-10",
+	"source": "db8411784eb22b8b6539c076a47fae44065c0328afbbed1af160e5c23287bfde",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Magic Pot",
+		"registers": [
+			{
+				"basis": "When this creature dies, create a Treasure token. (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Magic Pot",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile target card from a graveyard",
+				"basis": "{2}, {T}: Exile target card from a graveyard.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"token": false
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

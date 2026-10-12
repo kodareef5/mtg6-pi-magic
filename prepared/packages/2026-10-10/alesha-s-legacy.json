@@ -1,0 +1,51 @@
+{
+	"card": "Alesha's Legacy",
+	"generated": "2026-10-10",
+	"source": "3b86450e2dc2b5b468fb8f1da7c19defcddae48c238c0603b161e950daf7f380",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Alesha's Legacy",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Alesha's Legacy",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Grant deathtouch and indestructible until end of turn",
+				"basis": "Target creature you control gains deathtouch and indestructible until end of turn. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"deathtouch",
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

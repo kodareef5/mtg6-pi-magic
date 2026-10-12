@@ -1,0 +1,78 @@
+{
+	"card": "Stegron the Dinosaur Man",
+	"generated": "2026-10-10",
+	"source": "e35443de8b23f0ece69394dff73dc53227ed7342038f25c2af25b327461b8e5e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stegron the Dinosaur Man",
+		"registers": [
+			{
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stegron the Dinosaur Man",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Dinosaur Formula",
+				"basis": "Dinosaur Formula — {1}{R}, Discard this card: Until end of turn, target creature you control gets +3/+1 and becomes a Dinosaur in addition to its other types.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}",
+					"discard": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 1,
+							"subtypes": {
+								"add": [
+									"Dinosaur"
+								],
+								"of": "creature"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

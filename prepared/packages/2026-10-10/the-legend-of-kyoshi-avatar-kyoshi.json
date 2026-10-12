@@ -1,0 +1,197 @@
+{
+	"card": "The Legend of Kyoshi // Avatar Kyoshi",
+	"generated": "2026-10-10",
+	"source": "74c11d4ea71ed205d380f8614a199b7815603c117e9333e04dc93d2879e04f29",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Legend of Kyoshi // Avatar Kyoshi",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "I — Draw cards equal to the greatest power among creatures you control.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"aggregate": "max",
+								"of": {
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								},
+								"value": "power"
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "II — Earthbend X, where X is the number of cards in your hand. That land becomes an Island in addition to its other types.",
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"types": {
+									"add": [
+										"creature"
+									]
+								},
+								"base": {
+									"power": 0,
+									"toughness": 0
+								},
+								"words": [
+									"haste"
+								]
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": {
+								"count": {
+									"zones": [
+										"hand"
+									],
+									"controller": "you"
+								}
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "leaves",
+								"of": {
+									"is": "target:0"
+								},
+								"to": [
+									"graveyard",
+									"exile"
+								]
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "event:object",
+										"to": "battlefield",
+										"tapped": true,
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						},
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"subtypes": {
+									"add": [
+										"Island"
+									],
+									"of": "land"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "III — Exile this Saga, then return it to the battlefield transformed under your control.",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "exile",
+							"reason": "exile",
+							"as": "saga"
+						},
+						{
+							"do": "move",
+							"what": "bound:saga",
+							"to": "battlefield",
+							"face": 1,
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Lands you control have trample and hexproof.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"land"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"trample",
+						"hexproof"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "{T}: Add X mana of any one color, where X is the greatest power among creatures you control.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"times": {
+					"aggregate": "max",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					},
+					"value": "power"
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

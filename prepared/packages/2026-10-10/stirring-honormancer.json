@@ -1,0 +1,75 @@
+{
+	"card": "Stirring Honormancer",
+	"generated": "2026-10-10",
+	"source": "11141002b6fb01b00acd9cf57a1f11b11e14fafe6b0fcdf64a80ba3ad58c177e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stirring Honormancer",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, look at the top X cards of your library, where X is the number of creatures you control. Put one of those cards into your hand and the rest into your graveyard.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								},
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"count": 1,
+							"as": "taken"
+						},
+						{
+							"do": "move",
+							"what": "bound:taken",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"to": "graveyard",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

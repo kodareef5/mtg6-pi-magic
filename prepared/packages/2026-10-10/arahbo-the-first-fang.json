@@ -1,0 +1,74 @@
+{
+	"card": "Arahbo, the First Fang",
+	"generated": "2026-10-10",
+	"source": "b1154dbe2cfa841d5884fd9647ca4f869021d89cef7bf32e34f7335506aca547",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Arahbo, the First Fang",
+		"registers": [
+			{
+				"basis": "Other Cats you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Cat"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"basis": "Whenever Arahbo or another nontoken Cat you control enters, create a 1/1 white Cat creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"subtypes": [
+									"Cat"
+								],
+								"controller": "you",
+								"token": false,
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Cat Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Cat"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

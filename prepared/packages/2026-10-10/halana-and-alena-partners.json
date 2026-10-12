@@ -1,0 +1,95 @@
+{
+	"card": "Halana and Alena, Partners",
+	"generated": "2026-10-10",
+	"source": "989fcfac648b0db0f6acdd526a86c96f7c29c8914b3fe9af0ec6f660223e5c10",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Halana and Alena, Partners",
+		"registers": [
+			{
+				"basis": "Reach (This creature can block creatures with flying.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "First strike (This creature deals combat damage before creatures without first strike.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of combat on your turn, put X +1/+1 counters on another target creature you control, where X is Halana and Alena's power. That creature gains haste until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": {
+								"power": "this"
+							},
+							"if": {
+								"amount": {
+									"power": "this"
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"haste"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

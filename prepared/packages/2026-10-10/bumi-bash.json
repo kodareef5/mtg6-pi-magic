@@ -1,0 +1,94 @@
+{
+	"card": "Bumi Bash",
+	"generated": "2026-10-10",
+	"source": "8f4117dd1ecd0197f47db89364e2a5fa348dc76c57f3dea2ab9017d32794404b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bumi Bash",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bumi Bash",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bumi Bash choosing damage to a creature",
+				"basis": "Choose one — ... Bumi Bash deals damage equal to the number of lands you control to target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Bumi Bash",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bumi Bash choosing to destroy a land creature or nonbasic land",
+				"basis": "Choose one — ... Destroy target land creature or nonbasic land.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							],
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"not": {
+										"supertypes": [
+											"basic"
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

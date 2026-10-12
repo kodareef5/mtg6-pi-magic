@@ -1,0 +1,86 @@
+{
+	"card": "Cunning Coyote",
+	"generated": "2026-10-10",
+	"source": "68a862eb5ad8d99ea040be5c22994bca0df0cbc46de0c0f6dc86edf72559e9c7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cunning Coyote",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, another target creature you control gets +1/+1 and gains haste until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"haste"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cunning Coyote",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Cunning Coyote",
+				"basis": "Plot {1}{R} (You may pay {1}{R} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{1}{R}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

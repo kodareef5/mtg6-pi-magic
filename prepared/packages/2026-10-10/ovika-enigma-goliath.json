@@ -1,0 +1,111 @@
+{
+	"card": "Ovika, Enigma Goliath",
+	"generated": "2026-10-10",
+	"source": "5722a394bbdb012bd22bb9f62be207713263b31811cda705af9fc866a6682504",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ovika, Enigma Goliath",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Ward—{3}, Pay 3 life.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{3}",
+									"life": 3
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a noncreature spell, create X 1/1 red Phyrexian Goblin creature tokens, where X is the mana value of that spell. They gain haste until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"manaValue": "event:object"
+							},
+							"spec": {
+								"name": "Phyrexian Goblin Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Phyrexian",
+									"Goblin"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"as": "goblins"
+						},
+						{
+							"do": "modify",
+							"what": "bound:goblins",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"haste"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

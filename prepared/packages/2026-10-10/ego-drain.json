@@ -1,0 +1,107 @@
+{
+	"card": "Ego Drain",
+	"generated": "2026-10-10",
+	"source": "73091aa72e527f35a837cf45a33188e1c5371d294063fc8785fc10c10377985c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ego Drain",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ego Drain",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ego Drain to choose an opponent's discard, then exile a hand card if you control no Faerie",
+				"basis": "Target opponent reveals their hand. You choose a nonland card from it. That player discards that card. If you don't control a Faerie, exile a card from your hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "target:0"
+						},
+						"as": "hand"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"is": "bound:hand",
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"subtypes": [
+										"Faerie"
+									]
+								}
+							},
+							"atMost": 0
+						},
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"hand"
+									],
+									"controller": "you"
+								},
+								"count": 1,
+								"as": "exile"
+							},
+							{
+								"do": "move",
+								"what": "bound:exile",
+								"to": "exile",
+								"reason": "exile"
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

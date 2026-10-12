@@ -1,0 +1,84 @@
+{
+	"card": "Hexhaven Invigorator",
+	"generated": "2026-10-10",
+	"source": "268a5891fb326e4fcf69135c406b34196378bb73bc954eba40383540bf1f08de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hexhaven Invigorator",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature is dealt damage, you may search your library for up to that many land cards, put them onto the battlefield tapped, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"received": true,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"types": [
+											"land"
+										]
+									},
+									"count": {
+										"event": "amount"
+									},
+									"upTo": true,
+									"as": "lands"
+								},
+								{
+									"do": "move",
+									"what": "bound:lands",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

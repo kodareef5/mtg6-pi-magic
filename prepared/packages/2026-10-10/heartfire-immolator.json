@@ -1,0 +1,83 @@
+{
+	"card": "Heartfire Immolator",
+	"generated": "2026-10-10",
+	"source": "8ab0d31d012162d648dde514f7b1c2208b6861a955f1faed9220b000701e6b34",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Heartfire Immolator",
+		"registers": [
+			{
+				"basis": "Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self",
+					"card": "Heartfire Immolator"
+				},
+				"claim": "Sacrifice Heartfire Immolator for damage equal to its power",
+				"basis": "{R}, Sacrifice this creature: It deals damage equal to its power to target creature or planeswalker.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{R}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"power": "this"
+						},
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

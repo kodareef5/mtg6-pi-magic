@@ -1,0 +1,93 @@
+{
+	"card": "Lake-town Lookout",
+	"generated": "2026-10-10",
+	"source": "15183b078b29491ead73cfe583ebe6222b65edd397237a5a0aed8f8d1657fea5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lake-town Lookout",
+		"registers": [
+			{
+				"basis": "When this creature dies, recruit. (Draw a card, then discard a card. If you discarded a nonland card, create a 1/1 white Human Soldier creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "recruit-choice"
+						},
+						{
+							"do": "move",
+							"what": "bound:recruit-choice",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "recruit-discard"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"is": "bound:recruit-discard",
+								"matches": {
+									"zones": [
+										"library",
+										"hand",
+										"battlefield",
+										"graveyard",
+										"stack",
+										"exile",
+										"command",
+										"outside"
+									],
+									"token": false,
+									"not": {
+										"types": [
+											"land"
+										]
+									}
+								}
+							},
+							"spec": {
+								"name": "Human Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

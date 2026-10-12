@@ -1,0 +1,58 @@
+{
+	"card": "Deep Goblin Skulltaker",
+	"generated": "2026-10-10",
+	"source": "82450b76d3c5956d11aaaf285e1ad8844abfd583a28e41cb0dadd6eb28d2cb8d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deep Goblin Skulltaker",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Menace",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your end step, if you descended this turn, put a +1/+1 counter on this creature. (You descended if a permanent card was put into your graveyard from anywhere.)",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "descended",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

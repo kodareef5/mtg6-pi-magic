@@ -1,0 +1,91 @@
+{
+	"card": "Panther Pounce",
+	"generated": "2026-10-10",
+	"source": "23343fbd8b361b81860975b0af80947cba84ef413d1d539eabcc2b3519d46b1f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Panther Pounce",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Panther Pounce",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Panther Pounce",
+				"basis": "Target player investigates. Target creature gets +1/+0 and gains flying until end of turn. Untap it. (To investigate, create a Clue token. It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "target:0",
+						"spec": {
+							"name": "Clue Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Clue"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, Sacrifice this token: Draw a card.",
+									"cost": {
+										"mana": "{2}",
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"words": [
+								"flying"
+							]
+						}
+					},
+					{
+						"do": "untap",
+						"what": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

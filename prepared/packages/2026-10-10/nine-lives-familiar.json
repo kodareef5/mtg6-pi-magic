@@ -1,0 +1,89 @@
+{
+	"card": "Nine-Lives Familiar",
+	"generated": "2026-10-10",
+	"source": "7c946fd08f332db9a13209f7de2c2f7a0ada2a4bda368db4beb327f18b84a7e1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nine-Lives Familiar",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "This creature enters with eight revival counters on it if you cast it.",
+				"if": {
+					"cast": "this",
+					"by": "you"
+				},
+				"counters": {
+					"revival": 8
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature dies, if it had a revival counter on it, return it to the battlefield with one fewer revival counter on it at the beginning of the next end step.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"counters": "revival",
+						"on": "this"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"is": "event:object"
+							},
+							"count": 1,
+							"as": "returning-card"
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:returning-card",
+										"to": "battlefield",
+										"reason": "resolve",
+										"counters": {
+											"revival": {
+												"sum": [
+													{
+														"counters": "revival",
+														"on": "this"
+													},
+													-1
+												]
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

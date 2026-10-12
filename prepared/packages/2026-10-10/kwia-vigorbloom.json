@@ -1,0 +1,94 @@
+{
+	"card": "Kwia Vigorbloom",
+	"generated": "2026-10-10",
+	"source": "8fec400ce62e35046c7ac6b494691a4943849f2028010c49272451e73aa3610f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kwia Vigorbloom",
+		"registers": [
+			{
+				"basis": "Flying, vigilance, lifelink, ward {2}",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance",
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "Flying, vigilance, lifelink, ward {2}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you gain life, create a colorless artifact token named Lotus with \"{T}, Sacrifice this token: Add three mana of any one color.\" This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Lotus",
+								"types": [
+									"artifact"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add three mana of any one color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 3
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

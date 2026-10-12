@@ -22,7 +22,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Dragon",
+								"name": "Dragon Token",
 								"types": [
 									"creature"
 								],

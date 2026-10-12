@@ -1,0 +1,104 @@
+{
+	"card": "Gleaming Geardrake",
+	"generated": "2026-10-10",
+	"source": "906c7fa80d1de6baf62c8eafb583654a0dc6f01a9a4f2e5885af10c7438915f6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gleaming Geardrake",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, investigate. (Create a Clue token. It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Clue Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Clue"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, Sacrifice this token: Draw a card.",
+										"cost": {
+											"mana": "{2}",
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you sacrifice an artifact, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"artifact"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

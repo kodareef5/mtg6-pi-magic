@@ -36,7 +36,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Gremlin",
+								"name": "Gremlin Token",
 								"types": [
 									"creature"
 								],

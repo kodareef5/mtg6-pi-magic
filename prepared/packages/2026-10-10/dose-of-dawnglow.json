@@ -1,0 +1,98 @@
+{
+	"card": "Dose of Dawnglow",
+	"generated": "2026-10-10",
+	"source": "037fd4646a2bfb4fd5e813101e7684f82772d8612289206adefc35c56892e77a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dose of Dawnglow",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dose of Dawnglow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dose of Dawnglow",
+				"basis": "Return target creature card from your graveyard to the battlefield. Then if it isn't your main phase, blight 2. (Put two -1/-1 counters on a creature you control.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"not": {
+								"all": [
+									{
+										"turn": "self"
+									},
+									{
+										"any": [
+											{
+												"step": "precombat-main"
+											},
+											{
+												"step": "postcombat-main"
+											}
+										]
+									}
+								]
+							}
+						},
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								},
+								"count": 1,
+								"as": "blighted"
+							},
+							{
+								"do": "counters",
+								"on": "bound:blighted",
+								"kind": "-1/-1",
+								"amount": 2
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

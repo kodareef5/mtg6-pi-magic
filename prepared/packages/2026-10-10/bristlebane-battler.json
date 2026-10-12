@@ -1,0 +1,101 @@
+{
+	"card": "Bristlebane Battler",
+	"generated": "2026-10-10",
+	"source": "396ae6ebced1a37315355f02195e60ea3d21481aebabf1d035ad5b821d58c54c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bristlebane Battler",
+		"registers": [
+			{
+				"basis": "Trample, ward {2}",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Trample, ward {2}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "This creature enters with five -1/-1 counters on it.",
+				"kind": "enters",
+				"counters": {
+					"-1/-1": 5
+				}
+			},
+			{
+				"basis": "Whenever another creature you control enters while this creature has a -1/-1 counter on it, remove a -1/-1 counter from this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"counters": "-1/-1",
+						"on": "this"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "-1/-1",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

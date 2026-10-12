@@ -1,0 +1,52 @@
+{
+	"card": "Rot Farm Mortipede",
+	"generated": "2026-10-10",
+	"source": "5d982ce44e0d9b3c3428ab7ba31a6debb1b88a7275a532e475b077b461034b91",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rot Farm Mortipede",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more creature cards leave your graveyard, this creature gets +1/+0 and gains menace and lifelink until end of turn.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"types": [
+							"creature"
+						],
+						"token": false
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"words": [
+									"menace",
+									"lifelink"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

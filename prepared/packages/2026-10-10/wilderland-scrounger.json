@@ -1,0 +1,64 @@
+{
+	"card": "Wilderland Scrounger",
+	"generated": "2026-10-10",
+	"source": "220e75f8b7f1242bfdaf715fea0b940db5ad09557a6956946cd81c5f9e0b2977",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wilderland Scrounger",
+		"registers": [
+			{
+				"basis": "Ferocious — Whenever this creature attacks while you control a creature with power 4 or greater, put a +1/+1 counter on each creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"power": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

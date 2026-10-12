@@ -1,0 +1,66 @@
+{
+	"card": "Rabid Gnaw",
+	"generated": "2026-10-10",
+	"source": "47602d97f1af289255d7435f7604c4c40ab37c6339f7e07e0a5e219752ed081a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rabid Gnaw",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rabid Gnaw",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give your creature +1/+0, then have it deal damage equal to its power to a creature you don't control.",
+				"basis": "Target creature you control gets +1/+0 until end of turn. Then it deals damage equal to its power to target creature you don't control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						}
+					},
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

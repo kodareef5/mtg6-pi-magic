@@ -1,0 +1,145 @@
+{
+	"card": "Krenko, Baron of Tin Street",
+	"generated": "2026-10-10",
+	"source": "ac6e51c72bb34baa5f0b25d450a2380cfea4743fa4cc8ea9a59624aeb79755a4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Krenko, Baron of Tin Street",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever an artifact is put into a graveyard from the battlefield, you may pay {R}. If you do, create a 1/1 red Goblin creature token. It gains haste until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"artifact"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{R}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Goblin Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Goblin"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"bound": "paid"
+							},
+							"as": "goblin"
+						},
+						{
+							"do": "modify",
+							"what": "bound:goblin",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"haste"
+								]
+							},
+							"if": {
+								"bound": "goblin"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Krenko, Baron of Tin Street",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice an artifact to put a counter on each controlled Goblin",
+				"basis": "{T}, Sacrifice an artifact: Put a +1/+1 counter on each Goblin you control.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Goblin"
+							],
+							"controller": "you"
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

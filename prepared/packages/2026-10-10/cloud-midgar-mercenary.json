@@ -1,0 +1,97 @@
+{
+	"card": "Cloud, Midgar Mercenary",
+	"generated": "2026-10-10",
+	"source": "2511c9f73a8cf2ca90ea8f0e89a11527beba4ef52a152780708a0d8e982ded22",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cloud, Midgar Mercenary",
+		"registers": [
+			{
+				"basis": "When Cloud enters, search your library for an Equipment card, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"subtypes": [
+									"Equipment"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "equipment"
+						},
+						{
+							"do": "move",
+							"what": "bound:equipment",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"basis": "As long as Cloud is equipped, if a triggered ability of Cloud or an Equipment attached to it triggers, that ability triggers an additional time.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"subtypes": [
+								"Equipment"
+							],
+							"attachedTo": "this"
+						}
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "As long as Cloud is equipped, if a triggered ability of Cloud or an Equipment attached to it triggers, that ability triggers an additional time.",
+							"kind": "trigger-rule",
+							"affects": {
+								"any": [
+									{
+										"is": "this"
+									},
+									{
+										"subtypes": [
+											"Equipment"
+										],
+										"attachedTo": "this"
+									}
+								]
+							},
+							"additional": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

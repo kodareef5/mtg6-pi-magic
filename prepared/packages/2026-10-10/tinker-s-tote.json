@@ -1,0 +1,70 @@
+{
+	"card": "Tinker's Tote",
+	"generated": "2026-10-10",
+	"source": "117e07df7c9839071355333398ae47e0082d7a1a39809bb54d9cb78fe4f79338",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tinker's Tote",
+		"registers": [
+			{
+				"basis": "When this artifact enters, create two 1/1 colorless Gnome artifact creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Gnome Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Gnome"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tinker's Tote",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Tinker's Tote to gain 3 life.",
+				"basis": "{W}, Sacrifice this artifact: You gain 3 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{W}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

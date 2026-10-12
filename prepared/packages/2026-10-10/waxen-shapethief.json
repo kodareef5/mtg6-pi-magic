@@ -1,0 +1,79 @@
+{
+	"card": "Waxen Shapethief",
+	"generated": "2026-10-10",
+	"source": "71c42a8b002fa98f6e6e13a8bbfc3402611f322bf4a01b2742552b05ec6b48d3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Waxen Shapethief",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "You may have this creature enter as a copy of an artifact or creature you control.",
+				"kind": "enters",
+				"copy": {
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"artifact",
+							"creature"
+						],
+						"controller": "you"
+					},
+					"may": true
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Waxen Shapethief",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Waxen Shapethief",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

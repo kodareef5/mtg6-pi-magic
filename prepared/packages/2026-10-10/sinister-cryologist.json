@@ -1,0 +1,104 @@
+{
+	"card": "Sinister Cryologist",
+	"generated": "2026-10-10",
+	"source": "0b387a4d31be74bfb8fa7c0e6097167baa86069ae0e47884f6ca321f7bbc4a06",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sinister Cryologist",
+		"registers": [
+			{
+				"basis": "When this creature enters, target creature an opponent controls gets -3/-0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": -3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sinister Cryologist",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cast Sinister Cryologist for its warp cost",
+				"basis": "Warp {U} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+				"timing": "spell",
+				"cost": {
+					"alternative": "warp",
+					"mana": "{U}"
+				},
+				"instructions": [
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "this",
+									"to": "exile",
+									"reason": "exile",
+									"as": "warped"
+								},
+								{
+									"do": "permit",
+									"what": "bound:warped",
+									"who": "owner",
+									"from": "next-turn",
+									"until": "indefinite",
+									"of": {
+										"types": [
+											"artifact",
+											"battle",
+											"creature",
+											"enchantment",
+											"instant",
+											"kindred",
+											"planeswalker",
+											"sorcery"
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

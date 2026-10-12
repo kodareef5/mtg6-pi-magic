@@ -1,0 +1,92 @@
+{
+	"card": "Northern Air Temple",
+	"generated": "2026-10-10",
+	"source": "eee6ca2b8b22b51f3e76720be8176546314b34dadf7975ef2a25c60b26077a81",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Northern Air Temple",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Northern Air Temple enters, each opponent loses X life and you gain X life, where X is the number of Shrines you control.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": {
+								"negate": {
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"subtypes": [
+											"Shrine"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"subtypes": [
+										"Shrine"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever another Shrine you control enters, each opponent loses 1 life and you gain 1 life.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"subtypes": [
+							"Shrine"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

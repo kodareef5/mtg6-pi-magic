@@ -1,0 +1,119 @@
+{
+	"card": "Blighted Blackthorn",
+	"generated": "2026-10-10",
+	"source": "a1b97b88764c2dfba97fd2d8219a62b0312fc064e49ef9d0cabfff593c22ae49",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blighted Blackthorn",
+		"registers": [
+			{
+				"basis": "Whenever this creature enters or attacks, you may blight 2. If you do, you draw a card and lose 1 life. (To blight 2, put two -1/-1 counters on a creature you control.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"counters": {
+									"kind": "-1/-1",
+									"count": 2,
+									"put": true,
+									"on": {
+										"choose": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										},
+										"count": 1
+									}
+								}
+							},
+							"may": true,
+							"as": "blighted"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "blighted"
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1,
+							"if": {
+								"bound": "blighted"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, you may blight 2. If you do, you draw a card and lose 1 life. (To blight 2, put two -1/-1 counters on a creature you control.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"counters": {
+									"kind": "-1/-1",
+									"count": 2,
+									"put": true,
+									"on": {
+										"choose": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										},
+										"count": 1
+									}
+								}
+							},
+							"may": true,
+							"as": "blighted"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "blighted"
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1,
+							"if": {
+								"bound": "blighted"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

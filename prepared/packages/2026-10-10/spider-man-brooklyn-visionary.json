@@ -1,0 +1,93 @@
+{
+	"card": "Spider-Man, Brooklyn Visionary",
+	"generated": "2026-10-10",
+	"source": "7b8954508bfabcdfcbcdd14377f747b2839cd9f29bdd2bb212af6d36a643138c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider-Man, Brooklyn Visionary",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Spider-Man enters, search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "battlefield",
+							"tapped": true,
+							"controller": "you",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spider-Man, Brooklyn Visionary",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Spider-Man, Brooklyn Visionary for its web-slinging cost",
+				"basis": "Web-slinging {2}{G} (You may cast this spell for {2}{G} if you also return a tapped creature you control to its owner's hand.)",
+				"timing": "spell",
+				"cost": {
+					"alternative": "web-slinging",
+					"mana": "{2}{G}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

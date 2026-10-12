@@ -1,0 +1,372 @@
+{
+	"card": "Final Showdown",
+	"generated": "2026-10-10",
+	"source": "68c66f1672259eff04d792ae81cc9e73a5c9b7f0f013a61a800fbbcb6699c557",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Final Showdown",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Final Showdown",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Final Showdown: remove abilities",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — All creatures lose all abilities until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-abilities",
+							"mana": "{1}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"loseAbilities": true
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Final Showdown",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Final Showdown: grant indestructible",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Choose a creature you control. It gains indestructible until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-indestructible",
+							"mana": "{1}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "chosen"
+					},
+					{
+						"do": "modify",
+						"what": "bound:chosen",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Final Showdown",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Final Showdown: destroy creatures",
+				"basis": "Spree (Choose one or more additional costs.) ... + {3}{W}{W} — Destroy all creatures.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-destroy",
+							"mana": "{3}{W}{W}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Final Showdown",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Final Showdown: remove abilities and grant indestructible",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — All creatures lose all abilities until end of turn. ... + {1} — Choose a creature you control. It gains indestructible until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-abilities",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-indestructible",
+							"mana": "{1}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"loseAbilities": true
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "chosen"
+					},
+					{
+						"do": "modify",
+						"what": "bound:chosen",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Final Showdown",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Final Showdown: remove abilities and destroy creatures",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — All creatures lose all abilities until end of turn. ... + {3}{W}{W} — Destroy all creatures.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-abilities",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-destroy",
+							"mana": "{3}{W}{W}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"loseAbilities": true
+						}
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Final Showdown",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Final Showdown: grant indestructible and destroy creatures",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Choose a creature you control. It gains indestructible until end of turn. ... + {3}{W}{W} — Destroy all creatures.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-indestructible",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-destroy",
+							"mana": "{3}{W}{W}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "chosen"
+					},
+					{
+						"do": "modify",
+						"what": "bound:chosen",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Final Showdown",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Final Showdown: all three modes",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — All creatures lose all abilities until end of turn. ... + {1} — Choose a creature you control. It gains indestructible until end of turn. ... + {3}{W}{W} — Destroy all creatures.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-abilities",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-indestructible",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-destroy",
+							"mana": "{3}{W}{W}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"loseAbilities": true
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "chosen"
+					},
+					{
+						"do": "modify",
+						"what": "bound:chosen",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

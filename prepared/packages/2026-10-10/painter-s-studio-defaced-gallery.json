@@ -1,0 +1,87 @@
+{
+	"card": "Painter's Studio // Defaced Gallery",
+	"generated": "2026-10-10",
+	"source": "86ebe6f6b4aceb9c85e6968d0ee00e89a1c21ee661c985027857f6426c05f12a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Painter's Studio // Defaced Gallery",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When you unlock this door, exile the top two cards of your library. You may play them until the end of your next turn.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 2,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever you attack, attacking creatures you control get +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"attacking": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		],
+		"deferred": []
+	}
+}

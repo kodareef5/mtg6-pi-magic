@@ -1,0 +1,78 @@
+{
+	"card": "Harried Dronesmith",
+	"generated": "2026-10-10",
+	"source": "56ac5091643fe0ccc1cabf85cc2d1deb96d40633ee820172d93db5e04bd05b43",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Harried Dronesmith",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, create a 1/1 colorless Thopter artifact creature token with flying. It gains haste until end of turn. Sacrifice it at the beginning of your next end step.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"as": "thopter",
+							"spec": {
+								"name": "Thopter Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Thopter"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						},
+						{
+							"do": "modify",
+							"what": "bound:thopter",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"haste"
+								]
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "you"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:thopter",
+										"to": "graveyard",
+										"reason": "sacrifice"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

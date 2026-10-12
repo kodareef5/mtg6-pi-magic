@@ -1,0 +1,92 @@
+{
+	"card": "Yuriko, Hope from the Shadows",
+	"generated": "2026-10-10",
+	"source": "7e42672fa6a186c7d2a165621617e036409d43d9a6f8821b4dc981bea31e5092",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Yuriko, Hope from the Shadows",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When Yuriko enters, choose one —\n• Target creature gets -X/-0 until end of turn, where X is the number of cards in your graveyard.\n• Surveil 2. (Look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"power": {
+											"negate": {
+												"count": {
+													"zones": [
+														"graveyard"
+													],
+													"owner": "you",
+													"token": false
+												}
+											}
+										}
+									}
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "keyword",
+									"name": "surveil",
+									"who": "you",
+									"count": 2
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,69 @@
+{
+	"card": "Map the Frontier",
+	"generated": "2026-10-10",
+	"source": "df498df5c01b121ea4cc9bcabff3e73032d72f80fb5bb1da1b8616036852f515",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Map the Frontier",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Map the Frontier",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Map the Frontier",
+				"basis": "Search your library for up to two basic land cards and/or Desert cards, put them onto the battlefield tapped, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"any": [
+								{
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									]
+								},
+								{
+									"subtypes": [
+										"Desert"
+									]
+								}
+							]
+						},
+						"count": 2,
+						"upTo": true,
+						"as": "lands"
+					},
+					{
+						"do": "move",
+						"what": "bound:lands",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

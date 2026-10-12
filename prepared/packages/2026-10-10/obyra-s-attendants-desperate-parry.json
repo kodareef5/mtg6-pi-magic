@@ -1,0 +1,68 @@
+{
+	"card": "Obyra's Attendants // Desperate Parry",
+	"generated": "2026-10-10",
+	"source": "4afa21ff3856782a6efdd19b72fab2532032eaa94614da03a7bf9cd061acdf2b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Obyra's Attendants // Desperate Parry",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Obyra's Attendants // Desperate Parry",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Desperate Parry",
+				"basis": "Target creature gets -4/-0 until end of turn. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -4,
+							"toughness": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

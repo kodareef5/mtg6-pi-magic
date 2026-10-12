@@ -1,0 +1,62 @@
+{
+	"card": "Thoughtweft Lieutenant",
+	"generated": "2026-10-10",
+	"source": "5dca2ae73775c1dbcb5061dec5c73f5c3677ca877d3a5aa565ea2153fa41d4e1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thoughtweft Lieutenant",
+		"registers": [
+			{
+				"basis": "Whenever this creature or another Kithkin you control enters, target creature you control gets +1/+1 and gains trample until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"subtypes": [
+									"Kithkin"
+								],
+								"controller": "you",
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"trample"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

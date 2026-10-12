@@ -1,0 +1,122 @@
+{
+	"card": "Dubious Delicacy",
+	"generated": "2026-10-10",
+	"source": "2f0ee35bcce5b4ce694870f9a594071f96ec2f3240e753ad206c57ebf507657c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dubious Delicacy",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When this artifact enters, up to one target creature gets -3/-3 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": -3,
+								"toughness": -3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dubious Delicacy",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Dubious Delicacy to gain 3 life",
+				"basis": "{2}, {T}, Sacrifice this artifact: You gain 3 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Dubious Delicacy",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Dubious Delicacy to make target opponent lose 3 life",
+				"basis": "{2}, {T}, Sacrifice this artifact: Target opponent loses 3 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": -3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

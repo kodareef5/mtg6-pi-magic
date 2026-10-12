@@ -1,0 +1,76 @@
+{
+	"card": "Moonshaker Cavalry",
+	"generated": "2026-10-10",
+	"source": "c45be3cf4e30b49ce80a4994e1af8fe3c7a002bd0cca32662f050948f345d79a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Moonshaker Cavalry",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, creatures you control gain flying and get +X/+X until end of turn, where X is the number of creatures you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"flying"
+								],
+								"power": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								},
+								"toughness": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

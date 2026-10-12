@@ -1,0 +1,73 @@
+{
+	"card": "Sourbread Auntie",
+	"generated": "2026-10-10",
+	"source": "8c464262c0bb8cfd6aa5e0e41ee78d975aca55aaf2262f42c0baa3b4166cc60e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sourbread Auntie",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may blight 2. If you do, create two 1/1 black and red Goblin creature tokens. (To blight 2, put two -1/-1 counters on a creature you control.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"counters": {
+									"kind": "-1/-1",
+									"count": 2,
+									"put": true,
+									"on": {
+										"choose": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										},
+										"count": 1
+									}
+								}
+							},
+							"may": true,
+							"as": "blighted"
+						},
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Goblin Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Goblin"
+								],
+								"colors": [
+									"B",
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"bound": "blighted"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

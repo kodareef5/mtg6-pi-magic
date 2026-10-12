@@ -1,0 +1,113 @@
+{
+	"card": "Kellan's Lightblades",
+	"generated": "2026-10-10",
+	"source": "71036d0bf52b59bf8f62536191011b69e3cb3a0e3a3eaf60932299733c9e87a9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kellan's Lightblades",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kellan's Lightblades",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Kellan's Lightblades without bargain",
+				"basis": "Bargain (You may sacrifice an artifact, enchantment, or token as you cast this spell.)\nKellan's Lightblades deals 3 damage to target attacking or blocking creature. If this spell was bargained, destroy that creature instead.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"any": [
+								{
+									"attacking": true
+								},
+								{
+									"blocking": true
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Kellan's Lightblades",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast bargained Kellan's Lightblades",
+				"basis": "Bargain (You may sacrifice an artifact, enchantment, or token as you cast this spell.)\nKellan's Lightblades deals 3 damage to target attacking or blocking creature. If this spell was bargained, destroy that creature instead.",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"token": true
+								}
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"any": [
+								{
+									"attacking": true
+								},
+								{
+									"blocking": true
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

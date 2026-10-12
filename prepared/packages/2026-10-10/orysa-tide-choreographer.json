@@ -1,0 +1,102 @@
+{
+	"card": "Orysa, Tide Choreographer",
+	"generated": "2026-10-10",
+	"source": "991294dbe363534e11fe6cb7dae842c33b041c3cd05ba9916adbe1b8dd616ea7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Orysa, Tide Choreographer",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Orysa enters, draw two cards.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Orysa, Tide Choreographer",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Orysa with its toughness-based discount",
+				"basis": "This spell costs {3} less to cast if creatures you control have total toughness 10 or greater.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"aggregate": "sum",
+						"of": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"value": "toughness"
+					},
+					"atLeast": 10
+				},
+				"cost": {
+					"reduce": 3
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Orysa, Tide Choreographer",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Orysa without its toughness-based discount",
+				"basis": "This spell costs {3} less to cast if creatures you control have total toughness 10 or greater.",
+				"timing": "spell",
+				"if": {
+					"not": {
+						"amount": {
+							"aggregate": "sum",
+							"of": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"value": "toughness"
+						},
+						"atLeast": 10
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

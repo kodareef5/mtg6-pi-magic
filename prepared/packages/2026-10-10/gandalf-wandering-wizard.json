@@ -1,0 +1,73 @@
+{
+	"card": "Gandalf, Wandering Wizard",
+	"generated": "2026-10-10",
+	"source": "2c175eaf822bc3b297ab4791af5ceb0b9cf0dca43f21362e5420bb26215eb2ad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gandalf, Wandering Wizard",
+		"registers": [
+			{
+				"basis": "Ward {3} (Whenever this creature becomes the target of a spell or ability an opponent controls, counter it unless that player pays {3}.)",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{3}"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gandalf, Wandering Wizard",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Gandalf's shuffle and draw ability",
+				"basis": "{6}: Gandalf's owner shuffles him into their library and draws three cards.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "library",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "owner:this"
+					},
+					{
+						"do": "draw",
+						"who": "owner:this",
+						"count": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

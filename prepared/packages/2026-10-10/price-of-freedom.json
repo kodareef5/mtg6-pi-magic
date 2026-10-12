@@ -1,0 +1,88 @@
+{
+	"card": "Price of Freedom",
+	"generated": "2026-10-10",
+	"source": "2a1ecbe60f6eeced3f6a2d8d21de50e1b5d0e0db9a6c0d7b0f8b661028f25920",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Price of Freedom",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Destroy an opponent's artifact or land, offer its controller a basic land search, then draw",
+				"basis": "Destroy target artifact or land an opponent controls. Its controller may search their library for a basic land card, put it onto the battlefield tapped, then shuffle.\nDraw a card.",
+				"source": {
+					"card": "Price of Freedom",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"land"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "perform",
+						"who": "controller:target:0",
+						"may": true,
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "controller:target:0",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "controller:target:0",
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									]
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "land"
+							},
+							{
+								"do": "move",
+								"what": "bound:land",
+								"to": "battlefield",
+								"tapped": true,
+								"controller": "controller:target:0",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "controller:target:0"
+							}
+						]
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

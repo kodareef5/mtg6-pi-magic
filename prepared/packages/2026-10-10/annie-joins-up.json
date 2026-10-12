@@ -1,0 +1,59 @@
+{
+	"card": "Annie Joins Up",
+	"generated": "2026-10-10",
+	"source": "fd8f8eef70c974af0c795814daf41e0c4ca63228bfea5d007658a843664d56fa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Annie Joins Up",
+		"registers": [
+			{
+				"basis": "When Annie Joins Up enters, it deals 5 damage to target creature or planeswalker an opponent controls.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 5
+						}
+					]
+				}
+			},
+			{
+				"basis": "If a triggered ability of a legendary creature you control triggers, that ability triggers an additional time.",
+				"kind": "trigger-rule",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"supertypes": [
+						"legendary"
+					],
+					"controller": "you"
+				},
+				"additional": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

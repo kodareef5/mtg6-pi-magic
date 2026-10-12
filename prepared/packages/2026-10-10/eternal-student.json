@@ -16,7 +16,7 @@
 					],
 					"controller": "self"
 				},
-				"claim": "Exile Eternal Student to create two Inklings",
+				"claim": "Exile Eternal Student from your graveyard to create two Inklings",
 				"basis": "{1}{B}, Exile this card from your graveyard: Create two 1/1 white and black Inkling creature tokens with flying.",
 				"timing": "stack",
 				"cost": {
@@ -28,7 +28,7 @@
 						"do": "token",
 						"count": 2,
 						"spec": {
-							"name": "Inkling",
+							"name": "Inkling Token",
 							"types": [
 								"creature"
 							],

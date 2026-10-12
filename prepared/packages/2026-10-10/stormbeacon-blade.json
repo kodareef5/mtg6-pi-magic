@@ -1,0 +1,91 @@
+{
+	"card": "Stormbeacon Blade",
+	"generated": "2026-10-10",
+	"source": "fdbe1aa04614219ff91721c33903b689d5be94abb68e4ee4d4125be46e195ac7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stormbeacon Blade",
+		"registers": [
+			{
+				"basis": "Equipped creature gets +3/+0.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 3
+				}
+			},
+			{
+				"basis": "Whenever equipped creature attacks, draw a card if you control three or more attacking creatures.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "attached"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"attacking": true
+									}
+								},
+								"atLeast": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stormbeacon Blade",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Stormbeacon Blade",
+				"basis": "Equip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,69 @@
+{
+	"card": "Two-Headed Hunter // Twice the Rage",
+	"generated": "2026-10-10",
+	"source": "972c9d57f8c5cdad207287ae757e0b664ad6d2693472ffaa3363f2f39aeaa450",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Two-Headed Hunter // Twice the Rage",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Two-Headed Hunter // Twice the Rage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Twice the Rage",
+				"basis": "Target creature gains double strike until end of turn. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"double strike"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

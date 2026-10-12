@@ -1,0 +1,144 @@
+{
+	"card": "Explosive Derailment",
+	"generated": "2026-10-10",
+	"source": "20c34305bc9c7e9886224dfe820b9aeb79116a2e78bccf5ae0209852788b0b1f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Explosive Derailment",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Explosive Derailment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Explosive Derailment choosing only creature damage",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2} — Explosive Derailment deals 4 damage to target creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-damage",
+							"mana": "{2}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Explosive Derailment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Explosive Derailment choosing only artifact destruction",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2} — Destroy target artifact.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-destroy",
+							"mana": "{2}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Explosive Derailment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Explosive Derailment choosing both modes",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2} — Explosive Derailment deals 4 damage to target creature. ... + {2} — Destroy target artifact.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-damage",
+							"mana": "{2}"
+						},
+						{
+							"name": "spree-destroy",
+							"mana": "{2}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"artifact"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					},
+					{
+						"do": "destroy",
+						"what": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

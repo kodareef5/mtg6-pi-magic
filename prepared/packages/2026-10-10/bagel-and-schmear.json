@@ -1,0 +1,85 @@
+{
+	"card": "Bagel and Schmear",
+	"generated": "2026-10-10",
+	"source": "4f33ccfed8cd87d8512f3c36f81530ba9848d745039b16bba6fc1092047e20da",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bagel and Schmear",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bagel and Schmear",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Share: put a counter on up to one creature and draw a card",
+				"basis": "Share — {W}, {T}, Sacrifice this artifact: Put a +1/+1 counter on up to one target creature. Draw a card. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{W}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Bagel and Schmear",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Nosh: gain 3 life and draw a card",
+				"basis": "Nosh — {2}, {T}, Sacrifice this artifact: You gain 3 life and draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

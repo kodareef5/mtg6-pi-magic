@@ -1,0 +1,105 @@
+{
+	"card": "Ferocity of the Hunt",
+	"generated": "2026-10-10",
+	"source": "6431c675b5521402b4f8519c5e0c8a6c50c5f109616c56ff073e7c48d4c1fce0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ferocity of the Hunt",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Enchanted creature gets +1/+0 and has deathtouch.",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 1,
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When enchanted creature dies, return that card to the battlefield tapped under its owner's control.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "attached"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"tapped": true,
+							"controller": "owner:event:object",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ferocity of the Hunt",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ferocity of the Hunt enchanting a creature",
+				"basis": "Flash ... Enchant creature",
+				"timing": "spell",
+				"speed": "instant",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

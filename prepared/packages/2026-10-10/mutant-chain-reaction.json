@@ -1,0 +1,110 @@
+{
+	"card": "Mutant Chain Reaction",
+	"generated": "2026-10-10",
+	"source": "ae45ec1dafd38cd910b66e420e34597b92669b3b2807303f4fc59be6a5348a4b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mutant Chain Reaction",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mutant Chain Reaction",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mutant Chain Reaction",
+				"basis": "Destroy up to one target artifact, enchantment, or creature with flying. Create a Mutagen token. (It's an artifact with \"{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									],
+									"words": [
+										"flying"
+									]
+								}
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Mutagen Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Mutagen"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.",
+									"speed": "sorcery",
+									"cost": {
+										"mana": "{1}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"targets": [
+											{
+												"object": {
+													"zones": [
+														"battlefield"
+													],
+													"types": [
+														"creature"
+													]
+												}
+											}
+										],
+										"instructions": [
+											{
+												"do": "counters",
+												"on": "target:0",
+												"kind": "+1/+1",
+												"amount": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

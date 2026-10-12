@@ -1,0 +1,101 @@
+{
+	"card": "Werefox Bodyguard",
+	"generated": "2026-10-10",
+	"source": "1ae14cf52f9c7bf586fabd16eb2c8359ebd84d3e278c87715075afd62d4bbffb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Werefox Bodyguard",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, exile up to one other target non-Fox creature until this creature leaves the battlefield.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"other": true,
+								"not": {
+									"subtypes": [
+										"Fox"
+									]
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Werefox Bodyguard",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Werefox Bodyguard to gain 2 life",
+				"basis": "{1}{W}, Sacrifice this creature: You gain 2 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{W}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

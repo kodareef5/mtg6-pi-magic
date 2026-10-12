@@ -1,0 +1,258 @@
+{
+	"card": "Huatli, Poet of Unity // Roar of the Fifth People",
+	"generated": "2026-10-10",
+	"source": "97c83dc58943e295acd281b3c72c589a39f5a72d26cca4128733a16219b7a4f0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Huatli, Poet of Unity // Roar of the Fifth People",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When Huatli enters, search your library for a basic land card, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "I — Create two 3/3 green Dinosaur creature tokens.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Dinosaur Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dinosaur"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "II — This Saga gains \"Creatures you control have '{T}: Add {R}, {G}, or {W}.'\"",
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "register",
+							"on": "this",
+							"registration": {
+								"face": 1,
+								"basis": "II — This Saga gains \"Creatures you control have '{T}: Add {R}, {G}, or {W}.'\"",
+								"kind": "continuous",
+								"affects": {
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								},
+								"change": {
+									"registers": [
+										{
+											"basis": "II — This Saga gains \"Creatures you control have '{T}: Add {R}, {G}, or {W}.'\"",
+											"kind": "mana",
+											"cost": {
+												"tap": true
+											},
+											"colors": [
+												"R"
+											]
+										},
+										{
+											"basis": "II — This Saga gains \"Creatures you control have '{T}: Add {R}, {G}, or {W}.'\"",
+											"kind": "mana",
+											"cost": {
+												"tap": true
+											},
+											"colors": [
+												"G"
+											]
+										},
+										{
+											"basis": "II — This Saga gains \"Creatures you control have '{T}: Add {R}, {G}, or {W}.'\"",
+											"kind": "mana",
+											"cost": {
+												"tap": true
+											},
+											"colors": [
+												"W"
+											]
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "III — Search your library for a Dinosaur card, reveal it, put it into your hand, then shuffle.",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"subtypes": [
+									"Dinosaur"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "dinosaur"
+						},
+						{
+							"do": "move",
+							"what": "bound:dinosaur",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "IV — Dinosaurs you control gain double strike and trample until end of turn.",
+				"kind": "chapter",
+				"numbers": [
+					4
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"subtypes": [
+									"Dinosaur"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"double strike",
+									"trample"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Huatli, Poet of Unity // Roar of the Fifth People",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Huatli and return her transformed",
+				"basis": "{3}{R/W}{R/W}: Exile Huatli, then return her to the battlefield transformed under her owner's control. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}{R/W}{R/W}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "exile",
+						"reason": "exile",
+						"as": "huatli"
+					},
+					{
+						"do": "move",
+						"what": "bound:huatli",
+						"to": "battlefield",
+						"face": 1,
+						"controller": "owner:bound:huatli",
+						"reason": "resolve",
+						"if": {
+							"bound": "huatli"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

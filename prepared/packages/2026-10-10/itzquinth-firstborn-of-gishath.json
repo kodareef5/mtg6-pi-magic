@@ -1,0 +1,95 @@
+{
+	"card": "Itzquinth, Firstborn of Gishath",
+	"generated": "2026-10-10",
+	"source": "119030d7541e3c8cf609eb0a3bfb21514229b7820098dd48d195682c69115e1a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Itzquinth, Firstborn of Gishath",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "When Itzquinth enters, you may pay {2}. When you do, target Dinosaur you control deals damage equal to its power to another target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{2}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "paid"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											],
+											"subtypes": [
+												"Dinosaur"
+											],
+											"controller": "you"
+										}
+									},
+									{
+										"object": {
+											"types": [
+												"creature"
+											],
+											"not": {
+												"is": "target:0"
+											}
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "damage",
+										"from": "target:0",
+										"to": "target:1",
+										"amount": {
+											"power": "target:0"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

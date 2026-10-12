@@ -1,0 +1,33 @@
+{
+	"card": "Deepmuck Desperado",
+	"generated": "2026-10-10",
+	"source": "1584cc108339cd0083bc84289475b17bb2e82ce4a56ad603e897027ae418eac4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deepmuck Desperado",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you commit a crime, each opponent mills three cards. This ability triggers only once each turn. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.)",
+				"event": {
+					"on": "crime",
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "opponent",
+							"count": 3
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,146 @@
+{
+	"card": "Rewrite Regrets",
+	"generated": "2026-10-10",
+	"source": "617c17f9eae915ee9b979dd97559fe5893bc17b8a1c59d0f151d4c5a896892bf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rewrite Regrets",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Rewrite Regrets, return the target, then empower Jace 2",
+				"basis": "Return target creature or planeswalker card with mana value 6 or less from your graveyard to the battlefield.\nEmpower Jace 2. (Put two loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+				"source": {
+					"card": "Rewrite Regrets",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atMost": 6
+							},
+							"token": false
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"amount": {
+								"count": {
+									"controller": "you",
+									"types": [
+										"planeswalker"
+									],
+									"subtypes": [
+										"Jace"
+									],
+									"token": true
+								}
+							},
+							"atMost": 0
+						},
+						"spec": {
+							"name": "Jace Token",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"colors": [
+								"U"
+							],
+							"loyalty": 0,
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "[−1]: Surveil 1",
+									"cost": {
+										"loyalty": -1
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "keyword",
+												"name": "surveil",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								},
+								{
+									"kind": "activated",
+									"basis": "[−3]: Draw a card",
+									"cost": {
+										"loyalty": -3
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"controller": "you",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"token": true
+						},
+						"count": 1,
+						"as": "jace"
+					},
+					{
+						"do": "counters",
+						"on": "bound:jace",
+						"kind": "loyalty",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

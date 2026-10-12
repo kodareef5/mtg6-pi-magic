@@ -1,0 +1,87 @@
+{
+	"card": "Perfected Theory",
+	"generated": "2026-10-10",
+	"source": "6c8b7f9e696b2400cd9f934593cb5b4b2d9c6dad77bb4312e83e7ef537f4436e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Perfected Theory",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Perfected Theory",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose the 1/1 mode",
+				"basis": "Choose one —\n• Target creature has base power and toughness 1/1 until end of turn.\n• Target creature has base power and toughness 4/5 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Perfected Theory",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose the 4/5 mode",
+				"basis": "Choose one —\n• Target creature has base power and toughness 1/1 until end of turn.\n• Target creature has base power and toughness 4/5 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 4,
+								"toughness": 5
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,85 @@
+{
+	"card": "Imodane's Recruiter // Train Troops",
+	"generated": "2026-10-10",
+	"source": "a56812bc9b506045172c9d65d6710d5e23e22ea14c938206cf89faf25605a057",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Imodane's Recruiter // Train Troops",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When this creature enters, creatures you control get +1/+0 and gain haste until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"words": [
+									"haste"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Imodane's Recruiter // Train Troops",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Train Troops",
+				"basis": "Create two 2/2 white Knight creature tokens with vigilance. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Knight Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Knight"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"vigilance"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

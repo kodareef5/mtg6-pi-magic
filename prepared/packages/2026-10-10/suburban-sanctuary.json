@@ -1,0 +1,64 @@
+{
+	"card": "Suburban Sanctuary",
+	"generated": "2026-10-10",
+	"source": "b5371c8fa234ff36aa55976a7aa59fc1a1d60bfd10dc3d9265201022d374af5f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Suburban Sanctuary",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {G} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add {G} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Activate surveil 1",
+				"basis": "{4}, {T}: Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"source": {
+					"card": "Suburban Sanctuary",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

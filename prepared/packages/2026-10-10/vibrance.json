@@ -1,0 +1,151 @@
+{
+	"card": "Vibrance",
+	"generated": "2026-10-10",
+	"source": "9d808373726d8595057efa9805f6837c904775af5c6be62d4f37d56abcbb66a1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vibrance",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, if {R}{R} was spent to cast it, this creature deals 3 damage to any target.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "this",
+						"color": "R"
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 3,
+							"from": "this"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, if {G}{G} was spent to cast it, search your library for a land card, reveal it, put it into your hand, then shuffle. You gain 2 life.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "this",
+						"color": "G"
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Evoke {R/G}{R/G}",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"alternative": "evoke"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Evoke Vibrance",
+				"basis": "Evoke {R/G}{R/G}",
+				"source": {
+					"card": "Vibrance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"cost": {
+					"mana": "{R/G}{R/G}",
+					"alternative": "evoke"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

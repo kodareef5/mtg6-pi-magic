@@ -1,0 +1,95 @@
+{
+	"card": "Far Fortune, End Boss",
+	"generated": "2026-10-10",
+	"source": "39def33ea39520d61ecc80b802c25a987462abc8232a1f1700224d615a6006a5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Far Fortune, End Boss",
+		"registers": [
+			{
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you attack, Far Fortune deals 1 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"controller": "you",
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Max speed — If a source you control would deal damage to an opponent or a permanent an opponent controls, it deals that much damage plus 1 instead.",
+				"kind": "damage-rule",
+				"mode": "add",
+				"amount": 1,
+				"from": {
+					"controller": "you"
+				},
+				"to": {
+					"player": "opponent"
+				},
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				}
+			},
+			{
+				"basis": "Max speed — If a source you control would deal damage to an opponent or a permanent an opponent controls, it deals that much damage plus 1 instead.",
+				"kind": "damage-rule",
+				"mode": "add",
+				"amount": 1,
+				"from": {
+					"controller": "you"
+				},
+				"to": {
+					"object": {
+						"zones": [
+							"battlefield"
+						],
+						"controller": "opponent"
+					}
+				},
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

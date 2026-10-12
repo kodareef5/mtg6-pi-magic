@@ -1,0 +1,110 @@
+{
+	"card": "World Map",
+	"generated": "2026-10-10",
+	"source": "7153b10271f739a32e9f319566f59d7352704f2d300286a6d1c1cd1a3f8e069c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "World Map",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "World Map",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice World Map to search for a basic land",
+				"basis": "{1}, {T}, Sacrifice this artifact: Search your library for a basic land card, reveal it, put it into your hand, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "World Map",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice World Map to search for a land",
+				"basis": "{3}, {T}, Sacrifice this artifact: Search your library for a land card, reveal it, put it into your hand, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

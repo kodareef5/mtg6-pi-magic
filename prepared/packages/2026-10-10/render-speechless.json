@@ -1,0 +1,84 @@
+{
+	"card": "Render Speechless",
+	"generated": "2026-10-10",
+	"source": "bb052bc89c863ec1722bc65fc796d368e482e4ff3e555967c0170572230bc5cb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Render Speechless",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Render Speechless to choose an opponent's discard and put counters on up to one creature",
+				"basis": "Target opponent reveals their hand. You choose a nonland card from it. That player discards that card. ... Put two +1/+1 counters on up to one target creature.",
+				"source": {
+					"card": "Render Speechless",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "target:0"
+						},
+						"as": "hand"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"count": 1,
+						"as": "discard",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"is": "bound:hand",
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "+1/+1",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

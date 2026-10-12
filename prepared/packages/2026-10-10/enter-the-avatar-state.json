@@ -1,0 +1,59 @@
+{
+	"card": "Enter the Avatar State",
+	"generated": "2026-10-10",
+	"source": "3bed70da4104a88ec6913ba4d77860b26b14fa6064ecd9258117e8b5665374e4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Enter the Avatar State",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Enter the Avatar State",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Enter the Avatar State",
+				"basis": "Until end of turn, target creature you control becomes an Avatar in addition to its other types and gains flying, first strike, lifelink, and hexproof. (A creature with hexproof can't be the target of spells or abilities your opponents control.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"subtypes": {
+								"add": [
+									"Avatar"
+								],
+								"of": "creature"
+							},
+							"words": [
+								"flying",
+								"first strike",
+								"lifelink",
+								"hexproof"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

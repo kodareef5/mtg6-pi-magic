@@ -1,0 +1,165 @@
+{
+	"card": "Caretaker's Talent",
+	"generated": "2026-10-10",
+	"source": "d0308f20acd1cbb55854af29d94270a3cee9fcac14d2426457380e9eb30cdc3b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Caretaker's Talent",
+		"registers": [
+			{
+				"basis": "Whenever one or more tokens you control enter, draw a card. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"token": true,
+						"controller": "you"
+					},
+					"batch": true
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{W}: Level 2",
+				"kind": "activated",
+				"cost": {
+					"mana": "{W}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 1,
+							"atMost": 1
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this Class becomes level 2, create a token that's a copy of target token you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 2
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "When this Class becomes level 2, create a token that's a copy of target token you control.",
+							"kind": "watch",
+							"event": {
+								"on": "level",
+								"of": {
+									"is": "this"
+								},
+								"level": 2
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"token": true,
+											"controller": "you"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "token",
+										"count": 1,
+										"copy": "target:0"
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "{3}{W}: Level 3",
+				"kind": "activated",
+				"cost": {
+					"mana": "{3}{W}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 2,
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Creature tokens you control get +2/+2.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 3
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Creature tokens you control get +2/+2.",
+							"kind": "continuous",
+							"affects": {
+								"types": [
+									"creature"
+								],
+								"token": true,
+								"controller": "you"
+							},
+							"change": {
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

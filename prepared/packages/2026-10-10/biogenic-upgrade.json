@@ -1,0 +1,67 @@
+{
+	"card": "Biogenic Upgrade",
+	"generated": "2026-10-10",
+	"source": "7f8bc460900a1d9d5d003b21ba30393cff9355e0f4e61e85cbf7bacd92859e97",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Biogenic Upgrade",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Biogenic Upgrade",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Distribute three counters, then double each target's counters",
+				"basis": "Distribute three +1/+1 counters among one, two, or three target creatures, then double the number of +1/+1 counters on each of those creatures.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 3,
+						"atLeast": 1,
+						"divide": 3
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": {
+							"divided": 0
+						}
+					},
+					{
+						"do": "each",
+						"objects": {
+							"is": "target:0"
+						},
+						"instructions": [
+							{
+								"do": "counters",
+								"on": "bound:object",
+								"kind": "+1/+1",
+								"amount": {
+									"counters": "+1/+1",
+									"on": "bound:object"
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"card": "Walking Sarcophagus",
+	"generated": "2026-10-10",
+	"source": "d5bdbf4fd52fcefa25bf2272fda2529f7a5463db5a77a04baff7c94ef7b714d4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Walking Sarcophagus",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — This creature gets +1/+2.",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 2
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,79 @@
+{
+	"card": "Diversion Specialist",
+	"generated": "2026-10-10",
+	"source": "b04b02468d6f0d05c29bfa5f382d0b776654cbc34998bbd4a1978b47bbb81361",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Diversion Specialist",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Diversion Specialist",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature or enchantment to exile the top card and permit playing it this turn",
+				"basis": "{1}, Sacrifice another creature or enchantment: Exile the top card of your library. You may play it this turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature",
+								"enchantment"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 1,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": "end-of-turn"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,76 @@
+{
+	"card": "Living Phone",
+	"generated": "2026-10-10",
+	"source": "0450a8ab5ceea9aacd70baa6133678b11514115ec52ad6c9a745d5bb3a402b7e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Living Phone",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature dies, look at the top five cards of your library. You may reveal a creature card with power 2 or less from among them and put it into your hand. Put the rest on the bottom of your library in a random order.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 5,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"types": [
+									"creature"
+								],
+								"power": {
+									"atMost": 2
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "taken"
+						},
+						{
+							"do": "move",
+							"what": "bound:taken",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"position": "bottom",
+							"random": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

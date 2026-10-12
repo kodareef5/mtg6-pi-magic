@@ -1,0 +1,53 @@
+{
+	"card": "Stoic Grove-Guide",
+	"generated": "2026-10-10",
+	"source": "5693a9a96790f2ebef6933ede31392bda99e2c3eda7150ab8bd7e5e1a1b1f3fa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stoic Grove-Guide",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stoic Grove-Guide",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Stoic Grove-Guide to create an Elf token",
+				"basis": "{1}{B/G}, Exile this card from your graveyard: Create a 2/2 black and green Elf creature token. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{1}{B/G}",
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Elf Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elf"
+							],
+							"colors": [
+								"B",
+								"G"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

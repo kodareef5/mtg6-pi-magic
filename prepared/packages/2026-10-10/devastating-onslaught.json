@@ -1,0 +1,80 @@
+{
+	"card": "Devastating Onslaught",
+	"generated": "2026-10-10",
+	"source": "12fd53d008d7dca2d9f43326d437a1cbcfbb56940fdf2bc5fc3bd355b2694fee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Devastating Onslaught",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Devastating Onslaught",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Devastating Onslaught",
+				"basis": "Create X tokens that are copies of target artifact or creature you control. Those tokens gain haste until end of turn. Sacrifice them at the beginning of the next end step.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"x": true
+						},
+						"copy": "target:0",
+						"as": "copies"
+					},
+					{
+						"do": "modify",
+						"what": "bound:copies",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:copies",
+									"to": "graveyard",
+									"reason": "sacrifice"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

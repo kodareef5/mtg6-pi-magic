@@ -1,0 +1,167 @@
+{
+	"card": "Insatiable Avarice",
+	"generated": "2026-10-10",
+	"source": "98e49c24e2c67efc4c5cad5d52622eb098e2f1c6389455d0f62c7ada92ece7ba",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Insatiable Avarice",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Insatiable Avarice",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Insatiable Avarice with the search mode",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2} — Search your library for a card, then shuffle and put that card on top.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-search",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you"
+						},
+						"count": 1,
+						"as": "searched"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "move",
+						"what": "bound:searched",
+						"to": "library",
+						"position": "top",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Insatiable Avarice",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Insatiable Avarice with the draw and life-loss mode",
+				"basis": "Spree (Choose one or more additional costs.) ... + {B}{B} — Target player draws three cards and loses 3 life.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-draw",
+							"mana": "{B}{B}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 3
+					},
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": -3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Insatiable Avarice",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Insatiable Avarice with both modes",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2} — Search your library for a card, then shuffle and put that card on top. ... + {B}{B} — Target player draws three cards and loses 3 life.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-search",
+							"mana": "{2}"
+						},
+						{
+							"name": "spree-draw",
+							"mana": "{B}{B}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you"
+						},
+						"count": 1,
+						"as": "searched"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "move",
+						"what": "bound:searched",
+						"to": "library",
+						"position": "top",
+						"reason": "resolve"
+					},
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 3
+					},
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": -3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

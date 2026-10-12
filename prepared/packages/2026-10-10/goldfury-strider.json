@@ -1,0 +1,84 @@
+{
+	"card": "Goldfury Strider",
+	"generated": "2026-10-10",
+	"source": "ecfece9d0f543ffacf75aa9becef25ba3c2ab3efe42251f1fe5da628dba2fffe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goldfury Strider",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Give target creature +2/+0 until end of turn",
+				"basis": "Tap two untapped artifacts and/or creatures you control: Target creature gets +2/+0 until end of turn. Activate only as a sorcery.",
+				"source": {
+					"card": "Goldfury Strider",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"tapped": false
+						},
+						"count": 2
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"zones": [
+								"battlefield"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

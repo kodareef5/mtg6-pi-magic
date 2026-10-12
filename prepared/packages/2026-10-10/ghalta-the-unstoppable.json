@@ -1,0 +1,81 @@
+{
+	"card": "Ghalta the Unstoppable",
+	"generated": "2026-10-10",
+	"source": "9243a3e7964efedf68e44e3a01a71c4d58c5b9197837e99c1eae359fdb503e52",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ghalta the Unstoppable",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Other creatures you control have trample.",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ghalta the Unstoppable",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ghalta with its greatest-power generic cost reduction",
+				"basis": "This spell costs {X} less to cast, where X is the greatest power among creatures you control.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"aggregate": "max",
+						"of": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"value": "power"
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

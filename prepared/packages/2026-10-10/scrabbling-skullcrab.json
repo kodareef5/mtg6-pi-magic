@@ -1,0 +1,70 @@
+{
+	"card": "Scrabbling Skullcrab",
+	"generated": "2026-10-10",
+	"source": "c1fdaecca3bf27c7ac7258a8d8c094ff2e8ac96df3d90257cd8c8e1b8f9c5af4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scrabbling Skullcrab",
+		"registers": [
+			{
+				"basis": "Eerie — Whenever an enchantment you control enters and whenever you fully unlock a Room, target player mills two cards. (They put the top two cards of their library into their graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "target:0",
+							"count": 2
+						}
+					]
+				}
+			},
+			{
+				"basis": "Eerie — Whenever an enchantment you control enters and whenever you fully unlock a Room, target player mills two cards. (They put the top two cards of their library into their graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"fully": true,
+					"by": "you",
+					"of": {
+						"subtypes": [
+							"Room"
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "target:0",
+							"count": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,99 @@
+{
+	"card": "Blasphemous Edict",
+	"generated": "2026-10-10",
+	"source": "a109b601f407260c89c7f955db62a6a0eef552e2ed573d1222d003b0b339623a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blasphemous Edict",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Blasphemous Edict",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Blasphemous Edict at its printed cost",
+				"basis": "Each player sacrifices thirteen creatures of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 13,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									]
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Blasphemous Edict",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Blasphemous Edict for its conditional alternative cost",
+				"basis": "You may pay {B} rather than pay this spell's mana cost if there are thirteen or more creatures on the battlefield. ... Each player sacrifices thirteen creatures of their choice.",
+				"timing": "spell",
+				"cost": {
+					"mana": "{B}",
+					"alternative": "edict"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					},
+					"atLeast": 13
+				},
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 13,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									]
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

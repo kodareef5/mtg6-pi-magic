@@ -1,0 +1,59 @@
+{
+	"card": "Valkyrie's Call",
+	"generated": "2026-10-10",
+	"source": "60ff3ff89dc637c692cdc80e83b94657b418d323fc07082b99779a8b843d9e5b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Valkyrie's Call",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever a nontoken, non-Angel creature you control dies, return that card to the battlefield under its owner's control with a +1/+1 counter on it. It has flying and is an Angel in addition to its other types.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"token": false,
+						"not": {
+							"subtypes": [
+								"Angel"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "owner:event:object",
+							"reason": "resolve",
+							"counters": {
+								"+1/+1": 1
+							},
+							"change": {
+								"words": [
+									"flying"
+								],
+								"subtypes": {
+									"add": [
+										"Angel"
+									],
+									"of": "creature"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

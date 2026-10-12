@@ -1,0 +1,129 @@
+{
+	"card": "Divert Disaster",
+	"generated": "2026-10-10",
+	"source": "f316d7131f60010b9c91d36da0b0344035a11e885f63178bd23e74bf2c0c0bdb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Divert Disaster",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Divert Disaster",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Divert Disaster",
+				"basis": "Counter target spell unless its controller pays {2}. If they do, you create a Lander token. (It's an artifact with \"{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "pay",
+						"who": "controller:target:0",
+						"cost": {
+							"mana": "{2}"
+						},
+						"may": true,
+						"as": "paid"
+					},
+					{
+						"do": "counter",
+						"what": "target:0",
+						"if": {
+							"not": {
+								"bound": "paid"
+							}
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"bound": "paid"
+						},
+						"spec": {
+							"name": "Lander Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Lander"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+									"cost": {
+										"mana": "{2}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"library"
+													],
+													"owner": "you",
+													"types": [
+														"land"
+													],
+													"supertypes": [
+														"basic"
+													]
+												},
+												"count": 1,
+												"upTo": true,
+												"as": "land"
+											},
+											{
+												"do": "move",
+												"what": "bound:land",
+												"to": "battlefield",
+												"tapped": true,
+												"reason": "resolve"
+											},
+											{
+												"do": "shuffle",
+												"who": "you"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

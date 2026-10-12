@@ -1,0 +1,79 @@
+{
+	"card": "Ripclaw Wrangler",
+	"generated": "2026-10-10",
+	"source": "aa119fb2b70c2a06dcc1b262ecaf7123e11065bb416938d7abf5958846c50ba2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ripclaw Wrangler",
+		"registers": [
+			{
+				"basis": "When this Vehicle enters, each opponent discards a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": 1,
+							"actions": [
+								{
+									"discard": true
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ripclaw Wrangler",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Ripclaw Wrangler",
+				"basis": "Crew 2 (Tap any number of creatures you control with total power 2 or more: This Vehicle becomes an artifact creature until end of turn.)",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,1028 @@
+{
+	"card": "Cosmium Confluence",
+	"generated": "2026-10-10",
+	"source": "50b61885ade43148bd8965526995faa02d90cd8bb49de13311bbb808ef5fc5e2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cosmium Confluence",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Choose search three times",
+				"basis": "Choose three. You may choose the same mode more than once. ... • Search your library for a Cave card, put it onto the battlefield tapped, then shuffle.",
+				"source": {
+					"card": "Cosmium Confluence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "cave-a"
+					},
+					{
+						"do": "move",
+						"what": "bound:cave-a",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "cave-b"
+					},
+					{
+						"do": "move",
+						"what": "bound:cave-b",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "cave-c"
+					},
+					{
+						"do": "move",
+						"what": "bound:cave-c",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			},
+			{
+				"claim": "Choose search twice and animation once",
+				"basis": "Choose three. You may choose the same mode more than once. ... • Search your library for a Cave card, put it onto the battlefield tapped, then shuffle. ... • Put three +1/+1 counters on a Cave you control. It becomes a 0/0 Elemental creature with haste. It's still a land.",
+				"source": {
+					"card": "Cosmium Confluence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "cave-a"
+					},
+					{
+						"do": "move",
+						"what": "bound:cave-a",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "cave-b"
+					},
+					{
+						"do": "move",
+						"what": "bound:cave-b",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"as": "animated-a"
+					},
+					{
+						"do": "counters",
+						"on": "bound:animated-a",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "bound:animated-a",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			},
+			{
+				"claim": "Choose search twice and destruction once",
+				"basis": "Choose three. You may choose the same mode more than once. ... • Search your library for a Cave card, put it onto the battlefield tapped, then shuffle. ... • Destroy target enchantment.",
+				"source": {
+					"card": "Cosmium Confluence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "cave-a"
+					},
+					{
+						"do": "move",
+						"what": "bound:cave-a",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "cave-b"
+					},
+					{
+						"do": "move",
+						"what": "bound:cave-b",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"claim": "Choose search once and animation twice",
+				"basis": "Choose three. You may choose the same mode more than once. ... • Search your library for a Cave card, put it onto the battlefield tapped, then shuffle. ... • Put three +1/+1 counters on a Cave you control. It becomes a 0/0 Elemental creature with haste. It's still a land.",
+				"source": {
+					"card": "Cosmium Confluence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "cave-a"
+					},
+					{
+						"do": "move",
+						"what": "bound:cave-a",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"as": "animated-a"
+					},
+					{
+						"do": "counters",
+						"on": "bound:animated-a",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "bound:animated-a",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"as": "animated-b"
+					},
+					{
+						"do": "counters",
+						"on": "bound:animated-b",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "bound:animated-b",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			},
+			{
+				"claim": "Choose each mode once",
+				"basis": "Choose three. You may choose the same mode more than once. ... • Search your library for a Cave card, put it onto the battlefield tapped, then shuffle. ... • Put three +1/+1 counters on a Cave you control. It becomes a 0/0 Elemental creature with haste. It's still a land. ... • Destroy target enchantment.",
+				"source": {
+					"card": "Cosmium Confluence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "cave-a"
+					},
+					{
+						"do": "move",
+						"what": "bound:cave-a",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"as": "animated-a"
+					},
+					{
+						"do": "counters",
+						"on": "bound:animated-a",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "bound:animated-a",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"claim": "Choose search once and destruction twice",
+				"basis": "Choose three. You may choose the same mode more than once. ... • Search your library for a Cave card, put it onto the battlefield tapped, then shuffle. ... • Destroy target enchantment.",
+				"source": {
+					"card": "Cosmium Confluence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "cave-a"
+					},
+					{
+						"do": "move",
+						"what": "bound:cave-a",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "destroy",
+						"what": "target:1"
+					}
+				]
+			},
+			{
+				"claim": "Choose animation three times",
+				"basis": "Choose three. You may choose the same mode more than once. ... • Put three +1/+1 counters on a Cave you control. It becomes a 0/0 Elemental creature with haste. It's still a land.",
+				"source": {
+					"card": "Cosmium Confluence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"as": "animated-a"
+					},
+					{
+						"do": "counters",
+						"on": "bound:animated-a",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "bound:animated-a",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"as": "animated-b"
+					},
+					{
+						"do": "counters",
+						"on": "bound:animated-b",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "bound:animated-b",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"as": "animated-c"
+					},
+					{
+						"do": "counters",
+						"on": "bound:animated-c",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "bound:animated-c",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			},
+			{
+				"claim": "Choose animation twice and destruction once",
+				"basis": "Choose three. You may choose the same mode more than once. ... • Put three +1/+1 counters on a Cave you control. It becomes a 0/0 Elemental creature with haste. It's still a land. ... • Destroy target enchantment.",
+				"source": {
+					"card": "Cosmium Confluence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"as": "animated-a"
+					},
+					{
+						"do": "counters",
+						"on": "bound:animated-a",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "bound:animated-a",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"as": "animated-b"
+					},
+					{
+						"do": "counters",
+						"on": "bound:animated-b",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "bound:animated-b",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"claim": "Choose animation once and destruction twice",
+				"basis": "Choose three. You may choose the same mode more than once. ... • Put three +1/+1 counters on a Cave you control. It becomes a 0/0 Elemental creature with haste. It's still a land. ... • Destroy target enchantment.",
+				"source": {
+					"card": "Cosmium Confluence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Cave"
+							]
+						},
+						"count": 1,
+						"as": "animated-a"
+					},
+					{
+						"do": "counters",
+						"on": "bound:animated-a",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "bound:animated-a",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "destroy",
+						"what": "target:1"
+					}
+				]
+			},
+			{
+				"claim": "Choose destruction three times",
+				"basis": "Choose three. You may choose the same mode more than once. ... • Destroy target enchantment.",
+				"source": {
+					"card": "Cosmium Confluence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "destroy",
+						"what": "target:1"
+					},
+					{
+						"do": "destroy",
+						"what": "target:2"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

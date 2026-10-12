@@ -1,0 +1,114 @@
+{
+	"card": "Binding Negotiation",
+	"generated": "2026-10-10",
+	"source": "beb8a83f65965beb80486f4f431081475db2ae8b64dab76309556fb90ff6940e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Binding Negotiation",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Binding Negotiation",
+				"basis": "Target opponent reveals their hand. You may choose a nonland card from it. If you do, they discard it. Otherwise, you may put a face-up exiled card they own into their graveyard.",
+				"source": {
+					"card": "Binding Negotiation",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "target:0"
+						},
+						"as": "hand"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"is": "bound:hand",
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard",
+						"if": {
+							"bound": "discard"
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"exile"
+							],
+							"owner": "target:0",
+							"token": false,
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"land",
+								"planeswalker",
+								"sorcery"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "exiled-card",
+						"if": {
+							"not": {
+								"bound": "discard"
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:exiled-card",
+						"to": "graveyard",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "discard"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

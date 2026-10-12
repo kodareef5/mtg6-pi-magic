@@ -1,0 +1,109 @@
+{
+	"card": "Visionary's Dance",
+	"generated": "2026-10-10",
+	"source": "4326aeeaca134e9e8d8ba374a14c32e5e8eff1971cbd51a227950fed29cc3bfc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Visionary's Dance",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Visionary's Dance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Visionary's Dance",
+				"basis": "Create two 3/3 blue and red Elemental creature tokens with flying.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Elemental Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elemental"
+							],
+							"colors": [
+								"U",
+								"R"
+							],
+							"power": 3,
+							"toughness": 3,
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Visionary's Dance",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard Visionary's Dance to select one of the top two library cards",
+				"basis": "{2}, Discard this card: Look at the top two cards of your library. Put one of them into your hand and the other into your graveyard.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 2,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"count": 1,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"to": "graveyard",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

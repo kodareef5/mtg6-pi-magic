@@ -1,0 +1,78 @@
+{
+	"card": "Zell Dincht",
+	"generated": "2026-10-10",
+	"source": "906bda063f66605e519b309ca838483e2e450f5a2bcd36f674f9c0920c8afc8f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zell Dincht",
+		"registers": [
+			{
+				"basis": "You may play an additional land on each of your turns.",
+				"kind": "permit",
+				"lands": 1
+			},
+			{
+				"basis": "Zell Dincht gets +1/+0 for each land you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"power": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						}
+					}
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, return a land you control to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,76 @@
+{
+	"card": "Spectral Denial",
+	"generated": "2026-10-10",
+	"source": "bce8d7f73654675d477baacd32c8580a65ed567c98db156568ed2b55c5a2cc95",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spectral Denial",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spectral Denial",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Spectral Denial with chosen X and its creature-based generic reduction",
+				"basis": "This spell costs {1} less to cast for each creature you control with power 4 or greater. ... Counter target spell unless its controller pays {X}.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"power": {
+								"atLeast": 4
+							}
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{X}"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

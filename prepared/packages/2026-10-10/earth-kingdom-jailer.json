@@ -1,0 +1,58 @@
+{
+	"card": "Earth Kingdom Jailer",
+	"generated": "2026-10-10",
+	"source": "ecafa33e4e027f48d9089e2c7275e3172112d32d1de78d0967d9668a4b17b1da",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Earth Kingdom Jailer",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, exile up to one target artifact, creature, or enchantment an opponent controls with mana value 3 or greater until this creature leaves the battlefield.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"artifact",
+									"creature",
+									"enchantment"
+								],
+								"controller": "opponent",
+								"manaValue": {
+									"atLeast": 3
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

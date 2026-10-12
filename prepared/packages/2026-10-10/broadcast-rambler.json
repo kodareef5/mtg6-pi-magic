@@ -1,0 +1,89 @@
+{
+	"card": "Broadcast Rambler",
+	"generated": "2026-10-10",
+	"source": "a71f6e7824fe90c63abaffe01020ae31aed729160ade68e5302350889f98f46d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Broadcast Rambler",
+		"registers": [
+			{
+				"basis": "When this Vehicle enters, create a 1/1 colorless Thopter artifact creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Thopter Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Thopter"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Broadcast Rambler",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Broadcast Rambler",
+				"basis": "Crew 1 (Tap any number of creatures you control with total power 1 or more: This Vehicle becomes an artifact creature until end of turn.)",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

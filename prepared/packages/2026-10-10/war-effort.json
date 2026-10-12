@@ -1,0 +1,83 @@
+{
+	"card": "War Effort",
+	"generated": "2026-10-10",
+	"source": "07abb28d1397a9b5d833a4378256029335dccea2017e36283e7a82e2860a2f61",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "War Effort",
+		"registers": [
+			{
+				"basis": "Creatures you control get +1/+0.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"power": 1
+				}
+			},
+			{
+				"basis": "Whenever you attack, create a 1/1 red Warrior creature token that's tapped and attacking. Sacrifice it at the beginning of the next end step.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"tapped": true,
+							"attacking": true,
+							"as": "warrior",
+							"spec": {
+								"name": "Warrior Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Warrior"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:warrior",
+										"to": "graveyard",
+										"reason": "sacrifice"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

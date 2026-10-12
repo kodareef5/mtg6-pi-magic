@@ -1,0 +1,64 @@
+{
+	"card": "Shattered Wings",
+	"generated": "2026-10-10",
+	"source": "39f4c01c45f097ecf7084ac10d98140b13d9df5aa86bc2a1772e54e29d3f18f6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shattered Wings",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Shattered Wings",
+				"basis": "Destroy target artifact, enchantment, or creature with flying. Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"source": {
+					"card": "Shattered Wings",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									],
+									"words": [
+										"flying"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

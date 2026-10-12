@@ -1,0 +1,49 @@
+{
+	"card": "Chameleon, Master of Disguise",
+	"generated": "2026-10-10",
+	"source": "b939f634eca205b5658ffc7aa284ea6471a9b60dae346290a3d0257f5e6d2c9d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chameleon, Master of Disguise",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "You may have Chameleon enter as a copy of a creature you control, except his name is Chameleon, Master of Disguise.",
+				"copy": {
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					},
+					"may": true,
+					"except": {
+						"name": "Chameleon, Master of Disguise"
+					}
+				}
+			},
+			{
+				"kind": "permit",
+				"basis": "Mayhem {2}{U} (You may cast this card from your graveyard for {2}{U} if you discarded it this turn. Timing rules still apply.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{2}{U}",
+					"if": {
+						"discardedThisTurn": "this",
+						"by": "you"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,116 @@
+{
+	"card": "Mudbutton Cursetosser",
+	"generated": "2026-10-10",
+	"source": "6775401c26bf3ca16301f43bea8e6dd681903e6f3fcfeb1fa7f87705fea9ec7a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mudbutton Cursetosser",
+		"registers": [
+			{
+				"basis": "This creature can't block.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"can't block"
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, destroy target creature an opponent controls with power 2 or less.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent",
+								"power": {
+									"atMost": 2
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mudbutton Cursetosser",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast by beholding a Goblin",
+				"basis": "As an additional cost to cast this spell, behold a Goblin or pay {2}. (To behold a Goblin, choose a Goblin you control or reveal a Goblin card from your hand.)",
+				"timing": "spell",
+				"cost": {
+					"show": {
+						"choose": {
+							"zones": [
+								"hand",
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Goblin"
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Mudbutton Cursetosser",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast by paying the additional {2}",
+				"basis": "As an additional cost to cast this spell, behold a Goblin or pay {2}. (To behold a Goblin, choose a Goblin you control or reveal a Goblin card from your hand.)",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "behold-payment",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

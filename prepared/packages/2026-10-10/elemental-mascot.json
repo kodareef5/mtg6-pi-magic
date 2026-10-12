@@ -1,0 +1,92 @@
+{
+	"card": "Elemental Mascot",
+	"generated": "2026-10-10",
+	"source": "389f83c52f5f952462b33363ca030321483caf039ea89b1bbde5412d95c52860",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elemental Mascot",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Opus — Whenever you cast an instant or sorcery spell, this creature gets +1/+0 until end of turn. If five or more mana was spent to cast that spell, exile the top card of your library. You may play that card until the end of your next turn.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"amount": {
+									"manaSpent": "event:object"
+								},
+								"atLeast": 5
+							},
+							"instructions": [
+								{
+									"do": "move",
+									"what": {
+										"top": 1,
+										"of": "you"
+									},
+									"to": "exile",
+									"reason": "exile",
+									"as": "exiled"
+								},
+								{
+									"do": "permit",
+									"what": "bound:exiled",
+									"who": "you",
+									"until": {
+										"endOfNextTurn": "you"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

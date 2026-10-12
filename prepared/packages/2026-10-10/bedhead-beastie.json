@@ -1,0 +1,77 @@
+{
+	"card": "Bedhead Beastie",
+	"generated": "2026-10-10",
+	"source": "7706d904783196947f143c9fe3a13493b04653c8bb743c485b7ddb1c22939397",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bedhead Beastie",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bedhead Beastie",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Mountaincycle Bedhead Beastie",
+				"basis": "Mountaincycling {2} ({2}, Discard this card: Search your library for a Mountain card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Mountain"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "mountain"
+					},
+					{
+						"do": "move",
+						"what": "bound:mountain",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

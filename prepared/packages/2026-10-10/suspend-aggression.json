@@ -1,0 +1,91 @@
+{
+	"card": "Suspend Aggression",
+	"generated": "2026-10-10",
+	"source": "302201f4cb872569050c05c59c58b1c36cf05033defe4a8332b647f917b500f4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Suspend Aggression",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Suspend Aggression",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Exile the target and your top card simultaneously, then permit each card's owner to play it through the end of their next turn",
+				"basis": "Exile target nonland permanent and the top card of your library. For each of those cards, its owner may play it until the end of their next turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"any": [
+								{
+									"zones": [
+										"battlefield"
+									],
+									"is": "target:0"
+								},
+								{
+									"zones": [
+										"library"
+									],
+									"is": {
+										"top": 1,
+										"of": "you"
+									}
+								}
+							]
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "each",
+						"objects": {
+							"zones": [
+								"exile"
+							],
+							"is": "bound:exiled",
+							"token": false
+						},
+						"instructions": [
+							{
+								"do": "permit",
+								"what": "bound:object",
+								"who": "owner:bound:object",
+								"until": {
+									"endOfNextTurn": "owner:bound:object"
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

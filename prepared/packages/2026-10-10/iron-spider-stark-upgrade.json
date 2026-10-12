@@ -1,0 +1,148 @@
+{
+	"card": "Iron Spider, Stark Upgrade",
+	"generated": "2026-10-10",
+	"source": "63cf2e41559e24976ce5c8e030aa76df3dfa5b7e1f4f0d8f7129ff29746ddbcf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Iron Spider, Stark Upgrade",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Iron Spider, Stark Upgrade",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a counter on each controlled artifact creature or Vehicle",
+				"basis": "{T}: Put a +1/+1 counter on each artifact creature and/or Vehicle you control.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"every": {
+							"controller": "you",
+							"any": [
+								{
+									"all": [
+										{
+											"types": [
+												"artifact"
+											]
+										},
+										{
+											"types": [
+												"creature"
+											]
+										}
+									]
+								},
+								{
+									"subtypes": [
+										"Vehicle"
+									]
+								}
+							]
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Iron Spider, Stark Upgrade",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw by removing two counters from one artifact",
+				"basis": "{2}, Remove two +1/+1 counters from among artifacts you control: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"counters": {
+						"kind": "+1/+1",
+						"count": 2,
+						"on": {
+							"choose": {
+								"types": [
+									"artifact"
+								],
+								"controller": "you"
+							},
+							"count": 1
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Iron Spider, Stark Upgrade",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw by removing one counter from each of two artifacts",
+				"basis": "{2}, Remove two +1/+1 counters from among artifacts you control: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"counters": {
+						"kind": "+1/+1",
+						"count": 1,
+						"on": {
+							"choose": {
+								"types": [
+									"artifact"
+								],
+								"controller": "you"
+							},
+							"count": 2
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

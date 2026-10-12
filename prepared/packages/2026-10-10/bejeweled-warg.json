@@ -1,0 +1,95 @@
+{
+	"card": "Bejeweled Warg",
+	"generated": "2026-10-10",
+	"source": "ae568495a1d2def558c389aa0de36e5cea60a983fa4db239864b36a0f06db2df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bejeweled Warg",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature deals combat damage to a player, choose one —\n• Put a +1/+1 counter on target Wolf you control.\n• Create a Treasure token. (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"subtypes": [
+											"Wolf"
+										],
+										"controller": "you"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "target:0",
+									"kind": "+1/+1",
+									"amount": 1
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Treasure Token",
+										"types": [
+											"artifact"
+										],
+										"subtypes": [
+											"Treasure"
+										],
+										"colors": [],
+										"registers": [
+											{
+												"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+												"kind": "mana",
+												"cost": {
+													"tap": true,
+													"sacrifice": "this"
+												},
+												"any": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -22,7 +22,7 @@
 							"do": "token",
 							"count": 2,
 							"spec": {
-								"name": "Zombie",
+								"name": "Zombie Token",
 								"types": [
 									"creature"
 								],

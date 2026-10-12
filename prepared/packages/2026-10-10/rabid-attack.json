@@ -1,0 +1,70 @@
+{
+	"card": "Rabid Attack",
+	"generated": "2026-10-10",
+	"source": "63636a4277f9ee2acbf6d8f20f74bb3c2faa5d9c8bf700ff30d12f88b0a9aaf6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rabid Attack",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rabid Attack",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rabid Attack",
+				"basis": "Until end of turn, any number of target creatures you control each get +1/+0 and gain \"When this creature dies, draw a card.\"",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"registers": [
+								{
+									"basis": "Until end of turn, any number of target creatures you control each get +1/+0 and gain \"When this creature dies, draw a card.\"",
+									"kind": "watch",
+									"event": {
+										"on": "dies",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

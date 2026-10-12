@@ -1,0 +1,69 @@
+{
+	"card": "Didact Echo",
+	"generated": "2026-10-10",
+	"source": "d476acd5be3afb8d1ae6083b173b33f1dfb828d09d969c728309402b90ab2ed7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Didact Echo",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, draw a card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Descend 4 — This creature has flying as long as there are four or more permanent cards in your graveyard.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						}
+					},
+					"atLeast": 4
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

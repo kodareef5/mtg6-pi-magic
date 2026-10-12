@@ -1,0 +1,151 @@
+{
+	"card": "Restless Cottage",
+	"generated": "2026-10-10",
+	"source": "5a68adbd39b2a5a4e8fd1d151400ba2cafe5a9e0388bac94de7dbd92fc6c128d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Restless Cottage",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {B} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "{T}: Add {B} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "Whenever this land attacks, create a Food token and exile up to one target card from a graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"token": false
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"kind": "activated",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						},
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Restless Cottage",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Animate Restless Cottage",
+				"basis": "{2}{B}{G}: This land becomes a 4/4 black and green Horror creature until end of turn. It's still a land.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{B}{G}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"set": [
+									"Horror"
+								],
+								"of": "creature"
+							},
+							"colors": {
+								"set": [
+									"B",
+									"G"
+								]
+							},
+							"base": {
+								"power": 4,
+								"toughness": 4
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

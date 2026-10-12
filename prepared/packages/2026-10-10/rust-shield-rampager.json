@@ -1,0 +1,83 @@
+{
+	"card": "Rust-Shield Rampager",
+	"generated": "2026-10-10",
+	"source": "3dcf4fea728250caf69eb88071f653975c0c399f44eb3d3e90e18b5db214b94c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rust-Shield Rampager",
+		"registers": [
+			{
+				"basis": "Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"paid": "offspring"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"copy": "this",
+							"except": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "This creature can't be blocked by creatures with power 2 or less.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"is": "this"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						],
+						"power": {
+							"atMost": 2
+						}
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rust-Shield Rampager",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rust-Shield Rampager with offspring",
+				"basis": "Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "offspring",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

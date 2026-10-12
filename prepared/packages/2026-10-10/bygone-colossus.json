@@ -1,0 +1,59 @@
+{
+	"card": "Bygone Colossus",
+	"generated": "2026-10-10",
+	"source": "b0dd55b8d8ad50c154029f6047144de96a9667c0ca3891ca9920d3b52fc65f93",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bygone Colossus",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"hand"
+					],
+					"controller": "self",
+					"card": "Bygone Colossus"
+				},
+				"claim": "Cast Bygone Colossus for its warp cost",
+				"basis": "Warp {3} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+				"timing": "spell",
+				"cost": {
+					"alternative": "warp",
+					"mana": "{3}"
+				},
+				"instructions": [
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "this",
+									"to": "exile",
+									"reason": "exile",
+									"as": "warped"
+								},
+								{
+									"do": "permit",
+									"what": "bound:warped",
+									"who": "owner",
+									"from": "next-turn",
+									"until": "indefinite"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

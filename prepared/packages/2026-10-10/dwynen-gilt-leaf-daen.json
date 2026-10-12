@@ -1,0 +1,79 @@
+{
+	"card": "Dwynen, Gilt-Leaf Daen",
+	"generated": "2026-10-10",
+	"source": "531e99e85dc1943074c4e953c4fb15e8ab347cda2078b839c636609c20a5e58c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dwynen, Gilt-Leaf Daen",
+		"registers": [
+			{
+				"basis": "Reach (This creature can block creatures with flying.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "Other Elf creatures you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"subtypes": [
+						"Elf"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"basis": "Whenever Dwynen attacks, you gain 1 life for each attacking Elf you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"count": {
+									"types": [
+										"creature"
+									],
+									"subtypes": [
+										"Elf"
+									],
+									"controller": "you",
+									"attacking": true
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

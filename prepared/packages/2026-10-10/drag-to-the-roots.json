@@ -1,0 +1,118 @@
+{
+	"card": "Drag to the Roots",
+	"generated": "2026-10-10",
+	"source": "1c712aa8fce7e4c635a66dc44ad96f82ae8acc3939c0e08cbd1d5d0a274367ee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Drag to the Roots",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Drag to the Roots",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Drag to the Roots with delirium",
+				"basis": "Delirium — This spell costs {2} less to cast as long as there are four or more card types among cards in your graveyard. ... Destroy target nonland permanent.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"is": "this"
+							}
+						}
+					},
+					"atLeast": 4
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Drag to the Roots",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Drag to the Roots without delirium",
+				"basis": "Delirium — This spell costs {2} less to cast as long as there are four or more card types among cards in your graveyard. ... Destroy target nonland permanent.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"is": "this"
+							}
+						}
+					},
+					"atMost": 3
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

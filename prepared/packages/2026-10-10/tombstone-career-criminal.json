@@ -1,0 +1,62 @@
+{
+	"card": "Tombstone, Career Criminal",
+	"generated": "2026-10-10",
+	"source": "6ab37e99db29b2d806e7442b0ee50e51809f9a2d85017ddfbdee239d77e30bc3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tombstone, Career Criminal",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Tombstone enters, return target Villain card from your graveyard to your hand.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"subtypes": [
+									"Villain"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Villain spells you cast cost {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"subtypes": [
+						"Villain"
+					]
+				},
+				"reduce": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

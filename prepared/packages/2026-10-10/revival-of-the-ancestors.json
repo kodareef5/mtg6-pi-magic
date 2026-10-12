@@ -1,0 +1,104 @@
+{
+	"card": "Revival of the Ancestors",
+	"generated": "2026-10-10",
+	"source": "1bd4df1146f1e7dd4128d33cc883792e9ba3ecff51843bd272e51bc9360a7210",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Revival of the Ancestors",
+		"registers": [
+			{
+				"basis": "I — Create three 1/1 white Spirit creature tokens.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 3,
+							"spec": {
+								"name": "Spirit Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spirit"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "II — Distribute three +1/+1 counters among one, two, or three target creatures you control.",
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"count": 3,
+							"atLeast": 1,
+							"divide": 3
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": {
+								"divided": 0
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "III — Creatures you control gain trample and lifelink until end of turn.",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"trample",
+									"lifelink"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

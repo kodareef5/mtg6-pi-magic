@@ -1,0 +1,95 @@
+{
+	"card": "Captain Mar-Vell, Space-Born",
+	"generated": "2026-10-10",
+	"source": "ca5c70ced8cd7153ffa99e18e77cc262b573907638204c6d16406cef90a6a947",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Captain Mar-Vell, Space-Born",
+		"registers": [
+			{
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Cosmic Awareness — As long as an opponent has cast a spell this turn, you may cast spells as though they had flash.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "opponent",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Cosmic Awareness — As long as an opponent has cast a spell this turn, you may cast spells as though they had flash.",
+							"kind": "permit",
+							"flash": {
+								"zones": [
+									"hand",
+									"graveyard",
+									"exile",
+									"library",
+									"command",
+									"outside",
+									"stack"
+								],
+								"controller": "you",
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"instant",
+									"kindred",
+									"planeswalker",
+									"sorcery"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

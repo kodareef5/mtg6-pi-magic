@@ -1,0 +1,106 @@
+{
+	"card": "Summon: Bahamut",
+	"generated": "2026-10-10",
+	"source": "45b3952aac384a9a9bf0aea0577d38b7df3b208634fd440455695e3c2cc8473a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: Bahamut",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2
+				],
+				"basis": "I, II — Destroy up to one target nonland permanent.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"basis": "III — Draw two cards.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					4
+				],
+				"basis": "IV — Mega Flare — This creature deals damage equal to the total mana value of other permanents you control to each opponent.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"from": "this",
+							"to": "opponent",
+							"amount": {
+								"aggregate": "sum",
+								"of": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"other": true
+								},
+								"value": "manaValue"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,128 @@
+{
+	"card": "Stone-Giant of High Pass",
+	"generated": "2026-10-10",
+	"source": "dec78e058ad5cb55d6778569f259f35036e15852906ad030a38c8dcd09dced12",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stone-Giant of High Pass",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature enters or attacks, create a 3/1 colorless Wall artifact creature token with defender named Stone Boulder.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Stone Boulder",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Wall"
+								],
+								"colors": [],
+								"power": 3,
+								"toughness": 1,
+								"words": [
+									"defender"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature enters or attacks, create a 3/1 colorless Wall artifact creature token with defender named Stone Boulder.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Stone Boulder",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Wall"
+								],
+								"colors": [],
+								"power": 3,
+								"toughness": 1,
+								"words": [
+									"defender"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stone-Giant of High Pass",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice an artifact to deal 4 damage to any target",
+				"basis": "{2}{R}, Sacrifice an artifact: This creature deals 4 damage to any target.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{R}",
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

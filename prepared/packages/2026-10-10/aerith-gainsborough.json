@@ -1,0 +1,84 @@
+{
+	"card": "Aerith Gainsborough",
+	"generated": "2026-10-10",
+	"source": "3d6348492fa79cafd9535bc4fcd1b85b7e50a9b6063ce26d8215bba760ae8bb5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aerith Gainsborough",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Lifelink",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put a +1/+1 counter on Aerith Gainsborough.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Aerith Gainsborough dies, put X +1/+1 counters on each legendary creature you control, where X is the number of +1/+1 counters on Aerith Gainsborough.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"supertypes": [
+									"legendary"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": {
+								"counters": "+1/+1",
+								"on": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

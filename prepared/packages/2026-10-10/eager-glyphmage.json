@@ -22,7 +22,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Inkling",
+								"name": "Inkling Token",
 								"types": [
 									"creature"
 								],

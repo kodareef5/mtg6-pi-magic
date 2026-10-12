@@ -1,0 +1,98 @@
+{
+	"card": "Ultros, Obnoxious Octopus",
+	"generated": "2026-10-10",
+	"source": "ffc55ddaa7dd3d0355c6b4e87d5e8fe8c81dc6e3f6c2fd13a03077b31f675b63",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ultros, Obnoxious Octopus",
+		"registers": [
+			{
+				"basis": "Whenever you cast a noncreature spell, if at least four mana was spent to cast it, tap target creature an opponent controls and put a stun counter on it. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "event:object"
+					},
+					"atLeast": 4
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "tap",
+							"what": "target:0"
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "stun",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a noncreature spell, if at least eight mana was spent to cast it, put eight +1/+1 counters on Ultros.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "event:object"
+					},
+					"atLeast": 8
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 8
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

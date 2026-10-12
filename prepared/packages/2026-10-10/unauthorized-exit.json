@@ -1,0 +1,56 @@
+{
+	"card": "Unauthorized Exit",
+	"generated": "2026-10-10",
+	"source": "734b6b26ce32f571b48f80dbd29c33239fd033faf0b4276e1007f623c1d2c2f1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unauthorized Exit",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unauthorized Exit",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return target nonland permanent to its owner's hand, then surveil 1.",
+				"basis": "Return target nonland permanent to its owner's hand. Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

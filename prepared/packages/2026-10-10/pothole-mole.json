@@ -1,0 +1,56 @@
+{
+	"card": "Pothole Mole",
+	"generated": "2026-10-10",
+	"source": "1f9824913adb2da2347f48f5c8ca1dc166c2b0b131db3abad2d20c8f64d7db29",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pothole Mole",
+		"registers": [
+			{
+				"basis": "When this creature enters, mill three cards, then you may return a land card from your graveyard to your hand. (To mill three cards, put the top three cards of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

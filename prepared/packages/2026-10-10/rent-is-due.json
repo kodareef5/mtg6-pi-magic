@@ -1,0 +1,77 @@
+{
+	"card": "Rent Is Due",
+	"generated": "2026-10-10",
+	"source": "72d1c1a571fbd784591d81a7a2faef706541f988123c8d3224024bfbf9695bfa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rent Is Due",
+		"registers": [
+			{
+				"basis": "At the beginning of your end step, you may tap two untapped creatures and/or Treasures you control. If you do, draw a card. Otherwise, sacrifice this enchantment.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"tap": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"tapped": false,
+										"any": [
+											{
+												"types": [
+													"creature"
+												]
+											},
+											{
+												"subtypes": [
+													"Treasure"
+												]
+											}
+										]
+									},
+									"count": 2
+								}
+							},
+							"may": true,
+							"as": "paid-rent"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "paid-rent"
+							}
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice",
+							"if": {
+								"not": {
+									"bound": "paid-rent"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

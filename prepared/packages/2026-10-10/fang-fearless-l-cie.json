@@ -1,0 +1,48 @@
+{
+	"card": "Fang, Fearless l'Cie",
+	"generated": "2026-10-10",
+	"source": "81dbe2e434750c07f16d47aa2913037bd3e74f6d775cf5f63eb0b0ca5cca5c95",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fang, Fearless l'Cie",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more cards leave your graveyard, you draw a card and you lose 1 life. This ability triggers only once each turn.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"token": false
+					},
+					"batch": true
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,59 @@
+{
+	"card": "Nightwhorl Hermit",
+	"generated": "2026-10-10",
+	"source": "c26a70c6b683a29b3666c3623d01c8daa7c7bf177818a0ed34d5c31ba3a6a06c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nightwhorl Hermit",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Threshold — As long as there are seven or more cards in your graveyard, this creature gets +1/+0 and can't be blocked.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 7
+				},
+				"change": {
+					"power": 1,
+					"words": [
+						"can't be blocked"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

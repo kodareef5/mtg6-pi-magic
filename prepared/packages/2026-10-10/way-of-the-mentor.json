@@ -1,0 +1,141 @@
+{
+	"card": "Way of the Mentor",
+	"generated": "2026-10-10",
+	"source": "c109b96ee60fd53aea8137b2d2c2fcae12cd7614e1c8f8c7e9638798389de063",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Way of the Mentor",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Way of the Mentor enters, empower Jace 5. (Put five loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"types": [
+											"planeswalker"
+										],
+										"subtypes": [
+											"Jace"
+										],
+										"token": true
+									}
+								},
+								"atMost": 0
+							},
+							"spec": {
+								"name": "Jace Token",
+								"types": [
+									"planeswalker"
+								],
+								"subtypes": [
+									"Jace"
+								],
+								"colors": [
+									"U"
+								],
+								"loyalty": 0,
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "[−1]: Surveil 1",
+										"cost": {
+											"loyalty": -1
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "keyword",
+													"name": "surveil",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									},
+									{
+										"kind": "activated",
+										"basis": "[−3]: Draw a card.",
+										"cost": {
+											"loyalty": -3
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"controller": "you",
+								"types": [
+									"planeswalker"
+								],
+								"subtypes": [
+									"Jace"
+								],
+								"token": true
+							},
+							"count": 1,
+							"as": "jace"
+						},
+						{
+							"do": "counters",
+							"on": "bound:jace",
+							"kind": "loyalty",
+							"amount": 5
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put a loyalty counter on each planeswalker you control.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"planeswalker"
+								],
+								"controller": "you"
+							},
+							"kind": "loyalty",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

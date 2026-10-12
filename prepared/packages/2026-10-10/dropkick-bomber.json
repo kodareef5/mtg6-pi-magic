@@ -1,0 +1,92 @@
+{
+	"card": "Dropkick Bomber",
+	"generated": "2026-10-10",
+	"source": "52f60119821120778753cf0cf0d0307fda6a54e8465e7d039e5ba01fb2f3590a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dropkick Bomber",
+		"registers": [
+			{
+				"basis": "Other Goblins you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Goblin"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dropkick Bomber",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant another controlled Goblin flying and a combat-damage sacrifice ability until end of turn",
+				"basis": "{R}: Until end of turn, another target Goblin you control gains flying and \"When this creature deals combat damage, sacrifice it.\"",
+				"timing": "stack",
+				"cost": {
+					"mana": "{R}"
+				},
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Goblin"
+							],
+							"controller": "you",
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"flying"
+							],
+							"registers": [
+								{
+									"basis": "When this creature deals combat damage, sacrifice it.",
+									"kind": "watch",
+									"event": {
+										"on": "combat-damage",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": "this",
+												"to": "graveyard",
+												"reason": "sacrifice"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

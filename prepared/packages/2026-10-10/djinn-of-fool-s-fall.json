@@ -1,0 +1,49 @@
+{
+	"card": "Djinn of Fool's Fall",
+	"generated": "2026-10-10",
+	"source": "fb1fd67c75fa22f9571a442c1c32cbad29d50810d4350a2eae7ef47b63ca8e84",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Djinn of Fool's Fall",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Djinn of Fool's Fall",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Djinn of Fool's Fall",
+				"basis": "Plot {3}{U} (You may pay {3}{U} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{3}{U}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

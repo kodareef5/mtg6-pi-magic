@@ -1,0 +1,108 @@
+{
+	"card": "Mammoth Bellow",
+	"generated": "2026-10-10",
+	"source": "e9528055920096aa5cb48fea589d353ce0d46e6d9af68c0802332af3241c0e01",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mammoth Bellow",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Harmonize {5}{G}{U}{R} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{5}{G}{U}{R}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Create an Elephant token",
+				"basis": "Create a 5/5 green Elephant creature token.",
+				"source": {
+					"card": "Mammoth Bellow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Elephant Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elephant"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 5,
+							"toughness": 5
+						}
+					}
+				]
+			},
+			{
+				"claim": "Harmonize Mammoth Bellow with an optional creature tap",
+				"basis": "Create a 5/5 green Elephant creature token. ... Harmonize {5}{G}{U}{R} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"source": {
+					"card": "Mammoth Bellow",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"cost": {
+					"mana": "{5}{G}{U}{R}",
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"upTo": true,
+						"reduce": "power"
+					}
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Elephant Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elephant"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 5,
+							"toughness": 5
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,90 @@
+{
+	"card": "The Lion-Turtle",
+	"generated": "2026-10-10",
+	"source": "9054621e521469646e884c34c4c02d55f8889014b9cfe1c9bfd7e8f0d308d7e2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Lion-Turtle",
+		"registers": [
+			{
+				"basis": "Reach, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "When The Lion-Turtle enters, you gain 3 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3
+						}
+					]
+				}
+			},
+			{
+				"basis": "The Lion-Turtle can't attack or block unless there are three or more Lesson cards in your graveyard.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Lesson"
+							],
+							"token": false
+						}
+					},
+					"atMost": 2
+				},
+				"change": {
+					"words": [
+						"can't attack",
+						"can't block"
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

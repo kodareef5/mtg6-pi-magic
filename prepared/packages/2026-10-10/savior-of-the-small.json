@@ -1,0 +1,57 @@
+{
+	"card": "Savior of the Small",
+	"generated": "2026-10-10",
+	"source": "0c1bf7e65a8999ca4d97a7f396f542157fd8abd3c80424d6c8b530d551318ba5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Savior of the Small",
+		"registers": [
+			{
+				"basis": "Survival — At the beginning of your second main phase, if this creature is tapped, return target creature card with mana value 3 or less from your graveyard to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "postcombat-main",
+					"whose": "you"
+				},
+				"if": {
+					"is": "this",
+					"matches": {
+						"tapped": true
+					},
+					"lastKnown": true
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"manaValue": {
+									"atMost": 3
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,103 @@
+{
+	"card": "Virtue of Loyalty // Ardenvale Fealty",
+	"generated": "2026-10-10",
+	"source": "98bdd1d08ecf60a9e7f6a062dd7708d528a64f1a135bea40ffd8063e72d38661",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Virtue of Loyalty // Ardenvale Fealty",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "At the beginning of your end step, put a +1/+1 counter on each creature you control. Untap those creatures.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"count": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							"as": "creatures"
+						},
+						{
+							"do": "counters",
+							"on": "bound:creatures",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "untap",
+							"what": "bound:creatures"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Virtue of Loyalty // Ardenvale Fealty",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ardenvale Fealty",
+				"basis": "Create a 2/2 white Knight creature token with vigilance. (Then exile this card. You may cast the enchantment later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Knight Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Knight"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"vigilance"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

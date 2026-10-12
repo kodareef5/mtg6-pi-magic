@@ -1,0 +1,142 @@
+{
+	"card": "Kitesail Larcenist",
+	"generated": "2026-10-10",
+	"source": "a069e3bccf43f1d50fe4474438f40b601db6cb378a70e5f20c7637d4f6e10325",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kitesail Larcenist",
+		"registers": [
+			{
+				"basis": "Flying, ward {1}",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Flying, ward {1}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{1}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, for each player, choose up to one other target artifact or creature that player controls. For as long as this creature remains on the battlefield, the chosen permanents become Treasure artifacts with \"{T}, Sacrifice this artifact: Add one mana of any color\" and lose all other abilities.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"upTo": true
+						},
+						{
+							"object": {
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"controller": "opponent",
+								"other": true
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"any": [
+									{
+										"is": "target:0"
+									},
+									{
+										"is": "target:1"
+									}
+								]
+							},
+							"until": "while-source",
+							"if": {
+								"is": "this",
+								"matches": {
+									"zones": [
+										"battlefield"
+									]
+								}
+							},
+							"change": {
+								"types": {
+									"set": [
+										"artifact"
+									]
+								},
+								"subtypes": {
+									"set": [
+										"Treasure"
+									],
+									"of": "artifact"
+								},
+								"loseAbilities": true,
+								"registers": [
+									{
+										"basis": "When this creature enters, for each player, choose up to one other target artifact or creature that player controls. For as long as this creature remains on the battlefield, the chosen permanents become Treasure artifacts with \"{T}, Sacrifice this artifact: Add one mana of any color\" and lose all other abilities.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,67 @@
+{
+	"card": "Campus Guide",
+	"generated": "2026-10-10",
+	"source": "09bb7741661bb9d8f193f21a0344a139371b32107b72220f064348830d74baac",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Campus Guide",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may search your library for a basic land card, reveal it, then shuffle and put that card on top.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"supertypes": [
+											"basic"
+										],
+										"types": [
+											"land"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "land"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								},
+								{
+									"do": "move",
+									"what": "bound:land",
+									"to": "library",
+									"position": "top",
+									"reason": "resolve"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,113 @@
+{
+	"card": "Sunstar Chaplain",
+	"generated": "2026-10-10",
+	"source": "9f25f101b04392ba070e684140b3ca5d4f1baa5c00f5a5b3d92ff6dffc794a49",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sunstar Chaplain",
+		"registers": [
+			{
+				"basis": "At the beginning of your end step, if you control two or more tapped creatures, put a +1/+1 counter on target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": true
+						}
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sunstar Chaplain",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Remove a +1/+1 counter to tap target artifact or creature",
+				"basis": "{2}, Remove a +1/+1 counter from a creature you control: Tap target artifact or creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"counters": {
+						"kind": "+1/+1",
+						"count": 1,
+						"on": {
+							"choose": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"count": 1
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -22,7 +22,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Clue",
+								"name": "Clue Token",
 								"types": [
 									"artifact"
 								],
@@ -57,6 +57,7 @@
 		],
 		"procedures": [],
 		"assessed": true,
-		"printedCast": true
+		"printedCast": true,
+		"deferred": []
 	}
 }

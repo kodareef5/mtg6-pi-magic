@@ -1,0 +1,130 @@
+{
+	"card": "Kraven's Last Hunt",
+	"generated": "2026-10-10",
+	"source": "b6812a5e3cd9236c9054a54d1941feef29b53153f01b08ffe3e006357ab053fd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kraven's Last Hunt",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Mill five cards. When you do, this Saga deals damage equal to the greatest power among creature cards in your graveyard to target creature.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 5,
+							"as": "milled"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "milled"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "damage",
+										"from": "this",
+										"to": "target:0",
+										"amount": {
+											"aggregate": "max",
+											"of": {
+												"zones": [
+													"graveyard"
+												],
+												"owner": "you",
+												"types": [
+													"creature"
+												]
+											},
+											"value": "power"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"basis": "II — Target creature you control gets +2/+2 until end of turn.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"basis": "III — Return target creature card from your graveyard to your hand.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

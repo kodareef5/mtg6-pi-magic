@@ -33,16 +33,6 @@
 					"of": {
 						"zones": [
 							"stack"
-						],
-						"types": [
-							"artifact",
-							"battle",
-							"creature",
-							"enchantment",
-							"instant",
-							"kindred",
-							"planeswalker",
-							"sorcery"
 						]
 					}
 				},
@@ -52,7 +42,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Bird",
+								"name": "Bird Token",
 								"types": [
 									"creature"
 								],
@@ -75,7 +65,6 @@
 		],
 		"procedures": [],
 		"assessed": true,
-		"printedCast": true,
-		"deferred": []
+		"printedCast": true
 	}
 }

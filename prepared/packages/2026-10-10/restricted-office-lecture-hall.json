@@ -1,0 +1,65 @@
+{
+	"card": "Restricted Office // Lecture Hall",
+	"generated": "2026-10-10",
+	"source": "5b28797d21b37a9bd36c09521db54e125c91a5e6d3c2355f9b0bb973be294e3b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Restricted Office // Lecture Hall",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When you unlock this door, destroy all creatures with power 3 or greater.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "destroy",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"power": {
+									"atLeast": 3
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Other permanents you control have hexproof.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"words": [
+						"hexproof"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		]
+	}
+}

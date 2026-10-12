@@ -1,0 +1,70 @@
+{
+	"card": "Generous Revival",
+	"generated": "2026-10-10",
+	"source": "c4dec8c7a55e45f2cdf84afe653ac7a1e75a99fffc1ea60ee38f9f3abaea1e80",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Generous Revival",
+		"registers": [
+			{
+				"basis": "Flashback {4}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"kind": "permit",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{4}{W}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Generous Revival",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Generous Revival at its printed cost or using its flashback permission",
+				"basis": "Return target creature card with mana value 3 or less from your graveyard to the battlefield with an additional +1/+1 counter on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"+1/+1": 1
+						},
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

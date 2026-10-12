@@ -1,0 +1,98 @@
+{
+	"card": "Fake Your Own Death",
+	"generated": "2026-10-10",
+	"source": "fad90642597e15848e7c8bdcb29e4dad00c3f37f12f88b4c237af800c3ef09ee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fake Your Own Death",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fake Your Own Death",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fake Your Own Death",
+				"basis": "Until end of turn, target creature gets +2/+0 and gains \"When this creature dies, return it to the battlefield tapped under its owner's control and you create a Treasure token.\" (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"registers": [
+								{
+									"kind": "watch",
+									"basis": "Until end of turn, target creature gets +2/+0 and gains \"When this creature dies, return it to the battlefield tapped under its owner's control and you create a Treasure token.\" (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+									"event": {
+										"on": "dies",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": "event:object",
+												"to": "battlefield",
+												"tapped": true,
+												"controller": "owner:event:object",
+												"reason": "resolve"
+											},
+											{
+												"do": "token",
+												"count": 1,
+												"spec": {
+													"name": "Treasure Token",
+													"types": [
+														"artifact"
+													],
+													"subtypes": [
+														"Treasure"
+													],
+													"colors": [],
+													"registers": [
+														{
+															"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+															"kind": "mana",
+															"cost": {
+																"tap": true,
+																"sacrifice": "this"
+															},
+															"any": 1
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

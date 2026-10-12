@@ -1,0 +1,129 @@
+{
+	"card": "Vigorbloom Charm",
+	"generated": "2026-10-10",
+	"source": "6b593ec4c11a8bb25927dda8fb7f5a624abab888b483b6275dec5723a761bc09",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vigorbloom Charm",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vigorbloom Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Protect a permanent",
+				"basis": "Choose one — ... Target permanent you control gains hexproof and indestructible until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"hexproof",
+								"indestructible"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Vigorbloom Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw a card and gain 3 life",
+				"basis": "Choose one — ... You draw a card and gain 3 life.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Vigorbloom Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put a counter on a creature, then have it fight",
+				"basis": "Choose one — ... Put a +1/+1 counter on target creature you control. Then it fights target creature an opponent controls. (Each deals damage equal to its power to the other.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

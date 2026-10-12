@@ -1,0 +1,126 @@
+{
+	"card": "Salvation Swan",
+	"generated": "2026-10-10",
+	"source": "cdb8accd5e5f9238c6c2755401b54a50f3785febe85ddbd6ce572929d3d55c29",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Salvation Swan",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature or another Bird you control enters, exile up to one target creature you control without flying. Return it to the battlefield under its owner's control with a flying counter on it at the beginning of the next end step.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"subtypes": [
+									"Bird"
+								],
+								"controller": "you",
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"not": {
+									"words": [
+										"flying"
+									]
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "delay",
+							"if": {
+								"bound": "exiled"
+							},
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:exiled",
+										"to": "battlefield",
+										"controller": "owner:bound:exiled",
+										"counters": {
+											"flying": 1
+										},
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,64 @@
+{
+	"card": "Sinister Monolith",
+	"generated": "2026-10-10",
+	"source": "957a19da524cf32335b1bbf78208c437b74cce866a03c5a9bd600045c2f34cc4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sinister Monolith",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, each opponent loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sinister Monolith",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Sinister Monolith to draw two cards.",
+				"basis": "{T}, Pay 2 life, Sacrifice this artifact: Draw two cards. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": true,
+					"life": 2,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

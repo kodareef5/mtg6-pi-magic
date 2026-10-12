@@ -1,0 +1,101 @@
+{
+	"card": "Hamlet Glutton",
+	"generated": "2026-10-10",
+	"source": "858198f0a3fe9db46aab522188d24d7acc46686f03d31bd7b6184df28f267428",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hamlet Glutton",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, you gain 3 life.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hamlet Glutton",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Hamlet Glutton without bargain",
+				"basis": "Bargain (You may sacrifice an artifact, enchantment, or token as you cast this spell.) ... This spell costs {2} less to cast if it's bargained.",
+				"timing": "spell",
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Hamlet Glutton",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Hamlet Glutton with bargain",
+				"basis": "Bargain (You may sacrifice an artifact, enchantment, or token as you cast this spell.) ... This spell costs {2} less to cast if it's bargained.",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"controller": "you",
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"token": true
+								}
+							]
+						},
+						"count": 1
+					},
+					"reduce": 2
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

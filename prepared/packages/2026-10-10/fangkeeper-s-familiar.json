@@ -1,0 +1,103 @@
+{
+	"card": "Fangkeeper's Familiar",
+	"generated": "2026-10-10",
+	"source": "855f3e699409d9a7513324eefbc8b38d2e206f2e56c7c7079f6de6e10ecd071b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fangkeeper's Familiar",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield",
+						"library",
+						"command"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, choose one —\n• You gain 3 life and surveil 3. (Look at the top three cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)\n• Destroy target enchantment.\n• Counter target creature spell.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "life",
+									"who": "you",
+									"amount": 3
+								},
+								{
+									"do": "keyword",
+									"name": "surveil",
+									"who": "you",
+									"count": 3
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"enchantment"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "destroy",
+									"what": "target:0"
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"zones": [
+											"stack"
+										],
+										"types": [
+											"creature"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "counter",
+									"what": "target:0"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

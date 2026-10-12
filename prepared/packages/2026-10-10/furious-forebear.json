@@ -1,0 +1,56 @@
+{
+	"card": "Furious Forebear",
+	"generated": "2026-10-10",
+	"source": "11cb05326a5522710dbb0c47c3d8c85bd67b67b3c856904dc65f8c1a005261c1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Furious Forebear",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever a creature you control dies while this card is in your graveyard, you may pay {1}{W}. If you do, return this card from your graveyard to your hand.",
+				"zones": [
+					"graveyard"
+				],
+				"event": {
+					"on": "dies",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{1}{W}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "bounce",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

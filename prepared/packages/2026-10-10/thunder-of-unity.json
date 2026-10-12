@@ -1,0 +1,76 @@
+{
+	"card": "Thunder of Unity",
+	"generated": "2026-10-10",
+	"source": "7408b59c210e1c76352806a3c99f8d23a45154189c4e8ff1fc05c34eba214deb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thunder of Unity",
+		"registers": [
+			{
+				"basis": "I — You draw two cards and you lose 2 life.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -2
+						}
+					]
+				}
+			},
+			{
+				"basis": "II, III — Whenever a creature you control enters this turn, each opponent loses 1 life and you gain 1 life.",
+				"kind": "chapter",
+				"numbers": [
+					2,
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "delay",
+							"until": "end-of-turn",
+							"event": {
+								"on": "enters",
+								"of": {
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "life",
+										"who": "opponent",
+										"amount": -1
+									},
+									{
+										"do": "life",
+										"who": "you",
+										"amount": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

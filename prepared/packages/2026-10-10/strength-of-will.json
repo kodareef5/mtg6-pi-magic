@@ -1,0 +1,76 @@
+{
+	"card": "Strength of Will",
+	"generated": "2026-10-10",
+	"source": "0c609db407627a72cb70aa9bc29326da85f0f789171a60def68e22a3b079d012",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Strength of Will",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Strength of Will",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Strength of Will",
+				"basis": "Until end of turn, target creature you control gains indestructible and \"Whenever this creature is dealt damage, put that many +1/+1 counters on it.\"",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							],
+							"registers": [
+								{
+									"basis": "Until end of turn, target creature you control gains indestructible and \"Whenever this creature is dealt damage, put that many +1/+1 counters on it.\"",
+									"kind": "watch",
+									"event": {
+										"on": "damage",
+										"received": true,
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "counters",
+												"on": "this",
+												"kind": "+1/+1",
+												"amount": {
+													"event": "amount"
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

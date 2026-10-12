@@ -1,0 +1,79 @@
+{
+	"card": "Splash Portal",
+	"generated": "2026-10-10",
+	"source": "c27464cba46908fe9efb6d2fea24a4cb2ae63c2c51355a6a0f122d9382da191f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Splash Portal",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Splash Portal",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Exile and return a controlled creature, then draw if it is a Bird, Frog, Otter, or Rat.",
+				"basis": "Exile target creature you control, then return it to the battlefield under its owner's control. If that creature is a Bird, Frog, Otter, or Rat, draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile",
+						"as": "blinked"
+					},
+					{
+						"do": "move",
+						"what": "bound:blinked",
+						"to": "battlefield",
+						"controller": "owner:bound:blinked",
+						"reason": "resolve"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"is": "bound:blinked",
+							"matches": {
+								"zones": [
+									"battlefield",
+									"exile"
+								],
+								"subtypes": [
+									"Bird",
+									"Frog",
+									"Otter",
+									"Rat"
+								]
+							},
+							"lastKnown": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

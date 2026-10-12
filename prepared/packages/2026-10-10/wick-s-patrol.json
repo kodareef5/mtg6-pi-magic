@@ -1,0 +1,82 @@
+{
+	"card": "Wick's Patrol",
+	"generated": "2026-10-10",
+	"source": "d8186f90cc2237d6dfd0ac0b6a2ea141bb5ab1f14658d1d3308f776a416d13b0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wick's Patrol",
+		"registers": [
+			{
+				"basis": "When this creature enters, mill three cards. When you do, target creature an opponent controls gets -X/-X until end of turn, where X is the greatest mana value among cards in your graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						},
+						{
+							"do": "reflect",
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											],
+											"controller": "opponent"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "target:0",
+										"until": "end-of-turn",
+										"change": {
+											"power": {
+												"negate": {
+													"aggregate": "max",
+													"of": {
+														"zones": [
+															"graveyard"
+														],
+														"owner": "you"
+													},
+													"value": "manaValue"
+												}
+											},
+											"toughness": {
+												"negate": {
+													"aggregate": "max",
+													"of": {
+														"zones": [
+															"graveyard"
+														],
+														"owner": "you"
+													},
+													"value": "manaValue"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

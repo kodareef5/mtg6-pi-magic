@@ -1,0 +1,52 @@
+{
+	"card": "Infernal Vessel",
+	"generated": "2026-10-10",
+	"source": "38c3a18a8753de461ed36777187ff5b465867fcbf54bcb41bf41dcae69465463",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Infernal Vessel",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature dies, if it wasn't a Demon, return it to the battlefield under its owner's control with two +1/+1 counters on it. It's a Demon in addition to its other types.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this",
+						"not": {
+							"subtypes": [
+								"Demon"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "owner:event:object",
+							"reason": "resolve",
+							"counters": {
+								"+1/+1": 2
+							},
+							"change": {
+								"subtypes": {
+									"add": [
+										"Demon"
+									],
+									"of": "creature"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

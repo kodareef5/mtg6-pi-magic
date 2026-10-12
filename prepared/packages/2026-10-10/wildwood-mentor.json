@@ -1,0 +1,74 @@
+{
+	"card": "Wildwood Mentor",
+	"generated": "2026-10-10",
+	"source": "61741509aa5bdbfb63b15fcecf2cc058fb01e214356d0b664bd34e0d9540f325",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wildwood Mentor",
+		"registers": [
+			{
+				"basis": "Whenever a token you control enters, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"token": true,
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, another target attacking creature gets +X/+X until end of turn, where X is this creature's power.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"attacking": true,
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"power": "this"
+								},
+								"toughness": {
+									"power": "this"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

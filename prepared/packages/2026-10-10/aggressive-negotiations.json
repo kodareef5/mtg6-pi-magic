@@ -1,0 +1,87 @@
+{
+	"card": "Aggressive Negotiations",
+	"generated": "2026-10-10",
+	"source": "f0a924d52201322d407244e6fb37cd9316d09275b78f22d2f8ce14cd7c5a46cc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aggressive Negotiations",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Aggressive Negotiations",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Reveal an opponent's hand, exile a chosen nonland card, and put a counter on up to one controlled creature",
+				"basis": "Target opponent reveals their hand. You choose a nonland card from it and exile that card. Put a +1/+1 counter on up to one target creature you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					},
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "target:0"
+						},
+						"as": "hand"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"is": "bound:hand",
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"count": 1,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

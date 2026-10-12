@@ -1,0 +1,73 @@
+{
+	"card": "Fulminous Forte",
+	"generated": "2026-10-10",
+	"source": "62f9de0b36c612dfb94105b23d361c180657811bb11d8f2f1c1657b1bbabafe2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fulminous Forte",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fulminous Forte",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fulminous Forte: deal 1 damage to each opposing creature and planeswalker",
+				"basis": "Choose one —\n• Fulminous Forte deals 1 damage to each creature and planeswalker your opponents control.\n• Fulminous Forte deals 5 damage to target creature or planeswalker.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"controller": "opponent"
+						},
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Fulminous Forte",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fulminous Forte: deal 5 damage to a target creature or planeswalker",
+				"basis": "Choose one —\n• Fulminous Forte deals 1 damage to each creature and planeswalker your opponents control.\n• Fulminous Forte deals 5 damage to target creature or planeswalker.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 5
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

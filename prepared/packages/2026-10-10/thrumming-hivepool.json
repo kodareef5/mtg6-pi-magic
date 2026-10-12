@@ -1,0 +1,92 @@
+{
+	"card": "Thrumming Hivepool",
+	"generated": "2026-10-10",
+	"source": "3206bec34d54a51ccdd0d9f79a04b7c2d9fd5621e0548cf10ed086da9fa505b2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thrumming Hivepool",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Slivers you control have double strike and haste.",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"subtypes": [
+						"Sliver"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"double strike",
+						"haste"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your upkeep, create two 1/1 colorless Sliver creature tokens.",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Sliver Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Sliver"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thrumming Hivepool",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Thrumming Hivepool with affinity for Slivers",
+				"basis": "Affinity for Slivers (This spell costs {1} less to cast for each Sliver you control.)",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Sliver"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

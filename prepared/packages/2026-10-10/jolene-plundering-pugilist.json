@@ -1,0 +1,107 @@
+{
+	"card": "Jolene, Plundering Pugilist",
+	"generated": "2026-10-10",
+	"source": "30bfbd40dae10de39ebc9042afdfe5cfc275aeaee746861a99414913b39a7d61",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jolene, Plundering Pugilist",
+		"registers": [
+			{
+				"basis": "Whenever you attack with one or more creatures with power 4 or greater, create a Treasure token.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"power": {
+							"atLeast": 4
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Jolene, Plundering Pugilist",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice a Treasure to deal 1 damage to any target.",
+				"basis": "{1}{R}, Sacrifice a Treasure: Jolene deals 1 damage to any target.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}",
+					"sacrifice": {
+						"choose": {
+							"subtypes": [
+								"Treasure"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 1,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

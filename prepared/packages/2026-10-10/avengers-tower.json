@@ -1,0 +1,109 @@
+{
+	"card": "Avengers Tower",
+	"generated": "2026-10-10",
+	"source": "34af9936ec40e41bb632623d602494d92f28d596ff160ebb32eeca10e698cfb1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Avengers Tower",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast a Hero spell or to activate an ability of a Hero source.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack",
+						"battlefield",
+						"hand",
+						"graveyard",
+						"exile",
+						"command",
+						"library",
+						"outside"
+					],
+					"subtypes": [
+						"Hero"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Inspect three cards and optionally take a Hero card",
+				"basis": "{4}, {T}: Look at the top three cards of your library. You may reveal a Hero card from among them and put it into your hand. Put the rest on the bottom of your library in any order.",
+				"source": {
+					"card": "Avengers Tower",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 3,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"subtypes": [
+								"Hero"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,73 @@
+{
+	"card": "Reckless Ransacking",
+	"generated": "2026-10-10",
+	"source": "bf25e717948d88e04b98dfadb509956140cb78aa7d03453662c054c24216dd6d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Reckless Ransacking",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Reckless Ransacking",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Reckless Ransacking",
+				"basis": "Target creature gets +3/+2 until end of turn. Create a Treasure token. (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 2
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Treasure Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

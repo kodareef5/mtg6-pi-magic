@@ -1,0 +1,67 @@
+{
+	"card": "Strongbox Raider",
+	"generated": "2026-10-10",
+	"source": "4510170755070d4561999887b536aa447b19a6704de18e4c4acf929ab83a51cc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Strongbox Raider",
+		"registers": [
+			{
+				"basis": "Raid — When this creature enters, if you attacked this turn, exile the top two cards of your library. Choose one of them. Until the end of your next turn, you may play that card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 2,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"exile"
+								],
+								"is": "bound:exiled"
+							},
+							"count": 1,
+							"as": "chosen"
+						},
+						{
+							"do": "permit",
+							"what": "bound:chosen",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

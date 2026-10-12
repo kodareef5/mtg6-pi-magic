@@ -1,0 +1,75 @@
+{
+	"card": "Daily Bugle Building",
+	"generated": "2026-10-10",
+	"source": "07763fdc931fd36b21e75dde62d0533846642e1d994ffddb0b70600f0152bd39",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Daily Bugle Building",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{1}, {T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Daily Bugle Building",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Smear Campaign: grant a legendary creature menace until end of turn.",
+				"basis": "Smear Campaign — {1}, {T}: Target legendary creature gains menace until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"supertypes": [
+								"legendary"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"menace"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

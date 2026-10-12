@@ -1,0 +1,104 @@
+{
+	"card": "Random Encounter",
+	"generated": "2026-10-10",
+	"source": "b7a5aedfa43a2b73f2dac8e5526ccac1c7d8addf469999c4ffb84f5d106aa2ad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Random Encounter",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {6}{R}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{6}{R}{R}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Random Encounter at its printed cost or through its flashback permission",
+				"basis": "Shuffle your library, then mill four cards. Put each creature card milled this way onto the battlefield. They gain haste. At the beginning of the next end step, return those creatures to their owner's hand.",
+				"source": {
+					"card": "Random Encounter",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "move",
+						"what": {
+							"top": 4,
+							"of": "you"
+						},
+						"to": "graveyard",
+						"reason": "mill",
+						"as": "milled"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard",
+								"exile",
+								"battlefield",
+								"stack",
+								"command"
+							],
+							"is": "bound:milled",
+							"types": [
+								"creature"
+							]
+						},
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"as": "creatures"
+					},
+					{
+						"do": "modify",
+						"what": "bound:creatures",
+						"until": "indefinite",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:creatures",
+									"to": "hand",
+									"reason": "bounce"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

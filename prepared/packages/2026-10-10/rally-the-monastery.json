@@ -1,0 +1,368 @@
+{
+	"card": "Rally the Monastery",
+	"generated": "2026-10-10",
+	"source": "91484ec12853ce6353e97fad00e9850aba176409571025e736f978d7b17c6d2f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rally the Monastery",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rally the Monastery",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Create two Monks; first spell this turn",
+				"basis": "This spell costs {2} less to cast if you've cast another spell this turn. ... Choose one — ... • Create two 1/1 white Monk creature tokens with prowess.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Monk Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Monk"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"kind": "watch",
+									"basis": "• Create two 1/1 white Monk creature tokens with prowess.",
+									"event": {
+										"on": "cast",
+										"by": "you",
+										"of": {
+											"zones": [
+												"stack"
+											],
+											"not": {
+												"types": [
+													"creature"
+												]
+											}
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "this",
+												"until": "end-of-turn",
+												"change": {
+													"power": 1,
+													"toughness": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rally the Monastery",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Create two Monks; discounted after another spell",
+				"basis": "This spell costs {2} less to cast if you've cast another spell this turn. ... Choose one — ... • Create two 1/1 white Monk creature tokens with prowess.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Monk Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Monk"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"kind": "watch",
+									"basis": "• Create two 1/1 white Monk creature tokens with prowess.",
+									"event": {
+										"on": "cast",
+										"by": "you",
+										"of": {
+											"zones": [
+												"stack"
+											],
+											"not": {
+												"types": [
+													"creature"
+												]
+											}
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "this",
+												"until": "end-of-turn",
+												"change": {
+													"power": 1,
+													"toughness": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rally the Monastery",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give up to two controlled creatures +2/+2; first spell this turn",
+				"basis": "This spell costs {2} less to cast if you've cast another spell this turn. ... Choose one — ... • Up to two target creatures you control each get +2/+2 until end of turn.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rally the Monastery",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give up to two controlled creatures +2/+2; discounted after another spell",
+				"basis": "This spell costs {2} less to cast if you've cast another spell this turn. ... Choose one — ... • Up to two target creatures you control each get +2/+2 until end of turn.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rally the Monastery",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy a creature with power 4 or greater; first spell this turn",
+				"basis": "This spell costs {2} less to cast if you've cast another spell this turn. ... Choose one — ... • Destroy target creature with power 4 or greater.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"power": {
+								"atLeast": 4
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rally the Monastery",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy a creature with power 4 or greater; discounted after another spell",
+				"basis": "This spell costs {2} less to cast if you've cast another spell this turn. ... Choose one — ... • Destroy target creature with power 4 or greater.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"power": {
+								"atLeast": 4
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

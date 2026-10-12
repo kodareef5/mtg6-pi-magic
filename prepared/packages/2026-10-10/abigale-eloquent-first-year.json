@@ -1,0 +1,85 @@
+{
+	"card": "Abigale, Eloquent First-Year",
+	"generated": "2026-10-10",
+	"source": "01ac39e66e707316c3d1ac2f75b287546684dce7484ac2b8a5b4c83d1a1fdfb9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Abigale, Eloquent First-Year",
+		"registers": [
+			{
+				"basis": "Flying, first strike, lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"first strike",
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "When Abigale enters, up to one other target creature loses all abilities. Put a flying counter, a first strike counter, and a lifelink counter on that creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"other": true
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"loseAbilities": true
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "flying",
+							"amount": 1
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "first strike",
+							"amount": 1
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "lifelink",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

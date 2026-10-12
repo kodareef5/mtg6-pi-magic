@@ -1,0 +1,82 @@
+{
+	"card": "Treetop Snarespinner",
+	"generated": "2026-10-10",
+	"source": "f8d7f9a38ba28e5574d4e61670ad93e4c5ce74979d5fbf09dc3f7a33277c4eae",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Treetop Snarespinner",
+		"registers": [
+			{
+				"basis": "Reach (This creature can block creatures with flying.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Treetop Snarespinner",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a +1/+1 counter on target creature you control.",
+				"basis": "{2}{G}: Put a +1/+1 counter on target creature you control. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}{G}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

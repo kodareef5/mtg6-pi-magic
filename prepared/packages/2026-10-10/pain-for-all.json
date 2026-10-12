@@ -1,0 +1,108 @@
+{
+	"card": "Pain for All",
+	"generated": "2026-10-10",
+	"source": "b6ad3a663cf84eee1f3ff811fb841507c0c6054f36a2aa54f0b45ff906be2b00",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pain for All",
+		"registers": [
+			{
+				"basis": "When this Aura enters, enchanted creature deals damage equal to its power to any other target.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								],
+								"not": {
+									"is": "attached"
+								}
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"from": "attached",
+							"to": "target:0",
+							"amount": {
+								"power": "attached"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever enchanted creature is dealt damage, it deals that much damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"received": true,
+					"of": {
+						"is": "attached"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"from": "event:object",
+							"to": "opponent",
+							"amount": {
+								"event": "amount"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pain for All",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pain for All enchanting a creature you control",
+				"basis": "Enchant creature you control",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

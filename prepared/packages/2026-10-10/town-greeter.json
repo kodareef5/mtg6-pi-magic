@@ -1,0 +1,96 @@
+{
+	"card": "Town Greeter",
+	"generated": "2026-10-10",
+	"source": "b497a49db7e5a0a7e28880b96a7b7bcb06127ea104fd543f1288b0bebf365fe2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Town Greeter",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, mill four cards. You may put a land card from among them into your hand. If you put a Town card into your hand this way, you gain 2 life. (To mill four cards, a player puts the top four cards of their library into their graveyard.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 4,
+							"as": "milled"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard",
+									"exile",
+									"battlefield",
+									"command",
+									"stack"
+								],
+								"is": "bound:milled",
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "resolve",
+							"as": "returned"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"all": [
+									{
+										"is": "bound:returned",
+										"matches": {
+											"zones": [
+												"hand"
+											]
+										}
+									},
+									{
+										"is": "bound:land",
+										"matches": {
+											"zones": [
+												"graveyard",
+												"exile",
+												"battlefield",
+												"command",
+												"stack"
+											],
+											"subtypes": [
+												"Town"
+											]
+										},
+										"lastKnown": true
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

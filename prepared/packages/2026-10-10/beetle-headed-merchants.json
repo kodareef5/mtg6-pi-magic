@@ -1,0 +1,68 @@
+{
+	"card": "Beetle-Headed Merchants",
+	"generated": "2026-10-10",
+	"source": "bd44f4059a168fc3a1179c7c0184488b10072b253ba18f68edf0d8ada5f95cbd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beetle-Headed Merchants",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, you may sacrifice another creature or artifact. If you do, draw a card and put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature",
+											"artifact"
+										],
+										"controller": "you",
+										"other": true
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "sacrificed"
+							}
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"bound": "sacrificed"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

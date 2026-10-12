@@ -1,0 +1,59 @@
+{
+	"card": "Mindwhisker",
+	"generated": "2026-10-10",
+	"source": "44c877440a4adc011df648ac12fadc0989654e02ed9faf96f3096b06adbe7868",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mindwhisker",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Threshold — As long as there are seven or more cards in your graveyard, creatures your opponents control get -1/-0.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "opponent"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 7
+				},
+				"change": {
+					"power": -1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

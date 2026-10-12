@@ -1,0 +1,74 @@
+{
+	"card": "White Widow, Free Agent",
+	"generated": "2026-10-10",
+	"source": "b7218a4240d38d81568a6975139a1a5bb3db82ca9a9ba1982104809b05c260c0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "White Widow, Free Agent",
+		"registers": [
+			{
+				"basis": "When White Widow enters, choose one —\n• Put a +1/+1 counter on each of up to two target creatures.\n• Return target artifact or enchantment card from your graveyard to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										]
+									},
+									"count": 2,
+									"upTo": true
+								}
+							],
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "target:0",
+									"kind": "+1/+1",
+									"amount": 1
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"types": [
+											"artifact",
+											"enchantment"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "move",
+									"what": "target:0",
+									"to": "hand",
+									"reason": "bounce"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,98 @@
+{
+	"card": "Defiled Crypt // Cadaver Lab",
+	"generated": "2026-10-10",
+	"source": "730b5c983572cec08c556ac239f709c10d2b80ca90f68e3e50eb8c04fd3923da",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Defiled Crypt // Cadaver Lab",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever one or more cards leave your graveyard, create a 2/2 black Horror enchantment creature token. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"token": false
+					},
+					"batch": true
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Horror Token",
+								"types": [
+									"enchantment",
+									"creature"
+								],
+								"subtypes": [
+									"Horror"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When you unlock this door, return target creature card from your graveyard to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"token": false
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		],
+		"deferred": []
+	}
+}

@@ -1,0 +1,110 @@
+{
+	"card": "Sawblade Skinripper",
+	"generated": "2026-10-10",
+	"source": "a93e5eb78b8b54a8f5992b06b2d2c1b987b0bcc5c11979be1d161f0d59c5ca81",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sawblade Skinripper",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Menace",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your end step, if you sacrificed one or more permanents this turn, this creature deals that much damage to any target.",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "sacrificed",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": {
+								"history": "sacrificed",
+								"by": "you"
+							},
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sawblade Skinripper",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature or enchantment to put a +1/+1 counter on Sawblade Skinripper",
+				"basis": "{2}, Sacrifice another creature or enchantment: Put a +1/+1 counter on this creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature",
+								"enchantment"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

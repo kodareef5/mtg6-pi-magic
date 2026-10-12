@@ -16,7 +16,7 @@
 					],
 					"controller": "self"
 				},
-				"claim": "Exile Suspicious Shambler from your graveyard to create two Zombies",
+				"claim": "Exile Suspicious Shambler to create two Zombie tokens",
 				"basis": "{4}{B}{B}, Exile this card from your graveyard: Create two 2/2 black Zombie creature tokens. Activate only as a sorcery.",
 				"timing": "stack",
 				"speed": "sorcery",
@@ -29,7 +29,7 @@
 						"do": "token",
 						"count": 2,
 						"spec": {
-							"name": "Zombie",
+							"name": "Zombie Token",
 							"types": [
 								"creature"
 							],

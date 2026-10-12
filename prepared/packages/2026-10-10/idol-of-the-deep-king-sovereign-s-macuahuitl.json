@@ -1,0 +1,204 @@
+{
+	"card": "Idol of the Deep King // Sovereign's Macuahuitl",
+	"generated": "2026-10-10",
+	"source": "24d44033025e4d75e7a3b213fcf1c5c9817867a3af44e825d1167d64759c90d8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Idol of the Deep King // Sovereign's Macuahuitl",
+		"registers": [
+			{
+				"face": 0,
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"kind": "watch",
+				"basis": "When this artifact enters, it deals 2 damage to any target.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"kind": "watch",
+				"basis": "When this Equipment enters, attach it to target creature you control.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"kind": "continuous",
+				"basis": "Equipped creature gets +2/+0.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 0
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Idol of the Deep King // Sovereign's Macuahuitl",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Craft with another artifact",
+				"basis": "Craft with artifact {2}{R} ({2}{R}, Exile this artifact, Exile another artifact you control or an artifact card from your graveyard: Return this card transformed under its owner's control. Craft only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}{R}",
+					"exile": {
+						"source": true,
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"other": true,
+							"any": [
+								{
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you"
+								},
+								{
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you"
+								}
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "bound:cost-source",
+						"to": "battlefield",
+						"face": 1,
+						"controller": "owner:bound:cost-source",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Idol of the Deep King // Sovereign's Macuahuitl",
+					"face": 1,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Sovereign's Macuahuitl",
+				"basis": "Equip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

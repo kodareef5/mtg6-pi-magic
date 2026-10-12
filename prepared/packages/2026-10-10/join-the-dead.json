@@ -1,0 +1,98 @@
+{
+	"card": "Join the Dead",
+	"generated": "2026-10-10",
+	"source": "951549c19ebfb256dd1bae8dbb75b7a4db4ac5f23c5c638e62f81063fb0b14ab",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Join the Dead",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Join the Dead",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Join the Dead",
+				"basis": "Target creature gets -5/-5 until end of turn. ... Descend 4 — That creature gets -10/-10 until end of turn instead if there are four or more permanent cards in your graveyard.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -5,
+							"toughness": -5
+						},
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"land",
+										"planeswalker"
+									],
+									"token": false
+								}
+							},
+							"atMost": 3
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -10,
+							"toughness": -10
+						},
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"land",
+										"planeswalker"
+									],
+									"token": false
+								}
+							},
+							"atLeast": 4
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

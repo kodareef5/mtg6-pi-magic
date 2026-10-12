@@ -1,0 +1,92 @@
+{
+	"card": "Picklock Prankster // Free the Fae",
+	"generated": "2026-10-10",
+	"source": "83f502ed170dd05781ee5b58ae92e2d92bdfb7157cee8f8e381ec3bc27795175",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Picklock Prankster // Free the Fae",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Picklock Prankster // Free the Fae",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Free the Fae",
+				"basis": "Mill four cards. Then put an instant, sorcery, or Faerie card from among the milled cards into your hand.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 4,
+						"as": "milled"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard",
+								"exile",
+								"battlefield",
+								"stack",
+								"command"
+							],
+							"is": "bound:milled",
+							"any": [
+								{
+									"types": [
+										"instant",
+										"sorcery"
+									]
+								},
+								{
+									"subtypes": [
+										"Faerie"
+									]
+								}
+							]
+						},
+						"count": 1,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

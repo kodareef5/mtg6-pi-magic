@@ -1,0 +1,104 @@
+{
+	"card": "Midnight Snack",
+	"generated": "2026-10-10",
+	"source": "0ee8d6b67a5786910a7a6dcecded44d20f615b53b88848eff9c8c9693cf544d7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Midnight Snack",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Raid — At the beginning of your end step, if you attacked this turn, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Sacrifice Midnight Snack to make target opponent lose life equal to the life you gained this turn.",
+				"basis": "{2}{B}, Sacrifice this enchantment: Target opponent loses X life, where X is the amount of life you gained this turn.",
+				"source": {
+					"card": "Midnight Snack",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{B}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": {
+							"negate": {
+								"history": "life-gained",
+								"by": "you"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

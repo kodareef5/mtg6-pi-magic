@@ -1,0 +1,40 @@
+{
+	"card": "Hermitic Herbalist",
+	"generated": "2026-10-10",
+	"source": "5b05dd32a4e1df398af12efea00902c5b94c1a4415879e630f46c7cc28a78593",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hermitic Herbalist",
+		"registers": [
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			},
+			{
+				"basis": "{T}: Add two mana in any combination of colors. Spend this mana only to cast Lesson spells.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 2,
+				"combination": true,
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"subtypes": [
+						"Lesson"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

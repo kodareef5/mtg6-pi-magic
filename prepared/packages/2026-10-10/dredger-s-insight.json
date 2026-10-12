@@ -1,0 +1,91 @@
+{
+	"card": "Dredger's Insight",
+	"generated": "2026-10-10",
+	"source": "ce9f5374b8c24f14bef4f33acb8a5b6726e648596451eccbae4294b47465d32a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dredger's Insight",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more artifact and/or creature cards leave your graveyard, you gain 1 life.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"types": [
+							"artifact",
+							"creature"
+						],
+						"token": false
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this enchantment enters, mill four cards. You may put an artifact, creature, or land card from among the milled cards into your hand. (To mill four cards, put the top four cards of your library into your graveyard.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 4,
+							"as": "milled"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"is": "bound:milled",
+								"types": [
+									"artifact",
+									"creature",
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "taken"
+						},
+						{
+							"do": "move",
+							"what": "bound:taken",
+							"to": "hand",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

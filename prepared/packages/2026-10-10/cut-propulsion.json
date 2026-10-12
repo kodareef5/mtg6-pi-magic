@@ -1,0 +1,69 @@
+{
+	"card": "Cut Propulsion",
+	"generated": "2026-10-10",
+	"source": "3819ecdc5ce671189569fc9a61c548379c2b39437e846757f3f77b84388ac56f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cut Propulsion",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cut Propulsion",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cut Propulsion",
+				"basis": "Target creature deals damage to itself equal to its power. If that creature has flying, it deals twice that much damage to itself instead.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"zones": [
+								"battlefield"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:0",
+						"amount": {
+							"sum": [
+								{
+									"power": "target:0"
+								},
+								{
+									"aggregate": "sum",
+									"of": {
+										"zones": [
+											"battlefield"
+										],
+										"is": "target:0",
+										"words": [
+											"flying"
+										]
+									},
+									"value": "power"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

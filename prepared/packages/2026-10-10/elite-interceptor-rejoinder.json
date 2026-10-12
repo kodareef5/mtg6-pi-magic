@@ -1,0 +1,73 @@
+{
+	"card": "Elite Interceptor // Rejoinder",
+	"generated": "2026-10-10",
+	"source": "f5492a75db1ca6ba8e4a749adfee65fda8f8004b7c3f3df125a324cfdfc1dcaa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elite Interceptor // Rejoinder",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Elite Interceptor // Rejoinder",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rejoinder; choose whether to tap or untap on resolution, then draw",
+				"basis": "You may tap or untap target creature.\nDraw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "tap-choice",
+						"instructions": [
+							{
+								"do": "tap",
+								"what": "target:0"
+							}
+						]
+					},
+					{
+						"do": "untap",
+						"what": "target:0",
+						"may": true,
+						"if": {
+							"not": {
+								"bound": "tap-choice"
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

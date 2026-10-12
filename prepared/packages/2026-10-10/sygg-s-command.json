@@ -1,0 +1,292 @@
+{
+	"card": "Sygg's Command",
+	"generated": "2026-10-10",
+	"source": "0a96598350d1da701d2d5a0f87ce135f5cd3b588c84a31cc18c4bcdb0c4b0108",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sygg's Command",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sygg's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and lifelink",
+				"basis": "Choose two — ... • Create a token that's a copy of target Merfolk you control. ... • Creatures target player controls gain lifelink until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Merfolk"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:1"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"lifelink"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Sygg's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and draw",
+				"basis": "Choose two — ... • Create a token that's a copy of target Merfolk you control. ... • Target player draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Merfolk"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "draw",
+						"who": "target:1",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Sygg's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and tap with stun",
+				"basis": "Choose two — ... • Create a token that's a copy of target Merfolk you control. ... • Tap target creature. Put a stun counter on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Merfolk"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "tap",
+						"what": "target:1"
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "stun",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Sygg's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose lifelink and draw",
+				"basis": "Choose two — ... • Creatures target player controls gain lifelink until end of turn. ... • Target player draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"lifelink"
+							]
+						}
+					},
+					{
+						"do": "draw",
+						"who": "target:1",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Sygg's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose lifelink and tap with stun",
+				"basis": "Choose two — ... • Creatures target player controls gain lifelink until end of turn. ... • Tap target creature. Put a stun counter on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"lifelink"
+							]
+						}
+					},
+					{
+						"do": "tap",
+						"what": "target:1"
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "stun",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Sygg's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose draw and tap with stun",
+				"basis": "Choose two — ... • Target player draws a card. ... • Tap target creature. Put a stun counter on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 1
+					},
+					{
+						"do": "tap",
+						"what": "target:1"
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "stun",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

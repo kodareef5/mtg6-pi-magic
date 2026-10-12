@@ -1,0 +1,102 @@
+{
+	"card": "Voja, Jaws of the Conclave",
+	"generated": "2026-10-10",
+	"source": "101c7fbccdf4ab45330565b30e9fc278d9364e71ca37a85fb6f69e937f37af70",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Voja, Jaws of the Conclave",
+		"registers": [
+			{
+				"basis": "Vigilance, trample, ward {3}",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance",
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Vigilance, trample, ward {3}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{3}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Voja attacks, put X +1/+1 counters on each creature you control, where X is the number of Elves you control. Draw a card for each Wolf you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": {
+								"count": {
+									"subtypes": [
+										"Elf"
+									],
+									"controller": "you"
+								}
+							}
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"count": {
+									"subtypes": [
+										"Wolf"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"card": "Neighborhood Guardian",
+	"generated": "2026-10-10",
+	"source": "bdb88f7c01f51358c2d81766acfb2c8d9fbcb1048aa072d9f0e59c963bd228a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Neighborhood Guardian",
+		"registers": [
+			{
+				"basis": "Whenever another creature you control with power 2 or less enters, target creature you control gets +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true,
+						"power": {
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

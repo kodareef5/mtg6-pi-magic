@@ -1,0 +1,141 @@
+{
+	"card": "Lotuslight Dancers",
+	"generated": "2026-10-10",
+	"source": "0a0b2f556bd4b36fef4bbfc25dad02f9a27e0d45e9100a70cfaf253d7e26cb13",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lotuslight Dancers",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, search your library for a black card, a green card, and a blue card. Put those cards into your graveyard, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"colors": [
+									"B"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "black"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"colors": [
+									"G"
+								],
+								"not": {
+									"is": "bound:black"
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "green"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"colors": [
+									"U"
+								],
+								"all": [
+									{
+										"not": {
+											"is": "bound:black"
+										}
+									},
+									{
+										"not": {
+											"is": "bound:green"
+										}
+									}
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "blue"
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"any": [
+									{
+										"is": "bound:black"
+									},
+									{
+										"is": "bound:green"
+									},
+									{
+										"is": "bound:blue"
+									}
+								]
+							},
+							"to": "graveyard",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

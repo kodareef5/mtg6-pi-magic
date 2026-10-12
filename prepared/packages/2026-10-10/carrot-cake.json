@@ -1,0 +1,117 @@
+{
+	"card": "Carrot Cake",
+	"generated": "2026-10-10",
+	"source": "76ab20e156c5e3c95d1916154c7c133b81a4dd2b05d702f25ccc07fae778ff79",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Carrot Cake",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters and when you sacrifice it, create a 1/1 white Rabbit creature token and scry 1. (Look at the top card of your library. You may put that card on the bottom.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Rabbit Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Rabbit"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters and when you sacrifice it, create a 1/1 white Rabbit creature token and scry 1. (Look at the top card of your library. You may put that card on the bottom.)",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Rabbit Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Rabbit"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Sacrifice Carrot Cake to gain 3 life",
+				"basis": "{2}, {T}, Sacrifice this artifact: You gain 3 life.",
+				"source": {
+					"card": "Carrot Cake",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

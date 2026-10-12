@@ -1,0 +1,187 @@
+{
+	"card": "Hexhaven Battalion",
+	"generated": "2026-10-10",
+	"source": "9d725c9a85e69513bfb9cd9ddf03c589cb6fb3fd0a4420178a91db39f186ac81",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hexhaven Battalion",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hexhaven Battalion",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Hexhaven Battalion",
+				"basis": "Create three 2/2 colorless Wizard Soldier creature tokens named Cadet. Empower Jace 2. (Put two loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 3,
+						"spec": {
+							"name": "Cadet",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Wizard",
+								"Soldier"
+							],
+							"colors": [],
+							"power": 2,
+							"toughness": 2
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"amount": {
+								"count": {
+									"controller": "you",
+									"types": [
+										"planeswalker"
+									],
+									"subtypes": [
+										"Jace"
+									],
+									"token": true
+								}
+							},
+							"atMost": 0
+						},
+						"spec": {
+							"name": "Jace Token",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"colors": [
+								"U"
+							],
+							"loyalty": 0,
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "[−1]: Surveil 1",
+									"cost": {
+										"loyalty": -1
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "keyword",
+												"name": "surveil",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								},
+								{
+									"kind": "activated",
+									"basis": "[−3]: Draw a card",
+									"cost": {
+										"loyalty": -3
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"controller": "you",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"token": true
+						},
+						"count": 1,
+						"as": "jace"
+					},
+					{
+						"do": "counters",
+						"on": "bound:jace",
+						"kind": "loyalty",
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Hexhaven Battalion",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Basic landcycle Hexhaven Battalion",
+				"basis": "Basic landcycling {2} ({2}, Discard this card: Search your library for a basic land card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							],
+							"token": false
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

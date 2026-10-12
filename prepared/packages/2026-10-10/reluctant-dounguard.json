@@ -1,0 +1,56 @@
+{
+	"card": "Reluctant Dounguard",
+	"generated": "2026-10-10",
+	"source": "46d99496fd90cbdfe93c7b7a4931c12692476e8847f88ac4e8c305f4d412c951",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Reluctant Dounguard",
+		"registers": [
+			{
+				"basis": "This creature enters with two -1/-1 counters on it.",
+				"kind": "enters",
+				"counters": {
+					"-1/-1": 2
+				}
+			},
+			{
+				"basis": "Whenever another creature you control enters while this creature has a -1/-1 counter on it, remove a -1/-1 counter from this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"counters": "-1/-1",
+						"on": "this"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "-1/-1",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

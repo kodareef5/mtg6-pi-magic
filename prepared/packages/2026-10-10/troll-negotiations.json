@@ -1,0 +1,59 @@
+{
+	"card": "Troll Negotiations",
+	"generated": "2026-10-10",
+	"source": "c7b6d72c1b67aba669142bca2589d669782e7afcf0410a2e032e939f891901fd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Troll Negotiations",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Troll Negotiations",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put two +1/+1 counters on your creature, then have it fight an opponent's creature.",
+				"basis": "Put two +1/+1 counters on target creature you control. Then it fights target creature an opponent controls. (Each deals damage equal to its power to the other.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					},
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

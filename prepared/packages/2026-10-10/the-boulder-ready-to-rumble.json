@@ -1,0 +1,99 @@
+{
+	"card": "The Boulder, Ready to Rumble",
+	"generated": "2026-10-10",
+	"source": "72966da4d5dfceb9144e52b476fde4eb0f8d1dcf916e8cacac2602bed9c287fa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Boulder, Ready to Rumble",
+		"registers": [
+			{
+				"basis": "Whenever The Boulder attacks, earthbend X, where X is the number of creatures you control with power 4 or greater. (Target land you control becomes a 0/0 creature with haste that's still a land. Put X +1/+1 counters on it. When it dies or is exiled, return it to the battlefield tapped.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"types": {
+									"add": [
+										"creature"
+									]
+								},
+								"base": {
+									"power": 0,
+									"toughness": 0
+								},
+								"words": [
+									"haste"
+								]
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": {
+								"count": {
+									"types": [
+										"creature"
+									],
+									"controller": "you",
+									"power": {
+										"atLeast": 4
+									}
+								}
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "leaves",
+								"of": {
+									"is": "target:0"
+								},
+								"to": [
+									"graveyard",
+									"exile"
+								]
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "event:object",
+										"to": "battlefield",
+										"tapped": true,
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

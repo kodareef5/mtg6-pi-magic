@@ -1,0 +1,50 @@
+{
+	"card": "Aggressive Mammoth",
+	"generated": "2026-10-10",
+	"source": "4850decda865e11c958f716bde942d1e33cfd1b569b67266c757008dc383ffa8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aggressive Mammoth",
+		"registers": [
+			{
+				"basis": "Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Other creatures you control have trample.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"other": true,
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

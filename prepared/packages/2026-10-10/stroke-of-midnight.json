@@ -45,7 +45,7 @@
 						"count": 1,
 						"controller": "controller:target:0",
 						"spec": {
-							"name": "Human",
+							"name": "Human Token",
 							"types": [
 								"creature"
 							],

@@ -1,0 +1,168 @@
+{
+	"card": "Avatar of Burgeoning Echoes",
+	"generated": "2026-10-10",
+	"source": "14f7185fbf0f002a539f9405a93cc909aec68c7b6a2cd2ce9ad91c9a5b906668",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Avatar of Burgeoning Echoes",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Landfall — Whenever a land you control enters, empower Jace 2. (Put two loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"types": [
+											"planeswalker"
+										],
+										"subtypes": [
+											"Jace"
+										],
+										"token": true
+									}
+								},
+								"atMost": 0
+							},
+							"spec": {
+								"name": "Jace Token",
+								"types": [
+									"planeswalker"
+								],
+								"subtypes": [
+									"Jace"
+								],
+								"colors": [
+									"U"
+								],
+								"loyalty": 0,
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "[−1]: Surveil 1",
+										"cost": {
+											"loyalty": -1
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "keyword",
+													"name": "surveil",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									},
+									{
+										"kind": "activated",
+										"basis": "[−3]: Draw a card",
+										"cost": {
+											"loyalty": -3
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"controller": "you",
+								"types": [
+									"planeswalker"
+								],
+								"subtypes": [
+									"Jace"
+								],
+								"token": true
+							},
+							"count": 1,
+							"as": "jace"
+						},
+						{
+							"do": "counters",
+							"on": "bound:jace",
+							"kind": "loyalty",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Planeswalkers you control have \"[−10]: Put a +1/+1 counter on target creature for each land you control.\"",
+				"affects": {
+					"types": [
+						"planeswalker"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Planeswalkers you control have \"[−10]: Put a +1/+1 counter on target creature for each land you control.\"",
+							"cost": {
+								"loyalty": -10
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "counters",
+										"on": "target:0",
+										"kind": "+1/+1",
+										"amount": {
+											"count": {
+												"types": [
+													"land"
+												],
+												"controller": "you"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

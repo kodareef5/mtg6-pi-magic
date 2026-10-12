@@ -1,0 +1,96 @@
+{
+	"card": "Kulrath Zealot",
+	"generated": "2026-10-10",
+	"source": "054b20b9b6000f9b761d4107d1b61fde743cc8d2bf4a0b68ba57c43e4ec2852c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kulrath Zealot",
+		"registers": [
+			{
+				"basis": "When this creature enters, exile the top card of your library. Until the end of your next turn, you may play that card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kulrath Zealot",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Basic landcycle Kulrath Zealot",
+				"basis": "Basic landcycling {1}{R} ({1}{R}, Discard this card: Search your library for a basic land card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"supertypes": [
+								"basic"
+							],
+							"types": [
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

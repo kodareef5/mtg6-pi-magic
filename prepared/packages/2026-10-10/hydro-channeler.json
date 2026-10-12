@@ -1,0 +1,52 @@
+{
+	"card": "Hydro-Channeler",
+	"generated": "2026-10-10",
+	"source": "49bb44692dddb015a67ba8299fd1369c03ec5c993b715778fb4838cfcc2197a1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hydro-Channeler",
+		"registers": [
+			{
+				"basis": "{T}: Add {U}. Spend this mana only to cast an instant or sorcery spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				],
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"instant",
+						"sorcery"
+					]
+				}
+			},
+			{
+				"basis": "{1}, {T}: Add one mana of any color. Spend this mana only to cast an instant or sorcery spell.",
+				"kind": "mana",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"instant",
+						"sorcery"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

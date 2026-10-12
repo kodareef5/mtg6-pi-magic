@@ -1,0 +1,120 @@
+{
+	"card": "Anticausal Vestige",
+	"generated": "2026-10-10",
+	"source": "38d8d7f2817b1b8f0385d9343c114dd289748e84fdea3dc5e336ee83e3d73b6f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Anticausal Vestige",
+		"registers": [
+			{
+				"basis": "When this creature leaves the battlefield, draw a card, then you may put a permanent card with mana value less than or equal to the number of lands you control from your hand onto the battlefield tapped.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you",
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"land",
+									"planeswalker"
+								],
+								"manaValue": {
+									"atMost": {
+										"count": {
+											"types": [
+												"land"
+											],
+											"controller": "you"
+										}
+									}
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "permanent"
+						},
+						{
+							"do": "move",
+							"what": "bound:permanent",
+							"to": "battlefield",
+							"tapped": true,
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Anticausal Vestige",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cast Anticausal Vestige for its warp cost",
+				"basis": "Warp {4} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+				"timing": "spell",
+				"cost": {
+					"mana": "{4}",
+					"alternative": "warp"
+				},
+				"instructions": [
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "this",
+									"to": "exile",
+									"reason": "exile",
+									"as": "warped"
+								},
+								{
+									"do": "permit",
+									"what": "bound:warped",
+									"who": "owner",
+									"from": "next-turn",
+									"until": "indefinite",
+									"mana": "printed"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

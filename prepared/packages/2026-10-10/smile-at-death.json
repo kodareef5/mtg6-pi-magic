@@ -1,0 +1,60 @@
+{
+	"card": "Smile at Death",
+	"generated": "2026-10-10",
+	"source": "82277d76eabb67d202e217395fcbe9989b94bf9c8c67074ab1c5e01a010682f6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Smile at Death",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, return up to two target creature cards with power 2 or less from your graveyard to the battlefield. Put a +1/+1 counter on each of those creatures.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"power": {
+									"atMost": 2
+								}
+							},
+							"count": 2,
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"as": "returned"
+						},
+						{
+							"do": "counters",
+							"on": "bound:returned",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

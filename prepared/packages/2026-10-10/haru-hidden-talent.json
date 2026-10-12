@@ -1,0 +1,94 @@
+{
+	"card": "Haru, Hidden Talent",
+	"generated": "2026-10-10",
+	"source": "6ed0e8a1a63a0cba01256b65207324de9bc0cb6301b6c2620042fea62952362c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Haru, Hidden Talent",
+		"registers": [
+			{
+				"basis": "Whenever another Ally you control enters, earthbend 1. (Target land you control becomes a 0/0 creature with haste that's still a land. Put a +1/+1 counter on it. When it dies or is exiled, return it to the battlefield tapped.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Ally"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"types": {
+									"add": [
+										"creature"
+									]
+								},
+								"base": {
+									"power": 0,
+									"toughness": 0
+								},
+								"words": [
+									"haste"
+								]
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "leaves",
+								"of": {
+									"is": "target:0"
+								},
+								"to": [
+									"graveyard",
+									"exile"
+								]
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "event:object",
+										"to": "battlefield",
+										"tapped": true,
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,76 @@
+{
+	"card": "Boilerbilges Ripper",
+	"generated": "2026-10-10",
+	"source": "0d9cfb3a068f3f1a4333c663f49a4b3a18d5a0bb4297a80ccbc0f4ab83162e49",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boilerbilges Ripper",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may sacrifice another creature or enchantment. When you do, this creature deals 2 damage to any target.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"may": true,
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"types": [
+											"creature",
+											"enchantment"
+										],
+										"controller": "you",
+										"other": true
+									},
+									"count": 1
+								}
+							},
+							"as": "sacrificed"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature",
+												"planeswalker",
+												"battle"
+											]
+										},
+										"player": "any"
+									}
+								],
+								"instructions": [
+									{
+										"do": "damage",
+										"to": "target:0",
+										"from": "this",
+										"amount": 2
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

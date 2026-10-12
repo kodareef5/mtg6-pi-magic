@@ -1,0 +1,83 @@
+{
+	"card": "Danitha, Sword of Hope",
+	"generated": "2026-10-10",
+	"source": "7708bbfd7d2eec375d6f99ea213a90d0bf93b117ac68febc007a75c8a0e0de77",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Danitha, Sword of Hope",
+		"registers": [
+			{
+				"basis": "First strike",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast an Equipment spell or a spell that targets a creature you control, draw a card. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						],
+						"any": [
+							{
+								"subtypes": [
+									"Equipment"
+								]
+							},
+							{
+								"targeting": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							}
+						]
+					}
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

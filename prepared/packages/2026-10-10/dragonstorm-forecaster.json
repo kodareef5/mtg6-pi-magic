@@ -1,0 +1,65 @@
+{
+	"card": "Dragonstorm Forecaster",
+	"generated": "2026-10-10",
+	"source": "62b7b745a62a8bd8928b21128f3c58289c5241af5f6d4908754c8b1f65ab9314",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragonstorm Forecaster",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self",
+					"card": "Dragonstorm Forecaster"
+				},
+				"claim": "Search for Dragonstorm Globe or Boulderborn Dragon",
+				"basis": "{2}, {T}: Search your library for a card named Dragonstorm Globe or Boulderborn Dragon, reveal it, put it into your hand, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"any": [
+								{
+									"name": "Dragonstorm Globe"
+								},
+								{
+									"name": "Boulderborn Dragon"
+								}
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

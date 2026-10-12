@@ -1,0 +1,82 @@
+{
+	"card": "Air Nomad Legacy",
+	"generated": "2026-10-10",
+	"source": "471eda61a5aa6bf75eb40c85766a7e2680b952aa34de1e5c023e1eb655b357a8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Air Nomad Legacy",
+		"registers": [
+			{
+				"basis": "When this enchantment enters, create a Clue token. (It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Clue Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Clue"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{2}, Sacrifice this token: Draw a card.",
+										"kind": "activated",
+										"cost": {
+											"mana": "{2}",
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Creatures you control with flying get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"words": [
+						"flying"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

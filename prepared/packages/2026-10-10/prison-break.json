@@ -1,0 +1,71 @@
+{
+	"card": "Prison Break",
+	"generated": "2026-10-10",
+	"source": "c63981ea99b25314d14a4b47beae3629e7e5268ae983e2d9141ed05237e44930",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prison Break",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Mayhem {3}{B} (You may cast this card from your graveyard for {3}{B} if you discarded it this turn. Timing rules still apply.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{3}{B}",
+					"if": {
+						"discardedThisTurn": "this",
+						"by": "you"
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Return a creature card with an additional +1/+1 counter, using the printed cost or an earned casting permission",
+				"basis": "Return target creature card from your graveyard to the battlefield with an additional +1/+1 counter on it.",
+				"source": {
+					"card": "Prison Break",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"counters": {
+							"+1/+1": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

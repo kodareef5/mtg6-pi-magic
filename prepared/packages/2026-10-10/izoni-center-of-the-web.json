@@ -1,0 +1,179 @@
+{
+	"card": "Izoni, Center of the Web",
+	"generated": "2026-10-10",
+	"source": "35c08f77cbac575a577161f3aab3bf9ac9bd9a26b7dd7a74be2d245d2fb8d013",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Izoni, Center of the Web",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Izoni enters or attacks, you may collect evidence 4. If you do, create two 2/1 black and green Spider creature tokens with reach and menace.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"exile": {
+									"graveyard": {
+										"token": false
+									},
+									"totalManaValue": 4
+								}
+							},
+							"may": true,
+							"as": "evidence"
+						},
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Spider Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spider"
+								],
+								"colors": [
+									"B",
+									"G"
+								],
+								"power": 2,
+								"toughness": 1,
+								"words": [
+									"reach",
+									"menace"
+								]
+							},
+							"if": {
+								"bound": "evidence"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Izoni enters or attacks, you may collect evidence 4. If you do, create two 2/1 black and green Spider creature tokens with reach and menace.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"exile": {
+									"graveyard": {
+										"token": false
+									},
+									"totalManaValue": 4
+								}
+							},
+							"may": true,
+							"as": "evidence"
+						},
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Spider Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spider"
+								],
+								"colors": [
+									"B",
+									"G"
+								],
+								"power": 2,
+								"toughness": 1,
+								"words": [
+									"reach",
+									"menace"
+								]
+							},
+							"if": {
+								"bound": "evidence"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Izoni, Center of the Web",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice four tokens to surveil, draw, and gain life",
+				"basis": "Sacrifice four tokens: Surveil 2, then draw two cards. You gain 2 life.",
+				"timing": "stack",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"controller": "you",
+							"token": true
+						},
+						"count": 4
+					}
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

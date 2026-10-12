@@ -1,0 +1,100 @@
+{
+	"card": "Glimpse the Core",
+	"generated": "2026-10-10",
+	"source": "c6afd151c0f83f9d5c1638b462fb43f630a2de0219ad741e2897ee3738798477",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Glimpse the Core",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Glimpse the Core",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Glimpse the Core choosing the basic Forest search",
+				"basis": "Choose one —\n• Search your library for a basic Forest card, put that card onto the battlefield tapped, then shuffle.\n• Return target Cave card from your graveyard to the battlefield tapped.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"supertypes": [
+								"basic"
+							],
+							"subtypes": [
+								"Forest"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "forest"
+					},
+					{
+						"do": "move",
+						"what": "bound:forest",
+						"to": "battlefield",
+						"controller": "you",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Glimpse the Core",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Glimpse the Core choosing to return a Cave",
+				"basis": "Choose one —\n• Search your library for a basic Forest card, put that card onto the battlefield tapped, then shuffle.\n• Return target Cave card from your graveyard to the battlefield tapped.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Cave"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"tapped": true,
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

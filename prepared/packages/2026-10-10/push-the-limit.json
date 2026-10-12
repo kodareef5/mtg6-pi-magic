@@ -1,0 +1,106 @@
+{
+	"card": "Push the Limit",
+	"generated": "2026-10-10",
+	"source": "40d9be6c06b4e659e7ada94f2d64a8d8d000c43471c413c2ce34b139574901cc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Push the Limit",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Push the Limit",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return Mounts and Vehicles, schedule their sacrifice, animate Vehicles, and grant haste",
+				"basis": "Return all Mount and Vehicle cards from your graveyard to the battlefield. Sacrifice them at the beginning of the next end step. ... Vehicles you control become artifact creatures until end of turn. Creatures you control gain haste until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Mount",
+								"Vehicle"
+							]
+						},
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"as": "returned"
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:returned",
+									"to": "graveyard",
+									"reason": "sacrifice"
+								}
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Vehicle"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					},
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

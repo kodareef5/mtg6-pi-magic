@@ -1,0 +1,52 @@
+{
+	"card": "Sting-Slinger",
+	"generated": "2026-10-10",
+	"source": "622281f48fe9cf540fba593413d6911f3bbf537d30b662c35ba984a3e237d033",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sting-Slinger",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sting-Slinger",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Sting-Slinger to deal 2 damage to each opponent",
+				"basis": "{1}{R}, {T}, Blight 1: This creature deals 2 damage to each opponent. (To blight 1, put a -1/-1 counter on a creature you control.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}",
+					"tap": true,
+					"counters": {
+						"kind": "-1/-1",
+						"count": 1,
+						"put": true,
+						"on": {
+							"choose": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"count": 1
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "opponent",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

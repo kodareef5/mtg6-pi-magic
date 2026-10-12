@@ -1,0 +1,78 @@
+{
+	"card": "Funeral Room // Awakening Hall",
+	"generated": "2026-10-10",
+	"source": "64bbaa26bb5e7923aa89f74419d2ef6af75ff9c58a120362ed68eafa41f84539",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Funeral Room // Awakening Hall",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever a creature you control dies, each opponent loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When you unlock this door, return all creature cards from your graveyard to the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								]
+							},
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		],
+		"deferred": []
+	}
+}

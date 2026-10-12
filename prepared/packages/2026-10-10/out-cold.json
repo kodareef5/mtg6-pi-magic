@@ -1,0 +1,89 @@
+{
+	"card": "Out Cold",
+	"generated": "2026-10-10",
+	"source": "d96dd6a747c9edd4c12b7dbc19b0b74b19490b96acdac3142ef97d3434c39a89",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Out Cold",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Out Cold",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Out Cold",
+				"basis": "This spell can't be countered. (This includes by the ward ability.) ... Tap up to two target creatures and put a stun counter on each of them. Investigate. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"timing": "spell",
+				"words": [
+					"can't be countered"
+				],
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "stun",
+						"amount": 1
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Clue Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Clue"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, Sacrifice this token: Draw a card.",
+									"cost": {
+										"mana": "{2}",
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

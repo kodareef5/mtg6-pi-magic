@@ -1,0 +1,100 @@
+{
+	"card": "Eaten by Piranhas",
+	"generated": "2026-10-10",
+	"source": "f8a87f4bd6798fe068bbbeb2daad68741ddba3f1ea5afbde152ef10c2e3d5287",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eaten by Piranhas",
+		"registers": [
+			{
+				"basis": "Flash (You may cast this spell any time you could cast an instant.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "Enchanted creature loses all abilities and is a black Skeleton creature with base power and toughness 1/1. (It loses all other colors, card types, and creature types.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"loseAbilities": true,
+					"colors": {
+						"set": [
+							"B"
+						]
+					},
+					"types": {
+						"set": [
+							"creature"
+						]
+					},
+					"subtypes": {
+						"set": [
+							"Skeleton"
+						],
+						"of": "creature"
+					},
+					"base": {
+						"power": 1,
+						"toughness": 1
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Eaten by Piranhas",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Eaten by Piranhas enchanting target creature",
+				"basis": "Flash (You may cast this spell any time you could cast an instant.) ... Enchant creature",
+				"timing": "spell",
+				"speed": "instant",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

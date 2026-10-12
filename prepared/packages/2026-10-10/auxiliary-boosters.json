@@ -1,0 +1,103 @@
+{
+	"card": "Auxiliary Boosters",
+	"generated": "2026-10-10",
+	"source": "c1bbabb8d0edba4c750e209a30c54329b0dec0017b3d7868b30b1dc1c34555d2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Auxiliary Boosters",
+		"registers": [
+			{
+				"basis": "When this Equipment enters, create a 2/2 colorless Robot artifact creature token and attach this Equipment to it.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Robot Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Robot"
+								],
+								"colors": [],
+								"power": 2,
+								"toughness": 2
+							},
+							"as": "robot"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:robot"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +1/+2 and has flying.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 2,
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Auxiliary Boosters",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Auxiliary Boosters",
+				"basis": "Equip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

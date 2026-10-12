@@ -1,0 +1,85 @@
+{
+	"card": "Burrog Barrage",
+	"generated": "2026-10-10",
+	"source": "0d49d76880341ed7882893d48ec99ef94df4b7b36000689bcbe7db6caf6bd092",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Burrog Barrage",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Burrog Barrage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Burrog Barrage",
+				"basis": "Target creature you control gets +1/+0 until end of turn if you've cast another instant or sorcery spell this turn. Then it deals damage equal to its power to up to one target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						},
+						"if": {
+							"amount": {
+								"history": "cast",
+								"by": "you",
+								"of": {
+									"zones": [
+										"stack"
+									],
+									"types": [
+										"instant",
+										"sorcery"
+									],
+									"not": {
+										"is": "this"
+									}
+								}
+							},
+							"atLeast": 1
+						}
+					},
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

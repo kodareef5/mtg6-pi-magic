@@ -1,0 +1,81 @@
+{
+	"card": "Cunning Maneuver",
+	"generated": "2026-10-10",
+	"source": "09b4b08a7ab4f88318993dec2ad1409945f3270b7943d44f54b6899c9c0808d6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cunning Maneuver",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cunning Maneuver",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cunning Maneuver",
+				"basis": "Target creature gets +3/+1 until end of turn. ... Create a Clue token. (It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Clue Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Clue"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, Sacrifice this token: Draw a card.",
+									"cost": {
+										"mana": "{2}",
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

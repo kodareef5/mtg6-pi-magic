@@ -1,0 +1,89 @@
+{
+	"card": "Wail of War",
+	"generated": "2026-10-10",
+	"source": "e2131b926827df9271e755cf90a3942049369a0c6d0ca1f34f4aa4ede2c94c98",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wail of War",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Wail of War: opponent's creatures get -1/-1",
+				"basis": "Choose one —\n• Creatures target opponent controls get -1/-1 until end of turn.\n• Return up to two target creature cards from your graveyard to your hand.",
+				"source": {
+					"card": "Wail of War",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					}
+				]
+			},
+			{
+				"claim": "Wail of War: return up to two creature cards",
+				"basis": "Choose one —\n• Creatures target opponent controls get -1/-1 until end of turn.\n• Return up to two target creature cards from your graveyard to your hand.",
+				"source": {
+					"card": "Wail of War",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"types": [
+								"creature"
+							],
+							"owner": "you"
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

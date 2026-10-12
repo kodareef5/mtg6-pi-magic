@@ -1,0 +1,93 @@
+{
+	"card": "Popular Egotist",
+	"generated": "2026-10-10",
+	"source": "97dbee989e13e2c90b3aa2e26e3a4eed12c7b2f5e1f538f34a30f6c5e3f4146c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Popular Egotist",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you sacrifice a permanent, target opponent loses 1 life and you gain 1 life.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "life",
+							"who": "target:0",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Popular Egotist",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Gain indestructible and tap Popular Egotist",
+				"basis": "{1}{B}, Sacrifice another creature or enchantment: This creature gains indestructible until end of turn. Tap it. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature",
+								"enchantment"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					},
+					{
+						"do": "tap",
+						"what": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,113 @@
+{
+	"card": "Long Lake Nuisance",
+	"generated": "2026-10-10",
+	"source": "dbe22878118e3e4c52110cf7c962c1030dc82afeecbb8ba8e61d20a156e0a763",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Long Lake Nuisance",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, recruit. (Draw a card, then discard a card. If you discarded a nonland card, create a 1/1 white Human Soldier creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "recruit-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:recruit-card",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "recruit-discard"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"all": [
+									{
+										"bound": "recruit-discard"
+									},
+									{
+										"is": "bound:recruit-discard",
+										"matches": {
+											"zones": [
+												"graveyard",
+												"exile",
+												"battlefield",
+												"stack",
+												"command",
+												"outside"
+											],
+											"not": {
+												"types": [
+													"land"
+												]
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

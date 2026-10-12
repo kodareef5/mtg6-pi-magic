@@ -1,0 +1,63 @@
+{
+	"card": "Seize the Spoils",
+	"generated": "2026-10-10",
+	"source": "1dd60fae3ac180d4be0254b0f91934193c3e1ee9a7d140a5168f2bf0ed6de3b8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seize the Spoils",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Seize the Spoils",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Seize the Spoils, discarding a card as an additional cost",
+				"basis": "As an additional cost to cast this spell, discard a card. ... Draw two cards and create a Treasure token. (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"timing": "spell",
+				"cost": {
+					"discard": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Treasure Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

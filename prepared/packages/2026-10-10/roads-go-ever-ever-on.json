@@ -1,0 +1,157 @@
+{
+	"card": "Roads Go Ever, Ever On",
+	"generated": "2026-10-10",
+	"source": "b5890c98419cc52328cdbc169655dfc550422d88818c4f8855d64afe64665590",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Roads Go Ever, Ever On",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Search your library for up to two basic Plains cards, exile them, then shuffle. You gain 2 life.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								],
+								"subtypes": [
+									"Plains"
+								]
+							},
+							"count": 2,
+							"upTo": true,
+							"as": "plains"
+						},
+						{
+							"do": "move",
+							"what": "bound:plains",
+							"to": "exile",
+							"reason": "exile",
+							"link": true
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2,
+					3
+				],
+				"basis": "II, III — Put a card exiled with this Saga into its owner's hand.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"exile"
+								],
+								"linked": true
+							},
+							"count": 1,
+							"as": "card"
+						},
+						{
+							"do": "move",
+							"what": "bound:card",
+							"to": "hand",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					4
+				],
+				"basis": "IV — Whenever you attack this turn, target creature you control gets +1/+1 until end of turn for each Plains you control.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "delay",
+							"until": "end-of-turn",
+							"event": {
+								"on": "attacked-with",
+								"by": "you"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "target:0",
+										"until": "end-of-turn",
+										"change": {
+											"power": {
+												"count": {
+													"types": [
+														"land"
+													],
+													"subtypes": [
+														"Plains"
+													],
+													"controller": "you"
+												}
+											},
+											"toughness": {
+												"count": {
+													"types": [
+														"land"
+													],
+													"subtypes": [
+														"Plains"
+													],
+													"controller": "you"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

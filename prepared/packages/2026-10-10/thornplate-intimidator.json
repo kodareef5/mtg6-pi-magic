@@ -1,0 +1,110 @@
+{
+	"card": "Thornplate Intimidator",
+	"generated": "2026-10-10",
+	"source": "4956c4899f98b3c8364660d7bdb86ad456c53cb8ecfa1a59337bab1370f941e2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thornplate Intimidator",
+		"registers": [
+			{
+				"basis": "Offspring {3} (You may pay an additional {3} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"paid": "offspring"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"copy": "this",
+							"except": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, target opponent loses 3 life unless they sacrifice a nonland permanent of their choice or discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "target:0",
+							"count": 1,
+							"actions": [
+								{
+									"sacrifice": {
+										"zones": [
+											"battlefield"
+										],
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								},
+								{
+									"discard": true
+								},
+								{
+									"loseLife": 3
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thornplate Intimidator",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Thornplate Intimidator with offspring",
+				"basis": "Offspring {3} (You may pay an additional {3} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "offspring",
+							"mana": "{3}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

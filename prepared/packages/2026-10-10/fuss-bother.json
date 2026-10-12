@@ -1,0 +1,90 @@
+{
+	"card": "Fuss // Bother",
+	"generated": "2026-10-10",
+	"source": "b0c308b7b9544c1872d8d919177f48cb97d3cc507c14d7c06fa301798b1016c2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fuss // Bother",
+		"registers": [],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Fuss // Bother",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fuss",
+				"basis": "Put a +1/+1 counter on each attacking creature you control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "counters",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Fuss // Bother",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bother",
+				"basis": "Create three 1/1 colorless Thopter artifact creature tokens with flying. Surveil 2.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 3,
+						"spec": {
+							"name": "Thopter Token",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"subtypes": [
+								"Thopter"
+							],
+							"colors": [],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"flying"
+							]
+						}
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

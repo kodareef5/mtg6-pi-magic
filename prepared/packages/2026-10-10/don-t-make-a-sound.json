@@ -1,0 +1,76 @@
+{
+	"card": "Don't Make a Sound",
+	"generated": "2026-10-10",
+	"source": "8505c25c05da2e2f60a8124681f26b3c3508e5d84a833f0476bbeb4a6969f1a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Don't Make a Sound",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Counter a spell unless its controller pays two mana; if they pay, surveil 2",
+				"basis": "Counter target spell unless its controller pays {2}. If they do, surveil 2. (Look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"source": {
+					"card": "Don't Make a Sound",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "pay",
+						"who": "controller:target:0",
+						"cost": {
+							"mana": "{2}"
+						},
+						"may": true,
+						"as": "paid"
+					},
+					{
+						"do": "counter",
+						"what": "target:0",
+						"if": {
+							"not": {
+								"bound": "paid"
+							}
+						}
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"bound": "paid"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,79 @@
+{
+	"card": "Weapons Manufacturing",
+	"generated": "2026-10-10",
+	"source": "8464c378fdbc74100414590ca9f7f1205c6a8b24599eaa0957d24af51a872afb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Weapons Manufacturing",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever a nontoken artifact you control enters, create a colorless artifact token named Munitions with \"When this token leaves the battlefield, it deals 2 damage to any target.\"",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact"
+						],
+						"controller": "you",
+						"token": false
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Munitions",
+								"types": [
+									"artifact"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "watch",
+										"basis": "When this token leaves the battlefield, it deals 2 damage to any target.",
+										"event": {
+											"on": "leaves",
+											"of": {
+												"is": "this"
+											}
+										},
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"types": [
+															"creature",
+															"planeswalker",
+															"battle"
+														]
+													},
+													"player": "any"
+												}
+											],
+											"instructions": [
+												{
+													"do": "damage",
+													"to": "target:0",
+													"amount": 2,
+													"from": "this"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

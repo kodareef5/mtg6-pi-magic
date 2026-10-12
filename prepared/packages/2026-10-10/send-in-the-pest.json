@@ -1,0 +1,81 @@
+{
+	"card": "Send in the Pest",
+	"generated": "2026-10-10",
+	"source": "64b4df8ac4a5db1dea46d5403479ca2a6a6746336ffc82dc3c913d60f2f2c9b8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Send in the Pest",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Send in the Pest",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Send in the Pest",
+				"basis": "Each opponent discards a card. You create a 1/1 black and green Pest creature token with \"Whenever this token attacks, you gain 1 life.\"",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 1,
+						"actions": [
+							{
+								"discard": true
+							}
+						]
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Pest Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Pest"
+							],
+							"colors": [
+								"B",
+								"G"
+							],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"kind": "watch",
+									"basis": "Whenever this token attacks, you gain 1 life.",
+									"event": {
+										"on": "attacks",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "life",
+												"who": "you",
+												"amount": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

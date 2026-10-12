@@ -1,0 +1,92 @@
+{
+	"card": "Reptil, Dinomorpher",
+	"generated": "2026-10-10",
+	"source": "7fcd01067373956fa933719810baefbd68e5a96084bf0897997186d121941953",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Reptil, Dinomorpher",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Reptil, Dinomorpher",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Brontosaurus",
+				"basis": "Brontosaurus — {3}: Until end of turn, Reptil becomes a Dinosaur Hero with base power and toughness 3/5 and gains reach and vigilance.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"subtypes": {
+								"set": [
+									"Dinosaur",
+									"Hero"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 3,
+								"toughness": 5
+							},
+							"words": [
+								"reach",
+								"vigilance"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Reptil, Dinomorpher",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Tyrannosaurus Rex",
+				"basis": "Tyrannosaurus Rex — {6}: Until end of turn, Reptil becomes a Dinosaur Hero with base power and toughness 6/6 and gains trample.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"subtypes": {
+								"set": [
+									"Dinosaur",
+									"Hero"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 6,
+								"toughness": 6
+							},
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

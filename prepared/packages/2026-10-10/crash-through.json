@@ -1,0 +1,53 @@
+{
+	"card": "Crash Through",
+	"generated": "2026-10-10",
+	"source": "72d70120f2ed5f31f42ff2956b2c7c95836c7d30f900e3f407869dcfd27aade3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Crash Through",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Crash Through",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Crash Through",
+				"basis": "Creatures you control gain trample until end of turn. (Each of those creatures can deal excess combat damage to the player or planeswalker it's attacking.) ... Draw a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

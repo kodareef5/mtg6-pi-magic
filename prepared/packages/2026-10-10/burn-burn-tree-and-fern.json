@@ -1,0 +1,93 @@
+{
+	"card": "Burn, Burn, Tree and Fern",
+	"generated": "2026-10-10",
+	"source": "bf07d27d2fc48e9997d33f555d23ef4878d9cec9158471155a2e5b1d1fe60bf8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Burn, Burn, Tree and Fern",
+		"registers": [
+			{
+				"basis": "I — This Saga deals 6 damage to target creature an opponent controls.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 6,
+							"from": "this"
+						}
+					]
+				}
+			},
+			{
+				"basis": "II — Destroy target artifact an opponent controls.",
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"artifact"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"basis": "III, IV — Add {R}.",
+				"kind": "chapter",
+				"numbers": [
+					3,
+					4
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,83 @@
+{
+	"card": "Resonating Lute",
+	"generated": "2026-10-10",
+	"source": "7c6718af8e161129be6eab6f4132604e93953468e9f3fb7399105428c99b23e0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Resonating Lute",
+		"registers": [
+			{
+				"basis": "Lands you control have \"{T}: Add two mana of any one color. Spend this mana only to cast instant and sorcery spells.\"",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"land"
+					],
+					"controller": "you",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Lands you control have \"{T}: Add two mana of any one color. Spend this mana only to cast instant and sorcery spells.\"",
+							"kind": "mana",
+							"cost": {
+								"tap": true
+							},
+							"any": 2,
+							"spendOnly": {
+								"zones": [
+									"stack"
+								],
+								"types": [
+									"instant",
+									"sorcery"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Tap Resonating Lute to draw a card, only with seven or more cards in hand.",
+				"basis": "{T}: Draw a card. Activate only if you have seven or more cards in your hand.",
+				"source": {
+					"card": "Resonating Lute",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 7
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

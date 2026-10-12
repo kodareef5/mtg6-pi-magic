@@ -1,0 +1,71 @@
+{
+	"card": "Muse Seeker",
+	"generated": "2026-10-10",
+	"source": "ed0c19da5223d4994c65e18aaab8ac16138d4d1ee41368a6a2df297d98202779",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Muse Seeker",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Opus — Whenever you cast an instant or sorcery spell, draw a card. Then discard a card unless five or more mana was spent to cast that spell.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"amount": {
+									"manaSpent": "event:object"
+								},
+								"atMost": 4
+							},
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"hand"
+										],
+										"controller": "you"
+									},
+									"count": 1,
+									"as": "discard"
+								},
+								{
+									"do": "move",
+									"what": "bound:discard",
+									"to": "graveyard",
+									"reason": "discard"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

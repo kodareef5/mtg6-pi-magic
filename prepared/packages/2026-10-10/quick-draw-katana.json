@@ -1,0 +1,71 @@
+{
+	"card": "Quick-Draw Katana",
+	"generated": "2026-10-10",
+	"source": "f71e9bbb2316267ce4bad2dcc08dfa4a61e8b5e4d4d16c5475379b6dcf36fab7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Quick-Draw Katana",
+		"registers": [
+			{
+				"basis": "During your turn, equipped creature gets +2/+0 and has first strike. (It deals combat damage before creatures without first strike.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"turn": "self"
+				},
+				"change": {
+					"power": 2,
+					"words": [
+						"first strike"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Quick-Draw Katana",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Quick-Draw Katana",
+				"basis": "Equip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

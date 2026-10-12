@@ -1,0 +1,70 @@
+{
+	"card": "Pyrewood Gearhulk",
+	"generated": "2026-10-10",
+	"source": "1d7a09cf88b83c0fb377200052e1169b40dc1b78812ab9903cd08b41efaf90db",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pyrewood Gearhulk",
+		"registers": [
+			{
+				"basis": "Vigilance, menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance",
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, other creatures you control get +2/+2 and gain vigilance and menace until end of turn. Damage can't be prevented this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 2,
+								"words": [
+									"vigilance",
+									"menace"
+								]
+							}
+						},
+						{
+							"do": "damage-rule",
+							"mode": "unpreventable",
+							"until": "end-of-turn"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

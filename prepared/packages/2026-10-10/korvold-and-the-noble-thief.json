@@ -1,0 +1,84 @@
+{
+	"card": "Korvold and the Noble Thief",
+	"generated": "2026-10-10",
+	"source": "25b1fde622f94b0226ae1932033773af445ccab0fd3cb77395bdaf1e8b8e0d09",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Korvold and the Noble Thief",
+		"registers": [
+			{
+				"basis": "I, II — Create a Treasure token. (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "III — Exile the top three cards of target opponent's library. You may play those cards this turn.",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 3,
+								"of": "target:0"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": "end-of-turn"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

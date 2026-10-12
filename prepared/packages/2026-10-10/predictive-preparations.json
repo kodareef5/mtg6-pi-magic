@@ -1,0 +1,63 @@
+{
+	"card": "Predictive Preparations",
+	"generated": "2026-10-10",
+	"source": "3c9340f4e7533f676db293f8a6c62459f1e26961167613245be2eab25f13ae3e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Predictive Preparations",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {3}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{3}{W}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Put a +1/+1 counter on each of one or two target creatures, using the printed cost or the registered flashback permission",
+				"basis": "Put a +1/+1 counter on each of one or two target creatures.",
+				"source": {
+					"card": "Predictive Preparations",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"atLeast": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

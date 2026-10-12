@@ -1,0 +1,115 @@
+{
+	"card": "Momo, Playful Pet",
+	"generated": "2026-10-10",
+	"source": "6a4bb8878360034930a09d7b9b7810d5d690a745837e58a3d9bb9c4f6faa758d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Momo, Playful Pet",
+		"registers": [
+			{
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "When Momo leaves the battlefield, choose one —\n• Create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")\n• Put a +1/+1 counter on target creature you control.\n• Scry 2.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Food Token",
+										"types": [
+											"artifact"
+										],
+										"subtypes": [
+											"Food"
+										],
+										"colors": [],
+										"registers": [
+											{
+												"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+												"kind": "activated",
+												"cost": {
+													"mana": "{2}",
+													"tap": true,
+													"sacrifice": "this"
+												},
+												"effect": {
+													"instructions": [
+														{
+															"do": "life",
+															"who": "you",
+															"amount": 3
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "target:0",
+									"kind": "+1/+1",
+									"amount": 1
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "keyword",
+									"name": "scry",
+									"who": "you",
+									"count": 2
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

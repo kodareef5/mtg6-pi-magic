@@ -1,0 +1,93 @@
+{
+	"card": "Knight Luminary",
+	"generated": "2026-10-10",
+	"source": "4581bb8055773448f570de3d406b02ed1dc8303679ddb456b8505b36c184b6f4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Knight Luminary",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 1/1 white Human Soldier creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"hand"
+					],
+					"controller": "self",
+					"card": "Knight Luminary"
+				},
+				"claim": "Cast Knight Luminary for its warp cost",
+				"basis": "Warp {1}{W} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+				"timing": "spell",
+				"cost": {
+					"alternative": "warp",
+					"mana": "{1}{W}"
+				},
+				"instructions": [
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "this",
+									"to": "exile",
+									"reason": "exile",
+									"as": "warped"
+								},
+								{
+									"do": "permit",
+									"what": "bound:warped",
+									"who": "owner",
+									"from": "next-turn",
+									"until": "indefinite"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

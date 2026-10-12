@@ -1,0 +1,96 @@
+{
+	"card": "Killian's Confidence",
+	"generated": "2026-10-10",
+	"source": "801f5c6a1f6d70c10ce0bb49b0731747e048b2c45635f54189d30f96d3f00e8e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Killian's Confidence",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more creatures you control deal combat damage to a player, you may pay {W/B}. If you do, return this card from your graveyard to your hand.",
+				"zones": [
+					"graveyard"
+				],
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					},
+					"player": true,
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"may": true,
+							"cost": {
+								"mana": "{W/B}"
+							},
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "resolve",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Killian's Confidence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Killian's Confidence",
+				"basis": "Target creature gets +1/+1 until end of turn. Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

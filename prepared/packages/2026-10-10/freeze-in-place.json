@@ -1,0 +1,61 @@
+{
+	"card": "Freeze in Place",
+	"generated": "2026-10-10",
+	"source": "57c9a80dd0c8d91b2d76e77e2f2af09b8e36914c98e86c79cd51a1c41c551169",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Freeze in Place",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Freeze in Place",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Freeze in Place",
+				"basis": "Tap target creature an opponent controls and put three stun counters on it. Scry 2. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "stun",
+						"amount": 3
+					},
+					{
+						"do": "keyword",
+						"name": "scry",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

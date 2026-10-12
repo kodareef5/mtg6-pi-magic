@@ -1,0 +1,64 @@
+{
+	"card": "Ominous Asylum",
+	"generated": "2026-10-10",
+	"source": "ffa860c8f4300d6860387801fe28db0d5df3e93e05c25af8692c8b0a2640f2e6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ominous Asylum",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {B} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "{T}: Add {B} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ominous Asylum",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate surveil 1",
+				"basis": "{4}, {T}: Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

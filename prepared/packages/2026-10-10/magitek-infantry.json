@@ -1,0 +1,81 @@
+{
+	"card": "Magitek Infantry",
+	"generated": "2026-10-10",
+	"source": "5183829a3aea5a46df3bd0eb2d989de1c7ea80df5707ca83ea31c15822c18426",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Magitek Infantry",
+		"registers": [
+			{
+				"basis": "This creature gets +1/+0 as long as you control another artifact.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 1
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Magitek Infantry",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Search for Magitek Infantry",
+				"basis": "{2}{W}: Search your library for a card named Magitek Infantry, put it onto the battlefield tapped, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"name": "Magitek Infantry"
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "infantry"
+					},
+					{
+						"do": "move",
+						"what": "bound:infantry",
+						"to": "battlefield",
+						"controller": "you",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

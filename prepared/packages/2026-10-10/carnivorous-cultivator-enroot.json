@@ -1,0 +1,116 @@
+{
+	"card": "Carnivorous Cultivator // Enroot",
+	"generated": "2026-10-10",
+	"source": "edd1a3b217353affc7ad95c939f620eec44172a48ed631ffde7a8021d9ef4c14",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Carnivorous Cultivator // Enroot",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "This creature enters prepared.",
+				"kind": "enters",
+				"prepared": true
+			},
+			{
+				"face": 0,
+				"basis": "Whenever this creature deals combat damage to a player, return target land card from your graveyard to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"types": [
+									"land"
+								],
+								"owner": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Carnivorous Cultivator // Enroot",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Enroot copy",
+				"basis": "Search your library for a land card, put it into your graveyard, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "graveyard",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

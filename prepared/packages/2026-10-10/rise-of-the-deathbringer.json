@@ -1,0 +1,91 @@
+{
+	"card": "Rise of the Deathbringer",
+	"generated": "2026-10-10",
+	"source": "72eaf718c189a89c9666d890c4908808d79ccf5a9fe4718df0e083a31dd3e96d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rise of the Deathbringer",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rise of the Deathbringer",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rise of the Deathbringer choosing card draw and life loss",
+				"basis": "Choose one —\n• Draw cards equal to the greatest power among creatures you control. You lose life equal to the number of cards drawn this way.\n• All creatures get -3/-3 until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"aggregate": "max",
+							"of": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"value": "power"
+						},
+						"as": "drawn"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"negate": {
+								"bound": "drawn"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rise of the Deathbringer",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rise of the Deathbringer choosing -3/-3 to all creatures",
+				"basis": "Choose one —\n• Draw cards equal to the greatest power among creatures you control. You lose life equal to the number of cards drawn this way.\n• All creatures get -3/-3 until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": -3,
+							"toughness": -3
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

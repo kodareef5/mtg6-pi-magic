@@ -1,0 +1,64 @@
+{
+	"card": "Full Bore",
+	"generated": "2026-10-10",
+	"source": "49afe43f85d6f4bdaff76bbfe67137ee81d642a84fe4ec85e7d348c97ddd0ae1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Full Bore",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Full Bore",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Full Bore",
+				"basis": "Target creature you control gets +3/+2 until end of turn. If that creature was cast for its warp cost, it also gains trample and haste until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 2
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample",
+								"haste"
+							]
+						},
+						"if": {
+							"cast": "target:0",
+							"alternative": "warp"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

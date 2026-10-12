@@ -1,0 +1,70 @@
+{
+	"card": "Koth, the Geomancer",
+	"generated": "2026-10-10",
+	"source": "2d42261eeef65db8818638029690e7f9b9c99b3e735ce95258eb3d54358dd389",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Koth, the Geomancer",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, Koth deals 1 damage to each opponent. If that land is a Mountain, add {R}.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1,
+							"from": "this"
+						},
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R"
+							],
+							"if": {
+								"is": "event:object",
+								"matches": {
+									"subtypes": [
+										"Mountain"
+									]
+								},
+								"lastKnown": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

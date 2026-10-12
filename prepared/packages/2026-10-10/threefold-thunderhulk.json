@@ -1,0 +1,122 @@
+{
+	"card": "Threefold Thunderhulk",
+	"generated": "2026-10-10",
+	"source": "5385a9943fd3b6bdae9cba50f3f733045fbda04722a58764cfa7721c3a78b4aa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Threefold Thunderhulk",
+		"registers": [
+			{
+				"basis": "This creature enters with three +1/+1 counters on it.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": 3
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, create a number of 1/1 colorless Gnome artifact creature tokens equal to its power.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"power": "this"
+							},
+							"spec": {
+								"name": "Gnome Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Gnome"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, create a number of 1/1 colorless Gnome artifact creature tokens equal to its power.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"power": "this"
+							},
+							"spec": {
+								"name": "Gnome Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Gnome"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Threefold Thunderhulk",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another artifact to put a +1/+1 counter on Threefold Thunderhulk",
+				"basis": "{2}, Sacrifice another artifact: Put a +1/+1 counter on this creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

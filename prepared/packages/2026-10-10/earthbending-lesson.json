@@ -1,0 +1,90 @@
+{
+	"card": "Earthbending Lesson",
+	"generated": "2026-10-10",
+	"source": "8983cf0f216572fee2ebb66919caa58e46957e5a87e8087fbcddeddd8eb722ba",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Earthbending Lesson",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Earthbending Lesson",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Earthbending Lesson to earthbend 4",
+				"basis": "Earthbend 4. (Target land you control becomes a 0/0 creature with haste that's still a land. Put four +1/+1 counters on it. When it dies or is exiled, return it to the battlefield tapped.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 4
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "leaves",
+							"of": {
+								"is": "target:0"
+							},
+							"to": [
+								"graveyard",
+								"exile"
+							]
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "event:object",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

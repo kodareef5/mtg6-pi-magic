@@ -1,0 +1,58 @@
+{
+	"card": "Curious Colossus",
+	"generated": "2026-10-10",
+	"source": "2a8f4609e01adc48d6cbd79f8e0cd2df105051f74fb72ec11d3816efdab0c1c2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Curious Colossus",
+		"registers": [
+			{
+				"basis": "When this creature enters, each creature target opponent controls loses all abilities, becomes a Coward in addition to its other types, and has base power and toughness 1/1.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "target:0"
+							},
+							"until": "indefinite",
+							"change": {
+								"loseAbilities": true,
+								"subtypes": {
+									"add": [
+										"Coward"
+									],
+									"of": "creature"
+								},
+								"base": {
+									"power": 1,
+									"toughness": 1
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

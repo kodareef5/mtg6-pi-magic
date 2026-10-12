@@ -1,0 +1,191 @@
+{
+	"card": "Eddie Brock // Venom, Lethal Protector",
+	"generated": "2026-10-10",
+	"source": "e0ec8572e815505c0ac2e1ba004f491e54675ad7e6e8125856aac2853f00462a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eddie Brock // Venom, Lethal Protector",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When Eddie Brock enters, return target creature card with mana value 1 or less from your graveyard to the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"manaValue": {
+									"atMost": 1
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Menace, trample, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace",
+						"trample",
+						"haste"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever Venom attacks, you may sacrifice another creature. If you do, draw X cards, then you may put a permanent card with mana value X or less from your hand onto the battlefield, where X is the sacrificed creature's mana value.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you",
+								"types": [
+									"creature"
+								],
+								"other": true
+							},
+							"count": 1,
+							"may": true,
+							"as": "victim"
+						},
+						{
+							"do": "move",
+							"what": "bound:victim",
+							"to": "graveyard",
+							"reason": "sacrifice",
+							"if": {
+								"bound": "victim"
+							},
+							"as": "sacrificed"
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"instructions": [
+								{
+									"do": "draw",
+									"who": "you",
+									"count": {
+										"manaValue": "bound:victim"
+									}
+								},
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"hand"
+										],
+										"controller": "you",
+										"types": [
+											"artifact",
+											"battle",
+											"creature",
+											"enchantment",
+											"land",
+											"planeswalker"
+										],
+										"manaValue": {
+											"atMost": {
+												"manaValue": "bound:victim"
+											}
+										}
+									},
+									"count": 1,
+									"upTo": true,
+									"as": "permanent"
+								},
+								{
+									"do": "move",
+									"what": "bound:permanent",
+									"to": "battlefield",
+									"controller": "you",
+									"reason": "resolve"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Eddie Brock // Venom, Lethal Protector",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Transform Eddie Brock",
+				"basis": "{3}{B}{R}{G}: Transform Eddie Brock. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}{B}{R}{G}"
+				},
+				"instructions": [
+					{
+						"do": "transform",
+						"what": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		]
+	}
+}

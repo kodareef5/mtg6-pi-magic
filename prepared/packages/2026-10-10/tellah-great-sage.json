@@ -1,0 +1,100 @@
+{
+	"card": "Tellah, Great Sage",
+	"generated": "2026-10-10",
+	"source": "e876cba4d6f822c70f63c7d29b354604a7cce3a53c1488febf58e10cdd028085",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tellah, Great Sage",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a noncreature spell, create a 1/1 colorless Hero creature token. If four or more mana was spent to cast that spell, draw two cards. If eight or more mana was spent to cast that spell, sacrifice Tellah and it deals that much damage to each opponent.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"enchantment",
+							"instant",
+							"kindred",
+							"land",
+							"planeswalker",
+							"sorcery"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Hero Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"amount": {
+									"manaSpent": "event:object"
+								},
+								"atLeast": 4
+							}
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"amount": {
+									"manaSpent": "event:object"
+								},
+								"atLeast": 8
+							},
+							"instructions": [
+								{
+									"do": "move",
+									"what": "this",
+									"to": "graveyard",
+									"reason": "sacrifice"
+								},
+								{
+									"do": "damage",
+									"from": "this",
+									"to": "opponent",
+									"amount": {
+										"manaSpent": "event:object"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

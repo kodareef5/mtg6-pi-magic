@@ -1,0 +1,70 @@
+{
+	"card": "Teeming Dragonstorm",
+	"generated": "2026-10-10",
+	"source": "d4b21273eded58808b7486db2612d30d834f057434262a360a92c1f36076d078",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Teeming Dragonstorm",
+		"registers": [
+			{
+				"basis": "When this enchantment enters, create two 2/2 white Soldier creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When a Dragon you control enters, return this enchantment to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Dragon"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

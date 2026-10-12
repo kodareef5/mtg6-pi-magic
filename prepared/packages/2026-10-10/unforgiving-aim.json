@@ -1,0 +1,111 @@
+{
+	"card": "Unforgiving Aim",
+	"generated": "2026-10-10",
+	"source": "f4c374725713f1f1d8fc7a0a2f2730f131fc8f65c88c7687ec6df8612af46288",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unforgiving Aim",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unforgiving Aim",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Unforgiving Aim to destroy a creature with flying",
+				"basis": "Choose one —\n• Destroy target creature with flying.\n• Destroy target enchantment.\n• Create a 2/2 black and green Elf creature token.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"words": [
+								"flying"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Unforgiving Aim",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Unforgiving Aim to destroy an enchantment",
+				"basis": "Choose one —\n• Destroy target creature with flying.\n• Destroy target enchantment.\n• Create a 2/2 black and green Elf creature token.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Unforgiving Aim",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Unforgiving Aim to create an Elf token",
+				"basis": "Choose one —\n• Destroy target creature with flying.\n• Destroy target enchantment.\n• Create a 2/2 black and green Elf creature token.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Elf Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elf"
+							],
+							"colors": [
+								"B",
+								"G"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

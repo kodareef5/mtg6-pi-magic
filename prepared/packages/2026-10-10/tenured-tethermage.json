@@ -1,0 +1,122 @@
+{
+	"card": "Tenured Tethermage",
+	"generated": "2026-10-10",
+	"source": "f6b021ce3a99f6b834945356006c0e046c2b2164871cdd1c46cde318e2c5cb85",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tenured Tethermage",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may sacrifice a land. If you do, create two tapped Heartwood tokens. (They're red and green artifacts with \"{T}: Add {R} or {G}.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"types": [
+											"land"
+										],
+										"controller": "you"
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "token",
+							"count": 2,
+							"tapped": true,
+							"if": {
+								"bound": "sacrificed"
+							},
+							"spec": {
+								"name": "Heartwood Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Heartwood"
+								],
+								"colors": [
+									"R",
+									"G"
+								],
+								"registers": [
+									{
+										"basis": "{T}: Add {R} or {G}.",
+										"kind": "mana",
+										"cost": {
+											"tap": true
+										},
+										"colors": [
+											"R"
+										]
+									},
+									{
+										"basis": "{T}: Add {R} or {G}.",
+										"kind": "mana",
+										"cost": {
+											"tap": true
+										},
+										"colors": [
+											"G"
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tenured Tethermage",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap two artifacts to put two +1/+1 counters on this creature",
+				"basis": "Tap two untapped artifacts you control: Put two +1/+1 counters on this creature.",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"tapped": false
+						},
+						"count": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

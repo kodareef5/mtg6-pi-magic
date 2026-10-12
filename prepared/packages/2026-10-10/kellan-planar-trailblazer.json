@@ -1,0 +1,136 @@
+{
+	"card": "Kellan, Planar Trailblazer",
+	"generated": "2026-10-10",
+	"source": "64b89470022058794e72cd32714375adced67e03f22c3da2a5e13728d6c8d662",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kellan, Planar Trailblazer",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self",
+					"card": "Kellan, Planar Trailblazer"
+				},
+				"claim": "Kellan becomes a Detective",
+				"basis": "{1}{R}: If Kellan is a Scout, it becomes a Human Faerie Detective and gains \"Whenever Kellan deals combat damage to a player, exile the top card of your library. You may play that card this turn.\"",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "indefinite",
+						"if": {
+							"is": "this",
+							"matches": {
+								"subtypes": [
+									"Scout"
+								]
+							}
+						},
+						"change": {
+							"subtypes": {
+								"set": [
+									"Human",
+									"Faerie",
+									"Detective"
+								],
+								"of": "creature"
+							},
+							"registers": [
+								{
+									"basis": "{1}{R}: If Kellan is a Scout, it becomes a Human Faerie Detective and gains \"Whenever Kellan deals combat damage to a player, exile the top card of your library. You may play that card this turn.\"",
+									"kind": "watch",
+									"event": {
+										"on": "combat-damage",
+										"of": {
+											"is": "this"
+										},
+										"player": true
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": {
+													"top": 1,
+													"of": "you"
+												},
+												"to": "exile",
+												"reason": "exile",
+												"as": "card"
+											},
+											{
+												"do": "permit",
+												"what": "bound:card",
+												"who": "you",
+												"until": "end-of-turn"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self",
+					"card": "Kellan, Planar Trailblazer"
+				},
+				"claim": "Kellan becomes a 3/2 Rogue with double strike",
+				"basis": "{2}{R}: If Kellan is a Detective, it becomes a 3/2 Human Faerie Rogue and gains double strike.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{R}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "indefinite",
+						"if": {
+							"is": "this",
+							"matches": {
+								"subtypes": [
+									"Detective"
+								]
+							}
+						},
+						"change": {
+							"subtypes": {
+								"set": [
+									"Human",
+									"Faerie",
+									"Rogue"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 3,
+								"toughness": 2
+							},
+							"words": [
+								"double strike"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

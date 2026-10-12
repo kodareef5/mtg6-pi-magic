@@ -1,0 +1,104 @@
+{
+	"card": "Hellspur Posse Boss",
+	"generated": "2026-10-10",
+	"source": "0632987966b7f648395094d50b6b1aad012fa22a5c132d7046779289ee1a6193",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hellspur Posse Boss",
+		"registers": [
+			{
+				"basis": "Other outlaws you control have haste. (Assassins, Mercenaries, Pirates, Rogues, and Warlocks are outlaws.)",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"subtypes": [
+						"Assassin",
+						"Mercenary",
+						"Pirate",
+						"Rogue",
+						"Warlock"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create two 1/1 red Mercenary creature tokens with \"{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.\"",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Mercenary Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Mercenary"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1,
+								"registers": [
+									{
+										"basis": "{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.",
+										"kind": "activated",
+										"cost": {
+											"tap": true
+										},
+										"speed": "sorcery",
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"types": [
+															"creature"
+														],
+														"controller": "you"
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "target:0",
+													"until": "end-of-turn",
+													"change": {
+														"power": 1
+													},
+													"label": "+1/+0 until end of turn"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

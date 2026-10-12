@@ -1,0 +1,80 @@
+{
+	"card": "Nezumi Linkbreaker",
+	"generated": "2026-10-10",
+	"source": "911840dcb29f738f302f21cc52635cf38f25ba484215b16aa5d5461f63f8280a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nezumi Linkbreaker",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature dies, create a 1/1 red Mercenary creature token with \"{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.\"",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Mercenary Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Mercenary"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1,
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.",
+										"cost": {
+											"tap": true
+										},
+										"speed": "sorcery",
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"types": [
+															"creature"
+														],
+														"controller": "you"
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "target:0",
+													"until": "end-of-turn",
+													"change": {
+														"power": 1
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

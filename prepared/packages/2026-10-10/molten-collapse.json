@@ -1,0 +1,135 @@
+{
+	"card": "Molten Collapse",
+	"generated": "2026-10-10",
+	"source": "9e140dfb4607fda4aebac014e676c09e7b7995d80c116236754012f655d65ae2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Molten Collapse",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Molten Collapse",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Molten Collapse choosing the creature or planeswalker mode",
+				"basis": "Choose one. If you descended this turn, you may choose both instead. (You descended if a permanent card was put into your graveyard from anywhere.) ... • Destroy target creature or planeswalker.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Molten Collapse",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Molten Collapse choosing the small noncreature, nonland permanent mode",
+				"basis": "Choose one. If you descended this turn, you may choose both instead. (You descended if a permanent card was put into your graveyard from anywhere.) ... • Destroy target noncreature, nonland permanent with mana value 1 or less.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"not": {
+								"types": [
+									"creature",
+									"land"
+								]
+							},
+							"manaValue": {
+								"atMost": 1
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Molten Collapse",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Molten Collapse choosing both modes after descending",
+				"basis": "Choose one. If you descended this turn, you may choose both instead. (You descended if a permanent card was put into your graveyard from anywhere.) ... • Destroy target creature or planeswalker. ... • Destroy target noncreature, nonland permanent with mana value 1 or less.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "descended",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					},
+					{
+						"object": {
+							"not": {
+								"types": [
+									"creature",
+									"land"
+								]
+							},
+							"manaValue": {
+								"atMost": 1
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "destroy",
+						"what": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

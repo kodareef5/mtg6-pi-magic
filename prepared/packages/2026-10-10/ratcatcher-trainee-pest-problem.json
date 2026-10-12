@@ -1,0 +1,73 @@
+{
+	"card": "Ratcatcher Trainee // Pest Problem",
+	"generated": "2026-10-10",
+	"source": "adeb4e1962d9cf9c84e77d43732531a6da5b7faa879f3a9bf4e700ca2bab32b1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ratcatcher Trainee // Pest Problem",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "During your turn, this creature has first strike.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"turn": "self"
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Ratcatcher Trainee // Pest Problem",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pest Problem",
+				"basis": "Create two 1/1 black Rat creature tokens with \"This token can't block.\" (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Rat Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rat"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"can't block"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

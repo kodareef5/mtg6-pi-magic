@@ -1,0 +1,64 @@
+{
+	"card": "Elvish Archivist",
+	"generated": "2026-10-10",
+	"source": "2cb8da4358a2b7f4430422028055be94dd15854992af62cdcfcd07e9027ce6eb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elvish Archivist",
+		"registers": [
+			{
+				"basis": "Whenever one or more artifacts you control enter, put two +1/+1 counters on this creature. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact"
+						],
+						"controller": "you"
+					},
+					"batch": true
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever one or more enchantments you control enter, draw a card. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					},
+					"batch": true
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

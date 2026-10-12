@@ -1,0 +1,81 @@
+{
+	"card": "Pull Through the Weft",
+	"generated": "2026-10-10",
+	"source": "1533f279e2b7d5efc0de643dcede0bf148d03ff8f3ca047d0b1f14fbdff2dd56",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pull Through the Weft",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Return up to two nonland permanent cards to hand, then up to two land cards to the battlefield tapped",
+				"basis": "Return up to two target nonland permanent cards from your graveyard to your hand, then return up to two target land cards from your graveyard to the battlefield tapped.",
+				"source": {
+					"card": "Pull Through the Weft",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"planeswalker"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"count": 2,
+						"upTo": true
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "move",
+						"what": "target:1",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

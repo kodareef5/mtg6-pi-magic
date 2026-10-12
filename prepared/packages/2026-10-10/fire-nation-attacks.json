@@ -1,0 +1,87 @@
+{
+	"card": "Fire Nation Attacks",
+	"generated": "2026-10-10",
+	"source": "f3981a9ea15fcc761d4b05753bc3a6f28362e2ff99f4159798339c0c3120ba6a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fire Nation Attacks",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {8}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{8}{R}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fire Nation Attacks",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Create two Soldier tokens, using the flashback permission and price when chosen.",
+				"basis": "Create two 2/2 red Soldier creature tokens with firebending 1. (Whenever a creature with firebending 1 attacks, add {R}. This mana lasts until end of combat.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Soldier Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Soldier"
+							],
+							"colors": [
+								"R"
+							],
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"firebending 1"
+							],
+							"registers": [
+								{
+									"basis": "Create two 2/2 red Soldier creature tokens with firebending 1. (Whenever a creature with firebending 1 attacks, add {R}. This mana lasts until end of combat.)",
+									"kind": "watch",
+									"event": {
+										"on": "attacks",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "mana",
+												"who": "you",
+												"colors": [
+													"R"
+												],
+												"until": "end-of-combat"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

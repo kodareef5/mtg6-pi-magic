@@ -1,0 +1,91 @@
+{
+	"card": "Altanak, the Thrice-Called",
+	"generated": "2026-10-10",
+	"source": "456e29ef33df512166ddad4f89ec1046654c6ddff18286b4a88de98e3178ff05",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Altanak, the Thrice-Called",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Altanak becomes the target of a spell or ability an opponent controls, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Discard Altanak to return a land card tapped",
+				"basis": "{1}{G}, Discard this card: Return target land card from your graveyard to the battlefield tapped.",
+				"source": {
+					"card": "Altanak, the Thrice-Called",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{G}",
+					"discard": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"tapped": true,
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

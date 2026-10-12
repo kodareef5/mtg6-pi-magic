@@ -1,0 +1,93 @@
+{
+	"card": "Rabaroo Troop",
+	"generated": "2026-10-10",
+	"source": "836625c655abf5a6db48838e7a6870d06a067e84623ae84ace3f41a6bf02af73",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rabaroo Troop",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, this creature gains flying until end of turn and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"flying"
+								]
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rabaroo Troop",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plainscycle Rabaroo Troop",
+				"basis": "Plainscycling {2} ({2}, Discard this card: Search your library for a Plains card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Plains"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "plains"
+					},
+					{
+						"do": "move",
+						"what": "bound:plains",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

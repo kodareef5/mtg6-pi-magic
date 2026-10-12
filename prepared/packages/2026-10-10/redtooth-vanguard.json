@@ -1,0 +1,72 @@
+{
+	"card": "Redtooth Vanguard",
+	"generated": "2026-10-10",
+	"source": "c40152dac0b31a7f7e144b4946597123714c362c5d4f283fbf79bd9f5d646ade",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Redtooth Vanguard",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever an enchantment you control enters, you may pay {2}. If you do, return this card from your graveyard to your hand.",
+				"zones": [
+					"graveyard"
+				],
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{2}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "resolve",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

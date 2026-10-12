@@ -1,0 +1,126 @@
+{
+	"card": "The Unbeatable Squirrel Girl",
+	"generated": "2026-10-10",
+	"source": "accf3ebf03b51f420841c62154b21589ca340b54d6316cb59711cb1fdf18d0ba",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Unbeatable Squirrel Girl",
+		"registers": [
+			{
+				"basis": "Do You Like Squirrels? — Whenever The Unbeatable Squirrel Girl enters or attacks, create a 1/1 green Squirrel creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Squirrel Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Squirrel"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Do You Like Squirrels? — Whenever The Unbeatable Squirrel Girl enters or attacks, create a 1/1 green Squirrel creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Squirrel Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Squirrel"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "The Unbeatable Squirrel Girl",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a Squirrel token for each Squirrel you control, counted at resolution.",
+				"basis": "I LOVE Squirrels! — {1}{G}{G}{G}: Create X 1/1 green Squirrel creature tokens, where X is the number of Squirrels you control.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{G}{G}{G}"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"subtypes": [
+									"Squirrel"
+								],
+								"controller": "you"
+							}
+						},
+						"spec": {
+							"name": "Squirrel Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Squirrel"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

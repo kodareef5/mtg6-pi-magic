@@ -1,0 +1,80 @@
+{
+	"card": "Desecration Demon",
+	"generated": "2026-10-10",
+	"source": "2161dfb9abccdbc60d64565dbe42154c37115f7dfadc78c30920add70d88c292",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Desecration Demon",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of each combat, any opponent may sacrifice a creature of their choice. If a player does, tap this creature and put a +1/+1 counter on it.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "any"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "opponent",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										],
+										"controller": "opponent"
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "tap",
+							"what": "this",
+							"if": {
+								"bound": "sacrificed"
+							}
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"bound": "sacrificed"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

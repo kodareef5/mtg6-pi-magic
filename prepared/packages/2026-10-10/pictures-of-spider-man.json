@@ -1,0 +1,119 @@
+{
+	"card": "Pictures of Spider-Man",
+	"generated": "2026-10-10",
+	"source": "3e37341a6b9a66776f59ac95d39e1817a3878d612de934aefa089e7be212a1cc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pictures of Spider-Man",
+		"registers": [
+			{
+				"basis": "When this artifact enters, look at the top five cards of your library. You may reveal up to two creature cards from among them and put them into your hand. Put the rest on the bottom of your library in a random order.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 5,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"types": [
+									"creature"
+								]
+							},
+							"count": 2,
+							"upTo": true,
+							"reveal": true,
+							"as": "taken"
+						},
+						{
+							"do": "move",
+							"what": "bound:taken",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"position": "bottom",
+							"random": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pictures of Spider-Man",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Pictures of Spider-Man to create a Treasure token",
+				"basis": "{1}, {T}, Sacrifice this artifact: Create a Treasure token. (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Treasure Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

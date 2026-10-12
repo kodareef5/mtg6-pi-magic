@@ -1,0 +1,54 @@
+{
+	"card": "Valgavoth's Faithful",
+	"generated": "2026-10-10",
+	"source": "8e7969520b32ae951c1ee1b688535abf1c1acd503dc86dd3dd1aaff1ca45ca08",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Valgavoth's Faithful",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Valgavoth's Faithful",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice this creature to return a creature card from your graveyard to the battlefield.",
+				"basis": "{3}{B}, Sacrifice this creature: Return target creature card from your graveyard to the battlefield. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}{B}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

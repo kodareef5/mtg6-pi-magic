@@ -1,0 +1,85 @@
+{
+	"card": "Campus Composer // Aqueous Aria",
+	"generated": "2026-10-10",
+	"source": "e485f9818c1cc9886661b0f1794261f2b98b4b7944674a828de3aa879b73ea10",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Campus Composer // Aqueous Aria",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Ward {2}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Campus Composer // Aqueous Aria",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Aqueous Aria copy",
+				"basis": "Create a 3/3 blue and red Elemental creature token with flying.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Elemental Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elemental"
+							],
+							"colors": [
+								"U",
+								"R"
+							],
+							"power": 3,
+							"toughness": 3,
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

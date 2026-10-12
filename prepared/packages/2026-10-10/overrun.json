@@ -1,0 +1,50 @@
+{
+	"card": "Overrun",
+	"generated": "2026-10-10",
+	"source": "06a7756da8b0c21906642d5c9796158f31fde05ddbb2dcdae8ccfc84ce462844",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overrun",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Overrun",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Overrun",
+				"basis": "Creatures you control get +3/+3 and gain trample until end of turn. (Each of those creatures can deal excess combat damage to the player or planeswalker it's attacking.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3,
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

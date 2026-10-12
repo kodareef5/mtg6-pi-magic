@@ -1,0 +1,148 @@
+{
+	"card": "Guidelight Pathmaker",
+	"generated": "2026-10-10",
+	"source": "4acb3bed1ead6b1352d8ab7c3e7803e02a6cb33318edcd53c2956692968d0f81",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Guidelight Pathmaker",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "When this Vehicle enters, you may search your library for an artifact card and reveal it. Put it onto the battlefield if its mana value is 2 or less. Otherwise, put it into your hand. If you search your library this way, shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"types": [
+											"artifact"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "artifact"
+								},
+								{
+									"do": "move",
+									"what": "bound:artifact",
+									"to": "battlefield",
+									"controller": "you",
+									"reason": "resolve",
+									"if": {
+										"is": "bound:artifact",
+										"matches": {
+											"zones": [
+												"library"
+											],
+											"manaValue": {
+												"atMost": 2
+											}
+										}
+									}
+								},
+								{
+									"do": "move",
+									"what": "bound:artifact",
+									"to": "hand",
+									"reason": "resolve",
+									"if": {
+										"is": "bound:artifact",
+										"matches": {
+											"zones": [
+												"library"
+											],
+											"manaValue": {
+												"atLeast": 3
+											}
+										}
+									}
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Guidelight Pathmaker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Guidelight Pathmaker",
+				"basis": "Crew 2",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

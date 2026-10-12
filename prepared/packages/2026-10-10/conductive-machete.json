@@ -1,0 +1,88 @@
+{
+	"card": "Conductive Machete",
+	"generated": "2026-10-10",
+	"source": "5e657cfe14accb3a5d425bf20257417b52d874c397ac84753679f8e1d8e02ff5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Conductive Machete",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this Equipment enters, manifest dread, then attach this Equipment to that creature. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "manifest-dread",
+							"who": "you",
+							"as": "manifested"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:manifested"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +2/+1.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Conductive Machete",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Conductive Machete to target creature you control",
+				"basis": "Equip {4}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

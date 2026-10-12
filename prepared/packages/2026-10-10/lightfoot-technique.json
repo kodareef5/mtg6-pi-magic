@@ -1,0 +1,56 @@
+{
+	"card": "Lightfoot Technique",
+	"generated": "2026-10-10",
+	"source": "cf1d0bea6dddda2fba8f8e23456ce06aa073d42ebaef1cc97e352c94af26658b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lightfoot Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lightfoot Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Lightfoot Technique",
+				"basis": "Put a +1/+1 counter on target creature. It gains flying and indestructible until end of turn. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"flying",
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

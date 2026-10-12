@@ -1,0 +1,105 @@
+{
+	"card": "Killmonger, Scourge of Wakanda",
+	"generated": "2026-10-10",
+	"source": "bc4c0029779db0d909f721f56f1195ca00bb37325a2ea6f29955eb719fc5be8c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Killmonger, Scourge of Wakanda",
+		"registers": [
+			{
+				"basis": "When Killmonger enters, you may sacrifice another creature. When you do, destroy target nonland permanent an opponent controls.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"other": true
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "opponent",
+											"not": {
+												"types": [
+													"land"
+												]
+											}
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "destroy",
+										"what": "target:0"
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "As long as there are two or more creature cards in your graveyard, Killmonger gets +2/+1.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						}
+					},
+					"atLeast": 2
+				},
+				"change": {
+					"power": 2,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

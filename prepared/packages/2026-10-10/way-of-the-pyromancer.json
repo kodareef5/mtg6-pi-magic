@@ -1,0 +1,154 @@
+{
+	"card": "Way of the Pyromancer",
+	"generated": "2026-10-10",
+	"source": "e79bb185198c95e21a1b2e108b31f56de4be41a22abf96dbd9a21cec3ea03f56",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Way of the Pyromancer",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Way of the Pyromancer enters, empower Jace 2. (Put two loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"types": [
+											"planeswalker"
+										],
+										"subtypes": [
+											"Jace"
+										],
+										"token": true
+									}
+								},
+								"atMost": 0
+							},
+							"spec": {
+								"name": "Jace Token",
+								"types": [
+									"planeswalker"
+								],
+								"subtypes": [
+									"Jace"
+								],
+								"colors": [
+									"U"
+								],
+								"loyalty": 0,
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "[−1]: Surveil 1",
+										"cost": {
+											"loyalty": -1
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "keyword",
+													"name": "surveil",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									},
+									{
+										"kind": "activated",
+										"basis": "[−3]: Draw a card.",
+										"cost": {
+											"loyalty": -3
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"controller": "you",
+								"types": [
+									"planeswalker"
+								],
+								"subtypes": [
+									"Jace"
+								],
+								"token": true
+							},
+							"count": 1,
+							"as": "jace"
+						},
+						{
+							"do": "counters",
+							"on": "bound:jace",
+							"kind": "loyalty",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Planeswalkers you control have \"[+1]: Add {R}.\"",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"planeswalker"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Planeswalkers you control have \"[+1]: Add {R}.\"",
+							"cost": {
+								"loyalty": 1
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "mana",
+										"who": "you",
+										"colors": [
+											"R"
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

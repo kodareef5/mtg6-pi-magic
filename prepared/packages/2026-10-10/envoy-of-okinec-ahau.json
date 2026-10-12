@@ -16,7 +16,7 @@
 					],
 					"controller": "self"
 				},
-				"claim": "Create a Gnome token",
+				"claim": "Create a Gnome artifact creature token",
 				"basis": "{4}{W}: Create a 1/1 colorless Gnome artifact creature token.",
 				"timing": "stack",
 				"cost": {
@@ -27,7 +27,7 @@
 						"do": "token",
 						"count": 1,
 						"spec": {
-							"name": "Gnome",
+							"name": "Gnome Token",
 							"types": [
 								"artifact",
 								"creature"

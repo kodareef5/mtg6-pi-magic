@@ -1,0 +1,87 @@
+{
+	"card": "Excalibur II",
+	"generated": "2026-10-10",
+	"source": "0ccc8aafac4fd5b339905c50a0d6f41381131dd82c32e21bfc2ea5f1e4868f9a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Excalibur II",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put a charge counter on Excalibur II.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "charge",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +1/+1 for each charge counter on Excalibur II.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": {
+						"counters": "charge",
+						"on": "this"
+					},
+					"toughness": {
+						"counters": "charge",
+						"on": "this"
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Excalibur II",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Excalibur II",
+				"basis": "Equip {3}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

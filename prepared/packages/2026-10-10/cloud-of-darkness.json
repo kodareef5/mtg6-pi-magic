@@ -1,0 +1,100 @@
+{
+	"card": "Cloud of Darkness",
+	"generated": "2026-10-10",
+	"source": "9e7bc38b0a2dbbf9ca29956fd09153e0361bbb7fc00608984bf585f1fdcb66cb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cloud of Darkness",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Particle Beam — When Cloud of Darkness enters, target creature an opponent controls gets -X/-X until end of turn, where X is the number of permanent cards in your graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"negate": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"land",
+												"planeswalker"
+											]
+										}
+									}
+								},
+								"toughness": {
+									"negate": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"land",
+												"planeswalker"
+											]
+										}
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

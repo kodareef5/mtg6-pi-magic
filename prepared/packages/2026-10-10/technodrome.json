@@ -1,0 +1,96 @@
+{
+	"card": "Technodrome",
+	"generated": "2026-10-10",
+	"source": "89f542d0990cbde04ff4699a82e3c905531446af506b29df4dd6dfbaba4d2f4c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Technodrome",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Reach, trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "This creature can't attack or block unless its power is 6 or greater.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"power": "this"
+					},
+					"atMost": 5
+				},
+				"change": {
+					"words": [
+						"can't attack",
+						"can't block"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Technodrome",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another artifact to draw a card and put a +1/+1 counter on Technodrome",
+				"basis": "{T}, Sacrifice another artifact: Draw a card. Put a +1/+1 counter on this creature.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

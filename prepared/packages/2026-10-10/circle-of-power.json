@@ -1,0 +1,106 @@
+{
+	"card": "Circle of Power",
+	"generated": "2026-10-10",
+	"source": "a0345e1adcf72de02265b1d2ad6c9fa3bc52896513010168cbefa0422d784c02",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Circle of Power",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Circle of Power",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Circle of Power",
+				"basis": "You draw two cards and you lose 2 life. Create a 0/1 black Wizard creature token with \"Whenever you cast a noncreature spell, this token deals 1 damage to each opponent.\"\nWizards you control get +1/+0 and gain lifelink until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Wizard Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Wizard"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 0,
+							"toughness": 1,
+							"registers": [
+								{
+									"basis": "Whenever you cast a noncreature spell, this token deals 1 damage to each opponent.",
+									"kind": "watch",
+									"event": {
+										"on": "cast",
+										"by": "you",
+										"of": {
+											"zones": [
+												"stack"
+											],
+											"not": {
+												"types": [
+													"creature"
+												]
+											}
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "damage",
+												"to": "opponent",
+												"amount": 1,
+												"from": "this"
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"every": {
+							"subtypes": [
+								"Wizard"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"words": [
+								"lifelink"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

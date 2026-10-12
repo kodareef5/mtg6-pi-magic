@@ -1,0 +1,50 @@
+{
+	"card": "Utrom Scientists",
+	"generated": "2026-10-10",
+	"source": "0bdb412c4b1c3813629bf7ce4c5e75bd81e36bcbd3b22d8ec785b3ccfec5d243",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Utrom Scientists",
+		"registers": [
+			{
+				"basis": "When this creature enters, tap up to one target creature and put a stun counter on it. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "tap",
+							"what": "target:0"
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "stun",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

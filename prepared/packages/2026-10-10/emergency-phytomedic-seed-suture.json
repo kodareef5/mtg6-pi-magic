@@ -1,0 +1,60 @@
+{
+	"card": "Emergency Phytomedic // Seed Suture",
+	"generated": "2026-10-10",
+	"source": "646a1ca43c17c8489dd9df2221740899ad1739184f94445080b86a8712265b65",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Emergency Phytomedic // Seed Suture",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Emergency Phytomedic // Seed Suture",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Seed Suture copy",
+				"basis": "Put a +1/+1 counter on target creature. You gain 1 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

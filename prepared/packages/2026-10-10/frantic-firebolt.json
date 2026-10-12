@@ -1,0 +1,68 @@
+{
+	"card": "Frantic Firebolt",
+	"generated": "2026-10-10",
+	"source": "f0755cf766d5bdc8f4f1b6d890c6ab229efa7f204e756b88a7baec44426794d7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Frantic Firebolt",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Frantic Firebolt",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Frantic Firebolt",
+				"basis": "Frantic Firebolt deals X damage to target creature, where X is 2 plus the number of cards in your graveyard that are instant cards, sorcery cards, and/or have an Adventure.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"sum": [
+								2,
+								{
+									"count": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"token": false,
+										"any": [
+											{
+												"types": [
+													"instant",
+													"sorcery"
+												]
+											},
+											{
+												"hasAdventure": true
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,82 @@
+{
+	"card": "Uchbenbak, the Great Mistake",
+	"generated": "2026-10-10",
+	"source": "b29f9770f9852b1fffbdf8a4fda30f7531218979c911755fe1bad14c9da737de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Uchbenbak, the Great Mistake",
+		"registers": [
+			{
+				"basis": "Vigilance, menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance",
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Uchbenbak, the Great Mistake",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Uchbenbak with a finality counter",
+				"basis": "Descend 8 — {4}{U}{B}: Return this card from your graveyard to the battlefield with a finality counter on it. Activate only if there are eight or more permanent cards in your graveyard and only as a sorcery. (If a creature with a finality counter on it would die, exile it instead.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}{U}{B}"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							],
+							"token": false
+						}
+					},
+					"atLeast": 8
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"finality": 1
+						},
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

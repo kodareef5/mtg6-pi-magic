@@ -1,0 +1,72 @@
+{
+	"card": "Theorix Metamage // Omit Variables",
+	"generated": "2026-10-10",
+	"source": "81bf08634a2a12addfa654c83f0b137602b562d67af020393573884b9e56385c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Theorix Metamage // Omit Variables",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			},
+			{
+				"face": 0,
+				"basis": "Threshold — This creature gets +1/+0 and has flying as long as there are seven or more cards in your graveyard.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 7
+				},
+				"change": {
+					"power": 1,
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Theorix Metamage // Omit Variables",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Omit Variables",
+				"basis": "Mill three cards. (Put the top three cards of your library into your graveyard.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

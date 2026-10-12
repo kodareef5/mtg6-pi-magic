@@ -1,0 +1,56 @@
+{
+	"card": "Gnarlback Rhino",
+	"generated": "2026-10-10",
+	"source": "51bf70f57842a34dd5da0ae852a60d73dfbd166527b85611abc26db02b6d7cfd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gnarlback Rhino",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a spell that targets this creature, draw a card.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"targeting": {
+							"is": "this"
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

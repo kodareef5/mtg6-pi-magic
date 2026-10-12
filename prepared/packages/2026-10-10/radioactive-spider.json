@@ -1,0 +1,88 @@
+{
+	"card": "Radioactive Spider",
+	"generated": "2026-10-10",
+	"source": "bd0d03cb9a214b13b73df75df6772a62e9f0d4ac05a80c5c972d21289f0704d7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Radioactive Spider",
+		"registers": [
+			{
+				"basis": "Reach, deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Radioactive Spider",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Fateful Bite",
+				"basis": "Fateful Bite — {2}, Sacrifice this creature: Search your library for a Spider Hero card, reveal it, put it into your hand, then shuffle. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"all": [
+								{
+									"subtypes": [
+										"Spider"
+									]
+								},
+								{
+									"subtypes": [
+										"Hero"
+									]
+								}
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "spider-hero"
+					},
+					{
+						"do": "move",
+						"what": "bound:spider-hero",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

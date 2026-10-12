@@ -1,0 +1,122 @@
+{
+	"card": "Earth Rumble",
+	"generated": "2026-10-10",
+	"source": "b54f9948b959ad75935d1bca411509bfc0cb8e6b00948abf47fd2fe3c0f72ae1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Earth Rumble",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Earth Rumble",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Earth Rumble, earthbend 2, then create the reflexive fight trigger",
+				"basis": "Earthbend 2. When you do, up to one target creature you control fights target creature an opponent controls. (To earthbend 2, target land you control becomes a 0/0 creature with haste that's still a land. Put two +1/+1 counters on it. When it dies or is exiled, return it to the battlefield tapped. Creatures that fight each deal damage equal to their power to the other.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "leaves",
+							"of": {
+								"is": "target:0"
+							},
+							"to": [
+								"graveyard",
+								"exile"
+							]
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "event:object",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								}
+							]
+						}
+					},
+					{
+						"do": "reflect",
+						"effect": {
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									},
+									"upTo": true
+								},
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "opponent"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "fight",
+									"a": "target:0",
+									"b": "target:1"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

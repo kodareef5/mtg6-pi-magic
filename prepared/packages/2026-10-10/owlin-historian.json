@@ -1,0 +1,86 @@
+{
+	"card": "Owlin Historian",
+	"generated": "2026-10-10",
+	"source": "530fce54e656d56f70f58f69da62eaf6bc0c7e648a9e53913438a22f242ed8fd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Owlin Historian",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more cards leave your graveyard, this creature gets +1/+1 until end of turn.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"token": false
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

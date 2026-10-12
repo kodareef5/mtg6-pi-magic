@@ -1,0 +1,86 @@
+{
+	"card": "Ravenous Amulet",
+	"generated": "2026-10-10",
+	"source": "60375dd5138bda61837bda51114f61bb12b237090a26a444a63b6cf4923a102a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ravenous Amulet",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ravenous Amulet",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice a creature to draw a card and add a soul counter",
+				"basis": "{1}, {T}, Sacrifice a creature: Draw a card and put a soul counter on this artifact. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{1}",
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "soul",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ravenous Amulet",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Ravenous Amulet so each opponent loses life equal to its soul counters",
+				"basis": "{4}, {T}, Sacrifice this artifact: Each opponent loses life equal to the number of soul counters on this artifact.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": {
+							"negate": {
+								"counters": "soul",
+								"on": "this"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,110 @@
+{
+	"card": "Mabel, Heir to Cragflame",
+	"generated": "2026-10-10",
+	"source": "364c443c859b91ce96a7a8ed8157027fdd249f248da8aec9e2f4eedbea466f46",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mabel, Heir to Cragflame",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Other Mice you control get +1/+1.",
+				"affects": {
+					"subtypes": [
+						"Mouse"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Mabel enters, create Cragflame, a legendary colorless Equipment artifact token with \"Equipped creature gets +1/+1 and has vigilance, trample, and haste\" and equip {2}.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Cragflame",
+								"supertypes": [
+									"legendary"
+								],
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Equipment"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "continuous",
+										"basis": "When Mabel enters, create Cragflame, a legendary colorless Equipment artifact token with \"Equipped creature gets +1/+1 and has vigilance, trample, and haste\" and equip {2}.",
+										"affects": {
+											"is": "attached",
+											"types": [
+												"creature"
+											]
+										},
+										"change": {
+											"power": 1,
+											"toughness": 1,
+											"words": [
+												"vigilance",
+												"trample",
+												"haste"
+											]
+										}
+									},
+									{
+										"kind": "activated",
+										"basis": "When Mabel enters, create Cragflame, a legendary colorless Equipment artifact token with \"Equipped creature gets +1/+1 and has vigilance, trample, and haste\" and equip {2}.",
+										"cost": {
+											"mana": "{2}"
+										},
+										"speed": "sorcery",
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"types": [
+															"creature"
+														],
+														"controller": "you"
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "attach",
+													"what": "this",
+													"to": "target:0"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

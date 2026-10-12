@@ -1,0 +1,58 @@
+{
+	"card": "Vanguard Seraph",
+	"generated": "2026-10-10",
+	"source": "cb886a688b901036a8de4ba42428c506e8275032379220311606d3ff11650685",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vanguard Seraph",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life for the first time each turn, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"triggerIf": {
+					"amount": {
+						"history": "life-gained",
+						"by": "you"
+					},
+					"atMost": {
+						"event": "amount"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,89 @@
+{
+	"card": "Triumphant Chomp",
+	"generated": "2026-10-10",
+	"source": "c8d7ac745368c37892ddf4665ce387b162cfc154aadb7649ab9dc8a20847f3a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Triumphant Chomp",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Triumphant Chomp",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Triumphant Chomp",
+				"basis": "Triumphant Chomp deals damage to target creature equal to 2 or the greatest power among Dinosaurs you control, whichever is greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"amount": {
+								"aggregate": "max",
+								"of": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"subtypes": [
+										"Dinosaur"
+									]
+								},
+								"value": "power"
+							},
+							"atLeast": 3
+						},
+						"as": "greater-power",
+						"instructions": [
+							{
+								"do": "damage",
+								"to": "target:0",
+								"amount": {
+									"aggregate": "max",
+									"of": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"subtypes": [
+											"Dinosaur"
+										]
+									},
+									"value": "power"
+								}
+							}
+						]
+					},
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2,
+						"if": {
+							"not": {
+								"bound": "greater-power"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

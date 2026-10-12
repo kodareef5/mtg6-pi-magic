@@ -1,0 +1,77 @@
+{
+	"card": "Armasaur Guide",
+	"generated": "2026-10-10",
+	"source": "f4109602b2882a15202b78252151bcd5c58c2746b819889275ae7ea8f7377ea0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Armasaur Guide",
+		"registers": [
+			{
+				"basis": "Vigilance (Attacking doesn't cause this creature to tap.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you attack with three or more creatures, put a +1/+1 counter on target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"is": "event:objects",
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 3
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

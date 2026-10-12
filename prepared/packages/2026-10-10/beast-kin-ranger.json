@@ -1,0 +1,58 @@
+{
+	"card": "Beast-Kin Ranger",
+	"generated": "2026-10-10",
+	"source": "dd281ab26cb2cc5c12419fc25c48a8bf6448a9df57a5d8c9befdd114dbec9607",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beast-Kin Ranger",
+		"registers": [
+			{
+				"basis": "Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another creature you control enters, this creature gets +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

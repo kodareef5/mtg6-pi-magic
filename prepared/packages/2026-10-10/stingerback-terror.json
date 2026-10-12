@@ -1,0 +1,79 @@
+{
+	"card": "Stingerback Terror",
+	"generated": "2026-10-10",
+	"source": "72a8101d5d18ebd6b7760ffefe727b03a255524fc000effd75245738d5cea76c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stingerback Terror",
+		"registers": [
+			{
+				"basis": "Flying, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "This creature gets -1/-1 for each card in your hand.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"negate": {
+							"count": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							}
+						}
+					},
+					"toughness": {
+						"negate": {
+							"count": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							}
+						}
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stingerback Terror",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Stingerback Terror",
+				"basis": "Plot {2}{R} (You may pay {2}{R} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{2}{R}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

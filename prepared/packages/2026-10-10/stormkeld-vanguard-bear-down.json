@@ -1,0 +1,65 @@
+{
+	"card": "Stormkeld Vanguard // Bear Down",
+	"generated": "2026-10-10",
+	"source": "7e04154f2933bd56d5b27baea97cde57f5aa6fc904012f91495b1bdb2af55cf0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stormkeld Vanguard // Bear Down",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature can't be blocked by creatures with power 2 or less.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"is": "this"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						],
+						"power": {
+							"atMost": 2
+						}
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Stormkeld Vanguard // Bear Down",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bear Down",
+				"basis": "Destroy target artifact or enchantment. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

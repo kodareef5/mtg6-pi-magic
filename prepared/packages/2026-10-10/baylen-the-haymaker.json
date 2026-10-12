@@ -1,0 +1,109 @@
+{
+	"card": "Baylen, the Haymaker",
+	"generated": "2026-10-10",
+	"source": "3607ac6a7916f65783ebe7ef87041b7b34e3aac83ee9e5bea4bbe35a89230b62",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Baylen, the Haymaker",
+		"registers": [
+			{
+				"basis": "Tap two untapped tokens you control: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"token": true,
+							"tapped": false
+						},
+						"count": 2
+					}
+				},
+				"any": 1
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Tap three tokens to draw a card",
+				"basis": "Tap three untapped tokens you control: Draw a card.",
+				"source": {
+					"card": "Baylen, the Haymaker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"token": true,
+							"tapped": false
+						},
+						"count": 3
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"claim": "Tap four tokens to strengthen Baylen and grant trample",
+				"basis": "Tap four untapped tokens you control: Put three +1/+1 counters on Baylen. It gains trample until end of turn.",
+				"source": {
+					"card": "Baylen, the Haymaker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"token": true,
+							"tapped": false
+						},
+						"count": 4
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 3
+					},
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

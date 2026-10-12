@@ -1,0 +1,134 @@
+{
+	"card": "Explorer's Cache",
+	"generated": "2026-10-10",
+	"source": "606885976f1c5cdca8e7ab9cb442b62a2a96477f3aef8b1d9fc80ae0b7b82e0b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Explorer's Cache",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "This artifact enters with two +1/+1 counters on it.",
+				"counters": {
+					"+1/+1": 2
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a creature you control with a +1/+1 counter on it dies, put a +1/+1 counter on this artifact.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"counters": "+1/+1",
+						"on": "event:object"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Move a +1/+1 counter from Explorer's Cache onto target creature",
+				"basis": "{T}: Move a +1/+1 counter from this artifact onto target creature. Activate only as a sorcery.",
+				"source": {
+					"card": "Explorer's Cache",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"all": [
+								{
+									"is": "this",
+									"matches": {
+										"zones": [
+											"battlefield"
+										]
+									}
+								},
+								{
+									"amount": {
+										"counters": "+1/+1",
+										"on": "this"
+									},
+									"atLeast": 1
+								},
+								{
+									"is": "target:0",
+									"matches": {
+										"zones": [
+											"battlefield"
+										],
+										"not": {
+											"is": "this"
+										}
+									}
+								}
+							]
+						},
+						"instructions": [
+							{
+								"do": "counters",
+								"on": "this",
+								"kind": "+1/+1",
+								"amount": -1
+							},
+							{
+								"do": "counters",
+								"on": "target:0",
+								"kind": "+1/+1",
+								"amount": 1
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

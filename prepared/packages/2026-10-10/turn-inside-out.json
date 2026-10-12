@@ -1,0 +1,67 @@
+{
+	"card": "Turn Inside Out",
+	"generated": "2026-10-10",
+	"source": "7afd8bafa4ce5710c94465be5efa60d553572e8f637c0e15d3dcfa1c8ba9b6bc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Turn Inside Out",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Turn Inside Out",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Turn Inside Out",
+				"basis": "Target creature gets +3/+0 until end of turn. When it dies this turn, manifest dread. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "dies",
+							"of": {
+								"is": "target:0"
+							}
+						},
+						"until": "end-of-turn",
+						"effect": {
+							"instructions": [
+								{
+									"do": "keyword",
+									"name": "manifest-dread",
+									"who": "you"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

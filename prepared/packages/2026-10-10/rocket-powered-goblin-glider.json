@@ -1,0 +1,131 @@
+{
+	"card": "Rocket-Powered Goblin Glider",
+	"generated": "2026-10-10",
+	"source": "cfc78f4485be334d7cb689d37884d7e274bca06578762706d6e15cda6753ad10",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rocket-Powered Goblin Glider",
+		"registers": [
+			{
+				"basis": "When this Equipment enters, if it was cast from your graveyard, attach it to target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"all": [
+						{
+							"cast": "this",
+							"from": "graveyard"
+						},
+						{
+							"is": "this",
+							"matches": {
+								"zones": [
+									"battlefield"
+								],
+								"owner": "you"
+							},
+							"lastKnown": true
+						}
+					]
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +2/+0 and has flying and haste.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					],
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"power": 2,
+					"words": [
+						"flying",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Mayhem {2}",
+				"kind": "permit",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{2}",
+					"if": {
+						"discardedThisTurn": "this",
+						"by": "you"
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rocket-Powered Goblin Glider",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Rocket-Powered Goblin Glider",
+				"basis": "Equip {2}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

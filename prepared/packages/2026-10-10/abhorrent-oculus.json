@@ -1,0 +1,76 @@
+{
+	"card": "Abhorrent Oculus",
+	"generated": "2026-10-10",
+	"source": "b526f0c8295d9ec2fadbe13482c554aaf85ba85e69c37868b310f8075f8281b6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Abhorrent Oculus",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of each opponent's upkeep, manifest dread. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "manifest-dread",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Abhorrent Oculus",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Abhorrent Oculus, exiling six cards from your graveyard as an additional cost",
+				"basis": "As an additional cost to cast this spell, exile six cards from your graveyard.",
+				"timing": "spell",
+				"cost": {
+					"exile": {
+						"choose": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you"
+						},
+						"count": 6
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

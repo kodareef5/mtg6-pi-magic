@@ -1,0 +1,120 @@
+{
+	"card": "Splinter's Technique",
+	"generated": "2026-10-10",
+	"source": "3f82ae5d38a8b6b5517edf3d59dab998ac7e24b887305ad1b92c013190b6f878",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Splinter's Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Splinter's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Splinter's Technique normally",
+				"basis": "Search your library for a card, put that card into your hand, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you"
+						},
+						"count": 1,
+						"as": "card"
+					},
+					{
+						"do": "move",
+						"what": "bound:card",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Splinter's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Splinter's Technique for sneak",
+				"basis": "Sneak {1}{B} (You may cast this spell for {1}{B} if you also return an unblocked attacker you control to hand during the declare blockers step.) ... Search your library for a card, put that card into your hand, then shuffle.",
+				"timing": "spell",
+				"speed": "instant",
+				"if": {
+					"all": [
+						{
+							"turn": "self"
+						},
+						{
+							"step": "declare-blockers"
+						}
+					]
+				},
+				"cost": {
+					"alternative": "sneak",
+					"mana": "{1}{B}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true,
+							"blocked": false
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you"
+						},
+						"count": 1,
+						"as": "card"
+					},
+					{
+						"do": "move",
+						"what": "bound:card",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

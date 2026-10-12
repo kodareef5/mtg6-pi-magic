@@ -1,0 +1,90 @@
+{
+	"card": "Meteor Sword",
+	"generated": "2026-10-10",
+	"source": "11a104b6535b555e19dcd516e00c2be61c0aa6eacedb91b99b960826f7b1ce5a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Meteor Sword",
+		"registers": [
+			{
+				"basis": "When this Equipment enters, destroy target permanent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +3/+3.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 3,
+					"toughness": 3
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Meteor Sword",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Meteor Sword",
+				"basis": "Equip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

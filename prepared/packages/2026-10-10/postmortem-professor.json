@@ -1,0 +1,93 @@
+{
+	"card": "Postmortem Professor",
+	"generated": "2026-10-10",
+	"source": "edb732d0418ba5b9d53998f4a0a811607e00c4b1825f392482a12d6c076fadab",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Postmortem Professor",
+		"registers": [
+			{
+				"basis": "This creature can't block.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"can't block"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, each opponent loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Postmortem Professor",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Postmortem Professor from your graveyard to the battlefield",
+				"basis": "{1}{B}, Exile an instant or sorcery card from your graveyard: Return this card from your graveyard to the battlefield.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}",
+					"exile": {
+						"choose": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"instant",
+								"sorcery"
+							],
+							"token": false
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

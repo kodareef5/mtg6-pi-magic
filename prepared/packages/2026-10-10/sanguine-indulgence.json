@@ -1,0 +1,105 @@
+{
+	"card": "Sanguine Indulgence",
+	"generated": "2026-10-10",
+	"source": "d3960b512bbfaceb3904ab93ba3d0bbb95ed144e0c3b428a49219c08700f3676",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sanguine Indulgence",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sanguine Indulgence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Sanguine Indulgence with its life-gain discount",
+				"basis": "This spell costs {3} less to cast if you've gained 3 or more life this turn. ... Return up to two target creature cards from your graveyard to your hand.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "life-gained",
+						"by": "you"
+					},
+					"atLeast": 3
+				},
+				"cost": {
+					"reduce": 3
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Sanguine Indulgence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Sanguine Indulgence without its life-gain discount",
+				"basis": "This spell costs {3} less to cast if you've gained 3 or more life this turn. ... Return up to two target creature cards from your graveyard to your hand.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "life-gained",
+						"by": "you"
+					},
+					"atMost": 2
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,50 @@
+{
+	"card": "Tannuk, Memorial Ensign",
+	"generated": "2026-10-10",
+	"source": "4f5ec16cd968fe1b2a27a8ac1a9706d4f3f0664e732e92b50b4c91cceca24f03",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tannuk, Memorial Ensign",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Landfall — Whenever a land you control enters, Tannuk deals 1 damage to each opponent. If this is the second time this ability has resolved this turn, draw a card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"from": "this",
+							"amount": 1
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 2,
+								"atMost": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

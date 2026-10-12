@@ -1,0 +1,41 @@
+{
+	"card": "Hardbristle Bandit",
+	"generated": "2026-10-10",
+	"source": "a0e4ce1a7c64f2bf449abd88079b019630747e826e129f204c6b32a8267c3bbe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hardbristle Bandit",
+		"registers": [
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			},
+			{
+				"basis": "Whenever you commit a crime, untap this creature. This ability triggers only once each turn. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.)",
+				"kind": "watch",
+				"event": {
+					"on": "crime",
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "untap",
+							"what": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

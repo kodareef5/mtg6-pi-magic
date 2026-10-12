@@ -1,0 +1,121 @@
+{
+	"card": "Stalactite Dagger",
+	"generated": "2026-10-10",
+	"source": "9cdb0bef1f8d0a3b8d97590ddce26ad345cabeb397f2e309eb6a05f9f2024b05",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stalactite Dagger",
+		"registers": [
+			{
+				"basis": "When this Equipment enters, create a 1/1 colorless Shapeshifter creature token with changeling. (It's every creature type.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Shapeshifter Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Shapeshifter"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"changeling"
+								],
+								"registers": [
+									{
+										"basis": "When this Equipment enters, create a 1/1 colorless Shapeshifter creature token with changeling. (It's every creature type.)",
+										"kind": "continuous",
+										"affects": {
+											"is": "this",
+											"zones": [
+												"library",
+												"hand",
+												"battlefield",
+												"graveyard",
+												"stack",
+												"exile",
+												"command",
+												"outside"
+											]
+										},
+										"change": {
+											"subtypes": {
+												"allCreatureTypes": true
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +1/+1 and is all creature types.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1,
+					"subtypes": {
+						"allCreatureTypes": true
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stalactite Dagger",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Stalactite Dagger",
+				"basis": "Equip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

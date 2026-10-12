@@ -1,0 +1,59 @@
+{
+	"card": "Secluded Courtyard",
+	"generated": "2026-10-10",
+	"source": "7345554c6a8dc8adcbae270b54b69fda531e8dd7aa0b87c817ef6c6d51e5d963",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Secluded Courtyard",
+		"registers": [
+			{
+				"basis": "As this land enters, choose a creature type.",
+				"kind": "enters",
+				"choose": {
+					"as": "creatureType",
+					"from": "creature-type"
+				}
+			},
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast a creature spell of the chosen type or activate an ability of a creature source of the chosen type.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					],
+					"types": [
+						"creature"
+					],
+					"subtypes": {
+						"chosen": "creatureType"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

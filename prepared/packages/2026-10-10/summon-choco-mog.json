@@ -1,0 +1,44 @@
+{
+	"card": "Summon: Choco/Mog",
+	"generated": "2026-10-10",
+	"source": "7cfd468349786a0e50aba412c9e3cdd035fb6febaf1a66517f5e69c32926e84c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: Choco/Mog",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2,
+					3,
+					4
+				],
+				"basis": "I, II, III, IV — Stampede! — Other creatures you control get +1/+0 until end of turn.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

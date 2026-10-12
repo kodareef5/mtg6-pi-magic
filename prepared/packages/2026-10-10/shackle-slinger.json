@@ -1,0 +1,66 @@
+{
+	"card": "Shackle Slinger",
+	"generated": "2026-10-10",
+	"source": "92525f5b80131c8f85fe37f80acd4ff6b04cdc7d07d8632e9eb626022b1a7b7d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shackle Slinger",
+		"registers": [
+			{
+				"basis": "Whenever you cast your second spell each turn, choose target creature an opponent controls. If it's tapped, put a stun counter on it. Otherwise, tap it. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						]
+					},
+					"ordinal": 2
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "stun",
+							"amount": 1,
+							"if": {
+								"is": "target:0",
+								"matches": {
+									"tapped": true
+								}
+							}
+						},
+						{
+							"do": "tap",
+							"what": "target:0",
+							"if": {
+								"is": "target:0",
+								"matches": {
+									"tapped": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

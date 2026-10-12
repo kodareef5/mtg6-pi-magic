@@ -1,0 +1,92 @@
+{
+	"card": "Kirol, History Buff // Pack a Punch",
+	"generated": "2026-10-10",
+	"source": "8d45d8c69717f2990f39adf97d3d0c08c3a2f2b893e6ef3073d53250480783ee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kirol, History Buff // Pack a Punch",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever one or more cards leave your graveyard, Kirol becomes prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"token": false
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "prepare",
+							"what": "this",
+							"prepared": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Kirol, History Buff // Pack a Punch",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Pack a Punch",
+				"basis": "Mill a card. Put two +1/+1 counters on target creature. It gains trample until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

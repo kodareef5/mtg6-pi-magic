@@ -1,0 +1,76 @@
+{
+	"card": "Marshal of the Lost",
+	"generated": "2026-10-10",
+	"source": "ed8f87e89f3021883f992be5eedc33cba1360b1e895da804366ecdc3483dde71",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Marshal of the Lost",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you attack, target creature gets +X/+X until end of turn, where X is the number of attacking creatures.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"attacking": true
+									}
+								},
+								"toughness": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"attacking": true
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

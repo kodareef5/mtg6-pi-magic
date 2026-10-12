@@ -1,0 +1,134 @@
+{
+	"card": "The Coming of Galactus",
+	"generated": "2026-10-10",
+	"source": "a6e4a1d8620d5df408c9db9c72428de69822cfe40d48119c90e4ae43a3d1e3e7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Coming of Galactus",
+		"registers": [
+			{
+				"kind": "chapter",
+				"basis": "I — Destroy up to one target nonland permanent.",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"basis": "II, III — Each opponent loses 2 life.",
+				"numbers": [
+					2,
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "each",
+							"players": "opponent",
+							"instructions": [
+								{
+									"do": "life",
+									"who": "bound:player",
+									"amount": -2
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"basis": "IV — Create Galactus, a legendary 16/16 black Elder Alien creature token with flying, trample, and \"Whenever Galactus attacks, destroy target land.\"",
+				"numbers": [
+					4
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Galactus",
+								"supertypes": [
+									"legendary"
+								],
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Elder",
+									"Alien"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 16,
+								"toughness": 16,
+								"words": [
+									"flying",
+									"trample"
+								],
+								"registers": [
+									{
+										"kind": "watch",
+										"basis": "IV — Create Galactus, a legendary 16/16 black Elder Alien creature token with flying, trample, and \"Whenever Galactus attacks, destroy target land.\"",
+										"event": {
+											"on": "attacks",
+											"of": {
+												"is": "this"
+											}
+										},
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"types": [
+															"land"
+														]
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "destroy",
+													"what": "target:0"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

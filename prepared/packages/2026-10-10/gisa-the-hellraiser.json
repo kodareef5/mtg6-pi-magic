@@ -1,0 +1,94 @@
+{
+	"card": "Gisa, the Hellraiser",
+	"generated": "2026-10-10",
+	"source": "b627438c305d2b14cd1b15d0226ee1d78493c5280747e0df4da91a6cd12f934c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gisa, the Hellraiser",
+		"registers": [
+			{
+				"basis": "Ward—{2}, Pay 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}",
+									"life": 2
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Skeletons and Zombies you control get +1/+1 and have menace.",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"subtypes": [
+						"Skeleton",
+						"Zombie"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1,
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you commit a crime, create two tapped 2/2 blue and black Zombie Rogue creature tokens. This ability triggers only once each turn. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.)",
+				"kind": "watch",
+				"event": {
+					"on": "crime",
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"tapped": true,
+							"spec": {
+								"name": "Zombie Rogue Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Zombie",
+									"Rogue"
+								],
+								"colors": [
+									"U",
+									"B"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

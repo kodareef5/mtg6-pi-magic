@@ -1,0 +1,81 @@
+{
+	"card": "Meanders Guide",
+	"generated": "2026-10-10",
+	"source": "cfeedcffe5a7ea409e282ed44c6ba73f525c83a25e0c22d2afb75c6e10a2f654",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Meanders Guide",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature attacks, you may tap another untapped Merfolk you control. When you do, return target creature card with mana value 3 or less from your graveyard to the battlefield.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"tap": {
+									"choose": {
+										"subtypes": [
+											"Merfolk"
+										],
+										"controller": "you",
+										"other": true,
+										"tapped": false
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "tapped-merfolk"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "tapped-merfolk"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"creature"
+											],
+											"manaValue": {
+												"atMost": 3
+											}
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "battlefield",
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

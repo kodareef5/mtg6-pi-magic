@@ -1,0 +1,53 @@
+{
+	"card": "Dreams of Laguna",
+	"generated": "2026-10-10",
+	"source": "37811a35b8562afcda367172ce9449dd8011007e2a9b22e5c83621665a84152b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dreams of Laguna",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {3}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{3}{U}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Dreams of Laguna at its printed cost or using an earned casting permission, including flashback",
+				"basis": "Surveil 1, then draw a card. (To surveil 1, look at the top card of your library. You may put it into your graveyard.)",
+				"source": {
+					"card": "Dreams of Laguna",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

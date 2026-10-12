@@ -1,0 +1,95 @@
+{
+	"card": "They Went This Way",
+	"generated": "2026-10-10",
+	"source": "83fb05fb2b7a8596b53db0c3dab548cbb021a81e2778463b26933400971a578d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "They Went This Way",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "They Went This Way",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast They Went This Way",
+				"basis": "Search your library for a basic land card, put it onto the battlefield tapped, then shuffle. Investigate. (Create a Clue token. It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"supertypes": [
+								"basic"
+							],
+							"types": [
+								"land"
+							],
+							"token": false
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "battlefield",
+						"controller": "you",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Clue Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Clue"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, Sacrifice this token: Draw a card.",
+									"cost": {
+										"mana": "{2}",
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

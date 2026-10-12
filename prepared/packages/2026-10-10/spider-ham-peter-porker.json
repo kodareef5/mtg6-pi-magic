@@ -1,0 +1,95 @@
+{
+	"card": "Spider-Ham, Peter Porker",
+	"generated": "2026-10-10",
+	"source": "7b499f48d7893e97d36b03716f5a1b7022996a8333d7a52f16dda608e7013edd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider-Ham, Peter Porker",
+		"registers": [
+			{
+				"basis": "When Spider-Ham enters, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"kind": "activated",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Animal May-Ham — Other Spiders, Boars, Bats, Bears, Birds, Cats, Dogs, Frogs, Jackals, Lizards, Mice, Otters, Rabbits, Raccoons, Rats, Squirrels, Turtles, and Wolves you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"other": true,
+					"subtypes": [
+						"Spider",
+						"Boar",
+						"Bat",
+						"Bear",
+						"Bird",
+						"Cat",
+						"Dog",
+						"Frog",
+						"Jackal",
+						"Lizard",
+						"Mouse",
+						"Otter",
+						"Rabbit",
+						"Raccoon",
+						"Rat",
+						"Squirrel",
+						"Turtle",
+						"Wolf"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

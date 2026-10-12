@@ -1,0 +1,73 @@
+{
+	"card": "Earth Kingdom Protectors",
+	"generated": "2026-10-10",
+	"source": "42ea99dcba33a9b0ef9d9754e9de66aee55800c6cafc2ccbe7cbe985b6e44c73",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Earth Kingdom Protectors",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Earth Kingdom Protectors",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Earth Kingdom Protectors to grant another controlled Ally indestructible until end of turn.",
+				"basis": "Sacrifice this creature: Another target Ally you control gains indestructible until end of turn. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "stack",
+				"cost": {
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Ally"
+							],
+							"controller": "you",
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

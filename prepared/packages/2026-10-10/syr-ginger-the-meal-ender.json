@@ -1,0 +1,112 @@
+{
+	"card": "Syr Ginger, the Meal Ender",
+	"generated": "2026-10-10",
+	"source": "3a59b082c35c43a153a5134157554963d7aaada9e78350e046c2374079410c14",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Syr Ginger, the Meal Ender",
+		"registers": [
+			{
+				"basis": "Syr Ginger has trample, hexproof, and haste as long as an opponent controls a planeswalker.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"planeswalker"
+							],
+							"controller": "opponent"
+						}
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"words": [
+						"trample",
+						"hexproof",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another artifact you control is put into a graveyard from the battlefield, put a +1/+1 counter on Syr Ginger and scry 1.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"artifact"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Syr Ginger, the Meal Ender",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Syr Ginger to gain life equal to its last battlefield power",
+				"basis": "{2}, {T}, Sacrifice Syr Ginger: You gain life equal to its power.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"power": "this"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

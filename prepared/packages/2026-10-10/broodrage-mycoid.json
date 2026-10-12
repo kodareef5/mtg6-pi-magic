@@ -1,0 +1,56 @@
+{
+	"card": "Broodrage Mycoid",
+	"generated": "2026-10-10",
+	"source": "af538efdcfc934609e1106037f0368ad6c86f0d8f418706b4d6632aea66e20ae",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Broodrage Mycoid",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your end step, if you descended this turn, create a 1/1 black Fungus creature token with \"This token can't block.\" (You descended if a permanent card was put into your graveyard from anywhere.)",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "descended",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Fungus Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Fungus"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"can't block"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

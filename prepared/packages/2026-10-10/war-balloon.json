@@ -1,0 +1,122 @@
+{
+	"card": "War Balloon",
+	"generated": "2026-10-10",
+	"source": "1bc81b64211278d4fe13daeb6b551fe5b7d41b5a666ebbdc0e72c7f2b46c8e1f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "War Balloon",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "As long as this Vehicle has three or more fire counters on it, it's an artifact creature.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"counters": "fire",
+						"on": "this"
+					},
+					"atLeast": 3
+				},
+				"change": {
+					"types": {
+						"add": [
+							"artifact",
+							"creature"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "War Balloon",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a fire counter on War Balloon",
+				"basis": "{1}: Put a fire counter on this Vehicle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}"
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "fire",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "War Balloon",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew War Balloon",
+				"basis": "Crew 3 (Tap any number of creatures you control with total power 3 or more: This Vehicle becomes an artifact creature until end of turn.)",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 3
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

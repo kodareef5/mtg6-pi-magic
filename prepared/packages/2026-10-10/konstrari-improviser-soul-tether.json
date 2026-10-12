@@ -1,0 +1,77 @@
+{
+	"card": "Konstrari Improviser // Soul Tether",
+	"generated": "2026-10-10",
+	"source": "3a4406fb61d035f0c01df90b0176bc5de8662b8730655fc1fe843c17ff1803f9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Konstrari Improviser // Soul Tether",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Konstrari Improviser // Soul Tether",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Soul Tether",
+				"basis": "Create a Heartwood token. (It's a red and green artifact with \"{T}: Add {R} or {G}.\")",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Heartwood Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Heartwood"
+							],
+							"colors": [
+								"R",
+								"G"
+							],
+							"registers": [
+								{
+									"basis": "{T}: Add {R} or {G}.",
+									"kind": "mana",
+									"cost": {
+										"tap": true
+									},
+									"colors": [
+										"R"
+									]
+								},
+								{
+									"basis": "{T}: Add {R} or {G}.",
+									"kind": "mana",
+									"cost": {
+										"tap": true
+									},
+									"colors": [
+										"G"
+									]
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

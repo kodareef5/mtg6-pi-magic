@@ -1,0 +1,102 @@
+{
+	"card": "Bumbleflower's Sharepot",
+	"generated": "2026-10-10",
+	"source": "e6a4e39b63874763d990d057d3818bf1dd4b8b624bdcaf88e98eb2f259324c4d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bumbleflower's Sharepot",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Sacrifice Sharepot to destroy a nonland permanent",
+				"basis": "{5}, {T}, Sacrifice this artifact: Destroy target nonland permanent. Activate only as a sorcery.",
+				"source": {
+					"card": "Bumbleflower's Sharepot",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{5}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

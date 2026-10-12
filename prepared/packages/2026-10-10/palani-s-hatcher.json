@@ -1,0 +1,124 @@
+{
+	"card": "Palani's Hatcher",
+	"generated": "2026-10-10",
+	"source": "96a2f9feb9272e362bf587defcb02bba4a2f00621dbddda3fdd80d89475bfc84",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Palani's Hatcher",
+		"registers": [
+			{
+				"basis": "Other Dinosaurs you control have haste.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Dinosaur"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create two 0/1 green Dinosaur Egg creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Dinosaur Egg Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dinosaur",
+									"Egg"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 0,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of combat on your turn, if you control one or more Eggs, sacrifice an Egg, then create a 3/3 green Dinosaur creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"subtypes": [
+								"Egg"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"subtypes": [
+									"Egg"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "egg"
+						},
+						{
+							"do": "move",
+							"what": "bound:egg",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Dinosaur Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dinosaur"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

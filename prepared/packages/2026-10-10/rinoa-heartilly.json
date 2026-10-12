@@ -1,0 +1,100 @@
+{
+	"card": "Rinoa Heartilly",
+	"generated": "2026-10-10",
+	"source": "084cece891d9cc37c3b9a016b95e62938f898a1b4f24c4ec96573d98a7723e3c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rinoa Heartilly",
+		"registers": [
+			{
+				"basis": "When Rinoa Heartilly enters, create Angelo, a legendary 1/1 green and white Dog creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Angelo",
+								"supertypes": [
+									"legendary"
+								],
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dog"
+								],
+								"colors": [
+									"G",
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Angelo Cannon — Whenever Rinoa Heartilly attacks, another target creature you control gets +1/+1 until end of turn for each creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								},
+								"toughness": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

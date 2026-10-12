@@ -1,0 +1,50 @@
+{
+	"card": "Verdant Kraken",
+	"generated": "2026-10-10",
+	"source": "e20ddb509c86276e84f2b741f57322c94a46c79392625b2197d2af7f273d66b9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Verdant Kraken",
+		"registers": [
+			{
+				"basis": "At the beginning of each player's upkeep, you create a 3/3 green Forest Tentacle land creature token. (It has \"{T}: Add {G}.\" It's affected by summoning sickness until your next turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "any"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"controller": "you",
+							"spec": {
+								"name": "Forest Tentacle Token",
+								"types": [
+									"land",
+									"creature"
+								],
+								"subtypes": [
+									"Forest",
+									"Tentacle"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

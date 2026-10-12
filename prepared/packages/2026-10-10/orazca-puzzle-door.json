@@ -1,0 +1,72 @@
+{
+	"card": "Orazca Puzzle-Door",
+	"generated": "2026-10-10",
+	"source": "fa8c1de81e35810e696c868c1ce2ad1a899f68e8b3c6d0b1b560253e17955f37",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Orazca Puzzle-Door",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Orazca Puzzle-Door",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Orazca Puzzle-Door to select one of the top two cards for hand",
+				"basis": "{1}, {T}, Sacrifice this artifact: Look at the top two cards of your library. Put one of those cards into your hand and the other into your graveyard.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 2,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"count": 1,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"to": "graveyard",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

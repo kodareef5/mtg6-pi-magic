@@ -1,0 +1,163 @@
+{
+	"card": "Crescent Island Temple",
+	"generated": "2026-10-10",
+	"source": "3913bd218ddfe5c0888793b8613cc28b84f056af93792692a8bd861d96dd6e00",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Crescent Island Temple",
+		"registers": [
+			{
+				"basis": "When Crescent Island Temple enters, for each Shrine you control, create a 1/1 red Monk creature token with prowess. (Whenever you cast a noncreature spell, it gets +1/+1 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"count": {
+									"controller": "you",
+									"subtypes": [
+										"Shrine"
+									]
+								}
+							},
+							"spec": {
+								"name": "Monk Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Monk"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"prowess"
+								],
+								"registers": [
+									{
+										"basis": "When Crescent Island Temple enters, for each Shrine you control, create a 1/1 red Monk creature token with prowess. (Whenever you cast a noncreature spell, it gets +1/+1 until end of turn.)",
+										"kind": "watch",
+										"event": {
+											"on": "cast",
+											"by": "you",
+											"of": {
+												"zones": [
+													"stack"
+												],
+												"not": {
+													"types": [
+														"creature"
+													]
+												}
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "this",
+													"until": "end-of-turn",
+													"change": {
+														"power": 1,
+														"toughness": 1
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Shrine you control enters, create a 1/1 red Monk creature token with prowess.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Shrine"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Monk Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Monk"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"prowess"
+								],
+								"registers": [
+									{
+										"basis": "Whenever another Shrine you control enters, create a 1/1 red Monk creature token with prowess.",
+										"kind": "watch",
+										"event": {
+											"on": "cast",
+											"by": "you",
+											"of": {
+												"zones": [
+													"stack"
+												],
+												"not": {
+													"types": [
+														"creature"
+													]
+												}
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "this",
+													"until": "end-of-turn",
+													"change": {
+														"power": 1,
+														"toughness": 1
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

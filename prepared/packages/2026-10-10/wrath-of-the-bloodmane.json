@@ -1,0 +1,115 @@
+{
+	"card": "Wrath of the Bloodmane",
+	"generated": "2026-10-10",
+	"source": "c18241bfca9708442e36e0af56bfb9864df88e60bc52b25d164ce9036594f185",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wrath of the Bloodmane",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Wrath of the Bloodmane",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Wrath of the Bloodmane with its legendary-creature discount",
+				"basis": "This spell costs {1} less to cast if you control a legendary creature. ... Wrath of the Bloodmane deals 4 damage to target creature or planeswalker.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"supertypes": [
+								"legendary"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 1
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Wrath of the Bloodmane",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Wrath of the Bloodmane without a legendary creature",
+				"basis": "This spell costs {1} less to cast if you control a legendary creature. ... Wrath of the Bloodmane deals 4 damage to target creature or planeswalker.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"supertypes": [
+								"legendary"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

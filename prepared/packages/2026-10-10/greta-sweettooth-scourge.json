@@ -1,0 +1,142 @@
+{
+	"card": "Greta, Sweettooth Scourge",
+	"generated": "2026-10-10",
+	"source": "b20dab69df31b4dd353b5b3591c8bed5a9d6aa06cab59d359238bc577ec8b9d6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Greta, Sweettooth Scourge",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Greta enters, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Greta, Sweettooth Scourge",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice a Food to put a +1/+1 counter on target creature",
+				"basis": "{G}, Sacrifice a Food: Put a +1/+1 counter on target creature. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{G}",
+					"sacrifice": {
+						"choose": {
+							"controller": "you",
+							"subtypes": [
+								"Food"
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Greta, Sweettooth Scourge",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice a Food to draw a card and lose 1 life",
+				"basis": "{1}{B}, Sacrifice a Food: You draw a card and you lose 1 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}",
+					"sacrifice": {
+						"choose": {
+							"controller": "you",
+							"subtypes": [
+								"Food"
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

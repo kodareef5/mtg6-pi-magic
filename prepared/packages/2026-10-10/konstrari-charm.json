@@ -1,0 +1,114 @@
+{
+	"card": "Konstrari Charm",
+	"generated": "2026-10-10",
+	"source": "03249cdee1f2d21a8388c14f5b31378976580cef53933a9ffcf0b4bdb6f49510",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Konstrari Charm",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Konstrari Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Konstrari Charm: damage a creature with flying",
+				"basis": "Choose one — ... • Konstrari Charm deals 6 damage to target creature with flying.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"words": [
+								"flying"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 6
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Konstrari Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Konstrari Charm: counters and trample",
+				"basis": "Choose one — ... • Put two +1/+1 counters on target creature. It gains trample until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Konstrari Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Konstrari Charm: add three colorless mana",
+				"basis": "Choose one — ... • Add {C}{C}{C}.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mana",
+						"who": "you",
+						"colors": [
+							"C",
+							"C",
+							"C"
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

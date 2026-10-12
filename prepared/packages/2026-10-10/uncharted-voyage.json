@@ -1,0 +1,77 @@
+{
+	"card": "Uncharted Voyage",
+	"generated": "2026-10-10",
+	"source": "32aedd7906b2ed4f93354ca2ae108e8d62b0626306fd8934e2e57cac6cb13b09",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Uncharted Voyage",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Uncharted Voyage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Uncharted Voyage; the creature's owner chooses top or bottom, then surveil 1.",
+				"basis": "Target creature's owner puts it on their choice of the top or bottom of their library.\nSurveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "chose-top",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "top",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "chose-top"
+							}
+						}
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

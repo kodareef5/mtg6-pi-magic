@@ -1,0 +1,128 @@
+{
+	"card": "Welcome to Sweettooth",
+	"generated": "2026-10-10",
+	"source": "0348585ce82a4d34d84d065ffe50d204319cacf8d990ebe203ba201bb7150b79",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Welcome to Sweettooth",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Create a 1/1 white Human creature token.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"basis": "II — Create a Food token.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"kind": "activated",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"basis": "III — Put X +1/+1 counters on target creature you control, where X is one plus the number of Foods you control.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": {
+								"sum": [
+									1,
+									{
+										"count": {
+											"subtypes": [
+												"Food"
+											],
+											"controller": "you"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

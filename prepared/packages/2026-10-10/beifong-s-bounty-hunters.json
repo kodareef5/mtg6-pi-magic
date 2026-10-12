@@ -1,0 +1,126 @@
+{
+	"card": "Beifong's Bounty Hunters",
+	"generated": "2026-10-10",
+	"source": "8b5cb550033da4224793417e03ee4a2c7f6614253cc1ce8faa7088c7737ed35a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beifong's Bounty Hunters",
+		"registers": [
+			{
+				"basis": "Whenever a nonland creature you control dies, earthbend X, where X is that creature's power. (Target land you control becomes a 0/0 creature with haste that's still a land. Put X +1/+1 counters on it. When it dies or is exiled, return it to the battlefield tapped.)",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"not": {
+							"types": [
+								"land"
+							]
+						}
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"types": {
+									"add": [
+										"creature"
+									]
+								},
+								"base": {
+									"power": 0,
+									"toughness": 0
+								},
+								"words": [
+									"haste"
+								]
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": {
+								"power": "event:object"
+							},
+							"if": {
+								"amount": {
+									"power": "event:object"
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "dies",
+								"of": {
+									"is": "target:0"
+								}
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "event:object",
+										"to": "battlefield",
+										"tapped": true,
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "leaves",
+								"of": {
+									"is": "target:0"
+								},
+								"to": [
+									"exile"
+								]
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "event:object",
+										"to": "battlefield",
+										"tapped": true,
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -20,9 +20,9 @@
 					"instructions": [
 						{
 							"do": "perform",
-							"who": "you",
+							"who": "controller:this",
 							"may": true,
-							"as": "endure-counters",
+							"as": "counter-choice",
 							"if": {
 								"is": "this",
 								"matches": {
@@ -43,8 +43,14 @@
 						{
 							"do": "token",
 							"count": 1,
+							"controller": "controller:this",
+							"if": {
+								"not": {
+									"bound": "counter-choice"
+								}
+							},
 							"spec": {
-								"name": "Spirit",
+								"name": "Spirit Token",
 								"types": [
 									"creature"
 								],
@@ -56,11 +62,6 @@
 								],
 								"power": 1,
 								"toughness": 1
-							},
-							"if": {
-								"not": {
-									"bound": "endure-counters"
-								}
 							}
 						}
 					]

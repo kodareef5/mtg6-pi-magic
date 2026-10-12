@@ -1,0 +1,65 @@
+{
+	"card": "Muraganda Raceway",
+	"generated": "2026-10-10",
+	"source": "686aa953dde669fd93646093292f8b43cd47a0654083cc1393b91bb8b642e686",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Muraganda Raceway",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "mana",
+				"basis": "{T}: Add {C}.",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — {T}: Add {C}{C}.",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "mana",
+							"basis": "Max speed — {T}: Add {C}{C}.",
+							"cost": {
+								"tap": true
+							},
+							"colors": [
+								"C",
+								"C"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

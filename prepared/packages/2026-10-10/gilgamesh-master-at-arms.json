@@ -1,0 +1,232 @@
+{
+	"card": "Gilgamesh, Master-at-Arms",
+	"generated": "2026-10-10",
+	"source": "f48d3f4e2fca4f31a6fc10333075f3ff5520276dbbaa92a4d7f6e29458d159b3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gilgamesh, Master-at-Arms",
+		"registers": [
+			{
+				"basis": "Whenever Gilgamesh enters or attacks, look at the top six cards of your library. You may put any number of Equipment cards from among them onto the battlefield. Put the rest on the bottom of your library in a random order. When you put one or more Equipment onto the battlefield this way, you may attach one of them to a Samurai you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 6,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"subtypes": [
+									"Equipment"
+								]
+							},
+							"count": 6,
+							"upTo": true,
+							"as": "selected"
+						},
+						{
+							"do": "move",
+							"what": "bound:selected",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"as": "put"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"position": "bottom",
+							"random": true
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "put"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "perform",
+										"who": "you",
+										"may": true,
+										"instructions": [
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"battlefield"
+													],
+													"is": "bound:put"
+												},
+												"count": 1,
+												"as": "equipment"
+											},
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"battlefield"
+													],
+													"subtypes": [
+														"Samurai"
+													],
+													"controller": "you"
+												},
+												"count": 1,
+												"as": "samurai"
+											},
+											{
+												"do": "attach",
+												"what": "bound:equipment",
+												"to": "bound:samurai"
+											}
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Gilgamesh enters or attacks, look at the top six cards of your library. You may put any number of Equipment cards from among them onto the battlefield. Put the rest on the bottom of your library in a random order. When you put one or more Equipment onto the battlefield this way, you may attach one of them to a Samurai you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 6,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"subtypes": [
+									"Equipment"
+								]
+							},
+							"count": 6,
+							"upTo": true,
+							"as": "selected"
+						},
+						{
+							"do": "move",
+							"what": "bound:selected",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"as": "put"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"position": "bottom",
+							"random": true
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "put"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "perform",
+										"who": "you",
+										"may": true,
+										"instructions": [
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"battlefield"
+													],
+													"is": "bound:put"
+												},
+												"count": 1,
+												"as": "equipment"
+											},
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"battlefield"
+													],
+													"subtypes": [
+														"Samurai"
+													],
+													"controller": "you"
+												},
+												"count": 1,
+												"as": "samurai"
+											},
+											{
+												"do": "attach",
+												"what": "bound:equipment",
+												"to": "bound:samurai"
+											}
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

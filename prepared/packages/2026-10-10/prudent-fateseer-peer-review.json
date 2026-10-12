@@ -1,0 +1,123 @@
+{
+	"card": "Prudent Fateseer // Peer Review",
+	"generated": "2026-10-10",
+	"source": "d8fb5ce48f19537aff61ee9416c64ae340e654566875c521d742c3f032ba4960",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prudent Fateseer // Peer Review",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared.",
+				"kind": "enters",
+				"prepared": true
+			},
+			{
+				"face": 0,
+				"basis": "Whenever you scry or surveil, creatures you control get +1/+0 until end of turn. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "keyword",
+					"keyword": "scry",
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever you scry or surveil, creatures you control get +1/+0 until end of turn. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "keyword",
+					"keyword": "surveil",
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Prudent Fateseer // Peer Review",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Peer Review copy",
+				"basis": "Create a 2/2 colorless Wizard Soldier creature token named Cadet. Surveil 1.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Cadet",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Wizard",
+								"Soldier"
+							],
+							"colors": [],
+							"power": 2,
+							"toughness": 2
+						}
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

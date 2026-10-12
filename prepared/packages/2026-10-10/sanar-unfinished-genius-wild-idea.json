@@ -1,0 +1,126 @@
+{
+	"card": "Sanar, Unfinished Genius // Wild Idea",
+	"generated": "2026-10-10",
+	"source": "2cd87a3090800f276f3e099b7f751ef33da4f3cf3b8b3e546c3de16baee4d357",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sanar, Unfinished Genius // Wild Idea",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Sanar enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Sanar, Unfinished Genius // Wild Idea",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a Treasure token",
+				"basis": "{T}: Create a Treasure token. Activate only if you've cast an instant or sorcery spell this turn.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"if": {
+					"amount": {
+						"history": "cast",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"instant",
+								"sorcery"
+							]
+						},
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Treasure Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Sanar, Unfinished Genius // Wild Idea",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Wild Idea copy",
+				"basis": "Search your library for an instant or sorcery card, reveal it, put it into your hand, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"instant",
+								"sorcery"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

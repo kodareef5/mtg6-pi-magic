@@ -38,7 +38,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Gnome",
+								"name": "Gnome Token",
 								"types": [
 									"artifact",
 									"creature"

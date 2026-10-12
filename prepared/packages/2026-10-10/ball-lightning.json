@@ -1,0 +1,66 @@
+{
+	"card": "Ball Lightning",
+	"generated": "2026-10-10",
+	"source": "6ea9075a8b9cd0d3c18ab3a50538d398bc00e68da6bddacf8c34a8dc275627af",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ball Lightning",
+		"registers": [
+			{
+				"basis": "Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Haste (This creature can attack and {T} as soon as it comes under your control.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of the end step, sacrifice this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "any"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

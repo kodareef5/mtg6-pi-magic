@@ -1,0 +1,101 @@
+{
+	"card": "Tragedy Feaster",
+	"generated": "2026-10-10",
+	"source": "4445cf4c95094e8a1a657cbdaf7a40aba0cd570bd75c0ee6709244777cd8a0e3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tragedy Feaster",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Ward—Discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"discard": 1
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Infusion — At the beginning of your end step, sacrifice a permanent unless you gained life this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"amount": {
+									"history": "life-gained",
+									"by": "you"
+								},
+								"atMost": 0
+							},
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you"
+									},
+									"count": 1,
+									"as": "sacrifice"
+								},
+								{
+									"do": "move",
+									"what": "bound:sacrifice",
+									"to": "graveyard",
+									"reason": "sacrifice"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

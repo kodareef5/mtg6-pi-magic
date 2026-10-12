@@ -1,0 +1,64 @@
+{
+	"card": "Morcant's Loyalist",
+	"generated": "2026-10-10",
+	"source": "df88ebce004750a8196ac38bc7dd6e51b57f2d7c72dc1ff587c5e3d848d7471e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Morcant's Loyalist",
+		"registers": [
+			{
+				"basis": "Other Elves you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Elf"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"basis": "When this creature dies, return another target Elf card from your graveyard to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"subtypes": [
+									"Elf"
+								],
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

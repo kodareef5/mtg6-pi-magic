@@ -1,0 +1,105 @@
+{
+	"card": "Gollum the Abandoned",
+	"generated": "2026-10-10",
+	"source": "710416a8db89e63841323673c7d6fb2d690c5bbb9b4da6fac60822e8571bb56b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gollum the Abandoned",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Gollum can't block.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"can't block"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Gollum enters, exile up to one target card from an opponent's graveyard. Each opponent loses 2 life.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "opponent",
+								"token": false
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						},
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Return Gollum the Abandoned from your graveyard to your hand",
+				"basis": "{2}, Sacrifice an artifact or creature: Return this card from your graveyard to your hand. Activate only as a sorcery.",
+				"source": {
+					"card": "Gollum the Abandoned",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

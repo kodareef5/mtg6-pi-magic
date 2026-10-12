@@ -1,0 +1,68 @@
+{
+	"card": "Swarm, Being of Bees",
+	"generated": "2026-10-10",
+	"source": "5d3e853244d211a7ef712c4bde8fbf6a502af329a89ce4ab3bd5755133c61526",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Swarm, Being of Bees",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "permit",
+				"basis": "Mayhem {B} (You may cast this card from your graveyard for {B} if you discarded it this turn. Timing rules still apply.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{B}",
+					"if": {
+						"discardedThisTurn": "this",
+						"by": "you"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

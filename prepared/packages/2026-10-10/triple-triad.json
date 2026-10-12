@@ -1,0 +1,93 @@
+{
+	"card": "Triple Triad",
+	"generated": "2026-10-10",
+	"source": "99d0cbab5411ccf2cea06956a657f52baccb438d8d987df0d7ee41c1cb87d9c7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Triple Triad",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, each player exiles the top card of their library. Until end of turn, you may play the card you own exiled this way and each other card exiled this way with lesser mana value than it without paying their mana costs.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 1,
+								"of": "each-player"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "each",
+							"objects": {
+								"zones": [
+									"exile"
+								],
+								"is": "bound:exiled",
+								"any": [
+									{
+										"owner": "you"
+									},
+									{
+										"manaValue": {
+											"atMost": {
+												"sum": [
+													{
+														"aggregate": "max",
+														"of": {
+															"zones": [
+																"exile"
+															],
+															"is": "bound:exiled",
+															"owner": "you"
+														},
+														"value": "manaValue"
+													},
+													-1
+												]
+											}
+										}
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "permit",
+									"what": "bound:object",
+									"who": "you",
+									"until": "end-of-turn",
+									"of": {
+										"types": [
+											"land"
+										]
+									}
+								},
+								{
+									"do": "permit",
+									"what": "bound:object",
+									"who": "you",
+									"mana": "{0}",
+									"until": "end-of-turn"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

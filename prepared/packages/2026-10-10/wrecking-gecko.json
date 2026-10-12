@@ -1,0 +1,70 @@
+{
+	"card": "Wrecking Gecko",
+	"generated": "2026-10-10",
+	"source": "4fc5c83523d7ea77bf4c476a5fd033a9d984f2c214e3bbc2f5bf6ab35ce6dc5e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wrecking Gecko",
+		"registers": [
+			{
+				"basis": "Ward {2} (Whenever this creature becomes the target of a spell or ability an opponent controls, counter it unless that player pays {2}.)",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Wrecking Gecko",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Wrecking Gecko's +4/+4 and trample ability",
+				"basis": "{6}{G}{G}: This creature gets +4/+4 and gains trample until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}{G}{G}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 4,
+							"toughness": 4,
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,95 @@
+{
+	"card": "Judith, Carnage Connoisseur",
+	"generated": "2026-10-10",
+	"source": "7d2a5e19994b0c9de70315c916a0e49f8457973aad59cf9151761e39de4911fc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Judith, Carnage Connoisseur",
+		"registers": [
+			{
+				"basis": "Whenever you cast an instant or sorcery spell, choose one —\n• That spell gains deathtouch and lifelink.\n• Create a 2/2 red Imp creature token with \"When this token dies, it deals 2 damage to each opponent.\"",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "event:object",
+									"until": "indefinite",
+									"change": {
+										"words": [
+											"deathtouch",
+											"lifelink"
+										]
+									}
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Imp Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Imp"
+										],
+										"colors": [
+											"R"
+										],
+										"power": 2,
+										"toughness": 2,
+										"registers": [
+											{
+												"basis": "When this token dies, it deals 2 damage to each opponent.",
+												"kind": "watch",
+												"event": {
+													"on": "dies",
+													"of": {
+														"is": "this"
+													}
+												},
+												"effect": {
+													"instructions": [
+														{
+															"do": "damage",
+															"to": "opponent",
+															"amount": 2,
+															"from": "this"
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

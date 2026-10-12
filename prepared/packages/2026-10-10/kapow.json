@@ -1,0 +1,67 @@
+{
+	"card": "Kapow!",
+	"generated": "2026-10-10",
+	"source": "f87bab6bdd351cf90452d601dea22c61bbc4b331f0e7bf7c9f0df486534a7a99",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kapow!",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kapow!",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put a +1/+1 counter on your creature, then have it fight an opponent's creature.",
+				"basis": "Put a +1/+1 counter on target creature you control. It fights target creature an opponent controls. (Each deals damage equal to its power to the other.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

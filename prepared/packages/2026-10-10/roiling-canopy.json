@@ -1,0 +1,79 @@
+{
+	"card": "Roiling Canopy",
+	"generated": "2026-10-10",
+	"source": "ea8f246627c80934b3af67af163dd8c5814f03ef300eaab4b7ae4180dd8bfa0e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Roiling Canopy",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "Whenever a Forest you control enters, if you control at least five other Forests, target creature you control gets +3/+3 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Forest"
+						],
+						"controller": "you"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"subtypes": [
+								"Forest"
+							],
+							"controller": "you",
+							"not": {
+								"is": "event:object"
+							}
+						}
+					},
+					"atLeast": 5
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

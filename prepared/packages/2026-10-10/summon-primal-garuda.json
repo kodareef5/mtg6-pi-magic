@@ -1,0 +1,99 @@
+{
+	"card": "Summon: Primal Garuda",
+	"generated": "2026-10-10",
+	"source": "7e96428a9af94897fdab7c89a1ee16ef93c1990fc1459d405fd1af20d0eb7173",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: Primal Garuda",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Aerial Blast — This creature deals 4 damage to target tapped creature an opponent controls.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"tapped": true,
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"from": "this",
+							"to": "target:0",
+							"amount": 4
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2,
+					3
+				],
+				"basis": "II, III — Slipstream — Another target creature you control gets +1/+0 and gains flying until end of turn.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

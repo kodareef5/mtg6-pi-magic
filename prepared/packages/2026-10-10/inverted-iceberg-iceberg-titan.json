@@ -1,0 +1,142 @@
+{
+	"card": "Inverted Iceberg // Iceberg Titan",
+	"generated": "2026-10-10",
+	"source": "63e2940f857c34e619f9b1bb28492c0f01e316e907b7ac894e2b6e6f0c03c56e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Inverted Iceberg // Iceberg Titan",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When this artifact enters, mill a card, then draw a card. (To mill a card, put the top card of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever this creature attacks, you may tap or untap target artifact or creature.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "chose-tap",
+							"instructions": [
+								{
+									"do": "tap",
+									"what": "target:0"
+								}
+							]
+						},
+						{
+							"do": "untap",
+							"what": "target:0",
+							"may": true,
+							"if": {
+								"not": {
+									"bound": "chose-tap"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Inverted Iceberg // Iceberg Titan",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Craft with another artifact and return as Iceberg Titan",
+				"basis": "Craft with artifact {4}{U}{U} ({4}{U}{U}, Exile this artifact, Exile another artifact you control or an artifact card from your graveyard: Return this card transformed under its owner's control. Craft only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}{U}{U}",
+					"exile": {
+						"source": true,
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"not": {
+								"is": "this"
+							},
+							"any": [
+								{
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you"
+								},
+								{
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you"
+								}
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "bound:cost-source",
+						"to": "battlefield",
+						"face": 1,
+						"controller": "owner:bound:cost-source",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

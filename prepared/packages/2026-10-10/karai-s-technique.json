@@ -1,0 +1,339 @@
+{
+	"card": "Karai's Technique",
+	"generated": "2026-10-10",
+	"source": "6c8103f14be1af2978dc6169d2d9a8eeae3787fa1c3d57058202c52b30bc842f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Karai's Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Karai's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Karai's Technique choosing +3/+3",
+				"basis": "Choose one or both —\n• Target creature gets +3/+3 until end of turn.\n• Target creature gets -3/-3 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Karai's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Karai's Technique choosing -3/-3",
+				"basis": "Choose one or both —\n• Target creature gets +3/+3 until end of turn.\n• Target creature gets -3/-3 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -3,
+							"toughness": -3
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Karai's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Karai's Technique choosing both modes",
+				"basis": "Choose one or both —\n• Target creature gets +3/+3 until end of turn.\n• Target creature gets -3/-3 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"power": -3,
+							"toughness": -3
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Karai's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Karai's Technique for sneak choosing +3/+3",
+				"basis": "Sneak {W}{B} (You may cast this spell for {W}{B} if you also return an unblocked attacker you control to hand during the declare blockers step.) ... Choose one or both —\n• Target creature gets +3/+3 until end of turn.\n• Target creature gets -3/-3 until end of turn.",
+				"timing": "spell",
+				"speed": "instant",
+				"if": {
+					"all": [
+						{
+							"turn": "self"
+						},
+						{
+							"step": "declare-blockers"
+						}
+					]
+				},
+				"cost": {
+					"alternative": "sneak",
+					"mana": "{W}{B}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true,
+							"blocked": false
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Karai's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Karai's Technique for sneak choosing -3/-3",
+				"basis": "Sneak {W}{B} (You may cast this spell for {W}{B} if you also return an unblocked attacker you control to hand during the declare blockers step.) ... Choose one or both —\n• Target creature gets +3/+3 until end of turn.\n• Target creature gets -3/-3 until end of turn.",
+				"timing": "spell",
+				"speed": "instant",
+				"if": {
+					"all": [
+						{
+							"turn": "self"
+						},
+						{
+							"step": "declare-blockers"
+						}
+					]
+				},
+				"cost": {
+					"alternative": "sneak",
+					"mana": "{W}{B}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true,
+							"blocked": false
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -3,
+							"toughness": -3
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Karai's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Karai's Technique for sneak choosing both modes",
+				"basis": "Sneak {W}{B} (You may cast this spell for {W}{B} if you also return an unblocked attacker you control to hand during the declare blockers step.) ... Choose one or both —\n• Target creature gets +3/+3 until end of turn.\n• Target creature gets -3/-3 until end of turn.",
+				"timing": "spell",
+				"speed": "instant",
+				"if": {
+					"all": [
+						{
+							"turn": "self"
+						},
+						{
+							"step": "declare-blockers"
+						}
+					]
+				},
+				"cost": {
+					"alternative": "sneak",
+					"mana": "{W}{B}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true,
+							"blocked": false
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"power": -3,
+							"toughness": -3
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,83 @@
+{
+	"card": "Seedship Broodtender",
+	"generated": "2026-10-10",
+	"source": "fe70caac94af88dfb6a0839c586810cb66d67befcffebe7c1a3589a68db2e791",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seedship Broodtender",
+		"registers": [
+			{
+				"basis": "When this creature enters, mill three cards. (Put the top three cards of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Return a creature or Spacecraft card from your graveyard to the battlefield",
+				"basis": "{3}{B}{G}, Sacrifice this creature: Return target creature or Spacecraft card from your graveyard to the battlefield. Activate only as a sorcery.",
+				"source": {
+					"card": "Seedship Broodtender",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}{B}{G}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Spacecraft"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

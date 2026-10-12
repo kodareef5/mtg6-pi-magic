@@ -1,0 +1,53 @@
+{
+	"card": "Stromkirk Noble",
+	"generated": "2026-10-10",
+	"source": "b365e23b90aa235d1af7a9e2e297f5356c6f2abafe2114ec435f9b4344d637dd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stromkirk Noble",
+		"registers": [
+			{
+				"basis": "This creature can't be blocked by Humans.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"is": "this"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						],
+						"subtypes": [
+							"Human"
+						]
+					}
+				}
+			},
+			{
+				"basis": "Whenever this creature deals combat damage to a player, put a +1/+1 counter on it.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

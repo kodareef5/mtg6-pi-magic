@@ -1,0 +1,55 @@
+{
+	"card": "Water Wings",
+	"generated": "2026-10-10",
+	"source": "3b52f9a725a1c33795a9787ea204ecad78036615027a1f2c377787bdea703730",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Water Wings",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Water Wings",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Water Wings",
+				"basis": "Until end of turn, target creature you control has base power and toughness 4/4 and gains flying and hexproof. (It can't be the target of spells or abilities your opponents control.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 4,
+								"toughness": 4
+							},
+							"words": [
+								"flying",
+								"hexproof"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

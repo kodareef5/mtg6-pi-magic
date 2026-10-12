@@ -38,7 +38,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Human Citizen",
+								"name": "Human Citizen Token",
 								"types": [
 									"creature"
 								],

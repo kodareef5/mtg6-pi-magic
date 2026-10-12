@@ -1,0 +1,60 @@
+{
+	"card": "Claws Out",
+	"generated": "2026-10-10",
+	"source": "1a7d41d87184cd8e1dfdaa1f455ecf01933328dacb9f22d8270343d4fb09f2aa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Claws Out",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Claws Out",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Claws Out with affinity for Cats",
+				"basis": "Affinity for Cats (This spell costs {1} less to cast for each Cat you control.) ... Creatures you control get +2/+2 until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Cat"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,80 @@
+{
+	"card": "Sally Pride, Lioness Leader",
+	"generated": "2026-10-10",
+	"source": "5225fa8c63f4c8061df9743593756f54c64f5db1da0b7adabd34f998604b1dd6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sally Pride, Lioness Leader",
+		"registers": [
+			{
+				"basis": "When Sally Pride enters, create X 2/2 red Mutant creature tokens, where X is the number of nontoken creatures you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"count": {
+									"types": [
+										"creature"
+									],
+									"controller": "you",
+									"token": false
+								}
+							},
+							"spec": {
+								"name": "Mutant Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Mutant"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Sally Pride attacks, put a +1/+1 counter on each creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

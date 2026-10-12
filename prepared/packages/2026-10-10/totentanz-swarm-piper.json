@@ -1,0 +1,101 @@
+{
+	"card": "Totentanz, Swarm Piper",
+	"generated": "2026-10-10",
+	"source": "672747c5da665870fbe3ff633a4174760c8e0dfb4eaea61a6a41a26b36ecc13c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Totentanz, Swarm Piper",
+		"registers": [
+			{
+				"basis": "Whenever Totentanz or another nontoken creature you control dies, create a 1/1 black Rat creature token with \"This token can't block.\"",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"token": false,
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Rat Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Rat"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"can't block"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Totentanz, Swarm Piper",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant deathtouch to target attacking Rat you control",
+				"basis": "{1}{B}: Target attacking Rat you control gains deathtouch until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}"
+				},
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Rat"
+							],
+							"controller": "you",
+							"attacking": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"deathtouch"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,65 @@
+{
+	"card": "Massacre Wurm",
+	"generated": "2026-10-10",
+	"source": "e1ef10019e03c8d9a76ae251ad5e931cb6043abe2194438794ce2e1380fe4a0e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Massacre Wurm",
+		"registers": [
+			{
+				"basis": "When this creature enters, creatures your opponents control get -2/-2 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": -2,
+								"toughness": -2
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a creature an opponent controls dies, that player loses 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "opponent"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "controller:event:object",
+							"amount": -2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

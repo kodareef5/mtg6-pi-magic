@@ -1,0 +1,649 @@
+{
+	"card": "Season of Weaving",
+	"generated": "2026-10-10",
+	"source": "1ff3d8ed0969185a91b255e6f0feed58760f2e14d7234d8490a46ef4495d11ed",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Season of Weaving",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose no modes (0 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once.",
+				"timing": "spell",
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw once (1 pawprint)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw twice (2 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw three times (3 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw four times (4 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw five times (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Copy once (2 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P} — Choose an artifact or creature you control. Create a token that's a copy of it.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "copy-one"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "bound:copy-one"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw once, copy once (3 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card. ... {P}{P} — Choose an artifact or creature you control. Create a token that's a copy of it.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "copy-one"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "bound:copy-one"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw twice, copy once (4 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card. ... {P}{P} — Choose an artifact or creature you control. Create a token that's a copy of it.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "copy-one"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "bound:copy-one"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw three times, copy once (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card. ... {P}{P} — Choose an artifact or creature you control. Create a token that's a copy of it.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "copy-one"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "bound:copy-one"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Copy twice (4 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P} — Choose an artifact or creature you control. Create a token that's a copy of it.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "copy-one"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "bound:copy-one"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "copy-two"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "bound:copy-two"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw once, copy twice (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card. ... {P}{P} — Choose an artifact or creature you control. Create a token that's a copy of it.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "copy-one"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "bound:copy-one"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "copy-two"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "bound:copy-two"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return nonland nontoken permanents (3 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P}{P} — Return each nonland, nontoken permanent to its owner's hand.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							},
+							"token": false
+						},
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw once, return nonland nontoken permanents (4 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card. ... {P}{P}{P} — Return each nonland, nontoken permanent to its owner's hand.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							},
+							"token": false
+						},
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw twice, return nonland nontoken permanents (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Draw a card. ... {P}{P}{P} — Return each nonland, nontoken permanent to its owner's hand.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							},
+							"token": false
+						},
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Weaving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Copy once, return nonland nontoken permanents (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P} — Choose an artifact or creature you control. Create a token that's a copy of it. ... {P}{P}{P} — Return each nonland, nontoken permanent to its owner's hand.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "copy-one"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "bound:copy-one"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							},
+							"token": false
+						},
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

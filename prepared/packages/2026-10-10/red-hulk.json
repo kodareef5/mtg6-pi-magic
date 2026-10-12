@@ -1,0 +1,89 @@
+{
+	"card": "Red Hulk",
+	"generated": "2026-10-10",
+	"source": "f2b7768e76ffd0ae01c1ff06658aa978c77bb8d01633dadd6602114f7efac34e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Red Hulk",
+		"registers": [
+			{
+				"basis": "Reach, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Enrage — Whenever Red Hulk is dealt damage, put a +1/+1 counter on him. When you do, he deals damage equal to the number of +1/+1 counters on him to any other target.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"received": true,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"as": "countered"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "countered"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature",
+												"planeswalker",
+												"battle"
+											],
+											"not": {
+												"is": "this"
+											}
+										},
+										"player": "any"
+									}
+								],
+								"instructions": [
+									{
+										"do": "damage",
+										"from": "this",
+										"to": "target:0",
+										"amount": {
+											"counters": "+1/+1",
+											"on": "this"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

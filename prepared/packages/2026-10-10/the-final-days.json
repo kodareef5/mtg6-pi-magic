@@ -1,0 +1,101 @@
+{
+	"card": "The Final Days",
+	"generated": "2026-10-10",
+	"source": "b592722146129288cf4600f5570fe2bdb502a4377c99f8197fd36721e76d381e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Final Days",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {4}{B}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{4}{B}{B}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "The Final Days",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast The Final Days, using its flashback permission when chosen",
+				"basis": "Create two tapped 2/2 black Horror creature tokens. If this spell was cast from a graveyard, instead create X of those tokens, where X is the number of creature cards in your graveyard. ... Flashback {4}{B}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"tapped": true,
+						"spec": {
+							"name": "Horror Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Horror"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 2,
+							"toughness": 2
+						},
+						"if": {
+							"not": {
+								"cast": "this",
+								"from": "graveyard"
+							}
+						}
+					},
+					{
+						"do": "token",
+						"count": {
+							"count": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"token": false
+							}
+						},
+						"tapped": true,
+						"spec": {
+							"name": "Horror Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Horror"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 2,
+							"toughness": 2
+						},
+						"if": {
+							"cast": "this",
+							"from": "graveyard"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

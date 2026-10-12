@@ -1,0 +1,67 @@
+{
+	"card": "Lie in Wait",
+	"generated": "2026-10-10",
+	"source": "c62db5a66527a01db87f85add2607643784c0907751c27a2284704b865715b31",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lie in Wait",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lie in Wait",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return a creature card to hand, then deal damage equal to its last known graveyard power",
+				"basis": "Return target creature card from your graveyard to your hand. Lie in Wait deals damage equal to that card's power to target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "damage",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						},
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

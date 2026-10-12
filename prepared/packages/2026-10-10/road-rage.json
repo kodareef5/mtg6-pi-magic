@@ -1,0 +1,62 @@
+{
+	"card": "Road Rage",
+	"generated": "2026-10-10",
+	"source": "20b8a4425433b1436e7a2320fd441ddfe34571b702eafc8abe01a96f86863334",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Road Rage",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Road Rage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Road Rage",
+				"basis": "Road Rage deals X damage to target creature or planeswalker, where X is 2 plus the number of Mounts and Vehicles you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"sum": [
+								2,
+								{
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"subtypes": [
+											"Mount",
+											"Vehicle"
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

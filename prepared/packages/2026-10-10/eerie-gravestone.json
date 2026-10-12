@@ -1,0 +1,81 @@
+{
+	"card": "Eerie Gravestone",
+	"generated": "2026-10-10",
+	"source": "f9769592c41c2205a5164100416df3dcb8bad8dc4fd6ae4dfc7ae1d7188192a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eerie Gravestone",
+		"registers": [
+			{
+				"basis": "When this artifact enters, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Eerie Gravestone",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Eerie Gravestone to mill four and optionally take a milled creature card",
+				"basis": "{1}{B}, Sacrifice this artifact: Mill four cards. You may put a creature card from among them into your hand. (To mill four cards, put the top four cards of your library into your graveyard.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 4,
+						"as": "milled"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"is": "bound:milled",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "creature"
+					},
+					{
+						"do": "move",
+						"what": "bound:creature",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

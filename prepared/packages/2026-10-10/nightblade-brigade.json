@@ -1,0 +1,105 @@
+{
+	"card": "Nightblade Brigade",
+	"generated": "2026-10-10",
+	"source": "c89120ae187fe8e733f209483e05274640f47576e4ae0f6253df389f100b5fc5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nightblade Brigade",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Deathtouch",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Mobilize 1 (Whenever this creature attacks, create a tapped and attacking 1/1 red Warrior creature token. Sacrifice it at the beginning of the next end step.)",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"tapped": true,
+							"attacking": true,
+							"as": "mobilized",
+							"spec": {
+								"name": "Warrior Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Warrior"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:mobilized",
+										"to": "graveyard",
+										"reason": "sacrifice"
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

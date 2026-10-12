@@ -1,0 +1,129 @@
+{
+	"card": "Gumdrop Poisoner // Tempt with Treats",
+	"generated": "2026-10-10",
+	"source": "30b02a63caf2a17386091caa1ac5a780697b8d420306c92ac89ed1477000cc94",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gumdrop Poisoner // Tempt with Treats",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "When this creature enters, up to one target creature gets -X/-X until end of turn, where X is the amount of life you gained this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"negate": {
+										"history": "life-gained",
+										"by": "you"
+									}
+								},
+								"toughness": {
+									"negate": {
+										"history": "life-gained",
+										"by": "you"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Gumdrop Poisoner // Tempt with Treats",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Tempt with Treats",
+				"basis": "Create a Food token. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Food Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Food"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+									"cost": {
+										"mana": "{2}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "life",
+												"who": "you",
+												"amount": 3
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

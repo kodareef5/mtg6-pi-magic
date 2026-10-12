@@ -1,0 +1,59 @@
+{
+	"card": "Snakeskin Veil",
+	"generated": "2026-10-10",
+	"source": "5c753443e66ae92a63a3713671fcbe83866bf9b99221199ee5f27921c670931f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Snakeskin Veil",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Snakeskin Veil",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put a +1/+1 counter on a creature you control and give it hexproof until end of turn.",
+				"basis": "Put a +1/+1 counter on target creature you control. It gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"hexproof"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

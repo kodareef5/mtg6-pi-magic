@@ -1,0 +1,71 @@
+{
+	"card": "Cult Healer",
+	"generated": "2026-10-10",
+	"source": "4f1fdc9ca56a926591d8d1280a1374005c404e8de95c2659ebbaf8c7e7b13915",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cult Healer",
+		"registers": [
+			{
+				"basis": "Eerie — Whenever an enchantment you control enters and whenever you fully unlock a Room, this creature gains lifelink until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"lifelink"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Eerie — Whenever an enchantment you control enters and whenever you fully unlock a Room, this creature gains lifelink until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"fully": true,
+					"by": "you",
+					"of": {
+						"subtypes": [
+							"Room"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"lifelink"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

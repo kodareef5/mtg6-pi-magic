@@ -1,0 +1,152 @@
+{
+	"card": "Demonic Junker",
+	"generated": "2026-10-10",
+	"source": "8e5ee5971501a258fdb65c6492520785790db6580c4d88d117850348df48b4df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Demonic Junker",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this Vehicle enters, for each player, destroy up to one target creature that player controls. If a creature you controlled was destroyed this way, put two +1/+1 counters on this Vehicle.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"upTo": true
+						},
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"every": {
+								"any": [
+									{
+										"is": "target:0"
+									},
+									{
+										"is": "target:1"
+									}
+								]
+							},
+							"as": "destroyed"
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 2,
+							"if": {
+								"all": [
+									{
+										"bound": "destroyed"
+									},
+									{
+										"is": "bound:destroyed",
+										"matches": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										},
+										"lastKnown": true
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Demonic Junker",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Demonic Junker with affinity for artifacts",
+				"basis": "Affinity for artifacts (This spell costs {1} less to cast for each artifact you control.)",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Demonic Junker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Demonic Junker",
+				"basis": "Crew 2",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

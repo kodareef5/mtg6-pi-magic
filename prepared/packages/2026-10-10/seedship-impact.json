@@ -1,0 +1,118 @@
+{
+	"card": "Seedship Impact",
+	"generated": "2026-10-10",
+	"source": "fc8d3aadcb06ab172213b728878390917c094662c9b4a81f9c5f225c02c8d2e4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seedship Impact",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Seedship Impact",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target artifact or enchantment; create a Lander token if its mana value was 2 or less.",
+				"basis": "Destroy target artifact or enchantment. If its mana value was 2 or less, create a Lander token. (It's an artifact with \"{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"manaValue": {
+									"atMost": 2
+								}
+							},
+							"lastKnown": true
+						},
+						"spec": {
+							"name": "Lander Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Lander"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+									"cost": {
+										"mana": "{2}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"library"
+													],
+													"owner": "you",
+													"types": [
+														"land"
+													],
+													"supertypes": [
+														"basic"
+													],
+													"token": false
+												},
+												"count": 1,
+												"upTo": true,
+												"as": "land"
+											},
+											{
+												"do": "move",
+												"what": "bound:land",
+												"to": "battlefield",
+												"tapped": true,
+												"controller": "you",
+												"reason": "resolve"
+											},
+											{
+												"do": "shuffle",
+												"who": "you"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

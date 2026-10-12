@@ -14,7 +14,13 @@
 					"is": "this",
 					"zones": [
 						"battlefield",
-						"stack"
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
 					]
 				},
 				"change": {
@@ -38,7 +44,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Rat",
+								"name": "Rat Token",
 								"types": [
 									"creature"
 								],
@@ -50,21 +56,8 @@
 								],
 								"power": 1,
 								"toughness": 1,
-								"registers": [
-									{
-										"basis": "This token can't block.",
-										"kind": "prohibit",
-										"block": {
-											"attacker": {
-												"types": [
-													"creature"
-												]
-											},
-											"blocker": {
-												"is": "this"
-											}
-										}
-									}
+								"words": [
+									"can't block"
 								]
 							}
 						}

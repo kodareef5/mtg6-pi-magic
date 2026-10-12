@@ -1,0 +1,90 @@
+{
+	"card": "Red Room Recruit",
+	"generated": "2026-10-10",
+	"source": "6fec4ac3dc39860ea3a541304a5769a94381fd59a60d46fd2ed0cc96dda5a812",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Red Room Recruit",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, it connives. (Draw a card, then discard a card. If you discarded a nonland card, put a +1/+1 counter on this creature.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "controller:this",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "controller:this",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "controller:this"
+							},
+							"count": 1,
+							"as": "chosen-discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen-discard",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"is": "bound:discarded",
+								"matches": {
+									"zones": [
+										"library",
+										"hand",
+										"battlefield",
+										"graveyard",
+										"stack",
+										"exile",
+										"command",
+										"outside"
+									],
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"instant",
+										"kindred",
+										"planeswalker",
+										"sorcery"
+									],
+									"not": {
+										"types": [
+											"land"
+										]
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

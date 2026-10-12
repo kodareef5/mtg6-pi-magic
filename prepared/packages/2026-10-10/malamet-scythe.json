@@ -1,0 +1,114 @@
+{
+	"card": "Malamet Scythe",
+	"generated": "2026-10-10",
+	"source": "e37ba044cbc4f1b72a675d297b9d87df2b31fe004e29c2d574a24af05ab0e0e9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Malamet Scythe",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this Equipment enters, attach it to target creature you control.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +2/+2.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Equip Malamet Scythe",
+				"basis": "Equip {4} ({4}: Attach to target creature you control. Equip only as a sorcery.)",
+				"source": {
+					"card": "Malamet Scythe",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

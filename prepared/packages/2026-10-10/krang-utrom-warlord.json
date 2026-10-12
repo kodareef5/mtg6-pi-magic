@@ -1,0 +1,66 @@
+{
+	"card": "Krang, Utrom Warlord",
+	"generated": "2026-10-10",
+	"source": "3f614630908d650b3c92f58b37bbab73919af0df9cd55990ab53be63e64721ed",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Krang, Utrom Warlord",
+		"registers": [
+			{
+				"basis": "Flying, trample, indestructible, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"trample",
+						"indestructible",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Other artifact creatures you control have flying, trample, indestructible, and haste.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "you",
+					"other": true,
+					"all": [
+						{
+							"types": [
+								"artifact"
+							]
+						},
+						{
+							"types": [
+								"creature"
+							]
+						}
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"trample",
+						"indestructible",
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

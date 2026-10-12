@@ -1,0 +1,137 @@
+{
+	"card": "Bonehoard Dracosaur",
+	"generated": "2026-10-10",
+	"source": "c32dfe2a037621f53fde8221d4487eda6a7457628c9890757ddb4f790d1edd9b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bonehoard Dracosaur",
+		"registers": [
+			{
+				"basis": "Flying, first strike",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"first strike"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your upkeep, exile the top two cards of your library. You may play them this turn. If you exiled a land card this way, create a 3/1 red Dinosaur creature token. If you exiled a nonland card this way, create a Treasure token.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 2,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": "end-of-turn"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"exile"
+										],
+										"is": "bound:exiled",
+										"types": [
+											"land"
+										],
+										"token": false
+									}
+								},
+								"atLeast": 1
+							},
+							"spec": {
+								"name": "Dinosaur Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dinosaur"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 3,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"exile"
+										],
+										"is": "bound:exiled",
+										"not": {
+											"types": [
+												"land"
+											]
+										},
+										"token": false
+									}
+								},
+								"atLeast": 1
+							},
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,173 @@
+{
+	"card": "Overlord of the Boilerbilges",
+	"generated": "2026-10-10",
+	"source": "5adc9b9027163617178007694b2f2b02b55455c02a0b3d08484c4cb7fd6cc873",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overlord of the Boilerbilges",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "Impending 4—{2}{R}{R} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"if": {
+					"cast": "this",
+					"alternative": "impending"
+				},
+				"counters": {
+					"time": 4
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Impending 4—{2}{R}{R} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"all": [
+						{
+							"cast": "this",
+							"alternative": "impending"
+						},
+						{
+							"amount": {
+								"counters": "time",
+								"on": "this"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"change": {
+					"types": {
+						"remove": [
+							"creature"
+						]
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Impending 4—{2}{R}{R} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"all": [
+						{
+							"cast": "this",
+							"alternative": "impending"
+						},
+						{
+							"amount": {
+								"counters": "time",
+								"on": "this"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "time",
+							"amount": -1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this permanent enters or attacks, it deals 4 damage to any target.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 4,
+							"from": "this"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this permanent enters or attacks, it deals 4 damage to any target.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 4,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Overlord of the Boilerbilges for its impending cost",
+				"basis": "Impending 4—{2}{R}{R} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"source": {
+					"card": "Overlord of the Boilerbilges",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"cost": {
+					"mana": "{2}{R}{R}",
+					"alternative": "impending"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

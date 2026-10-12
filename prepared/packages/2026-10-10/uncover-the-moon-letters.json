@@ -1,0 +1,64 @@
+{
+	"card": "Uncover the Moon-Letters",
+	"generated": "2026-10-10",
+	"source": "a293459cde31e3453b4094097256551fb5555ab50621c3c4be24202823b5b46b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Uncover the Moon-Letters",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a noncreature spell, you may draw X cards, where X is the amount of mana spent to cast that spell. If you do, discard two cards.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"manaSpent": "event:object"
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 2,
+							"as": "discards"
+						},
+						{
+							"do": "move",
+							"what": "bound:discards",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

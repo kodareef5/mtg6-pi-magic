@@ -1,0 +1,124 @@
+{
+	"card": "Steamcore Scholar",
+	"generated": "2026-10-10",
+	"source": "02c2f5c07dd537d70977dee4aeff16ca73353ed4d30e4f494c73ea63112ead16",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Steamcore Scholar",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, draw two cards. Then discard two cards unless you discard an instant or sorcery card or a creature card with flying.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you",
+								"any": [
+									{
+										"types": [
+											"instant",
+											"sorcery"
+										]
+									},
+									{
+										"types": [
+											"creature"
+										],
+										"words": [
+											"flying"
+										]
+									}
+								]
+							},
+							"count": 1,
+							"may": true,
+							"as": "qualifying"
+						},
+						{
+							"do": "move",
+							"what": "bound:qualifying",
+							"to": "graveyard",
+							"reason": "discard",
+							"if": {
+								"bound": "qualifying"
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 2,
+							"as": "cards",
+							"if": {
+								"not": {
+									"bound": "qualifying"
+								}
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:cards",
+							"to": "graveyard",
+							"reason": "discard",
+							"if": {
+								"not": {
+									"bound": "qualifying"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

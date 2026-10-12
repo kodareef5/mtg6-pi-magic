@@ -1,0 +1,81 @@
+{
+	"card": "Clash of Elements",
+	"generated": "2026-10-10",
+	"source": "0d30da5f6ab88ccf5a31aecffc1398c3117ebcb288c7dcda9dd7bdeb90b92433",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Clash of Elements",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Clash of Elements",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "The target's owner may put it on top and take 2 damage; otherwise put it on the bottom.",
+				"basis": "Choose target nonland permanent. Its owner may put it on top of their library. If they do, Clash of Elements deals 2 damage to them. If they didn't put the card on top of their library, they put it on the bottom.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "top",
+								"reason": "resolve",
+								"as": "put-on-top"
+							}
+						]
+					},
+					{
+						"do": "damage",
+						"to": "owner:target:0",
+						"from": "this",
+						"amount": 2,
+						"if": {
+							"bound": "put-on-top"
+						}
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "put-on-top"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

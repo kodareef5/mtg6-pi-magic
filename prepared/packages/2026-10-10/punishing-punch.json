@@ -1,0 +1,147 @@
+{
+	"card": "Punishing Punch",
+	"generated": "2026-10-10",
+	"source": "3bcd63d0119b926dda139875c5d692cdca9dbef2f42ac0f840933ae5ffcd8c07",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Punishing Punch",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Punishing Punch",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Punishing Punch with its conditional reduction",
+				"basis": "This spell costs {2} less to cast if there are two or more creature cards in your graveyard. ... Target creature you control deals damage equal to twice its power to target creature an opponent controls.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						}
+					},
+					"atLeast": 2
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"sum": [
+								{
+									"power": "target:0"
+								},
+								{
+									"power": "target:0"
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Punishing Punch",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Punishing Punch without its conditional reduction",
+				"basis": "This spell costs {2} less to cast if there are two or more creature cards in your graveyard. ... Target creature you control deals damage equal to twice its power to target creature an opponent controls.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						}
+					},
+					"atMost": 1
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"sum": [
+								{
+									"power": "target:0"
+								},
+								{
+									"power": "target:0"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

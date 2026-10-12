@@ -1,0 +1,89 @@
+{
+	"card": "Slumbering Keepguard",
+	"generated": "2026-10-10",
+	"source": "2c35a6bb36efcbb06a1ee87d4d060f147d5d562e1a2400cdb7630a1ad1b416c1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Slumbering Keepguard",
+		"registers": [
+			{
+				"basis": "Whenever an enchantment you control enters, scry 1.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Slumbering Keepguard",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Slumbering Keepguard +1/+1 for each enchantment controlled until end of turn",
+				"basis": "{2}{W}: This creature gets +1/+1 until end of turn for each enchantment you control.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"enchantment"
+									],
+									"controller": "you"
+								}
+							},
+							"toughness": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"enchantment"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

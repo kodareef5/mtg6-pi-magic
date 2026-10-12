@@ -1,0 +1,100 @@
+{
+	"card": "Pensive Professor",
+	"generated": "2026-10-10",
+	"source": "cb264acbec4d8e536606fe65ec4bf2dfa54be7257b6bba1e507ef206f03e9fad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pensive Professor",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Increment (Whenever you cast a spell, if the amount of mana you spent is greater than this creature's power or toughness, put a +1/+1 counter on this creature.)",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"if": {
+					"any": [
+						{
+							"amount": {
+								"manaSpent": "event:object"
+							},
+							"atLeast": {
+								"sum": [
+									{
+										"power": "this"
+									},
+									1
+								]
+							}
+						},
+						{
+							"amount": {
+								"manaSpent": "event:object"
+							},
+							"atLeast": {
+								"sum": [
+									{
+										"toughness": "this"
+									},
+									1
+								]
+							}
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more +1/+1 counters are put on this creature, draw a card.",
+				"event": {
+					"on": "counters",
+					"counter": "+1/+1",
+					"of": {
+						"is": "this"
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,200 @@
+{
+	"card": "Overlord of the Floodpits",
+	"generated": "2026-10-10",
+	"source": "a99d468e677d661fa4ccc6e921a8f629c58826a49706f3ff424a9e00d717ac95",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overlord of the Floodpits",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "Impending 4—{1}{U}{U} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"if": {
+					"cast": "this",
+					"alternative": "impending"
+				},
+				"counters": {
+					"time": 4
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Impending 4—{1}{U}{U} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"all": [
+						{
+							"cast": "this",
+							"alternative": "impending"
+						},
+						{
+							"amount": {
+								"counters": "time",
+								"on": "this"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"change": {
+					"types": {
+						"remove": [
+							"creature"
+						]
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Impending 4—{1}{U}{U} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"all": [
+						{
+							"cast": "this",
+							"alternative": "impending"
+						},
+						{
+							"amount": {
+								"counters": "time",
+								"on": "this"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "time",
+							"amount": -1
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this permanent enters or attacks, draw two cards, then discard a card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this permanent enters or attacks, draw two cards, then discard a card.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Overlord of the Floodpits for impending",
+				"source": {
+					"card": "Overlord of the Floodpits",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"basis": "Impending 4—{1}{U}{U} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"timing": "spell",
+				"cost": {
+					"mana": "{1}{U}{U}",
+					"alternative": "impending"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

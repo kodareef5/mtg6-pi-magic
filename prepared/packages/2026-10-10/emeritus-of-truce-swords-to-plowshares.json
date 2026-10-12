@@ -1,0 +1,131 @@
+{
+	"card": "Emeritus of Truce // Swords to Plowshares",
+	"generated": "2026-10-10",
+	"source": "671e27caadc2da2210c57638a1906dcb539704ee46750120e9fdd6a37dff9245",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Emeritus of Truce // Swords to Plowshares",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When this creature enters, target player creates a 1/1 white and black Inkling creature token with flying. Then if an opponent controls more creatures than you, this creature becomes prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"controller": "target:0",
+							"spec": {
+								"name": "Inkling Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Inkling"
+								],
+								"colors": [
+									"W",
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						},
+						{
+							"do": "prepare",
+							"what": "this",
+							"prepared": true,
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "opponent"
+									}
+								},
+								"atLeast": {
+									"sum": [
+										{
+											"count": {
+												"types": [
+													"creature"
+												],
+												"controller": "you"
+											}
+										},
+										1
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Emeritus of Truce // Swords to Plowshares",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Swords to Plowshares",
+				"basis": "Exile target creature. Its controller gains life equal to its power.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "life",
+						"who": "controller:target:0",
+						"amount": {
+							"power": "target:0"
+						},
+						"if": {
+							"amount": {
+								"power": "target:0"
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

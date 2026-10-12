@@ -1,0 +1,92 @@
+{
+	"card": "Sokka, Bold Boomeranger",
+	"generated": "2026-10-10",
+	"source": "7478e6d9bd30b18037a5fa7b576bbf1ff1420b49c609a6a7bbc5519e7cfdd781",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sokka, Bold Boomeranger",
+		"registers": [
+			{
+				"basis": "When Sokka enters, discard up to two cards, then draw that many cards.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 2,
+							"upTo": true,
+							"as": "chosen"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast an artifact or Lesson spell, put a +1/+1 counter on Sokka.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"any": [
+							{
+								"types": [
+									"artifact"
+								]
+							},
+							{
+								"subtypes": [
+									"Lesson"
+								]
+							}
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,108 @@
+{
+	"card": "Origin of the Avengers",
+	"generated": "2026-10-10",
+	"source": "0dac92c03331112a13fa9d5a90a3da790d39d8546f8b808eb3e157ae0755331d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Origin of the Avengers",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Scry 2.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"basis": "II — You may put a Hero creature card with mana value 3 or less from your hand onto the battlefield. If you don't, draw a card.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"manaValue": {
+									"atMost": 3
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "hero"
+						},
+						{
+							"do": "move",
+							"what": "bound:hero",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"if": {
+								"bound": "hero"
+							}
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"not": {
+									"bound": "hero"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"basis": "III — Put a +1/+1 counter on each creature you control.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

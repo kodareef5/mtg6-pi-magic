@@ -1,0 +1,65 @@
+{
+	"card": "Wild Hypothesis",
+	"generated": "2026-10-10",
+	"source": "fed009960ff178ba22831a5baa8d1d8d2254c91e5797b1c65554d5210ff013ea",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wild Hypothesis",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Wild Hypothesis",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Wild Hypothesis",
+				"basis": "Create a 0/0 green and blue Fractal creature token. Put X +1/+1 counters on it. ... Surveil 2. (Look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Fractal Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Fractal"
+							],
+							"colors": [
+								"G",
+								"U"
+							],
+							"power": 0,
+							"toughness": 0
+						},
+						"as": "fractal"
+					},
+					{
+						"do": "counters",
+						"on": "bound:fractal",
+						"kind": "+1/+1",
+						"amount": {
+							"x": true
+						}
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

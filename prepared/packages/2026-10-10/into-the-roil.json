@@ -1,0 +1,100 @@
+{
+	"card": "Into the Roil",
+	"generated": "2026-10-10",
+	"source": "d88ba34a8a3b1223b66155c92dd2196eca783f420cf0e94b15cb8570430c245d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Into the Roil",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Into the Roil",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Into the Roil without kicker",
+				"basis": "Return target nonland permanent to its owner's hand. If this spell was kicked, draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Into the Roil",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Into the Roil kicked",
+				"basis": "Kicker {1}{U} (You may pay an additional {1}{U} as you cast this spell.) ... Return target nonland permanent to its owner's hand. If this spell was kicked, draw a card.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "kicker",
+							"mana": "{1}{U}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

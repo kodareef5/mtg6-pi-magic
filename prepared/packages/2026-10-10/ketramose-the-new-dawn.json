@@ -1,0 +1,99 @@
+{
+	"card": "Ketramose, the New Dawn",
+	"generated": "2026-10-10",
+	"source": "61a8572ecf7c0c7fd81e7f504788ffd8fc28353abdc8347185174d284a669ca7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ketramose, the New Dawn",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Menace, lifelink, indestructible",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace",
+						"lifelink",
+						"indestructible"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Ketramose can't attack or block unless there are seven or more cards in exile.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"exile"
+							],
+							"token": false
+						}
+					},
+					"atMost": 6
+				},
+				"change": {
+					"words": [
+						"can't attack",
+						"can't block"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more cards are put into exile from graveyards and/or the battlefield during your turn, you draw a card and lose 1 life.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard",
+						"battlefield"
+					],
+					"to": [
+						"exile"
+					],
+					"of": {
+						"zones": [
+							"graveyard",
+							"battlefield"
+						],
+						"token": false
+					},
+					"batch": true
+				},
+				"triggerIf": {
+					"turn": "self"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

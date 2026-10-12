@@ -1,0 +1,218 @@
+{
+	"card": "Unfortunate Accident",
+	"generated": "2026-10-10",
+	"source": "92b85fdf06dc74a8709853c031799d122c2b5889d54590dad7551ac9c80b73d1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unfortunate Accident",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unfortunate Accident",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Unfortunate Accident: destroy only",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2}{B} — Destroy target creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-destroy",
+							"mana": "{2}{B}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Unfortunate Accident",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Unfortunate Accident: Mercenary only",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Create a 1/1 red Mercenary creature token with \"{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.\"",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-mercenary",
+							"mana": "{1}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Mercenary Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Mercenary"
+							],
+							"colors": [
+								"R"
+							],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.",
+									"cost": {
+										"tap": true
+									},
+									"speed": "sorcery",
+									"effect": {
+										"targets": [
+											{
+												"object": {
+													"types": [
+														"creature"
+													],
+													"controller": "you"
+												}
+											}
+										],
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "target:0",
+												"until": "end-of-turn",
+												"change": {
+													"power": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Unfortunate Accident",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Unfortunate Accident: both modes",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2}{B} — Destroy target creature. ... + {1} — Create a 1/1 red Mercenary creature token with \"{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.\"",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-destroy",
+							"mana": "{2}{B}"
+						},
+						{
+							"name": "spree-mercenary",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Mercenary Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Mercenary"
+							],
+							"colors": [
+								"R"
+							],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.",
+									"cost": {
+										"tap": true
+									},
+									"speed": "sorcery",
+									"effect": {
+										"targets": [
+											{
+												"object": {
+													"types": [
+														"creature"
+													],
+													"controller": "you"
+												}
+											}
+										],
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "target:0",
+												"until": "end-of-turn",
+												"change": {
+													"power": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

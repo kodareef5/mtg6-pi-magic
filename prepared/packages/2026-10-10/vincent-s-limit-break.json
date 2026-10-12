@@ -1,0 +1,232 @@
+{
+	"card": "Vincent's Limit Break",
+	"generated": "2026-10-10",
+	"source": "91419e3284523c3ce938ed584fba81dcbdfccc7ff1b04d273905bb2d29377949",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vincent's Limit Break",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vincent's Limit Break",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing Galian Beast",
+				"basis": "Tiered (Choose one additional cost.)\nUntil end of turn, target creature you control gains \"When this creature dies, return it to the battlefield tapped under its owner's control\" and has the chosen base power and toughness.\n• Galian Beast — {0} — 3/2.\n• Death Gigas — {1} — 5/2.\n• Hellmasker — {3} — 7/2.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "galian-beast",
+							"mana": "{0}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 3,
+								"toughness": 2
+							},
+							"registers": [
+								{
+									"basis": "Until end of turn, target creature you control gains \"When this creature dies, return it to the battlefield tapped under its owner's control\" and has the chosen base power and toughness.",
+									"kind": "watch",
+									"event": {
+										"on": "dies",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": "event:object",
+												"to": "battlefield",
+												"tapped": true,
+												"controller": "owner:event:object",
+												"reason": "resolve"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Vincent's Limit Break",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing Death Gigas",
+				"basis": "Tiered (Choose one additional cost.)\nUntil end of turn, target creature you control gains \"When this creature dies, return it to the battlefield tapped under its owner's control\" and has the chosen base power and toughness.\n• Galian Beast — {0} — 3/2.\n• Death Gigas — {1} — 5/2.\n• Hellmasker — {3} — 7/2.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "death-gigas",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 5,
+								"toughness": 2
+							},
+							"registers": [
+								{
+									"basis": "Until end of turn, target creature you control gains \"When this creature dies, return it to the battlefield tapped under its owner's control\" and has the chosen base power and toughness.",
+									"kind": "watch",
+									"event": {
+										"on": "dies",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": "event:object",
+												"to": "battlefield",
+												"tapped": true,
+												"controller": "owner:event:object",
+												"reason": "resolve"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Vincent's Limit Break",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing Hellmasker",
+				"basis": "Tiered (Choose one additional cost.)\nUntil end of turn, target creature you control gains \"When this creature dies, return it to the battlefield tapped under its owner's control\" and has the chosen base power and toughness.\n• Galian Beast — {0} — 3/2.\n• Death Gigas — {1} — 5/2.\n• Hellmasker — {3} — 7/2.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "hellmasker",
+							"mana": "{3}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 7,
+								"toughness": 2
+							},
+							"registers": [
+								{
+									"basis": "Until end of turn, target creature you control gains \"When this creature dies, return it to the battlefield tapped under its owner's control\" and has the chosen base power and toughness.",
+									"kind": "watch",
+									"event": {
+										"on": "dies",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": "event:object",
+												"to": "battlefield",
+												"tapped": true,
+												"controller": "owner:event:object",
+												"reason": "resolve"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

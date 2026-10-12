@@ -1,0 +1,117 @@
+{
+	"card": "Wrench",
+	"generated": "2026-10-10",
+	"source": "706f2b181f0b9d19fa45bf2132ec8eea828a8bfdb566acd5667a16647d0d062a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wrench",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +1/+1 and has vigilance and \"{3}, {T}: Tap target creature.\"",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1,
+					"words": [
+						"vigilance"
+					],
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Equipped creature gets +1/+1 and has vigilance and \"{3}, {T}: Tap target creature.\"",
+							"cost": {
+								"mana": "{3}",
+								"tap": true
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "tap",
+										"what": "target:0"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Wrench",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Wrench to draw a card",
+				"basis": "{2}, Sacrifice this Equipment: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Wrench",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Wrench",
+				"basis": "Equip {2}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

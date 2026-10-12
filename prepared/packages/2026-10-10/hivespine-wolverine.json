@@ -1,0 +1,86 @@
+{
+	"card": "Hivespine Wolverine",
+	"generated": "2026-10-10",
+	"source": "58acb1afee2e3993c49b6e87a16b0659cecb4fc34f09f4c237b6de8ddf1338c8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hivespine Wolverine",
+		"registers": [
+			{
+				"basis": "When this creature enters, choose one —\n• Put a +1/+1 counter on target creature you control.\n• This creature fights target creature token.\n• Destroy target artifact or enchantment.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "target:0",
+									"kind": "+1/+1",
+									"amount": 1
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"token": true
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "fight",
+									"a": "this",
+									"b": "target:0"
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"artifact",
+											"enchantment"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "destroy",
+									"what": "target:0"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

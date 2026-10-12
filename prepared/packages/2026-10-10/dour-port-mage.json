@@ -1,0 +1,93 @@
+{
+	"card": "Dour Port-Mage",
+	"generated": "2026-10-10",
+	"source": "ba28eb0716890e3766e1eeed730dd490271e08ca3020b545d57738235f1fbe7e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dour Port-Mage",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more other creatures you control leave the battlefield without dying, draw a card.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"hand",
+						"library",
+						"exile",
+						"command",
+						"stack",
+						"outside"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Return another target creature you control to its owner's hand",
+				"basis": "{1}{U}, {T}: Return another target creature you control to its owner's hand.",
+				"source": {
+					"card": "Dour Port-Mage",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{U}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

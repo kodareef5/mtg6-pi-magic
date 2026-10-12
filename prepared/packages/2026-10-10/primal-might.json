@@ -1,0 +1,73 @@
+{
+	"card": "Primal Might",
+	"generated": "2026-10-10",
+	"source": "c6744f51f16677fa473ed3e16d34dc1030b99705e3d8e2803bcda78c4a1ca8fa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Primal Might",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Primal Might",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Primal Might",
+				"basis": "Target creature you control gets +X/+X until end of turn. Then it fights up to one target creature you don't control. (Each deals damage equal to its power to the other.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"x": true
+							},
+							"toughness": {
+								"x": true
+							}
+						}
+					},
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

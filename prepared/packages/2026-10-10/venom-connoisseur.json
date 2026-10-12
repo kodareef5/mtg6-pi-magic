@@ -1,0 +1,65 @@
+{
+	"card": "Venom Connoisseur",
+	"generated": "2026-10-10",
+	"source": "3ccfcbbdb1adcfc9ba24c7b8f338df26356c2a53df067fdd7fa304d5212f97fa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Venom Connoisseur",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Alliance — Whenever another creature you control enters, this creature gains deathtouch until end of turn. If this is the second time this ability has resolved this turn, all creatures you control gain deathtouch until end of turn.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"deathtouch"
+								]
+							}
+						},
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"deathtouch"
+								]
+							},
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 2,
+								"atMost": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

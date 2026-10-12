@@ -1,0 +1,66 @@
+{
+	"card": "Blazing Crescendo",
+	"generated": "2026-10-10",
+	"source": "0ffde7c729f7866c1442c717bd53a605c512ac7e5f4d683defaa3f4c7b1b888c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blazing Crescendo",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Blazing Crescendo",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +3/+1 and exile the top card with permission to play it through your next turn",
+				"basis": "Target creature gets +3/+1 until end of turn. ... Exile the top card of your library. Until the end of your next turn, you may play that card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "move",
+						"what": {
+							"top": 1,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": {
+							"endOfNextTurn": "you"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

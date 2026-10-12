@@ -1,0 +1,94 @@
+{
+	"card": "Meat Locker // Drowned Diner",
+	"generated": "2026-10-10",
+	"source": "88340e98abf9398acad7e7146477e435a4065d5cacccf7a72de3351c5d51b33f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Meat Locker // Drowned Diner",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When you unlock this door, tap up to one target creature and put two stun counters on it. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "tap",
+							"what": "target:0"
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "stun",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When you unlock this door, draw three cards, then discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 3
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard-card",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		],
+		"deferred": []
+	}
+}

@@ -1,0 +1,327 @@
+{
+	"card": "Let's Play a Game",
+	"generated": "2026-10-10",
+	"source": "78c7f40bec5af71a90fae31219d52e8a7ced52f0e6ba1b904ed5936bf6e0dcf7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Let's Play a Game",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Let's Play a Game",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing creatures get -1/-1",
+				"basis": "Delirium — Choose one. If there are four or more card types among cards in your graveyard, choose one or more instead. ... • Creatures your opponents control get -1/-1 until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Let's Play a Game",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing opponents discard two cards",
+				"basis": "Delirium — Choose one. If there are four or more card types among cards in your graveyard, choose one or more instead. ... • Each opponent discards two cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 2,
+						"actions": [
+							{
+								"discard": true
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Let's Play a Game",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing life loss and gain",
+				"basis": "Delirium — Choose one. If there are four or more card types among cards in your graveyard, choose one or more instead. ... • Each opponent loses 3 life and you gain 3 life.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -3
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Let's Play a Game",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing -1/-1 and discard",
+				"basis": "Delirium — Choose one. If there are four or more card types among cards in your graveyard, choose one or more instead. ... • Creatures your opponents control get -1/-1 until end of turn. ... • Each opponent discards two cards.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"is": "this"
+							}
+						}
+					},
+					"atLeast": 4
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					},
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 2,
+						"actions": [
+							{
+								"discard": true
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Let's Play a Game",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing -1/-1 and life loss and gain",
+				"basis": "Delirium — Choose one. If there are four or more card types among cards in your graveyard, choose one or more instead. ... • Creatures your opponents control get -1/-1 until end of turn. ... • Each opponent loses 3 life and you gain 3 life.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"is": "this"
+							}
+						}
+					},
+					"atLeast": 4
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					},
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -3
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Let's Play a Game",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing discard and life loss and gain",
+				"basis": "Delirium — Choose one. If there are four or more card types among cards in your graveyard, choose one or more instead. ... • Each opponent discards two cards. ... • Each opponent loses 3 life and you gain 3 life.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"is": "this"
+							}
+						}
+					},
+					"atLeast": 4
+				},
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 2,
+						"actions": [
+							{
+								"discard": true
+							}
+						]
+					},
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -3
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Let's Play a Game",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing all three modes",
+				"basis": "Delirium — Choose one. If there are four or more card types among cards in your graveyard, choose one or more instead. ... • Creatures your opponents control get -1/-1 until end of turn. ... • Each opponent discards two cards. ... • Each opponent loses 3 life and you gain 3 life.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"is": "this"
+							}
+						}
+					},
+					"atLeast": 4
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					},
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 2,
+						"actions": [
+							{
+								"discard": true
+							}
+						]
+					},
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -3
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

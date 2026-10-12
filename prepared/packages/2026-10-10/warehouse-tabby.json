@@ -1,0 +1,90 @@
+{
+	"card": "Warehouse Tabby",
+	"generated": "2026-10-10",
+	"source": "a2f76ace65a39cc29b636b53cc29525fe201bd02efee83e0a9a31284febe4874",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Warehouse Tabby",
+		"registers": [
+			{
+				"basis": "Whenever an enchantment you control is put into a graveyard from the battlefield, create a 1/1 black Rat creature token with \"This token can't block.\"",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Rat Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Rat"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"can't block"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Warehouse Tabby",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Gain deathtouch until end of turn",
+				"basis": "{1}{B}: This creature gains deathtouch until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"deathtouch"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

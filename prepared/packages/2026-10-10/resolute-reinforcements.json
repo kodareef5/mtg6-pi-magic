@@ -1,0 +1,69 @@
+{
+	"card": "Resolute Reinforcements",
+	"generated": "2026-10-10",
+	"source": "d6ebbe4575cb91efb7c79461c39958ccbd8b87d08ee191c6fd95dde0b2a17dc3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Resolute Reinforcements",
+		"registers": [
+			{
+				"basis": "Flash (You may cast this spell any time you could cast an instant.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"stack",
+						"battlefield",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create a 1/1 white Soldier creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

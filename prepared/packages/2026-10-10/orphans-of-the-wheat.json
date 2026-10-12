@@ -1,0 +1,75 @@
+{
+	"card": "Orphans of the Wheat",
+	"generated": "2026-10-10",
+	"source": "70f6ed99d6eb91a7cab4147f948afe94b9fc11d9b3ba0748e38f0fe383d9e2f1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Orphans of the Wheat",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, tap any number of untapped creatures you control. This creature gets +1/+1 until end of turn for each creature tapped this way.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"tapped": false
+							},
+							"count": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you",
+									"tapped": false
+								}
+							},
+							"upTo": true,
+							"as": "chosen"
+						},
+						{
+							"do": "tap",
+							"what": "bound:chosen",
+							"as": "tapped"
+						},
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"bound": "tapped"
+								},
+								"toughness": {
+									"bound": "tapped"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

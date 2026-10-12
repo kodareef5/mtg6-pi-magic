@@ -1,0 +1,58 @@
+{
+	"card": "Soulcoil Viper",
+	"generated": "2026-10-10",
+	"source": "8feee6e102edf952245016a23662eca41246a79fa3b264c451a999619be03dd3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Soulcoil Viper",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Soulcoil Viper",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Return a creature card from your graveyard with a finality counter",
+				"basis": "{B}, {T}, Sacrifice this creature: Return target creature card from your graveyard to the battlefield with a finality counter on it. Activate only as a sorcery. (If a creature with a finality counter on it would die, exile it instead.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{B}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"finality": 1
+						},
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

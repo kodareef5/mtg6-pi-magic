@@ -1,0 +1,101 @@
+{
+	"card": "Extract a Confession",
+	"generated": "2026-10-10",
+	"source": "4370d1300b5d3cf087e0d5d8b70043b7e5779bc432daf49380df9a626fcdc9f4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Extract a Confession",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Extract a Confession",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Extract a Confession without collecting evidence",
+				"basis": "As an additional cost to cast this spell, you may collect evidence 6. (Exile cards with total mana value 6 or greater from your graveyard.) ... Each opponent sacrifices a creature of their choice. If evidence was collected, instead each opponent sacrifices a creature with the greatest power among creatures they control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 1,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									]
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Extract a Confession",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Extract a Confession collecting evidence 6",
+				"basis": "As an additional cost to cast this spell, you may collect evidence 6. (Exile cards with total mana value 6 or greater from your graveyard.) ... Each opponent sacrifices a creature of their choice. If evidence was collected, instead each opponent sacrifices a creature with the greatest power among creatures they control.",
+				"timing": "spell",
+				"cost": {
+					"exile": {
+						"graveyard": {},
+						"totalManaValue": 6
+					}
+				},
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 1,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"power": {
+										"atLeast": {
+											"aggregate": "max",
+											"of": {
+												"zones": [
+													"battlefield"
+												],
+												"types": [
+													"creature"
+												],
+												"controller": "you"
+											},
+											"value": "power"
+										}
+									}
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

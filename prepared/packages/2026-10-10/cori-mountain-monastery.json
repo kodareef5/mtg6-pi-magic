@@ -1,0 +1,83 @@
+{
+	"card": "Cori Mountain Monastery",
+	"generated": "2026-10-10",
+	"source": "512a06ecc421773f8761cab2dd2ac4e28cd9a45e04c6b28408d014c52559a045",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cori Mountain Monastery",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a Plains or an Island.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"subtypes": [
+									"Plains",
+									"Island"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cori Mountain Monastery",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile the top card and permit playing it through your next turn",
+				"basis": "{3}{R}, {T}: Exile the top card of your library. Until the end of your next turn, you may play that card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{R}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 1,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": {
+							"endOfNextTurn": "you"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

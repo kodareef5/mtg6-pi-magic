@@ -1,0 +1,156 @@
+{
+	"card": "The Emperor of Palamecia // The Lord Master of Hell",
+	"generated": "2026-10-10",
+	"source": "5864c19eb1a07a4c8c965902374bda1e7919b93d9dbaf3b4c26315f4e234cd89",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Emperor of Palamecia // The Lord Master of Hell",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "{T}: Add {U} or {R}. Spend this mana only to cast a noncreature spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				],
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"artifact",
+						"battle",
+						"enchantment",
+						"instant",
+						"kindred",
+						"planeswalker",
+						"sorcery"
+					],
+					"not": {
+						"types": [
+							"creature"
+						]
+					}
+				}
+			},
+			{
+				"face": 0,
+				"basis": "{T}: Add {U} or {R}. Spend this mana only to cast a noncreature spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				],
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"artifact",
+						"battle",
+						"enchantment",
+						"instant",
+						"kindred",
+						"planeswalker",
+						"sorcery"
+					],
+					"not": {
+						"types": [
+							"creature"
+						]
+					}
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever you cast a noncreature spell, if at least four mana was spent to cast it, put a +1/+1 counter on The Emperor of Palamecia. Then if it has three or more +1/+1 counters on it, transform it.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "event:object"
+					},
+					"atLeast": 4
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "transform",
+							"what": "this",
+							"if": {
+								"amount": {
+									"counters": "+1/+1",
+									"on": "this"
+								},
+								"atLeast": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Starfall — Whenever The Lord Master of Hell attacks, it deals X damage to each opponent, where X is the number of noncreature, nonland cards in your graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"token": false,
+									"not": {
+										"types": [
+											"creature",
+											"land"
+										]
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

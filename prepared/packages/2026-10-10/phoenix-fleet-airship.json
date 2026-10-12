@@ -1,0 +1,124 @@
+{
+	"card": "Phoenix Fleet Airship",
+	"generated": "2026-10-10",
+	"source": "124741f3ff46bc84ae28296ffffe781b5b0763adfa32492c723689b90de8c908",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Phoenix Fleet Airship",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, if you sacrificed a permanent this turn, create a token that's a copy of this Vehicle.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "sacrificed",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"copy": "this"
+						}
+					]
+				}
+			},
+			{
+				"basis": "As long as you control eight or more permanents named Phoenix Fleet Airship, this Vehicle is an artifact creature.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"name": "Phoenix Fleet Airship"
+						}
+					},
+					"atLeast": 8
+				},
+				"change": {
+					"types": {
+						"add": [
+							"artifact",
+							"creature"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Phoenix Fleet Airship",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Phoenix Fleet Airship",
+				"basis": "Crew 1",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

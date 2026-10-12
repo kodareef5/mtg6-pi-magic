@@ -1,0 +1,62 @@
+{
+	"card": "Honest Rutstein",
+	"generated": "2026-10-10",
+	"source": "2825fedaa54b34a13c3547e705e44f35db7987c482c6ac0db0c393f3dc91ab97",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Honest Rutstein",
+		"registers": [
+			{
+				"basis": "When Honest Rutstein enters, return target creature card from your graveyard to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Creature spells you cast cost {1} less to cast.",
+				"kind": "cost",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"types": [
+						"creature"
+					]
+				},
+				"reduce": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

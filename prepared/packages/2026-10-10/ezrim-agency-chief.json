@@ -1,0 +1,201 @@
+{
+	"card": "Ezrim, Agency Chief",
+	"generated": "2026-10-10",
+	"source": "c63ca2cbc45b49c4d292897a10e71d309026f908e43ffdb8e239e783364d0c53",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ezrim, Agency Chief",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When Ezrim enters, investigate twice. (To investigate, create a Clue token. It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Clue Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Clue"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, Sacrifice this token: Draw a card.",
+										"cost": {
+											"mana": "{2}",
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Clue Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Clue"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, Sacrifice this token: Draw a card.",
+										"cost": {
+											"mana": "{2}",
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Activate Ezrim; choose vigilance, lifelink, or hexproof during resolution",
+				"basis": "{1}, Sacrifice an artifact: Ezrim gains your choice of vigilance, lifelink, or hexproof until end of turn.",
+				"source": {
+					"card": "Ezrim, Agency Chief",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "chose-vigilance",
+						"instructions": [
+							{
+								"do": "modify",
+								"what": "this",
+								"until": "end-of-turn",
+								"change": {
+									"words": [
+										"vigilance"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"if": {
+							"not": {
+								"bound": "chose-vigilance"
+							}
+						},
+						"as": "chose-lifelink",
+						"instructions": [
+							{
+								"do": "modify",
+								"what": "this",
+								"until": "end-of-turn",
+								"change": {
+									"words": [
+										"lifelink"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"if": {
+							"not": {
+								"any": [
+									{
+										"bound": "chose-vigilance"
+									},
+									{
+										"bound": "chose-lifelink"
+									}
+								]
+							}
+						},
+						"change": {
+							"words": [
+								"hexproof"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

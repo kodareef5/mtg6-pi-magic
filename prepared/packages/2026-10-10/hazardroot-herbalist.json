@@ -1,0 +1,62 @@
+{
+	"card": "Hazardroot Herbalist",
+	"generated": "2026-10-10",
+	"source": "8a503b3c71cf3c3a0d16d291974d8d5876aa2e2cab6fa969f4fd4e45ae14c77b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hazardroot Herbalist",
+		"registers": [
+			{
+				"basis": "Whenever you attack, target creature you control gets +1/+0 until end of turn. If that creature is a token, it also gains deathtouch until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						},
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"deathtouch"
+								]
+							},
+							"if": {
+								"is": "target:0",
+								"matches": {
+									"token": true
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

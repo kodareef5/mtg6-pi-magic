@@ -1,0 +1,117 @@
+{
+	"card": "Tyvar, the Pummeler",
+	"generated": "2026-10-10",
+	"source": "6c047f252f4dac982264110c8b88bd786b10890748db4281796e1ab5c5f3da42",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tyvar, the Pummeler",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tyvar, the Pummeler",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap another untapped controlled creature; Tyvar gains indestructible, then tap Tyvar",
+				"basis": "Tap another untapped creature you control: Tyvar gains indestructible until end of turn. Tap it.",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true,
+							"tapped": false
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					},
+					{
+						"do": "tap",
+						"what": "this"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Tyvar, the Pummeler",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give controlled creatures +X/+X until end of turn, capturing greatest controlled creature power at resolution",
+				"basis": "{3}{G}{G}: Creatures you control get +X/+X until end of turn, where X is the greatest power among creatures you control.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{G}{G}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"aggregate": "max",
+								"of": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								},
+								"value": "power"
+							},
+							"toughness": {
+								"aggregate": "max",
+								"of": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								},
+								"value": "power"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

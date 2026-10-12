@@ -1,0 +1,44 @@
+{
+	"card": "Ouroboroid",
+	"generated": "2026-10-10",
+	"source": "3a4ed7f232146d5f3af921b51b5b2d56688fe6af7742e76611dc40d9d325e415",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ouroboroid",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, put X +1/+1 counters on each creature you control, where X is this creature's power.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": {
+								"power": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,157 @@
+{
+	"card": "Ignis Scientia",
+	"generated": "2026-10-10",
+	"source": "68d634a08be852dd3ce3e70f0b866e07e77e3f41ca60113580a83a43d2d809e9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ignis Scientia",
+		"registers": [
+			{
+				"basis": "When Ignis Scientia enters, look at the top six cards of your library. You may put a land card from among them onto the battlefield tapped. Put the rest on the bottom of your library in a random order.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 6,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "battlefield",
+							"controller": "you",
+							"tapped": true,
+							"reason": "resolve"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"position": "bottom",
+							"random": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ignis Scientia",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile a graveyard card and create a Food if it was a creature card",
+				"basis": "I've Come Up with a New Recipe! — {1}{G}{U}, {T}: Exile target card from a graveyard. If a creature card was exiled this way, create a Food token.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{G}{U}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"token": false
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"is": "bound:exiled",
+							"matches": {
+								"zones": [
+									"exile"
+								],
+								"types": [
+									"creature"
+								],
+								"token": false
+							}
+						},
+						"spec": {
+							"name": "Food Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Food"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+									"kind": "activated",
+									"cost": {
+										"mana": "{2}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "life",
+												"who": "you",
+												"amount": 3
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

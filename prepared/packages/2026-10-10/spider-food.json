@@ -1,0 +1,95 @@
+{
+	"card": "Spider Food",
+	"generated": "2026-10-10",
+	"source": "9d5f6e286fc102ce730477c78d4e51e7d1377865b775fb8c32d611f7ec541bd0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider Food",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spider Food",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Spider Food",
+				"basis": "Destroy up to one target artifact, enchantment, or creature with flying. Create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									],
+									"words": [
+										"flying"
+									]
+								}
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Food Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Food"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+									"cost": {
+										"mana": "{2}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "life",
+												"who": "you",
+												"amount": 3
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

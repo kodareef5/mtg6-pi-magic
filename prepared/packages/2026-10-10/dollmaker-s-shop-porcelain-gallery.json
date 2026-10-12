@@ -1,0 +1,95 @@
+{
+	"card": "Dollmaker's Shop // Porcelain Gallery",
+	"generated": "2026-10-10",
+	"source": "b9853a524ee2765d1ed44fe5be3e182c5106d97728dce3d091f0117fdc4dc687",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dollmaker's Shop // Porcelain Gallery",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever one or more non-Toy creatures you control attack a player, create a 1/1 white Toy artifact creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"not": {
+							"subtypes": [
+								"Toy"
+							]
+						}
+					},
+					"player": true,
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Toy Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Toy"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Creatures you control have base power and toughness each equal to the number of creatures you control.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"base": {
+						"power": {
+							"count": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						},
+						"toughness": {
+							"count": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		],
+		"deferred": []
+	}
+}

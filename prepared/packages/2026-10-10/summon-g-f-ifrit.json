@@ -1,0 +1,63 @@
+{
+	"card": "Summon: G.F. Ifrit",
+	"generated": "2026-10-10",
+	"source": "bf4ca4545e67e9b86f856606aec6da789d262599ea63e5c1417c00c9db3318aa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: G.F. Ifrit",
+		"registers": [
+			{
+				"basis": "I, II — You may discard a card. If you do, draw a card.",
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "III, IV — Add {R}.",
+				"kind": "chapter",
+				"numbers": [
+					3,
+					4
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

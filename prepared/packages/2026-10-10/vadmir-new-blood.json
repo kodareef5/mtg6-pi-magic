@@ -1,0 +1,58 @@
+{
+	"card": "Vadmir, New Blood",
+	"generated": "2026-10-10",
+	"source": "343c24a8e13719129cfd339c8c1d2a6d0c4091c8338e5a95bc348a9bd5b79c8e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vadmir, New Blood",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you commit a crime, put a +1/+1 counter on Vadmir. This ability triggers only once each turn. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.)",
+				"event": {
+					"on": "crime",
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "As long as Vadmir has four or more +1/+1 counters on it, it has menace and lifelink.",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"counters": "+1/+1",
+						"on": "this"
+					},
+					"atLeast": 4
+				},
+				"change": {
+					"words": [
+						"menace",
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

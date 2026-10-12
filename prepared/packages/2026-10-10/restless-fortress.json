@@ -1,0 +1,110 @@
+{
+	"card": "Restless Fortress",
+	"generated": "2026-10-10",
+	"source": "3d2d4e4858b973e2cbb86d83e9c75c24a730a1264322c7b843af50a4594a7ef0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Restless Fortress",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {W} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"basis": "{T}: Add {W} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "Whenever this land attacks, defending player loses 2 life and you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Restless Fortress",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Animate Restless Fortress",
+				"basis": "{2}{W}{B}: This land becomes a 1/4 white and black Nightmare creature until end of turn. It's still a land.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}{B}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"set": [
+									"Nightmare"
+								],
+								"of": "creature"
+							},
+							"colors": {
+								"set": [
+									"W",
+									"B"
+								]
+							},
+							"base": {
+								"power": 1,
+								"toughness": 4
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

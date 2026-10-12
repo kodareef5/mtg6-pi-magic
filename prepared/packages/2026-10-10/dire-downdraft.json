@@ -1,0 +1,86 @@
+{
+	"card": "Dire Downdraft",
+	"generated": "2026-10-10",
+	"source": "37d1486b6f37120c281e049000f9f63565d3559722960a31709d5b51942952ec",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dire Downdraft",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dire Downdraft",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dire Downdraft; its target's owner chooses top or bottom on resolution",
+				"basis": "This spell costs {1} less to cast if it targets an attacking or tapped creature. ... Target creature's owner puts it on their choice of the top or bottom of their library.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"is": "target:0",
+							"types": [
+								"creature"
+							],
+							"any": [
+								{
+									"attacking": true
+								},
+								{
+									"tapped": true
+								}
+							]
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "chose-top",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "top",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "chose-top"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

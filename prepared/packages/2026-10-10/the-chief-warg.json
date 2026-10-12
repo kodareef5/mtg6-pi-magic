@@ -1,0 +1,73 @@
+{
+	"card": "The Chief Warg",
+	"generated": "2026-10-10",
+	"source": "2eaa2355339a7639b1528e5765409bdd818b9c67e8d04c4d43556e2bec7f7f6b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Chief Warg",
+		"registers": [
+			{
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Ferocious — Whenever you attack while you control a creature with power 4 or greater, you draw a card and lose 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"power": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

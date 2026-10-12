@@ -1,0 +1,84 @@
+{
+	"card": "Virtue of Courage // Embereth Blaze",
+	"generated": "2026-10-10",
+	"source": "a2f86751ef42d0fdc310a8365fb568d7a536fed1ced64352480cb0562f21fbab",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Virtue of Courage // Embereth Blaze",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever a source you control deals noncombat damage to an opponent, you may exile that many cards from the top of your library. You may play those cards this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"combat": false,
+					"by": "you",
+					"player": "opponent"
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": {
+									"event": "amount"
+								},
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": "end-of-turn"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Virtue of Courage // Embereth Blaze",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Embereth Blaze",
+				"basis": "Embereth Blaze deals 2 damage to any target. (Then exile this card. You may cast the enchantment later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,90 @@
+{
+	"card": "Reckless Detective",
+	"generated": "2026-10-10",
+	"source": "7a12b32b1bc599ec4ebe6ec2de1a19b9861ff48d5c8713a686923133bff356df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Reckless Detective",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, you may sacrifice an artifact or discard a card. If you do, draw a card and this creature gets +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"types": [
+											"artifact"
+										],
+										"controller": "you"
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded",
+							"if": {
+								"not": {
+									"bound": "sacrificed"
+								}
+							}
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"any": [
+									{
+										"bound": "sacrificed"
+									},
+									{
+										"bound": "discarded"
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "draw",
+									"who": "you",
+									"count": 1
+								},
+								{
+									"do": "modify",
+									"what": "this",
+									"until": "end-of-turn",
+									"change": {
+										"power": 2
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

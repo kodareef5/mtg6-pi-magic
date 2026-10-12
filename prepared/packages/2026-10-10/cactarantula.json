@@ -1,0 +1,118 @@
+{
+	"card": "Cactarantula",
+	"generated": "2026-10-10",
+	"source": "8068d5d41cc0614705ab33af6c077053966e83194a91250333b164666ac3bc6d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cactarantula",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Reach",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature becomes the target of a spell or ability an opponent controls, you may draw a card.",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					},
+					"by": "opponent"
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cactarantula",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cactarantula with the Desert discount",
+				"basis": "This spell costs {1} less to cast if you control a Desert.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Desert"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 1
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Cactarantula",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cactarantula without a Desert discount",
+				"basis": "This spell costs {1} less to cast if you control a Desert.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Desert"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

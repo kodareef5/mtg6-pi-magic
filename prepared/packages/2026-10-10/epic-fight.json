@@ -1,0 +1,151 @@
+{
+	"card": "Epic Fight",
+	"generated": "2026-10-10",
+	"source": "01901f9aa8e4c7fb3dc97fbe076ff3cf920d5cf5187569d4580e18da14ad348b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Epic Fight",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Epic Fight",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Epic Fight: double power and toughness only",
+				"basis": "Choose one or both —\n• Double target creature's power and toughness until end of turn.\n• Target creature you control fights target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"power": "target:0"
+							},
+							"toughness": {
+								"toughness": "target:0"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Epic Fight",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Epic Fight: fight only",
+				"basis": "Choose one or both —\n• Double target creature's power and toughness until end of turn.\n• Target creature you control fights target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Epic Fight",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Epic Fight: both modes, double then fight",
+				"basis": "Choose one or both —\n• Double target creature's power and toughness until end of turn.\n• Target creature you control fights target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"power": "target:0"
+							},
+							"toughness": {
+								"toughness": "target:0"
+							}
+						}
+					},
+					{
+						"do": "fight",
+						"a": "target:1",
+						"b": "target:2"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

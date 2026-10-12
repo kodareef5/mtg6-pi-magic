@@ -1,0 +1,74 @@
+{
+	"card": "The Sibsig Ceremony",
+	"generated": "2026-10-10",
+	"source": "2a08dfb8a3340bd05bf5db79b551dd5386871056f308af0891bb6395963811d5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Sibsig Ceremony",
+		"registers": [
+			{
+				"kind": "cost",
+				"basis": "Creature spells you cast cost {2} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"reduce": 2
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a creature you control enters, if you cast it, destroy that creature, then create a 2/2 black Zombie Druid creature token.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"if": {
+					"cast": "event:object",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "event:object"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Zombie Druid Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Zombie",
+									"Druid"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

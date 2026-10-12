@@ -1,0 +1,73 @@
+{
+	"card": "Avishkar Raceway",
+	"generated": "2026-10-10",
+	"source": "aabcc114049c07ef070fb5c5f9b23244eb0741f5e3705f3cd5bdc88465729f7b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Avishkar Raceway",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "mana",
+				"basis": "{T}: Add {C}.",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — {3}, {T}, Discard a card: Draw a card.",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Max speed — {3}, {T}, Discard a card: Draw a card.",
+							"cost": {
+								"mana": "{3}",
+								"tap": true,
+								"discard": 1
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "draw",
+										"who": "you",
+										"count": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

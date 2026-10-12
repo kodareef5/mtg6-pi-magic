@@ -1,0 +1,92 @@
+{
+	"card": "Patient Naturalist",
+	"generated": "2026-10-10",
+	"source": "dc34c0231c12f333b8eb9445e3ce9ce3e6be0818809488ad1a4359b06c007ed2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Patient Naturalist",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, mill three cards. Put a land card from among the milled cards into your hand. If you can't, create a Treasure token. (To mill three cards, put the top three cards of your library into your graveyard.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3,
+							"as": "milled"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard",
+									"exile",
+									"battlefield",
+									"command",
+									"stack"
+								],
+								"is": "bound:milled",
+								"types": [
+									"land"
+								],
+								"token": false
+							},
+							"count": 1,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "resolve",
+							"as": "returned"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"not": {
+									"bound": "returned"
+								}
+							},
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "mana",
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

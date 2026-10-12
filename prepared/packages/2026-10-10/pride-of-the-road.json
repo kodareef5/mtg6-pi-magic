@@ -1,0 +1,103 @@
+{
+	"card": "Pride of the Road",
+	"generated": "2026-10-10",
+	"source": "6df3cb174ee701a540ad51c41013c897dc03f5b70ee3fc53990a59256dffcd5b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pride of the Road",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — At the beginning of combat on your turn, target creature or Vehicle you control gains double strike until end of turn.",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "Max speed — At the beginning of combat on your turn, target creature or Vehicle you control gains double strike until end of turn.",
+							"event": {
+								"on": "step",
+								"step": "begin-combat",
+								"whose": "you"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"controller": "you",
+											"any": [
+												{
+													"types": [
+														"creature"
+													]
+												},
+												{
+													"subtypes": [
+														"Vehicle"
+													]
+												}
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "target:0",
+										"until": "end-of-turn",
+										"change": {
+											"words": [
+												"double strike"
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

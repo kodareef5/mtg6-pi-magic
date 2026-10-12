@@ -1,0 +1,60 @@
+{
+	"card": "Wisecrack",
+	"generated": "2026-10-10",
+	"source": "7453507b2271d34c48d97dee8bcd1ca339c70dd17e3fea4b898b47ad416c0763",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wisecrack",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Wisecrack",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Have the target creature damage itself, then damage its controller if it is attacking.",
+				"basis": "Target creature deals damage equal to its power to itself. If that creature is attacking, Wisecrack deals 2 damage to that creature's controller.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"from": "target:0",
+						"amount": {
+							"power": "target:0"
+						}
+					},
+					{
+						"do": "damage",
+						"to": "controller:target:0",
+						"from": "this",
+						"amount": 2,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"attacking": true
+							},
+							"lastKnown": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,118 @@
+{
+	"card": "Rediscover the Way",
+	"generated": "2026-10-10",
+	"source": "f26c1d6c60ec60b9d80377ab544d5004061e7fd4aaf784bb81bca1ff78b9fd20",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rediscover the Way",
+		"registers": [
+			{
+				"basis": "I, II — Look at the top three cards of your library. Put one of them into your hand and the rest on the bottom of your library in any order.",
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 3,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"count": 1,
+							"as": "taken"
+						},
+						{
+							"do": "move",
+							"what": "bound:taken",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"position": "bottom"
+						}
+					]
+				}
+			},
+			{
+				"basis": "III — Whenever you cast a noncreature spell this turn, target creature you control gains double strike until end of turn.",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "delay",
+							"until": "end-of-turn",
+							"event": {
+								"on": "cast",
+								"by": "you",
+								"of": {
+									"zones": [
+										"stack"
+									],
+									"not": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "target:0",
+										"until": "end-of-turn",
+										"change": {
+											"words": [
+												"double strike"
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

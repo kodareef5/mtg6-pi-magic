@@ -1,0 +1,106 @@
+{
+	"card": "The Princess Takes Flight",
+	"generated": "2026-10-10",
+	"source": "6e776872a16eed41d5ba28387a3d1c88d09d3e2745a92f0bb7d5483e8f2d52b9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Princess Takes Flight",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Exile up to one target creature.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"link": true
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"basis": "II — Target creature you control gets +2/+2 and gains flying until end of turn.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 2,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"basis": "III — Return the exiled card to the battlefield under its owner's control.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "each",
+							"objects": {
+								"zones": [
+									"exile"
+								],
+								"linked": true
+							},
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:object",
+									"to": "battlefield",
+									"controller": "owner:bound:object",
+									"reason": "resolve"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

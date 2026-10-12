@@ -1,0 +1,77 @@
+{
+	"card": "Tendril of the Mycotyrant",
+	"generated": "2026-10-10",
+	"source": "f2f159e8965f7cc17e88b95b1fd8be557d890cecb06ea06c0d4bf5fcf37116f0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tendril of the Mycotyrant",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tendril of the Mycotyrant",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put seven counters on a noncreature land and animate it",
+				"basis": "{5}{G}{G}: Put seven +1/+1 counters on target noncreature land you control. It becomes a 0/0 Fungus creature with haste. It's still a land.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}{G}{G}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							],
+							"not": {
+								"types": [
+									"creature"
+								]
+							},
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 7
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Fungus"
+								]
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,68 @@
+{
+	"card": "Glassworks // Shattered Yard",
+	"generated": "2026-10-10",
+	"source": "97a0b08deadf4596c40c9aeda452d45b39b786140029c41f270c9f8d6133f971",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Glassworks // Shattered Yard",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When you unlock this door, this Room deals 4 damage to target creature an opponent controls.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 4
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "At the beginning of your end step, this Room deals 1 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		]
+	}
+}

@@ -1,0 +1,84 @@
+{
+	"card": "Seize Opportunity",
+	"generated": "2026-10-10",
+	"source": "3d8686fa1c46310a56053a96a43842113f0e87d28f618c77946953779d3b6edc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seize Opportunity",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Seize Opportunity",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose exile and play permission",
+				"basis": "Choose one — ... Exile the top two cards of your library. Until the end of your next turn, you may play those cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 2,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": {
+							"endOfNextTurn": "you"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Seize Opportunity",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose +2/+1 for up to two creatures",
+				"basis": "Choose one — ... Up to two target creatures each get +2/+1 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

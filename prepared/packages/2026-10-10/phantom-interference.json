@@ -1,0 +1,192 @@
+{
+	"card": "Phantom Interference",
+	"generated": "2026-10-10",
+	"source": "b084f4452324382f2cd0ef33dbca405f44eaf6d553b4312004b84edf7739979a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Phantom Interference",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Phantom Interference",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with only the Spirit mode",
+				"basis": "Spree (Choose one or more additional costs.) ... + {3} — Create a 2/2 white Spirit creature token with flying.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-spirit",
+							"mana": "{3}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Spirit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Spirit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Phantom Interference",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with only the counter mode",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Counter target spell unless its controller pays {2}.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-counter",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{2}"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Phantom Interference",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with both modes",
+				"basis": "Spree (Choose one or more additional costs.) ... + {3} — Create a 2/2 white Spirit creature token with flying. ... + {1} — Counter target spell unless its controller pays {2}.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-spirit",
+							"mana": "{3}"
+						},
+						{
+							"name": "spree-counter",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Spirit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Spirit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"flying"
+							]
+						}
+					},
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{2}"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

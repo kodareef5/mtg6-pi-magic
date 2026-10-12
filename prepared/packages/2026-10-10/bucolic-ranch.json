@@ -1,0 +1,115 @@
+{
+	"card": "Bucolic Ranch",
+	"generated": "2026-10-10",
+	"source": "ba16596e04c59015f788a208446bf75d49bd4647a77260d69ec1676de820177d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bucolic Ranch",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast a Mount spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"subtypes": [
+						"Mount"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bucolic Ranch",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Inspect the top card, optionally reveal and take a Mount, otherwise optionally put it on the bottom",
+				"basis": "{3}, {T}: Look at the top card of your library. If it's a Mount card, you may reveal it and put it into your hand. If you don't put it into your hand, you may put it on the bottom of your library.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 1,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"if": {
+							"is": "bound:looked",
+							"matches": {
+								"zones": [
+									"library"
+								],
+								"subtypes": [
+									"Mount"
+								]
+							}
+						},
+						"instructions": [
+							{
+								"do": "reveal",
+								"what": "bound:looked"
+							},
+							{
+								"do": "move",
+								"what": "bound:looked",
+								"to": "hand",
+								"reason": "resolve",
+								"as": "taken"
+							}
+						]
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"may": true,
+						"if": {
+							"not": {
+								"bound": "taken"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

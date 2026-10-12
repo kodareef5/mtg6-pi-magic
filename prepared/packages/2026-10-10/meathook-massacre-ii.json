@@ -1,0 +1,145 @@
+{
+	"card": "Meathook Massacre II",
+	"generated": "2026-10-10",
+	"source": "5b1ac756c5e8e5c14c3df6dca1425aca6c4493ccd505087ec21bc707fa0cd1f9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Meathook Massacre II",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Meathook Massacre II enters, each player sacrifices X creatures of their choice.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "each-player",
+							"count": {
+								"x": true
+							},
+							"actions": [
+								{
+									"sacrifice": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a creature you control dies, you may pay 3 life. If you do, return that card under your control with a finality counter on it.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"life": 3
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "you",
+							"counters": {
+								"finality": 1
+							},
+							"reason": "resolve",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a creature an opponent controls dies, they may pay 3 life. If they don't, return that card under your control with a finality counter on it.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "opponent"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "controller:event:object",
+							"cost": {
+								"life": 3
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "you",
+							"counters": {
+								"finality": 1
+							},
+							"reason": "resolve",
+							"if": {
+								"not": {
+									"bound": "paid"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Meathook Massacre II with chosen X",
+				"basis": "When Meathook Massacre II enters, each player sacrifices X creatures of their choice.",
+				"source": {
+					"card": "Meathook Massacre II",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

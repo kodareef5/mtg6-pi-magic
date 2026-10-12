@@ -1,0 +1,63 @@
+{
+	"card": "Malamet Battle Glyph",
+	"generated": "2026-10-10",
+	"source": "345144fd64d3e745ae5d057899ed66b3abb2d01c2fe48d86cc780c1e6a2f7878",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Malamet Battle Glyph",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Malamet Battle Glyph",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put a counter on your creature if it entered this turn, then have the two creatures fight.",
+				"basis": "Choose target creature you control and target creature you don't control. If the creature you control entered this turn, put a +1/+1 counter on it. Then those creatures fight each other.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1,
+						"if": {
+							"enteredThisTurn": "target:0"
+						}
+					},
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,160 @@
+{
+	"card": "Vraska's Final Mercy",
+	"generated": "2026-10-10",
+	"source": "6f9df949a013bf859772274ed93f7d7bd53c55bd7295d97410913a9a288f8032",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vraska's Final Mercy",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vraska's Final Mercy",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Vraska's Final Mercy choosing to destroy a creature or planeswalker",
+				"basis": "Choose one —\n• You lose 2 life. Destroy target creature or planeswalker.\n• You lose 2 life. Empower Jace 6. (Put six loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2
+					},
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Vraska's Final Mercy",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Vraska's Final Mercy choosing to empower Jace 6",
+				"basis": "Choose one —\n• You lose 2 life. Destroy target creature or planeswalker.\n• You lose 2 life. Empower Jace 6. (Put six loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"amount": {
+								"count": {
+									"controller": "you",
+									"types": [
+										"planeswalker"
+									],
+									"subtypes": [
+										"Jace"
+									],
+									"token": true
+								}
+							},
+							"atMost": 0
+						},
+						"spec": {
+							"name": "Jace Token",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"colors": [
+								"U"
+							],
+							"loyalty": 0,
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "[−1]: Surveil 1",
+									"cost": {
+										"loyalty": -1
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "keyword",
+												"name": "surveil",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								},
+								{
+									"kind": "activated",
+									"basis": "[−3]: Draw a card.",
+									"cost": {
+										"loyalty": -3
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"controller": "you",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"token": true
+						},
+						"count": 1,
+						"as": "jace"
+					},
+					{
+						"do": "counters",
+						"on": "bound:jace",
+						"kind": "loyalty",
+						"amount": 6
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

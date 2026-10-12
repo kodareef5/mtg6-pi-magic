@@ -1,0 +1,88 @@
+{
+	"card": "Dancing from Dark to Dawn",
+	"generated": "2026-10-10",
+	"source": "0c06002bf8bfe409ad5ec8665dd54d18342b901ad0a481d8c56ddf67b660da9f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dancing from Dark to Dawn",
+		"registers": [
+			{
+				"basis": "Whenever you cast a creature spell, put X +1/+1 counters on target creature you control, where X is that spell's mana value.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": {
+								"manaValue": "event:object"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, create a 2/2 green Bear creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Bear Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Bear"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

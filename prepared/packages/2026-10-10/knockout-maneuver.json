@@ -1,0 +1,62 @@
+{
+	"card": "Knockout Maneuver",
+	"generated": "2026-10-10",
+	"source": "95c0165845a16ade147d075f66804fbf2da35b65edc9bc374e35808d6fe8e37f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Knockout Maneuver",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Knockout Maneuver",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put a counter on your creature, then it deals damage equal to its power to an opposing creature.",
+				"basis": "Put a +1/+1 counter on target creature you control, then it deals damage equal to its power to target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

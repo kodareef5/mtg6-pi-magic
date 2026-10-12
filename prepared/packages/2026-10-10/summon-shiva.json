@@ -1,0 +1,72 @@
+{
+	"card": "Summon: Shiva",
+	"generated": "2026-10-10",
+	"source": "082311086255aa6eaf7e5bb499b49c44db0c59e0deb63139de0a9ee71bb1bcaf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: Shiva",
+		"registers": [
+			{
+				"basis": "I, II — Heavenly Strike — Tap target creature an opponent controls. Put a stun counter on it. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2
+				],
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "tap",
+							"what": "target:0"
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "stun",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "III — Diamond Dust — Draw a card for each tapped creature your opponents control.",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"count": {
+									"types": [
+										"creature"
+									],
+									"controller": "opponent",
+									"tapped": true
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

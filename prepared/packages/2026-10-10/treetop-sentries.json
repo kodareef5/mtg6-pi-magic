@@ -1,0 +1,102 @@
+{
+	"card": "Treetop Sentries",
+	"generated": "2026-10-10",
+	"source": "179d6d26b0eccffd8a7520a3c7027fe6a3e087f764950ca698cd69da224383f6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Treetop Sentries",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, you may forage. If you do, draw a card. (To forage, exile three cards from your graveyard or sacrifice a Food.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"exile": {
+									"choose": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you"
+									},
+									"count": 3
+								}
+							},
+							"may": true,
+							"as": "foraged-cards"
+						},
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"subtypes": [
+											"Food"
+										]
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "foraged-food",
+							"if": {
+								"not": {
+									"bound": "foraged-cards"
+								}
+							}
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"any": [
+									{
+										"bound": "foraged-cards"
+									},
+									{
+										"bound": "foraged-food"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

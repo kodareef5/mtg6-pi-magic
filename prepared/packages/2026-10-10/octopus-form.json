@@ -1,0 +1,60 @@
+{
+	"card": "Octopus Form",
+	"generated": "2026-10-10",
+	"source": "2d27ac1069546d0f04f9fbb5e47e38cbf4da59f2e9eab06088b73faf8c952d8c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Octopus Form",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Octopus Form",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Octopus Form",
+				"basis": "Target creature you control gets +1/+1 and gains hexproof until end of turn. Untap it. (It can't be the target of spells or abilities your opponents control.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"hexproof"
+							]
+						}
+					},
+					{
+						"do": "untap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

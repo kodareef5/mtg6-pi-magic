@@ -1,0 +1,100 @@
+{
+	"card": "Jennika's Technique",
+	"generated": "2026-10-10",
+	"source": "c0c456c1852edf428258624775e3898470aa5235b2573147d4207683963f4904",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jennika's Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Jennika's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Jennika's Technique normally",
+				"basis": "Jennika's Technique deals 2 damage to each creature.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Jennika's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Jennika's Technique for sneak",
+				"basis": "Sneak {R} (You may cast this spell for {R} if you also return an unblocked attacker you control to hand during the declare blockers step.) ... Jennika's Technique deals 2 damage to each creature.",
+				"timing": "spell",
+				"if": {
+					"all": [
+						{
+							"turn": "self"
+						},
+						{
+							"step": "declare-blockers"
+						}
+					]
+				},
+				"cost": {
+					"alternative": "sneak",
+					"mana": "{R}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true,
+							"blocked": false
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

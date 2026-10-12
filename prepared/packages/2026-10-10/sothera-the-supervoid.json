@@ -1,0 +1,131 @@
+{
+	"card": "Sothera, the Supervoid",
+	"generated": "2026-10-10",
+	"source": "e6afd9f02733f720dcbe992c9c9fb8c03aee06d20dc9fcf78a716cf8a7db12a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sothera, the Supervoid",
+		"registers": [
+			{
+				"basis": "Whenever a creature you control dies, each opponent chooses a creature they control and exiles it.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "opponent",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							},
+							"count": 1,
+							"as": "chosen"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen",
+							"to": "exile",
+							"reason": "exile",
+							"link": true
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, if a player controls no creatures, sacrifice Sothera, then put a creature card exiled with it onto the battlefield under your control with two additional +1/+1 counters on it.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"any": [
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							"atMost": 0
+						},
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "opponent"
+								}
+							},
+							"atMost": 0
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"exile"
+								],
+								"types": [
+									"creature"
+								],
+								"token": false,
+								"linked": true
+							},
+							"count": 1,
+							"as": "returned"
+						},
+						{
+							"do": "move",
+							"what": "bound:returned",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"counters": {
+								"+1/+1": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

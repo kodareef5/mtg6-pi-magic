@@ -1,0 +1,76 @@
+{
+	"card": "Lunatic Pandora",
+	"generated": "2026-10-10",
+	"source": "e8a30805ad0d44dcb916189ffbf23dac10ece9e526ffcaf973bf9601f43aeb7e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lunatic Pandora",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lunatic Pandora",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Surveil 1",
+				"basis": "{2}, {T}: Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Lunatic Pandora",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Lunatic Pandora to destroy target nonland permanent",
+				"basis": "{6}, {T}, Sacrifice Lunatic Pandora: Destroy target nonland permanent.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

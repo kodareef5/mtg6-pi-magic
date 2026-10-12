@@ -1,0 +1,85 @@
+{
+	"card": "Marketback Walker",
+	"generated": "2026-10-10",
+	"source": "b2310417a297d3b05c7654c70023d494ac8471c4507ff3caa07aae186c212fde",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Marketback Walker",
+		"registers": [
+			{
+				"basis": "This creature enters with X +1/+1 counters on it.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": {
+						"x": true
+					}
+				}
+			},
+			{
+				"basis": "When this creature dies, draw a card for each +1/+1 counter on it.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"counters": "+1/+1",
+								"on": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Marketback Walker",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Marketback Walker with chosen X",
+				"basis": "This creature enters with X +1/+1 counters on it.",
+				"timing": "spell",
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Marketback Walker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a +1/+1 counter on Marketback Walker",
+				"basis": "{4}: Put a +1/+1 counter on this creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}"
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

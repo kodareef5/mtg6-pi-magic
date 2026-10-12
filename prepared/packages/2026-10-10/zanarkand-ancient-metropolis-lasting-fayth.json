@@ -1,0 +1,79 @@
+{
+	"card": "Zanarkand, Ancient Metropolis // Lasting Fayth",
+	"generated": "2026-10-10",
+	"source": "26ce23f105dfe446dfdd2dbb393f3240ac205d509caea7a9d285c98186f722be",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zanarkand, Ancient Metropolis // Lasting Fayth",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"face": 0,
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Zanarkand, Ancient Metropolis // Lasting Fayth",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Lasting Fayth",
+				"basis": "Create a 1/1 colorless Hero creature token. Put a +1/+1 counter on it for each land you control. (Then exile this card. You may play the land later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Hero Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Hero"
+							],
+							"colors": [],
+							"power": 1,
+							"toughness": 1
+						},
+						"as": "hero"
+					},
+					{
+						"do": "counters",
+						"on": "bound:hero",
+						"kind": "+1/+1",
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

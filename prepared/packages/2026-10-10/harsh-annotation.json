@@ -40,7 +40,7 @@
 						"count": 1,
 						"controller": "controller:target:0",
 						"spec": {
-							"name": "Inkling",
+							"name": "Inkling Token",
 							"types": [
 								"creature"
 							],

@@ -1,0 +1,65 @@
+{
+	"card": "Treeguard Duo",
+	"generated": "2026-10-10",
+	"source": "88c261f60f567ad0f7b9a6428ea218e1d4b99713a88b3994fe4afc1771483d83",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Treeguard Duo",
+		"registers": [
+			{
+				"basis": "When this creature enters, until end of turn, target creature you control gains vigilance and gets +X/+X, where X is the number of creatures you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"vigilance"
+								],
+								"power": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								},
+								"toughness": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

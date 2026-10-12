@@ -1,0 +1,67 @@
+{
+	"card": "Hellcat, Undying Vigilante",
+	"generated": "2026-10-10",
+	"source": "75dd70e1b254ef02cf0b87a4d81bd1956bc518c60c4ee61f0f5f194fb4fac966",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hellcat, Undying Vigilante",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Haste",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Hellcat dies, return her to the battlefield under her owner's control with a +1/+1 counter on her. She loses all abilities and gains haste.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "owner:event:object",
+							"counters": {
+								"+1/+1": 1
+							},
+							"reason": "resolve",
+							"as": "returned"
+						},
+						{
+							"do": "modify",
+							"what": "bound:returned",
+							"until": "indefinite",
+							"change": {
+								"loseAbilities": true,
+								"words": [
+									"haste"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

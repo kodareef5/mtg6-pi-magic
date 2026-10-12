@@ -1,0 +1,84 @@
+{
+	"card": "Scarblade's Malice",
+	"generated": "2026-10-10",
+	"source": "c566824f51aedae54ce738710d39b80f48a58e16991515b3820b526e3f74c8b0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scarblade's Malice",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Scarblade's Malice",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Scarblade's Malice",
+				"basis": "Target creature you control gains deathtouch and lifelink until end of turn. When that creature dies this turn, create a 2/2 black and green Elf creature token.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"deathtouch",
+								"lifelink"
+							]
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "dies",
+							"of": {
+								"is": "target:0"
+							}
+						},
+						"until": "end-of-turn",
+						"effect": {
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Elf Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Elf"
+										],
+										"colors": [
+											"B",
+											"G"
+										],
+										"power": 2,
+										"toughness": 2
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

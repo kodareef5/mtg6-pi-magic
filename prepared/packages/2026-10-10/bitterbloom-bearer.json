@@ -1,0 +1,100 @@
+{
+	"card": "Bitterbloom Bearer",
+	"generated": "2026-10-10",
+	"source": "840696bc1494fde9dd11824ff13c7c936dbcf50ad4b867af84cb4dc579809e62",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bitterbloom Bearer",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your upkeep, you lose 1 life and create a 1/1 blue and black Faerie creature token with flying.",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Faerie Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Faerie"
+								],
+								"colors": [
+									"U",
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

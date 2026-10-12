@@ -1,0 +1,86 @@
+{
+	"card": "Charge the Sanctum",
+	"generated": "2026-10-10",
+	"source": "00a4a63b934576f63aab4d85bc8954d5f75edfb4a09a7ea4ab819efaeb6156a2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Charge the Sanctum",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Charge the Sanctum",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Charge the Sanctum: boost creatures you control",
+				"basis": "Choose one — ... • Creatures you control get +2/+0 until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Charge the Sanctum",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Charge the Sanctum: boost one creature, grant first strike, and add a counter",
+				"basis": "Choose one — ... • Target creature gets +2/+0 and gains first strike until end of turn. Put a +1/+1 counter on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"words": [
+								"first strike"
+							]
+						}
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

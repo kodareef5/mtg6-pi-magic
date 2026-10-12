@@ -1,0 +1,127 @@
+{
+	"card": "Thief's Knife",
+	"generated": "2026-10-10",
+	"source": "d0c99dd9ebbff02d4b3bc0dd5d2ce9855844bc7e7905c6e4721f69bae501dc35",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thief's Knife",
+		"registers": [
+			{
+				"basis": "Job select (When this Equipment enters, create a 1/1 colorless Hero creature token, then attach this to it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Hero Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							},
+							"as": "hero"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:hero"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +1/+1, has \"Whenever this creature deals combat damage to a player, draw a card,\" and is a Rogue in addition to its other types.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1,
+					"subtypes": {
+						"add": [
+							"Rogue"
+						]
+					},
+					"registers": [
+						{
+							"basis": "Equipped creature gets +1/+1, has \"Whenever this creature deals combat damage to a player, draw a card,\" and is a Rogue in addition to its other types.",
+							"kind": "watch",
+							"event": {
+								"on": "combat-damage",
+								"of": {
+									"is": "this"
+								},
+								"player": true
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "draw",
+										"who": "you",
+										"count": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thief's Knife",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Thief's Knife",
+				"basis": "Equip {4}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

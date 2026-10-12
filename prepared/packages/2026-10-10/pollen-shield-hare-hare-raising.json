@@ -1,0 +1,97 @@
+{
+	"card": "Pollen-Shield Hare // Hare Raising",
+	"generated": "2026-10-10",
+	"source": "0e02245c003ad58014cc8141ffe8e4becc73da73179aabd921c15592a98e3a0d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pollen-Shield Hare // Hare Raising",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Creature tokens you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"token": true,
+					"controller": "you"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Pollen-Shield Hare // Hare Raising",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Hare Raising",
+				"basis": "Target creature you control gains vigilance and gets +X/+X until end of turn, where X is the number of creatures you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance"
+							],
+							"power": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							"toughness": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

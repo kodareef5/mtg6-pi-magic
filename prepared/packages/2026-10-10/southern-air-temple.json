@@ -1,0 +1,76 @@
+{
+	"card": "Southern Air Temple",
+	"generated": "2026-10-10",
+	"source": "35afb8ab619961b4ca512a11f0abfeb324a158f7972386a6fc6a11986fd4fb5f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Southern Air Temple",
+		"registers": [
+			{
+				"basis": "When Southern Air Temple enters, put X +1/+1 counters on each creature you control, where X is the number of Shrines you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": {
+								"count": {
+									"subtypes": [
+										"Shrine"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Shrine you control enters, put a +1/+1 counter on each creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Shrine"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

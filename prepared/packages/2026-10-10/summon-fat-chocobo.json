@@ -1,0 +1,99 @@
+{
+	"card": "Summon: Fat Chocobo",
+	"generated": "2026-10-10",
+	"source": "e0b7e8a1216be929b0fdc09c68afe5f820307bdf8074017c833198b061a49152",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: Fat Chocobo",
+		"registers": [
+			{
+				"basis": "I — Wark — Create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Bird Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Bird"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 2,
+								"toughness": 2,
+								"registers": [
+									{
+										"basis": "I — Wark — Create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+										"kind": "watch",
+										"event": {
+											"on": "enters",
+											"of": {
+												"types": [
+													"land"
+												],
+												"controller": "you"
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "this",
+													"until": "end-of-turn",
+													"change": {
+														"power": 1
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "II, III, IV — Kerplunk — Creatures you control gain trample until end of turn.",
+				"kind": "chapter",
+				"numbers": [
+					2,
+					3,
+					4
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"trample"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

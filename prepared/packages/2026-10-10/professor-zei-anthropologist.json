@@ -1,0 +1,80 @@
+{
+	"card": "Professor Zei, Anthropologist",
+	"generated": "2026-10-10",
+	"source": "f0a205e007362821762a5a9766b8a67629dd331c9f186c14f8b98c6e7511a7a6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Professor Zei, Anthropologist",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Professor Zei, Anthropologist",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard a card to draw a card",
+				"basis": "{T}, Discard a card: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"discard": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Professor Zei, Anthropologist",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Professor Zei to return an instant or sorcery card",
+				"basis": "{1}, {T}, Sacrifice Professor Zei: Return target instant or sorcery card from your graveyard to your hand. Activate only during your turn.",
+				"timing": "stack",
+				"if": {
+					"turn": "self"
+				},
+				"cost": {
+					"mana": "{1}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"instant",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,107 @@
+{
+	"card": "Nashi, Searcher in the Dark",
+	"generated": "2026-10-10",
+	"source": "eaf1c04b99a1dcdc6cdd9e2bdc6b2340ac1bc208667edf1b5163cf3d648a1913",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nashi, Searcher in the Dark",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Nashi deals combat damage to a player, you mill that many cards. You may put any number of legendary and/or enchantment cards from among them into your hand. If you put no cards into your hand this way, put a +1/+1 counter on Nashi.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": {
+									"event": "amount"
+								},
+								"of": "you"
+							},
+							"to": "graveyard",
+							"reason": "mill",
+							"as": "milled"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield",
+									"graveyard",
+									"exile",
+									"stack",
+									"command"
+								],
+								"is": "bound:milled",
+								"any": [
+									{
+										"supertypes": [
+											"legendary"
+										]
+									},
+									{
+										"types": [
+											"enchantment"
+										]
+									}
+								]
+							},
+							"count": {
+								"event": "amount"
+							},
+							"upTo": true,
+							"as": "chosen"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen",
+							"to": "hand",
+							"reason": "resolve",
+							"as": "returned"
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"not": {
+									"bound": "returned"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

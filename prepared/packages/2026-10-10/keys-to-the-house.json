@@ -1,0 +1,117 @@
+{
+	"card": "Keys to the House",
+	"generated": "2026-10-10",
+	"source": "2daad1db6ca7e844d4758f2377e7509898036a69f0abfbe4f7e08a152aa1ac56",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Keys to the House",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Keys to the House",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Search for a basic land",
+				"basis": "{1}, {T}, Sacrifice this artifact: Search your library for a basic land card, reveal it, put it into your hand, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Keys to the House",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Lock or unlock a Room door",
+				"basis": "{3}, {T}, Sacrifice this artifact: Lock or unlock a door of target Room you control. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Room"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "chose-lock",
+						"instructions": [
+							{
+								"do": "door",
+								"what": "target:0",
+								"action": "lock"
+							}
+						]
+					},
+					{
+						"do": "door",
+						"what": "target:0",
+						"action": "unlock",
+						"if": {
+							"not": {
+								"bound": "chose-lock"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"card": "Death Baron",
+	"generated": "2026-10-10",
+	"source": "1b3170ce383cb447df717000cc7194533bae7a824b79088244e52b21fbd1ae5e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Death Baron",
+		"registers": [
+			{
+				"basis": "Skeletons you control and other Zombies you control get +1/+1 and have deathtouch. (Any amount of damage they deal to a creature is enough to destroy it.)",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "you",
+					"any": [
+						{
+							"subtypes": [
+								"Skeleton"
+							]
+						},
+						{
+							"subtypes": [
+								"Zombie"
+							],
+							"other": true
+						}
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1,
+					"words": [
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

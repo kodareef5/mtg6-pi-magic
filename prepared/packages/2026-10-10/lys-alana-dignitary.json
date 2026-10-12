@@ -1,0 +1,96 @@
+{
+	"card": "Lys Alana Dignitary",
+	"generated": "2026-10-10",
+	"source": "3c0e381b3e871f2852a6f1aadfe21f980f2dafa8edc906e3c5f92c5b76ee44c0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lys Alana Dignitary",
+		"registers": [
+			{
+				"basis": "{T}: Add {G}{G}. Activate only if there is an Elf card in your graveyard.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G",
+					"G"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Elf"
+							],
+							"token": false
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lys Alana Dignitary",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast by beholding an Elf",
+				"basis": "As an additional cost to cast this spell, behold an Elf or pay {2}. (To behold an Elf, choose an Elf you control or reveal an Elf card from your hand.)",
+				"timing": "spell",
+				"cost": {
+					"show": {
+						"choose": {
+							"zones": [
+								"hand",
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Elf"
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Lys Alana Dignitary",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast by paying the additional {2}",
+				"basis": "As an additional cost to cast this spell, behold an Elf or pay {2}. (To behold an Elf, choose an Elf you control or reveal an Elf card from your hand.)",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "elf-surcharge",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

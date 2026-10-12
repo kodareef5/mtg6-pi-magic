@@ -1,0 +1,67 @@
+{
+	"card": "Vile Entomber",
+	"generated": "2026-10-10",
+	"source": "85e2125dee60e42179370d703dd684c4adc41aae1aeee6b9dff7c9552f1b5385",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vile Entomber",
+		"registers": [
+			{
+				"basis": "Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, search your library for a card, put that card into your graveyard, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you"
+							},
+							"count": 1,
+							"as": "card"
+						},
+						{
+							"do": "move",
+							"what": "bound:card",
+							"to": "graveyard",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

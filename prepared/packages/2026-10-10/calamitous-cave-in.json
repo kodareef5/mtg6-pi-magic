@@ -1,0 +1,63 @@
+{
+	"card": "Calamitous Cave-In",
+	"generated": "2026-10-10",
+	"source": "ae15068dab8426d76d55238a8cd02048fe6610bdbd47c915bcad5907aa1528ea",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Calamitous Cave-In",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any",
+					"card": "Calamitous Cave-In"
+				},
+				"claim": "Cast Calamitous Cave-In",
+				"basis": "Calamitous Cave-In deals X damage to each creature and each planeswalker, where X is the number of Caves you control plus the number of Cave cards in your graveyard.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						},
+						"amount": {
+							"sum": [
+								{
+									"count": {
+										"subtypes": [
+											"Cave"
+										],
+										"controller": "you"
+									}
+								},
+								{
+									"count": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"subtypes": [
+											"Cave"
+										],
+										"token": false
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

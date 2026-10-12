@@ -1,0 +1,101 @@
+{
+	"card": "The Misty Mountains Cold",
+	"generated": "2026-10-10",
+	"source": "86dec1be0a3b602f52ae8afb52fdb85e5083648e0ec3aedcb558c6807865af50",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Misty Mountains Cold",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2,
+					3,
+					4
+				],
+				"basis": "I, II, III, IV — Create a Treasure token. Then if you control four or more Treasures, sacrifice this Saga. If you do, create a 6/6 red Dragon creature token with flying. (A Treasure token is an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "mana",
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						},
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": "this"
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"subtypes": [
+											"Treasure"
+										]
+									}
+								},
+								"atLeast": 4
+							},
+							"as": "sacrificed-saga"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"bound": "sacrificed-saga"
+							},
+							"spec": {
+								"name": "Dragon Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dragon"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 6,
+								"toughness": 6,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,70 @@
+{
+	"card": "Marwyn, the Preserver",
+	"generated": "2026-10-10",
+	"source": "44742c7456f7bbfcf871c5b0caa1b07d531fe0d187eb4e66b616d53e245398de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Marwyn, the Preserver",
+		"registers": [
+			{
+				"basis": "Lands you control have hexproof. (They can't be the targets of spells or abilities your opponents control.)",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"land"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"hexproof"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Marwyn, the Preserver",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Return target land card from your graveyard to your hand",
+				"basis": "{2}: Return target land card from your graveyard to your hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"types": [
+								"land"
+							],
+							"owner": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

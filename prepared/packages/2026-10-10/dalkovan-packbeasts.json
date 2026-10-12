@@ -1,0 +1,85 @@
+{
+	"card": "Dalkovan Packbeasts",
+	"generated": "2026-10-10",
+	"source": "4814d554af24d898d5893d697544870ea126e9130ff31e3107e2cb593ef1ea91",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dalkovan Packbeasts",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Mobilize 3 (Whenever this creature attacks, create three tapped and attacking 1/1 red Warrior creature tokens. Sacrifice them at the beginning of the next end step.)",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 3,
+							"tapped": true,
+							"attacking": true,
+							"as": "mobilized",
+							"spec": {
+								"name": "Warrior Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Warrior"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:mobilized",
+										"to": "graveyard",
+										"reason": "sacrifice"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

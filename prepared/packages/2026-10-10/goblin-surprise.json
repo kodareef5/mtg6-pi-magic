@@ -18,8 +18,8 @@
 					],
 					"controller": "any"
 				},
-				"claim": "Goblin Surprise: boost your creatures",
-				"basis": "Choose one —\n• Creatures you control get +2/+0 until end of turn.\n• Create two 1/1 red Goblin creature tokens.",
+				"claim": "Cast Goblin Surprise: creatures you control get +2/+0",
+				"basis": "Choose one — ... • Creatures you control get +2/+0 until end of turn.",
 				"timing": "spell",
 				"instructions": [
 					{
@@ -48,15 +48,15 @@
 					],
 					"controller": "any"
 				},
-				"claim": "Goblin Surprise: create two Goblins",
-				"basis": "Choose one —\n• Creatures you control get +2/+0 until end of turn.\n• Create two 1/1 red Goblin creature tokens.",
+				"claim": "Cast Goblin Surprise: create two Goblins",
+				"basis": "Choose one — ... • Create two 1/1 red Goblin creature tokens.",
 				"timing": "spell",
 				"instructions": [
 					{
 						"do": "token",
 						"count": 2,
 						"spec": {
-							"name": "Goblin",
+							"name": "Goblin Token",
 							"types": [
 								"creature"
 							],

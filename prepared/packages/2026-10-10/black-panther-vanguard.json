@@ -1,0 +1,75 @@
+{
+	"card": "Black Panther, Vanguard",
+	"generated": "2026-10-10",
+	"source": "f55b8081196c64a12793a1827143fd5149679b7d18cd58fa681768f895464107",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Black Panther, Vanguard",
+		"registers": [
+			{
+				"basis": "Whenever another nontoken Hero you control enters, choose one —\n• Create a 1/1 white Soldier creature token.\n• Creatures you control get +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Hero"
+						],
+						"controller": "you",
+						"token": false,
+						"other": true
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Soldier Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Soldier"
+										],
+										"colors": [
+											"W"
+										],
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "modify",
+									"every": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									},
+									"until": "end-of-turn",
+									"change": {
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

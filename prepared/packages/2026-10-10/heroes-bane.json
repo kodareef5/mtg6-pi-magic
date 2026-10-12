@@ -1,0 +1,48 @@
+{
+	"card": "Heroes' Bane",
+	"generated": "2026-10-10",
+	"source": "38f6ebbf0d35e02c8a34389d03d4119fc99c7e9f02d9ecf8401287fa104e4582",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Heroes' Bane",
+		"registers": [
+			{
+				"basis": "This creature enters with four +1/+1 counters on it.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": 4
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Heroes' Bane",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put counters on Heroes' Bane equal to its power at resolution",
+				"basis": "{2}{G}{G}: Put X +1/+1 counters on this creature, where X is its power.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{G}{G}"
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": {
+							"power": "this"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

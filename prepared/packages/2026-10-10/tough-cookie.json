@@ -1,0 +1,137 @@
+{
+	"card": "Tough Cookie",
+	"generated": "2026-10-10",
+	"source": "4421eb1408d3f75894bea4275747315fd8820ad9a8d420d1a17cc4184d71b3ee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tough Cookie",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"kind": "activated",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tough Cookie",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Animate a noncreature artifact",
+				"basis": "{2}{G}: Until end of turn, target noncreature artifact you control becomes a 4/4 artifact creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{G}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact"
+							],
+							"not": {
+								"types": [
+									"creature"
+								]
+							},
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							},
+							"base": {
+								"power": 4,
+								"toughness": 4
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Tough Cookie",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Tough Cookie to gain 3 life",
+				"basis": "{2}, {T}, Sacrifice this creature: You gain 3 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

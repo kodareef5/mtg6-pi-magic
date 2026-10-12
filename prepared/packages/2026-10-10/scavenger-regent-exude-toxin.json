@@ -1,0 +1,102 @@
+{
+	"card": "Scavenger Regent // Exude Toxin",
+	"generated": "2026-10-10",
+	"source": "3c7db07f8622f227c58e4a629079db7082f82e59b2a4f3d20006c0d01fce5d21",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scavenger Regent // Exude Toxin",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Ward—Discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"discard": 1
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Scavenger Regent // Exude Toxin",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Exude Toxin",
+				"basis": "Each non-Dragon creature gets -X/-X until end of turn. (Then shuffle this card into its owner's library.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"not": {
+								"subtypes": [
+									"Dragon"
+								]
+							}
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"negate": {
+									"x": true
+								}
+							},
+							"toughness": {
+								"negate": {
+									"x": true
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

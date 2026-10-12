@@ -1,0 +1,136 @@
+{
+	"card": "Sunstar Expansionist",
+	"generated": "2026-10-10",
+	"source": "3ed14e5cc21d468add42759549bebb35ec34ca34ee27fb18c2e557cf88a33d60",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sunstar Expansionist",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, if an opponent controls more lands than you, create a Lander token. (It's an artifact with \"{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"controller": "opponent"
+						}
+					},
+					"atLeast": {
+						"sum": [
+							{
+								"count": {
+									"types": [
+										"land"
+									],
+									"controller": "you"
+								}
+							},
+							1
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Lander Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Lander"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "choose",
+													"who": "you",
+													"from": {
+														"zones": [
+															"library"
+														],
+														"owner": "you",
+														"types": [
+															"land"
+														],
+														"supertypes": [
+															"basic"
+														]
+													},
+													"count": 1,
+													"upTo": true,
+													"as": "land"
+												},
+												{
+													"do": "move",
+													"what": "bound:land",
+													"to": "battlefield",
+													"tapped": true,
+													"reason": "resolve"
+												},
+												{
+													"do": "shuffle",
+													"who": "you"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Landfall — Whenever a land you control enters, this creature gets +1/+0 until end of turn.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

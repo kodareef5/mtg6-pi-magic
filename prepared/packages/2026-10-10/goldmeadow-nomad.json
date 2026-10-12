@@ -16,7 +16,7 @@
 					],
 					"controller": "self"
 				},
-				"claim": "Exile Goldmeadow Nomad from your graveyard to create a Kithkin token",
+				"claim": "Exile Goldmeadow Nomad to create a Kithkin token",
 				"basis": "{W}, Exile this card from your graveyard: Create a 1/1 green and white Kithkin creature token. Activate only as a sorcery.",
 				"timing": "stack",
 				"speed": "sorcery",
@@ -29,7 +29,7 @@
 						"do": "token",
 						"count": 1,
 						"spec": {
-							"name": "Kithkin",
+							"name": "Kithkin Token",
 							"types": [
 								"creature"
 							],

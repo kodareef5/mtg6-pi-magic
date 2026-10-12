@@ -1,0 +1,94 @@
+{
+	"card": "End-Blaze Epiphany",
+	"generated": "2026-10-10",
+	"source": "feb1058fcda2ad0c3809d800081130553e137ed892119204da6562d49a1395a6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "End-Blaze Epiphany",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "End-Blaze Epiphany",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast End-Blaze Epiphany",
+				"basis": "End-Blaze Epiphany deals X damage to target creature. When that creature dies this turn, exile a number of cards from the top of your library equal to its power, then choose a card exiled this way. Until the end of your next turn, you may play that card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"x": true
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "dies",
+							"of": {
+								"is": "target:0"
+							}
+						},
+						"until": "end-of-turn",
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": {
+										"top": {
+											"power": "event:object"
+										},
+										"of": "you"
+									},
+									"to": "exile",
+									"reason": "exile",
+									"as": "exiled"
+								},
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"exile"
+										],
+										"is": "bound:exiled"
+									},
+									"count": 1,
+									"as": "chosen"
+								},
+								{
+									"do": "permit",
+									"what": "bound:chosen",
+									"who": "you",
+									"until": {
+										"endOfNextTurn": "you"
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

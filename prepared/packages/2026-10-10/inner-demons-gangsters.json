@@ -1,0 +1,44 @@
+{
+	"card": "Inner Demons Gangsters",
+	"generated": "2026-10-10",
+	"source": "f50f2bca1527959e3da6b37c487a6cdd051073526fa0239dd9ce096843baed9a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Inner Demons Gangsters",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Inner Demons Gangsters",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard a card to give this creature +1/+0 and menace until end of turn.",
+				"basis": "Discard a card: This creature gets +1/+0 and gains menace until end of turn. Activate only as a sorcery. (It can't be blocked except by two or more creatures.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"discard": 1
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"words": [
+								"menace"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

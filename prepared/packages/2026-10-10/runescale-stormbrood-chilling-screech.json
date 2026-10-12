@@ -1,0 +1,117 @@
+{
+	"card": "Runescale Stormbrood // Chilling Screech",
+	"generated": "2026-10-10",
+	"source": "3ba9591ede076bfddca677f4aca784a77a1fb8d3e06794d6e9a1b702d289f15f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Runescale Stormbrood // Chilling Screech",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever you cast a noncreature spell or a Dragon spell, this creature gets +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"any": [
+							{
+								"not": {
+									"types": [
+										"creature"
+									]
+								}
+							},
+							{
+								"subtypes": [
+									"Dragon"
+								]
+							}
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Runescale Stormbrood // Chilling Screech",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Chilling Screech",
+				"basis": "Counter target spell with mana value 2 or less. (Then shuffle this card into its owner's library.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							],
+							"manaValue": {
+								"atMost": 2
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

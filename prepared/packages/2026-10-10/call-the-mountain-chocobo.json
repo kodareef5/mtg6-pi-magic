@@ -1,0 +1,117 @@
+{
+	"card": "Call the Mountain Chocobo",
+	"generated": "2026-10-10",
+	"source": "b0791d0368a48808e77506278cf7fec28e816305d4ae78848e00fe127b124329",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Call the Mountain Chocobo",
+		"registers": [
+			{
+				"basis": "Flashback {5}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"kind": "permit",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{5}{R}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Call the Mountain Chocobo",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Call the Mountain Chocobo at its printed cost or using an earned permission, including flashback",
+				"basis": "Search your library for a Mountain card, reveal it, put it into your hand, then shuffle. Create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Mountain"
+							],
+							"token": false
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "mountain"
+					},
+					{
+						"do": "move",
+						"what": "bound:mountain",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Bird Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Bird"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 2,
+							"toughness": 2,
+							"registers": [
+								{
+									"basis": "Create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+									"kind": "watch",
+									"event": {
+										"on": "enters",
+										"of": {
+											"types": [
+												"land"
+											],
+											"controller": "you"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "this",
+												"until": "end-of-turn",
+												"change": {
+													"power": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

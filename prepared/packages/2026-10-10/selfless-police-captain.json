@@ -1,0 +1,55 @@
+{
+	"card": "Selfless Police Captain",
+	"generated": "2026-10-10",
+	"source": "5f82efe606fcac4c37b4b2a40a65e9173daeb2f712cdc7e3716b4052ea1d6db1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Selfless Police Captain",
+		"registers": [
+			{
+				"basis": "This creature enters with a +1/+1 counter on it.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": 1
+				}
+			},
+			{
+				"basis": "When this creature leaves the battlefield, put its +1/+1 counters on target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": {
+								"counters": "+1/+1",
+								"on": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

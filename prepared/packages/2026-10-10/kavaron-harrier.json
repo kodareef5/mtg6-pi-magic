@@ -1,0 +1,83 @@
+{
+	"card": "Kavaron Harrier",
+	"generated": "2026-10-10",
+	"source": "e7cd94368d9b59af875968b38e45aea4e3ff2aa13e00b985049fdd2c55866a60",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kavaron Harrier",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature attacks, you may pay {2}. If you do, create a 2/2 colorless Robot artifact creature token that's tapped and attacking. Sacrifice that token at end of combat.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{2}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Robot Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Robot"
+								],
+								"colors": [],
+								"power": 2,
+								"toughness": 2
+							},
+							"tapped": true,
+							"attacking": true,
+							"if": {
+								"bound": "paid"
+							},
+							"as": "robot"
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end-of-combat",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:robot",
+										"to": "graveyard",
+										"reason": "sacrifice"
+									}
+								]
+							},
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

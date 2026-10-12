@@ -1,0 +1,82 @@
+{
+	"card": "Tinybones Joins Up",
+	"generated": "2026-10-10",
+	"source": "9b1fb3aa40c07938f97cb9ed4cce79ac4ed62f777a7b0555f23605a6b6627086",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tinybones Joins Up",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Tinybones Joins Up enters, any number of target players each discard a card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any",
+							"count": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "target:0",
+							"count": 1,
+							"actions": [
+								{
+									"discard": true
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a legendary creature you control enters, any number of target players each mill a card and lose 1 life.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"supertypes": [
+							"legendary"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any",
+							"count": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "target:0",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "target:0",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

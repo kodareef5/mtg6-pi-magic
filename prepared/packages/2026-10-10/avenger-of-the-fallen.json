@@ -1,0 +1,95 @@
+{
+	"card": "Avenger of the Fallen",
+	"generated": "2026-10-10",
+	"source": "45be4980ad60f2a83d8b5be52a328262cb5d0098464210d00ab8c879ec1125e7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Avenger of the Fallen",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Deathtouch",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Mobilize X, where X is the number of creature cards in your graveyard. (Whenever this creature attacks, create X tapped and attacking 1/1 red Warrior creature tokens. Sacrifice them at the beginning of the next end step.)",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"types": [
+										"creature"
+									],
+									"token": false
+								}
+							},
+							"tapped": true,
+							"attacking": true,
+							"as": "mobilized",
+							"spec": {
+								"name": "Warrior Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Warrior"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:mobilized",
+										"to": "graveyard",
+										"reason": "sacrifice"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,89 @@
+{
+	"card": "Unscrupulous Contractor",
+	"generated": "2026-10-10",
+	"source": "0484a3e8a50c231943b2a3e870c1be111aaa2d345e429194670c9cbfa37f8218",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unscrupulous Contractor",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may sacrifice a creature. When you do, target player draws two cards and loses 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"effect": {
+								"targets": [
+									{
+										"player": "any"
+									}
+								],
+								"instructions": [
+									{
+										"do": "draw",
+										"who": "target:0",
+										"count": 2
+									},
+									{
+										"do": "life",
+										"who": "target:0",
+										"amount": -2
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unscrupulous Contractor",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Unscrupulous Contractor",
+				"basis": "Plot {2}{B} (You may pay {2}{B} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{2}{B}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

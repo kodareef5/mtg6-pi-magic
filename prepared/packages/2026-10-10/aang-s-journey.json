@@ -1,0 +1,175 @@
+{
+	"card": "Aang's Journey",
+	"generated": "2026-10-10",
+	"source": "74ff631bb8f81ace3e6a2ac84be9415719719e4a5f972cb7d42a4de9b683e32d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aang's Journey",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Aang's Journey",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Aang's Journey without kicker",
+				"basis": "Kicker {2} (You may pay an additional {2} as you cast this spell.)\nSearch your library for a basic land card. If this spell was kicked, instead search your library for a basic land card and a Shrine card. Reveal those cards, put them into your hand, then shuffle.\nYou gain 2 life.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "reveal",
+						"what": "bound:land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Aang's Journey",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Aang's Journey kicked",
+				"basis": "Kicker {2} (You may pay an additional {2} as you cast this spell.)\nSearch your library for a basic land card. If this spell was kicked, instead search your library for a basic land card and a Shrine card. Reveal those cards, put them into your hand, then shuffle.\nYou gain 2 life.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "kicker",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Shrine"
+							],
+							"not": {
+								"is": "bound:land"
+							}
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "shrine"
+					},
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"any": [
+								{
+									"is": "bound:land"
+								},
+								{
+									"is": "bound:shrine"
+								}
+							]
+						}
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"any": [
+								{
+									"is": "bound:land"
+								},
+								{
+									"is": "bound:shrine"
+								}
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

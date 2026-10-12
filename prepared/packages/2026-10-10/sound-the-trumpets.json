@@ -1,0 +1,140 @@
+{
+	"card": "Sound the Trumpets",
+	"generated": "2026-10-10",
+	"source": "61e934251749dc5cbbcc5d7b7012f8983a9d647285a358ff5eefc0ca494d53a4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sound the Trumpets",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sound the Trumpets",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter target spell, then recruit if its mana value was 2 or less",
+				"basis": "Counter target spell. If that spell's mana value was 2 or less, recruit. (Draw a card, then discard a card. If you discarded a nonland card, create a 1/1 white Human Soldier creature token.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"amount": {
+								"manaValue": "target:0"
+							},
+							"atMost": 2
+						},
+						"instructions": [
+							{
+								"do": "draw",
+								"who": "you",
+								"count": 1
+							},
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"hand"
+									],
+									"controller": "you"
+								},
+								"count": 1,
+								"as": "chosen-discard"
+							},
+							{
+								"do": "move",
+								"what": "bound:chosen-discard",
+								"to": "graveyard",
+								"reason": "discard",
+								"as": "discarded"
+							},
+							{
+								"do": "token",
+								"count": 1,
+								"spec": {
+									"name": "Human Soldier Token",
+									"types": [
+										"creature"
+									],
+									"subtypes": [
+										"Human",
+										"Soldier"
+									],
+									"colors": [
+										"W"
+									],
+									"power": 1,
+									"toughness": 1
+								},
+								"if": {
+									"is": "bound:discarded",
+									"matches": {
+										"zones": [
+											"graveyard",
+											"exile",
+											"hand",
+											"library",
+											"battlefield",
+											"command",
+											"stack",
+											"outside"
+										],
+										"types": [
+											"artifact",
+											"battle",
+											"creature",
+											"enchantment",
+											"instant",
+											"kindred",
+											"planeswalker",
+											"sorcery"
+										],
+										"not": {
+											"types": [
+												"land"
+											]
+										},
+										"token": false
+									}
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

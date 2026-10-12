@@ -1,0 +1,51 @@
+{
+	"card": "Mechan Assembler",
+	"generated": "2026-10-10",
+	"source": "4cfe018f8bd7d52d3e24af9befb49627afa7fd103d3682c70c69a1c07bd820a0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mechan Assembler",
+		"registers": [
+			{
+				"basis": "Whenever another artifact you control enters, create a 2/2 colorless Robot artifact creature token. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Robot Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Robot"
+								],
+								"colors": [],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,136 @@
+{
+	"card": "Friendly Neighborhood",
+	"generated": "2026-10-10",
+	"source": "0512432cb163f379d33d76e000f081190a0746dcccce0e898427250bc1b19015",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Friendly Neighborhood",
+		"registers": [
+			{
+				"basis": "When this Aura enters, create three 1/1 green and white Human Citizen creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 3,
+							"spec": {
+								"name": "Human Citizen Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Citizen"
+								],
+								"colors": [
+									"G",
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Enchanted land has \"{1}, {T}: Target creature gets +1/+1 until end of turn for each creature you control. Activate only as a sorcery.\"",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Enchanted land has \"{1}, {T}: Target creature gets +1/+1 until end of turn for each creature you control. Activate only as a sorcery.\"",
+							"kind": "activated",
+							"cost": {
+								"mana": "{1}",
+								"tap": true
+							},
+							"speed": "sorcery",
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "target:0",
+										"until": "end-of-turn",
+										"change": {
+											"power": {
+												"count": {
+													"types": [
+														"creature"
+													],
+													"controller": "you"
+												}
+											},
+											"toughness": {
+												"count": {
+													"types": [
+														"creature"
+													],
+													"controller": "you"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Friendly Neighborhood",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Friendly Neighborhood enchanting a land",
+				"basis": "Enchant land",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

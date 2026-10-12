@@ -1,0 +1,52 @@
+{
+	"card": "Nessian Hornbeetle",
+	"generated": "2026-10-10",
+	"source": "9aaa02f0fc957b21b6d14c7b0df3ef7a31001005d36f386b10238fe369a24c47",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nessian Hornbeetle",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, if you control another creature with power 4 or greater, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true,
+							"power": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

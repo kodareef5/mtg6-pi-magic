@@ -1,0 +1,70 @@
+{
+	"card": "Mistbreath Elder",
+	"generated": "2026-10-10",
+	"source": "42a45d4808333cc8f887e7998cbc807a0639a72488aa8cc00edb85d932c0d25a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mistbreath Elder",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, return another creature you control to its owner's hand. If you do, put a +1/+1 counter on this creature. Otherwise, you may return this creature to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"return": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"other": true
+									},
+									"count": 1
+								}
+							},
+							"as": "returned"
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"bound": "returned"
+							}
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "bounce",
+							"may": true,
+							"if": {
+								"not": {
+									"bound": "returned"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,92 @@
+{
+	"card": "Harmonized Trio // Brainstorm",
+	"generated": "2026-10-10",
+	"source": "4eed29ec707eab676aeb42868b922e690d674903db8f0f2c836d1d40a862766a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Harmonized Trio // Brainstorm",
+		"registers": [],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Harmonized Trio // Brainstorm",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Prepare Harmonized Trio",
+				"basis": "{T}, Tap two untapped creatures you control: This creature becomes prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"source": true,
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"tapped": false
+						},
+						"count": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "prepare",
+						"what": "this",
+						"prepared": true
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Harmonized Trio // Brainstorm",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Brainstorm copy",
+				"basis": "Draw three cards, then put two cards from your hand on top of your library in any order.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 2,
+						"as": "returned"
+					},
+					{
+						"do": "move",
+						"what": "bound:returned",
+						"to": "library",
+						"position": "top",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,52 @@
+{
+	"card": "Delney, Streetwise Lookout",
+	"generated": "2026-10-10",
+	"source": "84bfe2abcc1eb92d0bcb003e32ec3606c933e13334e9d355b997a847a9225408",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Delney, Streetwise Lookout",
+		"registers": [
+			{
+				"basis": "Creatures you control with power 2 or less can't be blocked by creatures with power 3 or greater.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"power": {
+							"atMost": 2
+						}
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						],
+						"power": {
+							"atLeast": 3
+						}
+					}
+				}
+			},
+			{
+				"basis": "If a triggered ability of a creature you control with power 2 or less triggers, that ability triggers an additional time.",
+				"kind": "trigger-rule",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"power": {
+						"atMost": 2
+					}
+				},
+				"additional": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

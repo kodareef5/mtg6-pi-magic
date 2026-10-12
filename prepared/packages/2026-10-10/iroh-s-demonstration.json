@@ -1,0 +1,77 @@
+{
+	"card": "Iroh's Demonstration",
+	"generated": "2026-10-10",
+	"source": "de7c0a8785f36dd10fb91d42d42442efaa409ce4d52b07bfd563c94277ff73c3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Iroh's Demonstration",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Iroh's Demonstration",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Iroh's Demonstration: 1 damage to each opposing creature",
+				"basis": "Choose one —\n• Iroh's Demonstration deals 1 damage to each creature your opponents control.\n• Iroh's Demonstration deals 4 damage to target creature.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Iroh's Demonstration",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Iroh's Demonstration: 4 damage to target creature",
+				"basis": "Choose one —\n• Iroh's Demonstration deals 1 damage to each creature your opponents control.\n• Iroh's Demonstration deals 4 damage to target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

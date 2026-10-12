@@ -1,0 +1,77 @@
+{
+	"card": "The Masters of Evil",
+	"generated": "2026-10-10",
+	"source": "7945d4b16da016d8f2d583e670f85270e1b24416592904abac830985ae3e35df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Masters of Evil",
+		"registers": [
+			{
+				"basis": "Other Villains you control get +2/+1.",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"subtypes": [
+						"Villain"
+					],
+					"other": true
+				},
+				"change": {
+					"power": 2,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "The Masters of Evil",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard The Masters of Evil to search for a Plan card",
+				"basis": "{1}{B}, Discard this card: Search your library for a Plan card, reveal it, put it into your hand, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Plan"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "plan"
+					},
+					{
+						"do": "move",
+						"what": "bound:plan",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

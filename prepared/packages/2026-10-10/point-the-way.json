@@ -1,0 +1,78 @@
+{
+	"card": "Point the Way",
+	"generated": "2026-10-10",
+	"source": "ce856c78eb81d199c2018e0d69f954f0e4c50baf086fd0df8ec59e59a3863c76",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Point the Way",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Point the Way",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Point the Way to search for up to your speed basic lands",
+				"basis": "{3}{G}, Sacrifice this enchantment: Search your library for up to X basic land cards, where X is your speed. Put those cards onto the battlefield tapped, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{G}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"supertypes": [
+								"basic"
+							],
+							"types": [
+								"land"
+							]
+						},
+						"count": {
+							"speed": "you"
+						},
+						"upTo": true,
+						"as": "lands"
+					},
+					{
+						"do": "move",
+						"what": "bound:lands",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

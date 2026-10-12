@@ -1,0 +1,99 @@
+{
+	"card": "Insidious Roots",
+	"generated": "2026-10-10",
+	"source": "e05649a8f106b5edf81be02d45990ebfd59d67af47260f5faede1693f0242c8a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Insidious Roots",
+		"registers": [
+			{
+				"basis": "Creature tokens you control have \"{T}: Add one mana of any color.\"",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"token": true,
+					"controller": "you"
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Creature tokens you control have \"{T}: Add one mana of any color.\"",
+							"kind": "mana",
+							"cost": {
+								"tap": true
+							},
+							"any": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever one or more creature cards leave your graveyard, create a 0/1 green Plant creature token, then put a +1/+1 counter on each Plant you control.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"types": [
+							"creature"
+						],
+						"owner": "you",
+						"token": false
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Plant Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Plant"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 0,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "counters",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"subtypes": [
+									"Plant"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

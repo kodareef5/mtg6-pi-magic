@@ -1,0 +1,83 @@
+{
+	"card": "Ark of Hunger",
+	"generated": "2026-10-10",
+	"source": "42481b4d021c6b9dbcb62ca68bced3154e63e0f14a7e219ab140d78bcbe543c5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ark of Hunger",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more cards leave your graveyard, this artifact deals 1 damage to each opponent and you gain 1 life.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"token": false
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1,
+							"from": "this"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ark of Hunger",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Mill a card and permit playing it this turn",
+				"basis": "{T}: Mill a card. You may play that card this turn.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 1,
+							"of": "you"
+						},
+						"to": "graveyard",
+						"reason": "mill",
+						"as": "milled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:milled",
+						"who": "you",
+						"until": "end-of-turn"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

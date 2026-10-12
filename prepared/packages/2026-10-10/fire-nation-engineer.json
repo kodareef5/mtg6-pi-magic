@@ -1,0 +1,61 @@
+{
+	"card": "Fire Nation Engineer",
+	"generated": "2026-10-10",
+	"source": "97c644ca68a374de6d33280cf01a333396bb7f61c7fe4c3cfd052f80b487ac21",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fire Nation Engineer",
+		"registers": [
+			{
+				"basis": "Raid — At the beginning of your end step, if you attacked this turn, put a +1/+1 counter on another target creature or Vehicle you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"controller": "you",
+								"other": true,
+								"any": [
+									{
+										"types": [
+											"creature"
+										]
+									},
+									{
+										"subtypes": [
+											"Vehicle"
+										]
+									}
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

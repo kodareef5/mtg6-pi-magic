@@ -1,0 +1,104 @@
+{
+	"card": "Boggart Mischief",
+	"generated": "2026-10-10",
+	"source": "7c15adeab0796c43ccd3181a501a3d63f7ebba34eadda5d595bed3dc40754373",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boggart Mischief",
+		"registers": [
+			{
+				"basis": "When this enchantment enters, you may blight 1. If you do, create two 1/1 black and red Goblin creature tokens. (To blight 1, put a -1/-1 counter on a creature you control.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"may": true,
+							"cost": {
+								"counters": {
+									"kind": "-1/-1",
+									"count": 1,
+									"put": true,
+									"on": {
+										"choose": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										},
+										"count": 1
+									}
+								}
+							},
+							"as": "blighted"
+						},
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Goblin Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Goblin"
+								],
+								"colors": [
+									"B",
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"bound": "blighted"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a Goblin creature you control dies, each opponent loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"subtypes": [
+							"Goblin"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

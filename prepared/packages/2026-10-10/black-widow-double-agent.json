@@ -1,0 +1,73 @@
+{
+	"card": "Black Widow, Double Agent",
+	"generated": "2026-10-10",
+	"source": "cdc13b7b3eb11787cd88787e7e9cc957882d336865ebd35d5fcef7c4d19e2a16",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Black Widow, Double Agent",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "Whenever a creature you control attacks alone, it gains first strike and menace until end of turn. (It can't be blocked except by two or more creatures.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"is": "event:objects",
+							"zones": [
+								"battlefield"
+							]
+						}
+					},
+					"atLeast": 1,
+					"atMost": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "event:objects",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"first strike",
+									"menace"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

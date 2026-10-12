@@ -1,0 +1,125 @@
+{
+	"card": "Theorix Charm",
+	"generated": "2026-10-10",
+	"source": "2775cf8f869ef4ef5825fc557418112e558e1b94c4caf59802a52f47ffb5aaa5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Theorix Charm",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Theorix Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Theorix Charm: counter a noncreature spell unless its controller pays {2}",
+				"basis": "Choose one — ... • Counter target noncreature spell unless its controller pays {2}.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							],
+							"not": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{2}"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Theorix Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Theorix Charm: give a creature -2/-2 until end of turn",
+				"basis": "Choose one — ... • Target creature gets -2/-2 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -2,
+							"toughness": -2
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Theorix Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Theorix Charm: mill three cards, then draw a card",
+				"basis": "Choose one — ... • Mill three cards, then draw a card. (To mill three cards, put the top three cards of your library into your graveyard.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

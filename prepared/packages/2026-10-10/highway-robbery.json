@@ -1,0 +1,95 @@
+{
+	"card": "Highway Robbery",
+	"generated": "2026-10-10",
+	"source": "7835d83129262b0ab061c7ac66a8ef278f22186fbb9a893644eb238a0698d377",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Highway Robbery",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Highway Robbery",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Optionally discard a card or sacrifice a land, then draw two if paid",
+				"basis": "You may discard a card or sacrifice a land. If you do, draw two cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"discard": 1
+						},
+						"may": true,
+						"as": "discarded"
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"sacrifice": {
+								"choose": {
+									"types": [
+										"land"
+									],
+									"controller": "you"
+								},
+								"count": 1
+							}
+						},
+						"may": true,
+						"as": "sacrificed",
+						"if": {
+							"not": {
+								"bound": "discarded"
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"any": [
+								{
+									"bound": "discarded"
+								},
+								{
+									"bound": "sacrificed"
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Highway Robbery",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Highway Robbery",
+				"basis": "Plot {1}{R} (You may pay {1}{R} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{1}{R}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

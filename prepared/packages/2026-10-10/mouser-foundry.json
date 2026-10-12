@@ -1,0 +1,111 @@
+{
+	"card": "Mouser Foundry",
+	"generated": "2026-10-10",
+	"source": "864426d46e214277855330d240c62193a9d2a26fdfced47da55ea3efb03b050a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mouser Foundry",
+		"registers": [
+			{
+				"basis": "When this artifact enters or leaves the battlefield, create a 1/1 colorless Robot artifact creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Robot Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Robot"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this artifact enters or leaves the battlefield, create a 1/1 colorless Robot artifact creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Robot Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Robot"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Sacrifice Mouser Foundry to deal 3 damage to target creature.",
+				"basis": "{4}{R}, Sacrifice this artifact: It deals 3 damage to target creature.",
+				"source": {
+					"card": "Mouser Foundry",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{R}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

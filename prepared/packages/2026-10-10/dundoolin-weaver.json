@@ -1,0 +1,64 @@
+{
+	"card": "Dundoolin Weaver",
+	"generated": "2026-10-10",
+	"source": "a26f28020e623d8cd37483d0e914ec94202bd5cc63fab4cd6f24521c0c8f4a7d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dundoolin Weaver",
+		"registers": [
+			{
+				"basis": "When this creature enters, if you control three or more creatures, return target permanent card from your graveyard to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 3
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"land",
+									"planeswalker"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

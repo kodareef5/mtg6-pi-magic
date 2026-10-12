@@ -1,0 +1,77 @@
+{
+	"card": "Fractalize",
+	"generated": "2026-10-10",
+	"source": "29c1cdc45c05d69f3179537ebbd639bd2531670364dfe9aee5db1fe62b3dd69b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fractalize",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fractalize",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fractalize",
+				"basis": "Until end of turn, target creature becomes a green and blue Fractal with base power and toughness each equal to X plus 1. (It loses all other colors and creature types.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"colors": {
+								"set": [
+									"G",
+									"U"
+								]
+							},
+							"subtypes": {
+								"set": [
+									"Fractal"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": {
+									"sum": [
+										{
+											"x": true
+										},
+										1
+									]
+								},
+								"toughness": {
+									"sum": [
+										{
+											"x": true
+										},
+										1
+									]
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

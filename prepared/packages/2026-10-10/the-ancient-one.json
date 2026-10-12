@@ -1,0 +1,116 @@
+{
+	"card": "The Ancient One",
+	"generated": "2026-10-10",
+	"source": "fee7d684f97c3b3c5e1d0bbcc6fe5fd18a88db084f0a0bfbea3ae7e0e86fd2ac",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Ancient One",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Descend 8 — The Ancient One can't attack or block unless there are eight or more permanent cards in your graveyard.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							],
+							"token": false
+						}
+					},
+					"atMost": 7
+				},
+				"change": {
+					"words": [
+						"can't attack",
+						"can't block"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "The Ancient One",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card, discard a card, then create the reflexive milling trigger",
+				"basis": "{2}{U}{B}: Draw a card, then discard a card. When you discard a card this way, target player mills cards equal to its mana value.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{U}{B}"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "graveyard",
+						"reason": "discard",
+						"as": "discarded"
+					},
+					{
+						"do": "reflect",
+						"if": {
+							"bound": "discarded"
+						},
+						"effect": {
+							"targets": [
+								{
+									"player": "any"
+								}
+							],
+							"instructions": [
+								{
+									"do": "mill",
+									"who": "target:0",
+									"count": {
+										"manaValue": "bound:discarded"
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

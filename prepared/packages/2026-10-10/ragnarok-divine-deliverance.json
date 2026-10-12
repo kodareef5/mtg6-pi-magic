@@ -1,0 +1,106 @@
+{
+	"card": "Ragnarok, Divine Deliverance",
+	"generated": "2026-10-10",
+	"source": "8bcde85d91a5fc285029dae7c2adea1eb423d977195d66acb9193d91e8cfd5a8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ragnarok, Divine Deliverance",
+		"registers": [
+			{
+				"basis": "Reach, vigilance, menace, trample, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"vigilance",
+						"menace",
+						"trample",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "When Ragnarok dies, destroy target permanent and return target nonlegendary permanent card from your graveyard to the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								]
+							}
+						},
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"land",
+									"planeswalker"
+								],
+								"not": {
+									"supertypes": [
+										"legendary"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						},
+						{
+							"do": "move",
+							"what": "target:1",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Ragnarok, Divine Deliverance; its absent mana cost is unpayable unless an applicable alternative cost is supplied.",
+				"basis": "Reach, vigilance, menace, trample, haste ... When Ragnarok dies, destroy target permanent and return target nonlegendary permanent card from your graveyard to the battlefield.",
+				"source": {
+					"card": "Ragnarok, Divine Deliverance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

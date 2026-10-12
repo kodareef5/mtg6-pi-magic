@@ -1,0 +1,96 @@
+{
+	"card": "Canonized in Blood",
+	"generated": "2026-10-10",
+	"source": "b0b1c75fed11b54cd06905dbb78809e68e5823dd2388073b71aaadca93406a26",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Canonized in Blood",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your end step, if you descended this turn, put a +1/+1 counter on target creature you control. (You descended if a permanent card was put into your graveyard from anywhere.)",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "descended",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Sacrifice Canonized in Blood to create a Vampire Demon token",
+				"basis": "{5}{B}{B}, Sacrifice this enchantment: Create a 4/3 white and black Vampire Demon creature token with flying.",
+				"source": {
+					"card": "Canonized in Blood",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}{B}{B}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Vampire Demon Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Vampire",
+								"Demon"
+							],
+							"colors": [
+								"W",
+								"B"
+							],
+							"power": 4,
+							"toughness": 3,
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

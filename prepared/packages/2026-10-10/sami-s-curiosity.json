@@ -1,0 +1,97 @@
+{
+	"card": "Sami's Curiosity",
+	"generated": "2026-10-10",
+	"source": "bf24b81fe3f228a1d3d261c1527f26996a6286438eac52ebcbd8726c6d1b3cfc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sami's Curiosity",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sami's Curiosity",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Sami's Curiosity",
+				"basis": "You gain 2 life. Create a Lander token. (It's an artifact with \"{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\")",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Lander Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Lander"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+									"cost": {
+										"mana": "{2}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"library"
+													],
+													"owner": "you",
+													"types": [
+														"land"
+													],
+													"supertypes": [
+														"basic"
+													]
+												},
+												"count": 1,
+												"upTo": true,
+												"as": "land"
+											},
+											{
+												"do": "move",
+												"what": "bound:land",
+												"to": "battlefield",
+												"tapped": true,
+												"controller": "you",
+												"reason": "resolve"
+											},
+											{
+												"do": "shuffle",
+												"who": "you"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

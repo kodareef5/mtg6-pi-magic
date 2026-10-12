@@ -1,0 +1,91 @@
+{
+	"card": "Qiqirn Merchant",
+	"generated": "2026-10-10",
+	"source": "19d3b2f01b3f7827280ae4566eb6109c2e33c0709cc77c4c365ef766b4f8607b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Qiqirn Merchant",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Draw a card, then discard a card",
+				"basis": "{1}, {T}: Draw a card, then discard a card.",
+				"source": {
+					"card": "Qiqirn Merchant",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			},
+			{
+				"claim": "Sacrifice Qiqirn Merchant to draw three cards, with its Town discount",
+				"basis": "{7}, {T}, Sacrifice this creature: Draw three cards. This ability costs {1} less to activate for each Town you control.",
+				"source": {
+					"card": "Qiqirn Merchant",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{7}",
+					"tap": true,
+					"sacrifice": "this",
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Town"
+							]
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

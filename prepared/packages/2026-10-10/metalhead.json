@@ -1,0 +1,92 @@
+{
+	"card": "Metalhead",
+	"generated": "2026-10-10",
+	"source": "3426283ba3851237026a269bd8bff0087cf4e6e1b07b5e26610dc4aaf89cc0ba",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Metalhead",
+		"registers": [
+			{
+				"basis": "When Metalhead enters, return up to one other target artifact or creature to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"other": true
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Metalhead",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another artifact to strengthen Metalhead and grant menace and haste",
+				"basis": "{R}, Sacrifice another artifact: Put a +1/+1 counter on Metalhead. He gains menace and haste until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{R}",
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"menace",
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,60 @@
+{
+	"card": "Auron's Inspiration",
+	"generated": "2026-10-10",
+	"source": "c62a82be34cd48567fd9cadfc4bb8d3891c058d53cdec614c7021267661d525a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Auron's Inspiration",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {2}{W}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{2}{W}{W}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Auron's Inspiration",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Auron's Inspiration at its printed cost or using an earned casting permission, including flashback",
+				"basis": "Attacking creatures get +2/+0 until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"attacking": true
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

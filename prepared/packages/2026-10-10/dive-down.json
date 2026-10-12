@@ -1,0 +1,52 @@
+{
+	"card": "Dive Down",
+	"generated": "2026-10-10",
+	"source": "20158a31a958a1f7fb26288a34de24d7dc563c3753c5557eb9a73208814d0246",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dive Down",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dive Down",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature you control +0/+3 and hexproof until end of turn.",
+				"basis": "Target creature you control gets +0/+3 and gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 0,
+							"toughness": 3,
+							"words": [
+								"hexproof"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

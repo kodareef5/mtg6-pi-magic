@@ -1,0 +1,84 @@
+{
+	"card": "Shoreline Looter",
+	"generated": "2026-10-10",
+	"source": "a36979ab049f3b6edfe7513042859ef31d3bf6f3149acfeb59adeb1709c721dd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shoreline Looter",
+		"registers": [
+			{
+				"basis": "This creature can't be blocked.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"can't be blocked"
+					]
+				}
+			},
+			{
+				"basis": "Threshold — Whenever this creature deals combat damage to a player, draw a card. Then discard a card unless there are seven or more cards in your graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"token": false
+									}
+								},
+								"atMost": 6
+							},
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"hand"
+										],
+										"controller": "you"
+									},
+									"count": 1,
+									"as": "discard-card"
+								},
+								{
+									"do": "move",
+									"what": "bound:discard-card",
+									"to": "graveyard",
+									"reason": "discard"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,76 @@
+{
+	"card": "Ferocification",
+	"generated": "2026-10-10",
+	"source": "9d0a9fbeacb9bd369d0bf474c0745fd4abca0ca109dd0512c7eaaf2563b0a97a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ferocification",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, choose one —\n• Target creature you control gets +2/+0 until end of turn.\n• Target creature you control gains menace and haste until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"power": 2,
+										"toughness": 0
+									}
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"words": [
+											"menace",
+											"haste"
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

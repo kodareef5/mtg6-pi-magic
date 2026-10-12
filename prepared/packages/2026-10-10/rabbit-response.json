@@ -1,0 +1,67 @@
+{
+	"card": "Rabbit Response",
+	"generated": "2026-10-10",
+	"source": "37e18194e35f5366c1df9f77ce6d64f02a1ab8a23cb8f39646e106aea44d5d58",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rabbit Response",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rabbit Response",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rabbit Response",
+				"basis": "Creatures you control get +2/+1 until end of turn. If you control a Rabbit, scry 2. (Look at the top two cards of your library, then put any number of them on the bottom and the rest on top in any order.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "keyword",
+						"name": "scry",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"subtypes": [
+										"Rabbit"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,150 @@
+{
+	"card": "Ogre Chitterlord",
+	"generated": "2026-10-10",
+	"source": "76ec9f7721dde936b64434627861269e8bf5612cfb8f15d28e64b84fac95d9e5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ogre Chitterlord",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, create two 1/1 black Rat creature tokens with \"This token can't block.\" Then if you control five or more Rats, each Rat you control gets +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Rat Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Rat"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"can't block"
+								]
+							}
+						},
+						{
+							"do": "modify",
+							"every": {
+								"subtypes": [
+									"Rat"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 2
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"subtypes": [
+											"Rat"
+										],
+										"controller": "you"
+									}
+								},
+								"atLeast": 5
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, create two 1/1 black Rat creature tokens with \"This token can't block.\" Then if you control five or more Rats, each Rat you control gets +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Rat Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Rat"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"can't block"
+								]
+							}
+						},
+						{
+							"do": "modify",
+							"every": {
+								"subtypes": [
+									"Rat"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 2
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"subtypes": [
+											"Rat"
+										],
+										"controller": "you"
+									}
+								},
+								"atLeast": 5
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

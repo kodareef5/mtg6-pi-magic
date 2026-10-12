@@ -1,0 +1,106 @@
+{
+	"card": "Sun-Blessed Healer",
+	"generated": "2026-10-10",
+	"source": "94ec3e70c8f06db7c028720f86632085acf7843374773aa6b8a2a9a25c89a957",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sun-Blessed Healer",
+		"registers": [
+			{
+				"basis": "Lifelink (Damage dealt by this creature also causes you to gain that much life.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, if it was kicked, return target nonland permanent card with mana value 2 or less from your graveyard to the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"paid": "kicker"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"planeswalker"
+								],
+								"not": {
+									"types": [
+										"land"
+									]
+								},
+								"manaValue": {
+									"atMost": 2
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"reason": "resolve",
+							"controller": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sun-Blessed Healer",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Sun-Blessed Healer kicked",
+				"basis": "Kicker {1}{W} (You may pay an additional {1}{W} as you cast this spell.)",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "kicker",
+							"mana": "{1}{W}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

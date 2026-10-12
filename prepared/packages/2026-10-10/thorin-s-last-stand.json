@@ -1,0 +1,80 @@
+{
+	"card": "Thorin's Last Stand",
+	"generated": "2026-10-10",
+	"source": "7e0a0ead38fb7be141d8fa44dd00b8f00191142f65683ccd35e6aa224aeb6033",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thorin's Last Stand",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thorin's Last Stand",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give creatures you control +2/+1 until end of turn",
+				"basis": "Choose one — ... • Creatures you control get +2/+1 until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Thorin's Last Stand",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy an artifact or enchantment and gain 2 life",
+				"basis": "Choose one — ... • Destroy target artifact or enchantment. You gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

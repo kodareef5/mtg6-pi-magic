@@ -1,0 +1,95 @@
+{
+	"card": "Fearsome Goblin Pair",
+	"generated": "2026-10-10",
+	"source": "628fbe11055d1028be0161d0f2a84180954cbaa6af35ff9eac71b99415432745",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fearsome Goblin Pair",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature dies, amass Goblins 4. (Put four +1/+1 counters on an Army you control. It's also a Goblin. If you don't control an Army, create a 0/0 black Goblin Army creature token first.)",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Goblin Army Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Goblin",
+									"Army"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 0,
+								"toughness": 0
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Army"
+										],
+										"controller": "you"
+									}
+								},
+								"atMost": 0
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Army"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "army"
+						},
+						{
+							"do": "counters",
+							"on": "bound:army",
+							"kind": "+1/+1",
+							"amount": 4
+						},
+						{
+							"do": "modify",
+							"what": "bound:army",
+							"until": "indefinite",
+							"change": {
+								"subtypes": {
+									"add": [
+										"Goblin"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

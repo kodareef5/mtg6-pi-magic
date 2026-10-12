@@ -1,0 +1,84 @@
+{
+	"card": "Loot, the Key to Everything",
+	"generated": "2026-10-10",
+	"source": "7886715d733faf84f3836b993ffc8cf805384130e4271950e856f06e48a350f5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Loot, the Key to Everything",
+		"registers": [
+			{
+				"basis": "Ward {1}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{1}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your upkeep, exile the top X cards of your library, where X is the number of card types among other nonland permanents you control. You may play those cards this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": {
+									"distinct": "card-types",
+									"among": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"other": true,
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								},
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": "end-of-turn"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

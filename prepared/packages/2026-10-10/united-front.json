@@ -28,7 +28,7 @@
 							"x": true
 						},
 						"spec": {
-							"name": "Ally",
+							"name": "Ally Token",
 							"types": [
 								"creature"
 							],

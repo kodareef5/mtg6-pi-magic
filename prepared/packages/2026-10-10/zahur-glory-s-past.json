@@ -1,0 +1,116 @@
+{
+	"card": "Zahur, Glory's Past",
+	"generated": "2026-10-10",
+	"source": "a76d325ffe7876ec18a8f47579d86ce8d0f96bebbb7be62cfd379c57bd264ba9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zahur, Glory's Past",
+		"registers": [
+			{
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"basis": "Max speed — Whenever a nontoken creature you control dies, create a tapped 2/2 black Zombie creature token.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Max speed — Whenever a nontoken creature you control dies, create a tapped 2/2 black Zombie creature token.",
+							"kind": "watch",
+							"event": {
+								"on": "dies",
+								"of": {
+									"types": [
+										"creature"
+									],
+									"controller": "you",
+									"token": false
+								}
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "token",
+										"count": 1,
+										"tapped": true,
+										"spec": {
+											"name": "Zombie Token",
+											"types": [
+												"creature"
+											],
+											"subtypes": [
+												"Zombie"
+											],
+											"colors": [
+												"B"
+											],
+											"power": 2,
+											"toughness": 2
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Sacrifice another creature to surveil 1",
+				"basis": "Sacrifice another creature: Surveil 1. Activate only once each turn.",
+				"source": {
+					"card": "Zahur, Glory's Past",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"limit": "once-per-turn",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

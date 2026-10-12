@@ -1,0 +1,79 @@
+{
+	"card": "Oltec Matterweaver",
+	"generated": "2026-10-10",
+	"source": "cdd83ccedf57a6d1a5d3aadbee34f3741fa44a37ba65be5f2f3b449ec22a1233",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Oltec Matterweaver",
+		"registers": [
+			{
+				"basis": "Whenever you cast a creature spell, choose one —\n• Create a 1/1 colorless Gnome artifact creature token.\n• Create a token that's a copy of target artifact token you control.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Gnome Token",
+										"types": [
+											"artifact",
+											"creature"
+										],
+										"subtypes": [
+											"Gnome"
+										],
+										"colors": [],
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"artifact"
+										],
+										"token": true,
+										"controller": "you"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"copy": "target:0"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,96 @@
+{
+	"card": "Borrowed Knowledge",
+	"generated": "2026-10-10",
+	"source": "44a640c24ad30e28d8c27d8e5143e9e2a16db3cdef1479973b74e53bee610061",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Borrowed Knowledge",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Borrowed Knowledge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose the opponent-hand-size mode",
+				"basis": "Choose one —\n• Discard your hand, then draw cards equal to the number of cards in target opponent's hand.\n• Discard your hand, then draw cards equal to the number of cards discarded this way.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"to": "graveyard",
+						"reason": "discard"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"count": {
+								"zones": [
+									"hand"
+								],
+								"controller": "target:0"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Borrowed Knowledge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose the discarded-card-count mode",
+				"basis": "Choose one —\n• Discard your hand, then draw cards equal to the number of cards in target opponent's hand.\n• Discard your hand, then draw cards equal to the number of cards discarded this way.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"to": "graveyard",
+						"reason": "discard",
+						"as": "discarded",
+						"countFrom": "hand"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"bound": "discarded"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

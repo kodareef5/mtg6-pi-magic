@@ -1,0 +1,256 @@
+{
+	"card": "Rankle's Prank",
+	"generated": "2026-10-10",
+	"source": "1ac94b392910e7cf85655cb1b86e8eb2087e48b6335c3eab4459847606a5af5d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rankle's Prank",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rankle's Prank",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rankle's Prank choosing discard only",
+				"basis": "Choose one or more —\n• Each player discards two cards.\n• Each player loses 4 life.\n• Each player sacrifices two creatures of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 2,
+						"actions": [
+							{
+								"discard": true
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rankle's Prank",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rankle's Prank choosing life loss only",
+				"basis": "Choose one or more —\n• Each player discards two cards.\n• Each player loses 4 life.\n• Each player sacrifices two creatures of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "life",
+						"who": "each-player",
+						"amount": -4
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rankle's Prank",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rankle's Prank choosing sacrifice only",
+				"basis": "Choose one or more —\n• Each player discards two cards.\n• Each player loses 4 life.\n• Each player sacrifices two creatures of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 2,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									]
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rankle's Prank",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rankle's Prank choosing discard and life loss",
+				"basis": "Choose one or more —\n• Each player discards two cards.\n• Each player loses 4 life.\n• Each player sacrifices two creatures of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 2,
+						"actions": [
+							{
+								"discard": true
+							}
+						]
+					},
+					{
+						"do": "life",
+						"who": "each-player",
+						"amount": -4
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rankle's Prank",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rankle's Prank choosing discard and sacrifice",
+				"basis": "Choose one or more —\n• Each player discards two cards.\n• Each player loses 4 life.\n• Each player sacrifices two creatures of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 2,
+						"actions": [
+							{
+								"discard": true
+							}
+						]
+					},
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 2,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									]
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rankle's Prank",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rankle's Prank choosing life loss and sacrifice",
+				"basis": "Choose one or more —\n• Each player discards two cards.\n• Each player loses 4 life.\n• Each player sacrifices two creatures of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "life",
+						"who": "each-player",
+						"amount": -4
+					},
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 2,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									]
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rankle's Prank",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rankle's Prank choosing all three modes",
+				"basis": "Choose one or more —\n• Each player discards two cards.\n• Each player loses 4 life.\n• Each player sacrifices two creatures of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 2,
+						"actions": [
+							{
+								"discard": true
+							}
+						]
+					},
+					{
+						"do": "life",
+						"who": "each-player",
+						"amount": -4
+					},
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 2,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									]
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

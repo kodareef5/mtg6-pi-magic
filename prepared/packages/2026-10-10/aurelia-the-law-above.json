@@ -1,0 +1,106 @@
+{
+	"card": "Aurelia, the Law Above",
+	"generated": "2026-10-10",
+	"source": "e67307bc9cc272108e9e695cf62b57629047fbc17842e30a2beb5395ab901935",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aurelia, the Law Above",
+		"registers": [
+			{
+				"basis": "Flying, vigilance, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever a player attacks with three or more creatures, you draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "any",
+					"of": {
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"is": "event:objects",
+							"types": [
+								"creature"
+							]
+						}
+					},
+					"atLeast": 3
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a player attacks with five or more creatures, Aurelia deals 3 damage to each of your opponents and you gain 3 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "any",
+					"of": {
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"is": "event:objects",
+							"types": [
+								"creature"
+							]
+						}
+					},
+					"atLeast": 5
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 3,
+							"from": "this"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

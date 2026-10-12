@@ -1,0 +1,58 @@
+{
+	"card": "Shantotto, Tactician Magician",
+	"generated": "2026-10-10",
+	"source": "6cec598d4d3f14c48fa463eeacd3ae5625a7dd322c2b810c6d2936bd0a493b4e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shantotto, Tactician Magician",
+		"registers": [
+			{
+				"basis": "Whenever you cast a noncreature spell, Shantotto gets +X/+0 until end of turn, where X is the amount of mana spent to cast that spell. If X is 4 or more, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"manaSpent": "event:object"
+								}
+							}
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"amount": {
+									"manaSpent": "event:object"
+								},
+								"atLeast": 4
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

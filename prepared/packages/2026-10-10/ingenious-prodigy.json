@@ -1,0 +1,121 @@
+{
+	"card": "Ingenious Prodigy",
+	"generated": "2026-10-10",
+	"source": "bf9ac5ebea18486da80f5342abd1fb247edd9caf629f4a8a8fee9d2d28370760",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ingenious Prodigy",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Skulk (This creature can't be blocked by creatures with greater power.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"skulk"
+					]
+				}
+			},
+			{
+				"kind": "prohibit",
+				"basis": "Skulk (This creature can't be blocked by creatures with greater power.)",
+				"block": {
+					"attacker": {
+						"is": "this"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						],
+						"power": {
+							"atLeast": {
+								"sum": [
+									{
+										"power": "this"
+									},
+									1
+								]
+							}
+						}
+					}
+				}
+			},
+			{
+				"kind": "enters",
+				"basis": "This creature enters with X +1/+1 counters on it.",
+				"counters": {
+					"+1/+1": {
+						"x": true
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your upkeep, if this creature has one or more +1/+1 counters on it, you may remove a +1/+1 counter from it. If you do, draw a card.",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"counters": "+1/+1",
+						"on": "this"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"counters": {
+									"kind": "+1/+1",
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "removed"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "removed"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Ingenious Prodigy with chosen X",
+				"basis": "This creature enters with X +1/+1 counters on it.",
+				"source": {
+					"card": "Ingenious Prodigy",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

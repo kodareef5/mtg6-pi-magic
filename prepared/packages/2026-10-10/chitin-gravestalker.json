@@ -1,0 +1,68 @@
+{
+	"card": "Chitin Gravestalker",
+	"generated": "2026-10-10",
+	"source": "0e90f719dd6f321ee123c4d81dce3c28d84df168693b7330cfa10dca602f477b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chitin Gravestalker",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Chitin Gravestalker",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Chitin Gravestalker with its graveyard cost reduction",
+				"basis": "This spell costs {1} less to cast for each artifact and/or creature card in your graveyard.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Chitin Gravestalker",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Chitin Gravestalker",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

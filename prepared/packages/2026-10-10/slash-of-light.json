@@ -1,0 +1,69 @@
+{
+	"card": "Slash of Light",
+	"generated": "2026-10-10",
+	"source": "86ba3900cd7f03a7b3dce21dfabc552fc128754b076aa94163e549618969fa99",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Slash of Light",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Slash of Light",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Deal damage equal to your creature count plus your Equipment count to target creature.",
+				"basis": "Slash of Light deals damage equal to the number of creatures you control plus the number of Equipment you control to target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"sum": [
+								{
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								},
+								{
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"subtypes": [
+											"Equipment"
+										],
+										"controller": "you"
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

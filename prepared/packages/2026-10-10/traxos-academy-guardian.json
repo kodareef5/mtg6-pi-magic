@@ -1,0 +1,132 @@
+{
+	"card": "Traxos, Academy Guardian",
+	"generated": "2026-10-10",
+	"source": "8e022f27a829d96ecb58f30cba85047af5b314bda5a13425c98905e398e781ce",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Traxos, Academy Guardian",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Traxos with its conditional generic reduction",
+				"basis": "This spell costs {2} less to cast if you've cast a noncreature spell this turn.",
+				"source": {
+					"card": "Traxos, Academy Guardian",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"not": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"instructions": []
+			},
+			{
+				"claim": "Cast Traxos without its conditional reduction",
+				"basis": "This spell costs {2} less to cast if you've cast a noncreature spell this turn.",
+				"source": {
+					"card": "Traxos, Academy Guardian",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"not": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					},
+					"atMost": 0
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

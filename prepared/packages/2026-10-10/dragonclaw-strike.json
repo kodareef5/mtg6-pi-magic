@@ -1,0 +1,68 @@
+{
+	"card": "Dragonclaw Strike",
+	"generated": "2026-10-10",
+	"source": "4e3fb007112a8e5a63865d4972983f4d08adab369a8b6f6810f7f75935e06862",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragonclaw Strike",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dragonclaw Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dragonclaw Strike",
+				"basis": "Double the power and toughness of target creature you control until end of turn. Then it fights up to one target creature an opponent controls. (Each deals damage equal to its power to the other.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"power": "target:0"
+							},
+							"toughness": {
+								"toughness": "target:0"
+							}
+						}
+					},
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

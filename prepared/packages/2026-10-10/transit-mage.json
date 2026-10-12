@@ -1,0 +1,67 @@
+{
+	"card": "Transit Mage",
+	"generated": "2026-10-10",
+	"source": "01b6a2d48023dff4a1df0d11e079465b2537c3d37d1dbc2b74ff600b94acbc3a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Transit Mage",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may search your library for an artifact card with mana value 4 or 5, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"types": [
+											"artifact"
+										],
+										"manaValue": {
+											"atLeast": 4,
+											"atMost": 5
+										}
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "artifact"
+								},
+								{
+									"do": "move",
+									"what": "bound:artifact",
+									"to": "hand",
+									"reason": "resolve"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

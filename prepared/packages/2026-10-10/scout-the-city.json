@@ -1,0 +1,101 @@
+{
+	"card": "Scout the City",
+	"generated": "2026-10-10",
+	"source": "de9f3bf642f77e894a65d9e025c6619151c56cf24641e3f97d260103b418589e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scout the City",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Scout the City",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Scout the City — Look Around",
+				"basis": "Choose one — ... • Look Around — Mill three cards. You may put a permanent card from among them into your hand. You gain 3 life. (To mill three cards, put the top three cards of your library into your graveyard.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 3,
+						"as": "milled"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"is": "bound:milled",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "selected"
+					},
+					{
+						"do": "move",
+						"what": "bound:selected",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Scout the City",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Scout the City — Bring Down",
+				"basis": "Choose one — ... • Bring Down — Destroy target creature with flying.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"words": [
+								"flying"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

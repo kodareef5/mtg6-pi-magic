@@ -1,0 +1,39 @@
+{
+	"card": "Flamebraider",
+	"generated": "2026-10-10",
+	"source": "90c0b844008e6506cf540b6512b3249e8c2412016d7fa893ccdbc7f2f5137bab",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Flamebraider",
+		"registers": [
+			{
+				"kind": "mana",
+				"basis": "{T}: Add two mana in any combination of colors. Spend this mana only to cast Elemental spells or activate abilities of Elemental sources.",
+				"cost": {
+					"tap": true
+				},
+				"any": 2,
+				"combination": true,
+				"spendOnly": {
+					"zones": [
+						"stack",
+						"battlefield",
+						"hand",
+						"graveyard",
+						"exile",
+						"command",
+						"library",
+						"outside"
+					],
+					"subtypes": [
+						"Elemental"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

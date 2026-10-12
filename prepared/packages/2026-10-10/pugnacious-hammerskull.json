@@ -1,0 +1,48 @@
+{
+	"card": "Pugnacious Hammerskull",
+	"generated": "2026-10-10",
+	"source": "ec45de92d49ab1f512bc24c8070d72687448ce42cdf8cda2252a70fcdb0bdfbb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pugnacious Hammerskull",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks while you don't control another Dinosaur, put a stun counter on it. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Dinosaur"
+							],
+							"other": true
+						}
+					},
+					"atMost": 0
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "stun",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

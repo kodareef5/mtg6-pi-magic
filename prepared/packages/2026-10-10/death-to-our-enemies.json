@@ -1,0 +1,126 @@
+{
+	"card": "Death to Our Enemies",
+	"generated": "2026-10-10",
+	"source": "d0ffc488c4d2eba149cc9796f92f2984e311e278004a4d074e1efc9359b5d660",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Death to Our Enemies",
+		"registers": [
+			{
+				"basis": "Whenever you cast a noncreature spell, create a tapped Treasure token and put a plan counter on this enchantment.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"tapped": true,
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "plan",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "When the fourth plan counter is put on this enchantment, sacrifice it. When you do, it deals 7 damage divided as you choose among one or two targets.",
+				"kind": "watch",
+				"event": {
+					"on": "counters",
+					"counter": "plan",
+					"reaches": 4,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice",
+							"as": "sacrificed"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature",
+												"planeswalker",
+												"battle"
+											]
+										},
+										"player": "any",
+										"count": 2,
+										"atLeast": 1,
+										"divide": 7
+									}
+								],
+								"instructions": [
+									{
+										"do": "damage",
+										"from": "this",
+										"to": "target:0",
+										"amount": {
+											"divided": 0
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,69 @@
+{
+	"card": "Haste Magic",
+	"generated": "2026-10-10",
+	"source": "8e83e3b035ee7a1b22b482e81b9e48ec9482bdac0ad9adcabaf8f8ed728b6f93",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Haste Magic",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Haste Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +3/+1 and haste until end of turn, then exile the top card and allow playing it until your next end step begins.",
+				"basis": "Target creature gets +3/+1 and gains haste until end of turn. Exile the top card of your library. You may play it until your next end step.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 1,
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "move",
+						"what": {
+							"top": 1,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": {
+							"nextEndStep": "you"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,83 @@
+{
+	"card": "Stall Out",
+	"generated": "2026-10-10",
+	"source": "1b43c225507deafb23143b1c701a7b16b50517d0afc0cfb0e405d0950f5ab108",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stall Out",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stall Out",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Stall Out to tap a creature or Vehicle and put three stun counters on it",
+				"basis": "Tap target creature or Vehicle, then put three stun counters on it. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Vehicle"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "stun",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Stall Out",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Stall Out",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

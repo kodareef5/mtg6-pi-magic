@@ -1,0 +1,118 @@
+{
+	"card": "Eshki Dragonclaw",
+	"generated": "2026-10-10",
+	"source": "58d19d6edf5c20f2dceecdcecd8a155c5dceed557f4bbacac16d25c1ad5c12ec",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eshki Dragonclaw",
+		"registers": [
+			{
+				"basis": "Vigilance, trample, ward {1}",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance",
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Vigilance, trample, ward {1}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{1}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of combat on your turn, if you've cast both a creature spell and a noncreature spell this turn, draw a card and put two +1/+1 counters on Eshki Dragonclaw.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"history": "cast",
+								"by": "you",
+								"of": {
+									"zones": [
+										"stack"
+									],
+									"types": [
+										"creature"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"history": "cast",
+								"by": "you",
+								"of": {
+									"zones": [
+										"stack"
+									],
+									"not": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

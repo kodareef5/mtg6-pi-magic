@@ -1,0 +1,85 @@
+{
+	"card": "Clachan Festival",
+	"generated": "2026-10-10",
+	"source": "a318936e560b0a1705273534e3f879e2d3f883ebae60cb459fb7e31a146fb99a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Clachan Festival",
+		"registers": [
+			{
+				"basis": "When this enchantment enters, create two 1/1 green and white Kithkin creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Kithkin Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Kithkin"
+								],
+								"colors": [
+									"G",
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Create a Kithkin token",
+				"basis": "{4}{W}: Create a 1/1 green and white Kithkin creature token.",
+				"source": {
+					"card": "Clachan Festival",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{W}"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Kithkin Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Kithkin"
+							],
+							"colors": [
+								"G",
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

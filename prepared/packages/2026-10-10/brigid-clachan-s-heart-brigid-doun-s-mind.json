@@ -1,0 +1,185 @@
+{
+	"card": "Brigid, Clachan's Heart // Brigid, Doun's Mind",
+	"generated": "2026-10-10",
+	"source": "d0e06b034bf0cc9bf02943477c2b27d96e10f939a74e4b1e60b32fc66dae65d1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brigid, Clachan's Heart // Brigid, Doun's Mind",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever this creature enters or transforms into Brigid, Clachan's Heart, create a 1/1 green and white Kithkin creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Kithkin Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Kithkin"
+								],
+								"colors": [
+									"G",
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever this creature enters or transforms into Brigid, Clachan's Heart, create a 1/1 green and white Kithkin creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "transforms",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Kithkin Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Kithkin"
+								],
+								"colors": [
+									"G",
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "At the beginning of your first main phase, you may pay {G}. If you do, transform Brigid.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{G}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "transform",
+							"what": "this",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "{T}: Add X {G} or X {W}, where X is the number of other creatures you control.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"times": {
+					"count": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				}
+			},
+			{
+				"face": 1,
+				"basis": "{T}: Add X {G} or X {W}, where X is the number of other creatures you control.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				],
+				"times": {
+					"count": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				}
+			},
+			{
+				"face": 1,
+				"basis": "At the beginning of your first main phase, you may pay {W}. If you do, transform Brigid.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{W}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "transform",
+							"what": "this",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

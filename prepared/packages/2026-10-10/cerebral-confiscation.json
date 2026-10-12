@@ -1,0 +1,109 @@
+{
+	"card": "Cerebral Confiscation",
+	"generated": "2026-10-10",
+	"source": "1411a669fc9ff9f4c48b0c0f8af0ce9ae9fb41929857ed4b5bf81d4031d82889",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cerebral Confiscation",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Cerebral Confiscation: opponent discards two cards",
+				"basis": "Choose one — ... Target opponent discards two cards.",
+				"source": {
+					"card": "Cerebral Confiscation",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "target:0"
+						},
+						"count": 2,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			},
+			{
+				"claim": "Cast Cerebral Confiscation: reveal opponent's hand and choose a nonland discard",
+				"basis": "Choose one — ... Target opponent reveals their hand. You choose a nonland card from it. That player discards that card.",
+				"source": {
+					"card": "Cerebral Confiscation",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "target:0"
+						},
+						"as": "hand"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"is": "bound:hand",
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,135 @@
+{
+	"card": "Lithobraking",
+	"generated": "2026-10-10",
+	"source": "572943996126aca37040a50f617b0572733aed351f616ac8ba3ef6e05cfc3a96",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lithobraking",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lithobraking",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Create a Lander, optionally sacrifice an artifact, and create the reflexive damage trigger.",
+				"basis": "Create a Lander token. Then you may sacrifice an artifact. When you do, Lithobraking deals 2 damage to each creature. (A Lander token is an artifact with \"{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\")",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Lander Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Lander"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+									"cost": {
+										"mana": "{2}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"library"
+													],
+													"owner": "you",
+													"types": [
+														"land"
+													],
+													"supertypes": [
+														"basic"
+													],
+													"token": false
+												},
+												"count": 1,
+												"upTo": true,
+												"as": "land"
+											},
+											{
+												"do": "move",
+												"what": "bound:land",
+												"to": "battlefield",
+												"tapped": true,
+												"reason": "resolve"
+											},
+											{
+												"do": "shuffle",
+												"who": "you"
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"sacrifice": {
+								"choose": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								},
+								"count": 1
+							}
+						},
+						"may": true,
+						"as": "sacrificed"
+					},
+					{
+						"do": "reflect",
+						"if": {
+							"bound": "sacrificed"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "damage",
+									"every": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										]
+									},
+									"amount": 2,
+									"from": "this"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

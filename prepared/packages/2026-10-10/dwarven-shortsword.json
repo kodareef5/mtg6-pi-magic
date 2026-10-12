@@ -1,0 +1,98 @@
+{
+	"card": "Dwarven Shortsword",
+	"generated": "2026-10-10",
+	"source": "29687cce2944d7de843f36781b0b0adf19532fd698564398412ef697d2c71b3c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dwarven Shortsword",
+		"registers": [
+			{
+				"basis": "When this Equipment enters, create a 2/2 red Dwarf creature token, then attach this Equipment to it.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Dwarf Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dwarf"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 2,
+								"toughness": 2
+							},
+							"as": "dwarf"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:dwarf"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +1/+2.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 2
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dwarven Shortsword",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Dwarven Shortsword",
+				"basis": "Equip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

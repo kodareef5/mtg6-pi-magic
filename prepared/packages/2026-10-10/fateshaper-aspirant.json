@@ -1,0 +1,82 @@
+{
+	"card": "Fateshaper Aspirant",
+	"generated": "2026-10-10",
+	"source": "c4afaa130c01b3b450a19670554b3fa96a6036714bc5cb3f773db58b8a6f27dd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fateshaper Aspirant",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, choose one —\n• Return target legendary card from your graveyard to your hand.\n• Put a +1/+1 counter on target creature. It gains vigilance and indestructible until end of turn. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"supertypes": [
+											"legendary"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "move",
+									"what": "target:0",
+									"to": "hand",
+									"reason": "bounce"
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "target:0",
+									"kind": "+1/+1",
+									"amount": 1
+								},
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"words": [
+											"vigilance",
+											"indestructible"
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,92 @@
+{
+	"card": "Zero Point Ballad",
+	"generated": "2026-10-10",
+	"source": "dd6e2fdc850b129523d53ac27a3c815797822e33e356578fa630d50b53feb5ba",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zero Point Ballad",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Zero Point Ballad",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Zero Point Ballad",
+				"basis": "Destroy all creatures with toughness X or less. You lose X life. If X is 6 or more, return a creature card put into a graveyard this way to the battlefield under your control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"toughness": {
+								"atMost": {
+									"x": true
+								}
+							}
+						},
+						"as": "destroyed"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"negate": {
+								"x": true
+							}
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"is": "bound:destroyed",
+							"types": [
+								"creature"
+							],
+							"token": false
+						},
+						"count": 1,
+						"as": "returning",
+						"if": {
+							"amount": {
+								"x": true
+							},
+							"atLeast": 6
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:returning",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"if": {
+							"amount": {
+								"x": true
+							},
+							"atLeast": 6
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

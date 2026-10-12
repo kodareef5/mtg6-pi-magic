@@ -1,0 +1,75 @@
+{
+	"card": "Arabella, Abandoned Doll",
+	"generated": "2026-10-10",
+	"source": "bfc32722d1c34bb649900cf8eca004adc5f0fb9d92d373215d88946251c18fc1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Arabella, Abandoned Doll",
+		"registers": [
+			{
+				"basis": "Whenever Arabella attacks, it deals X damage to each opponent and you gain X life, where X is the number of creatures you control with power 2 or less.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"power": {
+									"atMost": 2
+								}
+							},
+							"count": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you",
+									"power": {
+										"atMost": 2
+									}
+								}
+							},
+							"as": "small-creatures"
+						},
+						{
+							"do": "damage",
+							"to": "opponent",
+							"from": "this",
+							"amount": {
+								"bound": "small-creatures"
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"bound": "small-creatures"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

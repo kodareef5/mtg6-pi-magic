@@ -1,0 +1,134 @@
+{
+	"card": "Teysa, Opulent Oligarch",
+	"generated": "2026-10-10",
+	"source": "546c8a04688f1f8b833a5acdc35453ee2fc1ca17fa2fc86b7d844d5fbff01edc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Teysa, Opulent Oligarch",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, investigate for each opponent who lost life this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "each",
+							"players": "opponent",
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"if": {
+										"amount": {
+											"history": "life-lost",
+											"by": "bound:player"
+										},
+										"atLeast": 1
+									},
+									"spec": {
+										"name": "Clue Token",
+										"types": [
+											"artifact"
+										],
+										"subtypes": [
+											"Clue"
+										],
+										"colors": [],
+										"registers": [
+											{
+												"basis": "{2}, Sacrifice this token: Draw a card.",
+												"kind": "activated",
+												"cost": {
+													"mana": "{2}",
+													"sacrifice": "this"
+												},
+												"effect": {
+													"instructions": [
+														{
+															"do": "draw",
+															"who": "you",
+															"count": 1
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a Clue you control is put into a graveyard from the battlefield, create a 1/1 white and black Spirit creature token with flying. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"subtypes": [
+							"Clue"
+						],
+						"controller": "you"
+					}
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Spirit Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spirit"
+								],
+								"colors": [
+									"W",
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

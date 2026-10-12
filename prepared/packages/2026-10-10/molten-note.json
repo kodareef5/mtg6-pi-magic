@@ -1,0 +1,69 @@
+{
+	"card": "Molten Note",
+	"generated": "2026-10-10",
+	"source": "1759680ca57cad1f331c7290bc69b263eb7bcd2212fbb7fcdcb7981b69b4a152",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Molten Note",
+		"registers": [
+			{
+				"basis": "Flashback {6}{R}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"kind": "permit",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{6}{R}{W}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Molten Note",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Molten Note at its printed cost or an earned permission's price",
+				"basis": "Molten Note deals damage to target creature equal to the amount of mana spent to cast this spell. Untap all creatures you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"manaSpent": "this"
+						}
+					},
+					{
+						"do": "untap",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

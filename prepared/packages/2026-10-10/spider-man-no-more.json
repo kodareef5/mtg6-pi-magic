@@ -1,0 +1,69 @@
+{
+	"card": "Spider-Man No More",
+	"generated": "2026-10-10",
+	"source": "3539f2b95dffc6779e509723fb5f08a162fd19614127786043102249e7f3fd45",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider-Man No More",
+		"registers": [
+			{
+				"basis": "Enchanted creature is a Citizen with base power and toughness 1/1. It has defender and loses all other abilities. (It also loses all other creature types.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"subtypes": {
+						"set": [
+							"Citizen"
+						],
+						"of": "creature"
+					},
+					"base": {
+						"power": 1,
+						"toughness": 1
+					},
+					"loseAbilities": true,
+					"words": [
+						"defender"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spider-Man No More",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Spider-Man No More enchanting a creature",
+				"basis": "Enchant creature",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

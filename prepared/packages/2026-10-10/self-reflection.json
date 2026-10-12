@@ -1,0 +1,62 @@
+{
+	"card": "Self-Reflection",
+	"generated": "2026-10-10",
+	"source": "68493e91c06c952adae784ea7ec5d0a735bc51767858bdfe5f4cd7d3bd6f610d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Self-Reflection",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {3}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{3}{U}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Self-Reflection",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Self-Reflection to create a token copy of a creature you control, at its printed cost or through an earned casting permission, including flashback",
+				"basis": "Create a token that's a copy of target creature you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

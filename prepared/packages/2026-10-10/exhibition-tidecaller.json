@@ -1,0 +1,64 @@
+{
+	"card": "Exhibition Tidecaller",
+	"generated": "2026-10-10",
+	"source": "c63ae2cee63cce88d7805da3ca214ead8b102ca0346a88d442f325eda81b865b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Exhibition Tidecaller",
+		"registers": [
+			{
+				"basis": "Opus — Whenever you cast an instant or sorcery spell, target player mills three cards. If five or more mana was spent to cast that spell, that player mills ten cards instead.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "target:0",
+							"count": 3,
+							"if": {
+								"amount": {
+									"manaSpent": "event:object"
+								},
+								"atMost": 4
+							}
+						},
+						{
+							"do": "mill",
+							"who": "target:0",
+							"count": 10,
+							"if": {
+								"amount": {
+									"manaSpent": "event:object"
+								},
+								"atLeast": 5
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

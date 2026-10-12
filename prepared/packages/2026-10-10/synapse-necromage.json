@@ -22,7 +22,7 @@
 							"do": "token",
 							"count": 2,
 							"spec": {
-								"name": "Fungus",
+								"name": "Fungus Token",
 								"types": [
 									"creature"
 								],
@@ -34,21 +34,8 @@
 								],
 								"power": 1,
 								"toughness": 1,
-								"registers": [
-									{
-										"basis": "This token can't block.",
-										"kind": "prohibit",
-										"block": {
-											"attacker": {
-												"types": [
-													"creature"
-												]
-											},
-											"blocker": {
-												"is": "this"
-											}
-										}
-									}
+								"words": [
+									"can't block"
 								]
 							}
 						}

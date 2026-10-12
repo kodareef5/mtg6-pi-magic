@@ -1,0 +1,99 @@
+{
+	"card": "Flamewake Phoenix",
+	"generated": "2026-10-10",
+	"source": "6e73b5362d28d30def39e31ce78325df795f4a4bab7a950bfbb03bb5c6d76f1e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Flamewake Phoenix",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, haste",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"haste"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "This creature attacks each combat if able.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"attacks each combat if able"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Ferocious — At the beginning of combat on your turn, if you control a creature with power 4 or greater, you may pay {R}. If you do, return this card from your graveyard to the battlefield.",
+				"zones": [
+					"graveyard"
+				],
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"power": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{R}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

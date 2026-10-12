@@ -1,0 +1,226 @@
+{
+	"card": "Ugin, Eye of the Storms",
+	"generated": "2026-10-10",
+	"source": "70701565788a3e1219cc03088833d6d8b20298b958215932d5ce313c1bc59cf6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ugin, Eye of the Storms",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When you cast this spell, exile up to one target permanent that's one or more colors.",
+				"zones": [
+					"stack"
+				],
+				"event": {
+					"on": "cast",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"is": "this"
+					},
+					"by": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"colors": [
+									"W",
+									"U",
+									"B",
+									"R",
+									"G"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a colorless spell, exile up to one target permanent that's one or more colors.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"colors": [],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"colors": [
+									"W",
+									"U",
+									"B",
+									"R",
+									"G"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ugin, Eye of the Storms",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Ugin's +2 loyalty ability",
+				"basis": "+2: You gain 3 life and draw a card.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": 2
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ugin, Eye of the Storms",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Ugin's 0 loyalty ability",
+				"basis": "0: Add {C}{C}{C}.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": 0
+				},
+				"instructions": [
+					{
+						"do": "mana",
+						"who": "you",
+						"colors": [
+							"C",
+							"C",
+							"C"
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ugin, Eye of the Storms",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Ugin's −11 loyalty ability",
+				"basis": "−11: Search your library for any number of colorless nonland cards, exile them, then shuffle. Until end of turn, you may cast those cards without paying their mana costs.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": -11
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"colors": [],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"library"
+								],
+								"owner": "you"
+							}
+						},
+						"upTo": true,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"mana": "{0}",
+						"until": "end-of-turn"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,94 @@
+{
+	"card": "Sinuous Benthisaur",
+	"generated": "2026-10-10",
+	"source": "cb0aeb10425c50dc973f906d09fa66a6ca783ee1efaefb37734eaf623c742cac",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sinuous Benthisaur",
+		"registers": [
+			{
+				"basis": "When this creature enters, look at the top X cards of your library, where X is the number of Caves you control plus the number of Cave cards in your graveyard. Put two of those cards into your hand and the rest on the bottom of your library in a random order.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": {
+									"sum": [
+										{
+											"count": {
+												"zones": [
+													"battlefield"
+												],
+												"subtypes": [
+													"Cave"
+												],
+												"controller": "you"
+											}
+										},
+										{
+											"count": {
+												"zones": [
+													"graveyard"
+												],
+												"subtypes": [
+													"Cave"
+												],
+												"owner": "you",
+												"token": false
+											}
+										}
+									]
+								},
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"count": 2,
+							"as": "taken"
+						},
+						{
+							"do": "move",
+							"what": "bound:taken",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"position": "bottom",
+							"random": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

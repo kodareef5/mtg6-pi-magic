@@ -1,0 +1,76 @@
+{
+	"card": "Compass Gnome",
+	"generated": "2026-10-10",
+	"source": "d5f0bf9ed4639910ed84c093850dd381ad3d35b8bf23a49c31188472c7f3c9c4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Compass Gnome",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, you may search your library for a basic land card or Cave card, reveal it, then shuffle and put that card on top.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"any": [
+											{
+												"supertypes": [
+													"basic"
+												],
+												"types": [
+													"land"
+												]
+											},
+											{
+												"subtypes": [
+													"Cave"
+												]
+											}
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "card"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								},
+								{
+									"do": "move",
+									"what": "bound:card",
+									"to": "library",
+									"position": "top",
+									"reason": "resolve"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

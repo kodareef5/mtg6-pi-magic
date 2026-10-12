@@ -1,0 +1,117 @@
+{
+	"card": "Twining Twins // Swift Spiral",
+	"generated": "2026-10-10",
+	"source": "5341f5942e4e655ee2c9b0d7e1b695b04e059fafbc34f452419b73052ec755c2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Twining Twins // Swift Spiral",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying, vigilance, ward {1}",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Flying, vigilance, ward {1}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{1}"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Twining Twins // Swift Spiral",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Swift Spiral",
+				"basis": "Exile target nontoken creature. Return it to the battlefield under its owner's control at the beginning of the next end step.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"token": false
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "delay",
+						"if": {
+							"bound": "exiled"
+						},
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:exiled",
+									"to": "battlefield",
+									"controller": "owner:bound:exiled",
+									"reason": "resolve"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

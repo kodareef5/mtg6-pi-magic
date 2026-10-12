@@ -1,0 +1,99 @@
+{
+	"card": "Poetic Ingenuity",
+	"generated": "2026-10-10",
+	"source": "ee4ce382cc039040cf04de35cdb7f0e02ca813588d0f750736004b6417a18b5f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Poetic Ingenuity",
+		"registers": [
+			{
+				"basis": "Whenever one or more Dinosaurs you control attack, create that many Treasure tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"subtypes": [
+							"Dinosaur"
+						],
+						"controller": "you"
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"event": "amount"
+							},
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast an artifact spell, create a 3/1 red Dinosaur creature token. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact"
+						]
+					}
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Dinosaur Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dinosaur"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 3,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

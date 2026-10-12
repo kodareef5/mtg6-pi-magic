@@ -1,0 +1,88 @@
+{
+	"card": "Vindictive Triumph",
+	"generated": "2026-10-10",
+	"source": "8f4d00518f80f0caab6f449f9380f818e1b0b5b73c4180f79cdd74ee040b8f5c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vindictive Triumph",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vindictive Triumph",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Exile target creature or planeswalker; if its former mana value was 3 or less, return it tapped under your control and exile that returned permanent at the beginning of the next end step.",
+				"basis": "Exile target creature or planeswalker. If that permanent's mana value was 3 or less, return it to the battlefield tapped under your control. Exile it at the beginning of the next end step.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "move",
+						"what": "bound:exiled",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve",
+						"as": "returned",
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"manaValue": {
+									"atMost": 3
+								}
+							},
+							"lastKnown": true
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:returned",
+									"to": "exile",
+									"reason": "exile"
+								}
+							]
+						},
+						"if": {
+							"bound": "returned"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

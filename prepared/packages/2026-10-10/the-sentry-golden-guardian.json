@@ -1,0 +1,80 @@
+{
+	"card": "The Sentry, Golden Guardian",
+	"generated": "2026-10-10",
+	"source": "e24efda42653832f63cd7e4312939378542ee74ced93a7aec9e0f5813f1da49c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Sentry, Golden Guardian",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance, indestructible",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance",
+						"indestructible"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When The Sentry enters, target opponent creates The Void, a legendary 5/5 black Horror Villain creature token with flying, indestructible, and \"The Void attacks each combat if able.\"",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"controller": "target:0",
+							"spec": {
+								"name": "The Void",
+								"supertypes": [
+									"legendary"
+								],
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Horror",
+									"Villain"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 5,
+								"toughness": 5,
+								"words": [
+									"flying",
+									"indestructible",
+									"attacks each combat if able"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

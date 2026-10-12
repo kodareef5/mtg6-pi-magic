@@ -1,0 +1,87 @@
+{
+	"card": "Derelict Attic // Widow's Walk",
+	"generated": "2026-10-10",
+	"source": "348cc36708518fa9f9f6e6fa61337e6b2ef6ac0ecfa114f9f74594eb600688f6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Derelict Attic // Widow's Walk",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When you unlock this door, you draw two cards and you lose 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -2
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever a creature you control attacks alone, it gets +1/+0 and gains deathtouch until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true
+						}
+					},
+					"atLeast": 1,
+					"atMost": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "event:object",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"words": [
+									"deathtouch"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		],
+		"deferred": []
+	}
+}

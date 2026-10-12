@@ -1,0 +1,114 @@
+{
+	"card": "Demonic Counsel",
+	"generated": "2026-10-10",
+	"source": "65ee9616fd206f6746611c7bb499a9ef3725e2bc090c1ac2d06a4b9dc2acba28",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Demonic Counsel",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Demonic Counsel",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Demonic Counsel, checking delirium as it resolves",
+				"basis": "Search your library for a Demon card, reveal it, put it into your hand, then shuffle. ... Delirium — If there are four or more card types among cards in your graveyard, instead search your library for any card, put it into your hand, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"amount": {
+								"distinct": "card-types",
+								"among": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"token": false
+								}
+							},
+							"atLeast": 4
+						},
+						"as": "delirium",
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "you",
+									"token": false
+								},
+								"count": 1,
+								"as": "card"
+							},
+							{
+								"do": "move",
+								"what": "bound:card",
+								"to": "hand",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "you"
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"not": {
+								"bound": "delirium"
+							}
+						},
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "you",
+									"subtypes": [
+										"Demon"
+									],
+									"token": false
+								},
+								"count": 1,
+								"upTo": true,
+								"reveal": true,
+								"as": "demon"
+							},
+							{
+								"do": "move",
+								"what": "bound:demon",
+								"to": "hand",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "you"
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

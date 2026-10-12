@@ -1,0 +1,76 @@
+{
+	"card": "Enduring Courage",
+	"generated": "2026-10-10",
+	"source": "f5dceba006a99c8125d77c3a0dcbdfe82610e64e9a68483a2af9c557931cbab0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Enduring Courage",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever another creature you control enters, it gets +2/+0 and gains haste until end of turn.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "event:object",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"words": [
+									"haste"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Enduring Courage dies, if it was a creature, return it to the battlefield under its owner's control. It's an enchantment. (It's not a creature.)",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this",
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "owner:event:object",
+							"reason": "resolve",
+							"change": {
+								"types": {
+									"set": [
+										"enchantment"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

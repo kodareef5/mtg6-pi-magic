@@ -1,0 +1,65 @@
+{
+	"card": "Relic's Roar",
+	"generated": "2026-10-10",
+	"source": "1bb8106f5f7d546a419cb85507e8a367427f7fdba68e19552be197d577c60883",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Relic's Roar",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Relic's Roar",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Turn target artifact or creature into a 4/3 Dinosaur artifact creature until end of turn",
+				"basis": "Until end of turn, target artifact or creature becomes a Dinosaur artifact creature with base power and toughness 4/3 in addition to its other types.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Dinosaur"
+								]
+							},
+							"base": {
+								"power": 4,
+								"toughness": 3
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

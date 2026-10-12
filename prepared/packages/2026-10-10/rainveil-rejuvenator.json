@@ -1,0 +1,48 @@
+{
+	"card": "Rainveil Rejuvenator",
+	"generated": "2026-10-10",
+	"source": "27c256c6d042e86c3d272b02f288d9524f962af7b0ba5ed126ddb491d6c60a1d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rainveil Rejuvenator",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may mill three cards. (You may put the top three cards of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add an amount of {G} equal to this creature's power.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"times": {
+					"power": "this"
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

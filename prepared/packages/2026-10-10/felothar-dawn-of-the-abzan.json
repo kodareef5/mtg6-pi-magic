@@ -1,0 +1,151 @@
+{
+	"card": "Felothar, Dawn of the Abzan",
+	"generated": "2026-10-10",
+	"source": "0a9028141bb32202fb176546a32c6242d9785ad038816bb1cac286f87054dcf2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Felothar, Dawn of the Abzan",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Felothar enters or attacks, you may sacrifice a nonland permanent. When you do, put a +1/+1 counter on each creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "counters",
+										"every": {
+											"zones": [
+												"battlefield"
+											],
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										},
+										"kind": "+1/+1",
+										"amount": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Felothar enters or attacks, you may sacrifice a nonland permanent. When you do, put a +1/+1 counter on each creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "counters",
+										"every": {
+											"zones": [
+												"battlefield"
+											],
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										},
+										"kind": "+1/+1",
+										"amount": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

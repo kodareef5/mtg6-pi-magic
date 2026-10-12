@@ -1,0 +1,126 @@
+{
+	"card": "Silk, Web Weaver",
+	"generated": "2026-10-10",
+	"source": "d978189b7589f113cd9d347e817fde8fc6e8199186d4335264898d88bd00f20f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Silk, Web Weaver",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a creature spell, create a 1/1 green and white Human Citizen creature token.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Citizen Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Citizen"
+								],
+								"colors": [
+									"G",
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Silk, Web Weaver",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Silk, Web Weaver for its web-slinging cost",
+				"basis": "Web-slinging {1}{G}{W} (You may cast this spell for {1}{G}{W} if you also return a tapped creature you control to its owner's hand.)",
+				"timing": "spell",
+				"cost": {
+					"alternative": "web-slinging",
+					"mana": "{1}{G}{W}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Silk, Web Weaver",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give creatures you control +2/+2 and vigilance until end of turn",
+				"basis": "{3}{G}{W}: Creatures you control get +2/+2 and gain vigilance until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{G}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"vigilance"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

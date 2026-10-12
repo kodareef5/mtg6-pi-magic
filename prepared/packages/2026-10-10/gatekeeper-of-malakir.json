@@ -1,0 +1,80 @@
+{
+	"card": "Gatekeeper of Malakir",
+	"generated": "2026-10-10",
+	"source": "18d4a60cde9e5909e654ec022008a7e81945a2f97f3f6c2628683a694572beb4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gatekeeper of Malakir",
+		"registers": [
+			{
+				"basis": "When this creature enters, if it was kicked, target player sacrifices a creature of their choice.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"paid": "kicker"
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "target:0",
+							"count": 1,
+							"actions": [
+								{
+									"sacrifice": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										],
+										"controller": "target:0"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gatekeeper of Malakir",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gatekeeper of Malakir kicked",
+				"basis": "Kicker {B} (You may pay an additional {B} as you cast this spell.)",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "kicker",
+							"mana": "{B}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

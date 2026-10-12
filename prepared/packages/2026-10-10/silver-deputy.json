@@ -1,0 +1,113 @@
+{
+	"card": "Silver Deputy",
+	"generated": "2026-10-10",
+	"source": "f0b77a8af79fdcc3e4952bc481e1680803cf82ea806b18eb062db94286459fa6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Silver Deputy",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may search your library for a basic land card or a Desert card, reveal it, then shuffle and put it on top.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"any": [
+											{
+												"types": [
+													"land"
+												],
+												"supertypes": [
+													"basic"
+												]
+											},
+											{
+												"subtypes": [
+													"Desert"
+												]
+											}
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "land"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								},
+								{
+									"do": "move",
+									"what": "bound:land",
+									"to": "library",
+									"position": "top",
+									"reason": "resolve"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Silver Deputy",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give target creature you control +1/+0 until end of turn",
+				"basis": "{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

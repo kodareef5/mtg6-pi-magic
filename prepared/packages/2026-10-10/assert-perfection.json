@@ -1,0 +1,67 @@
+{
+	"card": "Assert Perfection",
+	"generated": "2026-10-10",
+	"source": "78f11633c3f4a107f5cf9bad90e36bba4416262d93f2222e75adab8a710020c2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Assert Perfection",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Assert Perfection",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Boost a creature you control, then have it deal damage to up to one opposing creature.",
+				"basis": "Target creature you control gets +1/+0 until end of turn. It deals damage equal to its power to up to one target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 0
+						}
+					},
+					{
+						"do": "damage",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						},
+						"from": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

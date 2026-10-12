@@ -1,0 +1,65 @@
+{
+	"card": "Pursue the Past",
+	"generated": "2026-10-10",
+	"source": "706c8a92a0562242d7b2a854ba5fe914da58cc1f30c673b650d5fc3eb76eddf7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pursue the Past",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {2}{R}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{2}{R}{W}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pursue the Past",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pursue the Past at its printed cost or using an earned casting permission",
+				"basis": "You gain 2 life. You may discard a card. If you do, draw two cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"discard": 1
+						},
+						"may": true,
+						"as": "discarded"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"bound": "discarded"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

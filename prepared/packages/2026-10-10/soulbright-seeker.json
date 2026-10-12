@@ -1,0 +1,123 @@
+{
+	"card": "Soulbright Seeker",
+	"generated": "2026-10-10",
+	"source": "f4ffa391a53d473cb3d42fbf2215725f86421688dc43d8d2bb59cbdb456111ad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Soulbright Seeker",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Soulbright Seeker",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Soulbright Seeker by beholding an Elemental",
+				"basis": "As an additional cost to cast this spell, behold an Elemental or pay {2}. (To behold an Elemental, choose an Elemental you control or reveal an Elemental card from your hand.)",
+				"timing": "spell",
+				"cost": {
+					"show": {
+						"choose": {
+							"zones": [
+								"hand",
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Elemental"
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Soulbright Seeker",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Soulbright Seeker paying the additional {2}",
+				"basis": "As an additional cost to cast this spell, behold an Elemental or pay {2}. (To behold an Elemental, choose an Elemental you control or reveal an Elemental card from your hand.)",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "elemental-payment",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Soulbright Seeker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant trample and add four red mana on the third resolution this turn",
+				"basis": "{R}: Target creature you control gains trample until end of turn. If this is the third time this ability has resolved this turn, add {R}{R}{R}{R}.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{R}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "mana",
+						"who": "you",
+						"colors": [
+							"R",
+							"R",
+							"R",
+							"R"
+						],
+						"if": {
+							"amount": {
+								"resolution": true
+							},
+							"atLeast": 3,
+							"atMost": 3
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

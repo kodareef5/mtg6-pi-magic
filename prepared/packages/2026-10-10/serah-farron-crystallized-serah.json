@@ -1,0 +1,146 @@
+{
+	"card": "Serah Farron // Crystallized Serah",
+	"generated": "2026-10-10",
+	"source": "fb2ba96abc17a35ed4dc6999fb65e668120027b71568830e456a64bb0a17a565",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Serah Farron // Crystallized Serah",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "The first legendary creature spell you cast each turn costs {2} less to cast.",
+				"kind": "cost",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"types": [
+						"creature"
+					],
+					"supertypes": [
+						"legendary"
+					]
+				},
+				"reduce": 2,
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"creature"
+							],
+							"supertypes": [
+								"legendary"
+							]
+						}
+					},
+					"atMost": 0
+				}
+			},
+			{
+				"face": 0,
+				"basis": "At the beginning of combat on your turn, if you control two or more other legendary creatures, you may transform Serah Farron.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"supertypes": [
+								"legendary"
+							],
+							"other": true
+						}
+					},
+					"atLeast": 2
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "transform",
+							"what": "this"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "The first legendary creature spell you cast each turn costs {2} less to cast.",
+				"kind": "cost",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"types": [
+						"creature"
+					],
+					"supertypes": [
+						"legendary"
+					]
+				},
+				"reduce": 2,
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"creature"
+							],
+							"supertypes": [
+								"legendary"
+							]
+						}
+					},
+					"atMost": 0
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Legendary creatures you control get +2/+2.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "you",
+					"types": [
+						"creature"
+					],
+					"supertypes": [
+						"legendary"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

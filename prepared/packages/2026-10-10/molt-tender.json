@@ -1,0 +1,55 @@
+{
+	"card": "Molt Tender",
+	"generated": "2026-10-10",
+	"source": "d1e31b67b5fa11983d47e15e58df712008166f89d28d197d652ffdc86ff64e00",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Molt Tender",
+		"registers": [
+			{
+				"basis": "{T}, Exile a card from your graveyard: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true,
+					"exile": {
+						"choose": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you"
+						},
+						"count": 1
+					}
+				},
+				"any": 1
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Molt Tender",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap Molt Tender to mill a card",
+				"basis": "{T}: Mill a card. (Put the top card of your library into your graveyard.)",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,68 @@
+{
+	"card": "Sample Collector",
+	"generated": "2026-10-10",
+	"source": "e6c79c9204afe06d2841e0b1a479670c51d1162f83eea491c618e364a4a10b8b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sample Collector",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, you may collect evidence 3. When you do, put a +1/+1 counter on target creature you control. (To collect evidence 3, exile cards with total mana value 3 or greater from your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"exile": {
+									"graveyard": {},
+									"totalManaValue": 3
+								}
+							},
+							"may": true,
+							"as": "evidence"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "evidence"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "counters",
+										"on": "target:0",
+										"kind": "+1/+1",
+										"amount": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

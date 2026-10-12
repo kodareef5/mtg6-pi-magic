@@ -1,0 +1,109 @@
+{
+	"card": "Wojek Investigator",
+	"generated": "2026-10-10",
+	"source": "1985454e02def76a1a2f0e1af4e6f0c8cf622de6ce60d8eb3c879dce001c3940",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wojek Investigator",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your upkeep, investigate once for each opponent who has more cards in hand than you. (To investigate, create a Clue token. It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "each",
+							"players": "opponent",
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"if": {
+										"amount": {
+											"count": {
+												"zones": [
+													"hand"
+												],
+												"owner": "bound:player",
+												"token": false
+											}
+										},
+										"atLeast": {
+											"sum": [
+												{
+													"count": {
+														"zones": [
+															"hand"
+														],
+														"owner": "you",
+														"token": false
+													}
+												},
+												1
+											]
+										}
+									},
+									"spec": {
+										"name": "Clue Token",
+										"types": [
+											"artifact"
+										],
+										"subtypes": [
+											"Clue"
+										],
+										"colors": [],
+										"registers": [
+											{
+												"kind": "activated",
+												"basis": "{2}, Sacrifice this token: Draw a card.",
+												"cost": {
+													"mana": "{2}",
+													"sacrifice": "this"
+												},
+												"effect": {
+													"instructions": [
+														{
+															"do": "draw",
+															"who": "you",
+															"count": 1
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

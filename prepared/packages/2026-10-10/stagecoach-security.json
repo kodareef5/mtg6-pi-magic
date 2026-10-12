@@ -1,0 +1,64 @@
+{
+	"card": "Stagecoach Security",
+	"generated": "2026-10-10",
+	"source": "160d23220550d0ed0c8a856efd492f2da2c27773e64ca3e867ac25dcfcb10c39",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stagecoach Security",
+		"registers": [
+			{
+				"basis": "When this creature enters, creatures you control get +1/+1 and gain vigilance until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"vigilance"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stagecoach Security",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Stagecoach Security",
+				"basis": "Plot {3}{W} (You may pay {3}{W} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{3}{W}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

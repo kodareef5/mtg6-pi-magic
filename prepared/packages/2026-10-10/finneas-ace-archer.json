@@ -1,0 +1,87 @@
+{
+	"card": "Finneas, Ace Archer",
+	"generated": "2026-10-10",
+	"source": "450e646393eb4ce4ff3aa63606203823338b35dbd8e1442ab42891db929b2b91",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Finneas, Ace Archer",
+		"registers": [
+			{
+				"basis": "Reach, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Finneas attacks, put a +1/+1 counter on each other creature you control that's a token or a Rabbit. Then if creatures you control have total power 10 or greater, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true,
+								"any": [
+									{
+										"token": true
+									},
+									{
+										"subtypes": [
+											"Rabbit"
+										]
+									}
+								]
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"amount": {
+									"aggregate": "sum",
+									"of": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									},
+									"value": "power"
+								},
+								"atLeast": 10
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

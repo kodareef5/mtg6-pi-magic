@@ -1,0 +1,90 @@
+{
+	"card": "Scrap Compactor",
+	"generated": "2026-10-10",
+	"source": "689f9a180c015a9667b6cd3162e383043560e92be40e22f2b3e440deca471262",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scrap Compactor",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Scrap Compactor",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Scrap Compactor to deal 3 damage to target creature.",
+				"basis": "{3}, {T}, Sacrifice this artifact: It deals 3 damage to target creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3,
+						"from": "this"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Scrap Compactor",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Scrap Compactor to destroy target creature or Vehicle.",
+				"basis": "{6}, {T}, Sacrifice this artifact: Destroy target creature or Vehicle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Vehicle"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

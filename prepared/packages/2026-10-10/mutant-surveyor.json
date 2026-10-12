@@ -1,0 +1,84 @@
+{
+	"card": "Mutant Surveyor",
+	"generated": "2026-10-10",
+	"source": "4d879300fac2383334bbd7bfa31b8de048edec473e5f60f888347ab5ca3d3b58",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mutant Surveyor",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mutant Surveyor",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Mutant Surveyor +1/+1 until end of turn",
+				"basis": "{2}: This creature gets +1/+1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Mutant Surveyor",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "At max speed, exile Mutant Surveyor from your graveyard to draw a card",
+				"basis": "Max speed — {3}, Exile this card from your graveyard: Draw a card.",
+				"timing": "stack",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"cost": {
+					"mana": "{3}",
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

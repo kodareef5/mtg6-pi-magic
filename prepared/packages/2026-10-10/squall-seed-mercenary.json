@@ -1,0 +1,102 @@
+{
+	"card": "Squall, SeeD Mercenary",
+	"generated": "2026-10-10",
+	"source": "dde4deda5ed56648148ba80a838a75ecaad0765a6b6161bd3cc7f532ccd6c3e1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Squall, SeeD Mercenary",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Rough Divide — Whenever a creature you control attacks alone, it gains double strike until end of turn.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"attacking": true
+						}
+					},
+					"atLeast": 1,
+					"atMost": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "event:object",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"double strike"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever Squall deals combat damage to a player, return target permanent card with mana value 3 or less from your graveyard to the battlefield.",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"land",
+									"planeswalker"
+								],
+								"manaValue": {
+									"atMost": 3
+								},
+								"token": false
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

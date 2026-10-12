@@ -1,0 +1,61 @@
+{
+	"card": "Axebane Ferox",
+	"generated": "2026-10-10",
+	"source": "69a47c5d15afe617b1537ffe67ad9d38728528fec5db8f44b652e70aefa75f11",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Axebane Ferox",
+		"registers": [
+			{
+				"basis": "Deathtouch, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Ward—Collect evidence 4. (Whenever this creature becomes the target of a spell or ability an opponent controls, counter it unless that player exiles cards with total mana value 4 or greater from their graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"exile": {
+										"graveyard": {},
+										"totalManaValue": 4
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

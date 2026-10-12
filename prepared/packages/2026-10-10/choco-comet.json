@@ -1,0 +1,96 @@
+{
+	"card": "Choco-Comet",
+	"generated": "2026-10-10",
+	"source": "3f326d0f541d3d9135e8a8d082307a4e62efe280055521b71606a92d2a98f6d5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Choco-Comet",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Choco-Comet for X damage and create a Bird token",
+				"basis": "Choco-Comet deals X damage to any target. ... Create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+				"source": {
+					"card": "Choco-Comet",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"x": true
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Bird Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Bird"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 2,
+							"toughness": 2,
+							"registers": [
+								{
+									"basis": "Create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+									"kind": "watch",
+									"event": {
+										"on": "enters",
+										"of": {
+											"types": [
+												"land"
+											],
+											"controller": "you"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "this",
+												"until": "end-of-turn",
+												"change": {
+													"power": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

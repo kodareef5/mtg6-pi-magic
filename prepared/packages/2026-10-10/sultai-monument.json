@@ -1,0 +1,102 @@
+{
+	"card": "Sultai Monument",
+	"generated": "2026-10-10",
+	"source": "5af7fc7c40605e7c900544e737a11e8385be105d2655ac18b83d25d818b278d8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sultai Monument",
+		"registers": [
+			{
+				"basis": "When this artifact enters, search your library for a basic Swamp, Forest, or Island card, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"subtypes": [
+									"Swamp",
+									"Forest",
+									"Island"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "basic"
+						},
+						{
+							"do": "move",
+							"what": "bound:basic",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sultai Monument",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Sultai Monument to create two Zombie Druid tokens",
+				"basis": "{2}{B}{G}{U}, {T}, Sacrifice this artifact: Create two 2/2 black Zombie Druid creature tokens. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}{B}{G}{U}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Zombie Druid Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Zombie",
+								"Druid"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

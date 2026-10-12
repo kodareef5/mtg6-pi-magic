@@ -1,0 +1,131 @@
+{
+	"card": "Ygra, Eater of All",
+	"generated": "2026-10-10",
+	"source": "beb0484b11b8657e66cbeb3cf0d892acda571ebb36d538b7db7a4633b4d44682",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ygra, Eater of All",
+		"registers": [
+			{
+				"basis": "Ward—Sacrifice a Food.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"sacrifice": {
+										"choose": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "event:player",
+											"subtypes": [
+												"Food"
+											]
+										},
+										"count": 1
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Other creatures are Food artifacts in addition to their other types and have \"{2}, {T}, Sacrifice this permanent: You gain 3 life.\"",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"other": true
+				},
+				"change": {
+					"types": {
+						"add": [
+							"artifact"
+						]
+					},
+					"subtypes": {
+						"add": [
+							"Food"
+						]
+					},
+					"registers": [
+						{
+							"basis": "Other creatures are Food artifacts in addition to their other types and have \"{2}, {T}, Sacrifice this permanent: You gain 3 life.\"",
+							"kind": "activated",
+							"cost": {
+								"mana": "{2}",
+								"tap": true,
+								"sacrifice": "this"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "life",
+										"who": "you",
+										"amount": 3
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a Food is put into a graveyard from the battlefield, put two +1/+1 counters on Ygra.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"subtypes": [
+							"Food"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

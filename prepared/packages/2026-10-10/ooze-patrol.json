@@ -1,0 +1,52 @@
+{
+	"card": "Ooze Patrol",
+	"generated": "2026-10-10",
+	"source": "114fbcb07b6ab41260a1f486427d26d0ee6138c7d1cd2246689ab2a18c767a46",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ooze Patrol",
+		"registers": [
+			{
+				"basis": "When this creature enters, mill two cards, then put a +1/+1 counter on this creature for each artifact and/or creature card in your graveyard. (To mill two cards, put the top two cards of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"types": [
+										"artifact",
+										"creature"
+									],
+									"token": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

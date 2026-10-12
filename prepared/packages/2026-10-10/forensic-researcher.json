@@ -1,0 +1,79 @@
+{
+	"card": "Forensic Researcher",
+	"generated": "2026-10-10",
+	"source": "29b13f68c09ceac068f178c65160117e70db487c3fcb3f931387ac3c8cf6bc1b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Forensic Researcher",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Forensic Researcher",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Untap another permanent you control",
+				"basis": "{T}: Untap another target permanent you control.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"controller": "you",
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "untap",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Forensic Researcher",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Collect evidence 3 to tap a creature you don't control",
+				"basis": "{T}, Collect evidence 3: Tap target creature you don't control. (To collect evidence 3, exile cards with total mana value 3 or greater from your graveyard.)",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"exile": {
+						"graveyard": {},
+						"totalManaValue": 3
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

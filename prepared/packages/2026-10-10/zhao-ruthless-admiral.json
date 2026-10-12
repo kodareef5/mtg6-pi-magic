@@ -1,0 +1,74 @@
+{
+	"card": "Zhao, Ruthless Admiral",
+	"generated": "2026-10-10",
+	"source": "25d77e03674f26ff386f47e49b8dae097a2c93e5c4df9869b1f49a9d9e921c5f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zhao, Ruthless Admiral",
+		"registers": [
+			{
+				"basis": "Firebending 2 (Whenever this creature attacks, add {R}{R}. This mana lasts until end of combat.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R",
+								"R"
+							],
+							"until": "end-of-combat"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you sacrifice another permanent, creatures you control get +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,1313 @@
+{
+	"card": "Season of Gathering",
+	"generated": "2026-10-10",
+	"source": "76f3f19919c235dad5517ec3b8b41e753ce1870c1317236c5b4446148193882d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Season of Gathering",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with no modes (0 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once.",
+				"timing": "spell",
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter mode once (1 pawprint)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter mode twice (2 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-two"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-two",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-two",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter mode three times (3 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-two"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-two",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-two",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-three"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-three",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-three",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter mode four times (4 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-two"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-two",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-two",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-three"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-three",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-three",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-four"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-four",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-four",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter mode five times (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-two"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-two",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-two",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-three"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-three",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-three",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-four"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-four",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-four",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-five"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-five",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-five",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destruction once (2 pawprints); during resolution accept the artifact branch to choose artifact, or decline to choose enchantment",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P} — Choose artifact or enchantment. Destroy all permanents of the chosen type.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "artifact-one",
+						"instructions": [
+							{
+								"do": "destroy",
+								"every": {
+									"types": [
+										"artifact"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"enchantment"
+							]
+						},
+						"if": {
+							"not": {
+								"bound": "artifact-one"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter once and destruction once (3 pawprints); during resolution accept the artifact branch for artifact or decline for enchantment",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn. ... {P}{P} — Choose artifact or enchantment. Destroy all permanents of the chosen type.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "artifact-one",
+						"instructions": [
+							{
+								"do": "destroy",
+								"every": {
+									"types": [
+										"artifact"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"enchantment"
+							]
+						},
+						"if": {
+							"not": {
+								"bound": "artifact-one"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter twice and destruction once (4 pawprints); during resolution accept the artifact branch for artifact or decline for enchantment",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn. ... {P}{P} — Choose artifact or enchantment. Destroy all permanents of the chosen type.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-two"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-two",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-two",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "artifact-one",
+						"instructions": [
+							{
+								"do": "destroy",
+								"every": {
+									"types": [
+										"artifact"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"enchantment"
+							]
+						},
+						"if": {
+							"not": {
+								"bound": "artifact-one"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter three times and destruction once (5 pawprints); during resolution accept the artifact branch for artifact or decline for enchantment",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn. ... {P}{P} — Choose artifact or enchantment. Destroy all permanents of the chosen type.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-two"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-two",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-two",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-three"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-three",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-three",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "artifact-one",
+						"instructions": [
+							{
+								"do": "destroy",
+								"every": {
+									"types": [
+										"artifact"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"enchantment"
+							]
+						},
+						"if": {
+							"not": {
+								"bound": "artifact-one"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destruction twice (4 pawprints); independently accept each artifact branch for artifact or decline for enchantment during resolution",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P} — Choose artifact or enchantment. Destroy all permanents of the chosen type.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "artifact-one",
+						"instructions": [
+							{
+								"do": "destroy",
+								"every": {
+									"types": [
+										"artifact"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"enchantment"
+							]
+						},
+						"if": {
+							"not": {
+								"bound": "artifact-one"
+							}
+						}
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "artifact-two",
+						"instructions": [
+							{
+								"do": "destroy",
+								"every": {
+									"types": [
+										"artifact"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"enchantment"
+							]
+						},
+						"if": {
+							"not": {
+								"bound": "artifact-two"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter once and destruction twice (5 pawprints); independently accept each artifact branch for artifact or decline for enchantment during resolution",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn. ... {P}{P} — Choose artifact or enchantment. Destroy all permanents of the chosen type.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "artifact-one",
+						"instructions": [
+							{
+								"do": "destroy",
+								"every": {
+									"types": [
+										"artifact"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"enchantment"
+							]
+						},
+						"if": {
+							"not": {
+								"bound": "artifact-one"
+							}
+						}
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "artifact-two",
+						"instructions": [
+							{
+								"do": "destroy",
+								"every": {
+									"types": [
+										"artifact"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"enchantment"
+							]
+						},
+						"if": {
+							"not": {
+								"bound": "artifact-two"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw once (3 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P}{P} — Draw cards equal to the greatest power among creatures you control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"aggregate": "max",
+							"of": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"value": "power"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter once and draw once (4 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn. ... {P}{P}{P} — Draw cards equal to the greatest power among creatures you control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"aggregate": "max",
+							"of": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"value": "power"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter twice and draw once (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Put a +1/+1 counter on a creature you control. It gains vigilance and trample until end of turn. ... {P}{P}{P} — Draw cards equal to the greatest power among creatures you control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-one"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-one",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-one",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "creature-two"
+					},
+					{
+						"do": "counters",
+						"on": "bound:creature-two",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature-two",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance",
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"aggregate": "max",
+							"of": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"value": "power"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of Gathering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destruction once and draw once (5 pawprints); during resolution accept the artifact branch for artifact or decline for enchantment",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P} — Choose artifact or enchantment. Destroy all permanents of the chosen type. ... {P}{P}{P} — Draw cards equal to the greatest power among creatures you control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "artifact-one",
+						"instructions": [
+							{
+								"do": "destroy",
+								"every": {
+									"types": [
+										"artifact"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"enchantment"
+							]
+						},
+						"if": {
+							"not": {
+								"bound": "artifact-one"
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"aggregate": "max",
+							"of": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"value": "power"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

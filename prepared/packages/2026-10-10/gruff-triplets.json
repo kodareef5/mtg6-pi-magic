@@ -1,0 +1,91 @@
+{
+	"card": "Gruff Triplets",
+	"generated": "2026-10-10",
+	"source": "898d8a2180da905de2b16b3c6c8a21bf1d6ef0eb6486e7c65dcd9542ea1caa6e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gruff Triplets",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, if it isn't a token, create two tokens that are copies of it.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"is": "this",
+					"matches": {
+						"zones": [
+							"battlefield"
+						],
+						"token": false
+					},
+					"lastKnown": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"copy": "this"
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, put a number of +1/+1 counters equal to its power on each creature you control named Gruff Triplets.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"name": "Gruff Triplets"
+							},
+							"kind": "+1/+1",
+							"amount": {
+								"power": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

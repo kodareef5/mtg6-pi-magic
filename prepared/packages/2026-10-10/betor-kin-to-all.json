@@ -1,0 +1,116 @@
+{
+	"card": "Betor, Kin to All",
+	"generated": "2026-10-10",
+	"source": "0335aac9c8cfe17dc183b853b54c12eb867e716e9642a3af166027373f1850f5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Betor, Kin to All",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, if creatures you control have total toughness 10 or greater, draw a card. Then if creatures you control have total toughness 20 or greater, untap each creature you control. Then if creatures you control have total toughness 40 or greater, each opponent loses half their life, rounded up.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"aggregate": "sum",
+						"of": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"value": "toughness"
+					},
+					"atLeast": 10
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "untap",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"if": {
+								"amount": {
+									"aggregate": "sum",
+									"of": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									},
+									"value": "toughness"
+								},
+								"atLeast": 20
+							}
+						},
+						{
+							"do": "each",
+							"players": "opponent",
+							"if": {
+								"amount": {
+									"aggregate": "sum",
+									"of": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									},
+									"value": "toughness"
+								},
+								"atLeast": 40
+							},
+							"instructions": [
+								{
+									"do": "life",
+									"who": "bound:player",
+									"amount": {
+										"negate": {
+											"half": {
+												"life": "bound:player"
+											},
+											"round": "up"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

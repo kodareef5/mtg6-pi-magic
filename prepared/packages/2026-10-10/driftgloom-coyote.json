@@ -1,0 +1,64 @@
+{
+	"card": "Driftgloom Coyote",
+	"generated": "2026-10-10",
+	"source": "e25049eadd2bcde6f9f5f5e89ae06ebaf5beb5bcea842c352eb90f6a57f0362a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Driftgloom Coyote",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, exile target creature an opponent controls until this creature leaves the battlefield. If that creature had power 2 or less, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"is": "target:0",
+								"matches": {
+									"power": {
+										"atMost": 2
+									}
+								},
+								"lastKnown": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,35 @@
+{
+	"card": "Manifest Dread",
+	"generated": "2026-10-10",
+	"source": "859e404df70893691637f5c5d2b498c443e0bbc3aa2c329d78c47de77a838f3f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Manifest Dread",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Manifest Dread",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Manifest Dread to manifest dread.",
+				"basis": "Manifest dread. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "manifest-dread",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

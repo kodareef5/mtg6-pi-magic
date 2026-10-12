@@ -1,0 +1,55 @@
+{
+	"card": "Volley Veteran",
+	"generated": "2026-10-10",
+	"source": "5c83b5d034b3eed7a072178d661e5f8690e8f858403ae9d4fe3a4ae282f2fe76",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Volley Veteran",
+		"registers": [
+			{
+				"basis": "When this creature enters, it deals damage to target creature an opponent controls equal to the number of Goblins you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"from": "this",
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"subtypes": [
+										"Goblin"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

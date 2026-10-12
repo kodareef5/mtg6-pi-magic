@@ -1,0 +1,122 @@
+{
+	"card": "Villainous Hideout",
+	"generated": "2026-10-10",
+	"source": "e25b67fff21f8526e979c3c5c140f741cd242e89bf45d9e6c2a918470a5fba18",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Villainous Hideout",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast a Villain spell or to activate an ability of a Villain source.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack",
+						"battlefield",
+						"hand",
+						"graveyard",
+						"exile",
+						"command",
+						"library",
+						"outside"
+					],
+					"subtypes": [
+						"Villain"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Villainous Hideout",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Have target Villain you control connive",
+				"basis": "{3}, {T}: Target Villain you control connives. Activate only as a sorcery. (Draw a card, then discard a card. If you discarded a nonland card, put a +1/+1 counter on that creature.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Villain"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "controller:target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "controller:target:0"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1,
+						"if": {
+							"is": "bound:discard",
+							"matches": {
+								"zones": [
+									"hand"
+								],
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							},
+							"lastKnown": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

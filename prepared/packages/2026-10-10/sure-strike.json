@@ -1,0 +1,51 @@
+{
+	"card": "Sure Strike",
+	"generated": "2026-10-10",
+	"source": "8d1efa5474335b56a65d68d61aa8635b354f0e1e52a218f8733a7e61c8103272",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sure Strike",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sure Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +3/+0 and first strike until end of turn.",
+				"basis": "Target creature gets +3/+0 and gains first strike until end of turn. (It deals combat damage before creatures without first strike.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 0,
+							"words": [
+								"first strike"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

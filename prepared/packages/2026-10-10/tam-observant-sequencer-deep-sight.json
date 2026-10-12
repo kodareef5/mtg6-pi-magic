@@ -1,0 +1,64 @@
+{
+	"card": "Tam, Observant Sequencer // Deep Sight",
+	"generated": "2026-10-10",
+	"source": "7920f8a5d2f2df3b7d10c77850edf8b356d7156df7aa5007bf2c1fbd6849f889",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tam, Observant Sequencer // Deep Sight",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Landfall — Whenever a land you control enters, Tam becomes prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "prepare",
+							"what": "this",
+							"prepared": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Tam, Observant Sequencer // Deep Sight",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Deep Sight",
+				"basis": "You draw a card and gain 1 life.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

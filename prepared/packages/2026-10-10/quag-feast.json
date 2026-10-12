@@ -1,0 +1,77 @@
+{
+	"card": "Quag Feast",
+	"generated": "2026-10-10",
+	"source": "cd4f1b84a0e9e1c1d76666de72e3e15da5d16584dbc3bc28c50ea035c461423b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Quag Feast",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Quag Feast",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Quag Feast",
+				"basis": "Choose target creature, planeswalker, or Vehicle. Mill two cards, then destroy the chosen permanent if its mana value is less than or equal to the number of cards in your graveyard.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"any": [
+								{
+									"types": [
+										"creature",
+										"planeswalker"
+									]
+								},
+								{
+									"subtypes": [
+										"Vehicle"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "destroy",
+						"what": "target:0",
+						"if": {
+							"amount": {
+								"manaValue": "target:0"
+							},
+							"atMost": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"token": false
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,63 @@
+{
+	"card": "Combustion Man",
+	"generated": "2026-10-10",
+	"source": "a7a586cfb22273a4a16862a4d5b0cbbffd0b1bdf4fc8554eba5661239b4642eb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Combustion Man",
+		"registers": [
+			{
+				"basis": "Whenever Combustion Man attacks, destroy target permanent unless its controller has Combustion Man deal damage to them equal to his power.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "controller:target:0",
+							"may": true,
+							"as": "accepted-damage",
+							"instructions": [
+								{
+									"do": "damage",
+									"from": "this",
+									"to": "controller:target:0",
+									"amount": {
+										"power": "this"
+									}
+								}
+							]
+						},
+						{
+							"do": "destroy",
+							"what": "target:0",
+							"if": {
+								"not": {
+									"bound": "accepted-damage"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

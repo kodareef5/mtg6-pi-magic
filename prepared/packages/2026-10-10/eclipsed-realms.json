@@ -1,0 +1,65 @@
+{
+	"card": "Eclipsed Realms",
+	"generated": "2026-10-10",
+	"source": "d5be3bfbdb7f8dd18e19a5c35c51391f50db9c013b7525ae094967c820fdb958",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eclipsed Realms",
+		"registers": [
+			{
+				"basis": "As this land enters, choose Elemental, Elf, Faerie, Giant, Goblin, Kithkin, Merfolk, or Treefolk.",
+				"kind": "enters",
+				"choose": {
+					"as": "creatureType",
+					"options": [
+						"Elemental",
+						"Elf",
+						"Faerie",
+						"Giant",
+						"Goblin",
+						"Kithkin",
+						"Merfolk",
+						"Treefolk"
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast a spell of the chosen type or activate an ability of a source of the chosen type.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack",
+						"battlefield",
+						"hand",
+						"graveyard",
+						"exile",
+						"command",
+						"library",
+						"outside"
+					],
+					"subtypes": {
+						"chosen": "creatureType"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

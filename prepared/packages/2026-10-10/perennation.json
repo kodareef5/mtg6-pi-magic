@@ -1,0 +1,59 @@
+{
+	"card": "Perennation",
+	"generated": "2026-10-10",
+	"source": "d79d9bea3f267a234ff4da4f3f67232b07d337177c1b2ca3b237816153e13db9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Perennation",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Perennation",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Perennation",
+				"basis": "Return target permanent card from your graveyard to the battlefield with a hexproof counter and an indestructible counter on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"counters": {
+							"hexproof": 1,
+							"indestructible": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,89 @@
+{
+	"card": "Changeling Wayfinder",
+	"generated": "2026-10-10",
+	"source": "ed242d4c8746ef3c89a29ed4eb70ed4aaa5b0a2774a23c0f5e3a6935b83348a5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Changeling Wayfinder",
+		"registers": [
+			{
+				"basis": "Changeling (This card is every creature type.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"subtypes": {
+						"allCreatureTypes": true
+					}
+				}
+			},
+			{
+				"basis": "When this creature enters, you may search your library for a basic land card, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"supertypes": [
+											"basic"
+										],
+										"types": [
+											"land"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "land"
+								},
+								{
+									"do": "move",
+									"what": "bound:land",
+									"to": "hand",
+									"reason": "resolve"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

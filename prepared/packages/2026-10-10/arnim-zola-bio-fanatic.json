@@ -1,0 +1,70 @@
+{
+	"card": "Arnim Zola, Bio-Fanatic",
+	"generated": "2026-10-10",
+	"source": "29dc6688141210ddac1384e8103233107741e13e474d3a4c97691c6efd92d7bf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Arnim Zola, Bio-Fanatic",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Create a tapped Villain token",
+				"basis": "{3}, {T}: Create a tapped 2/1 black Villain creature token with menace. Activate only if there are two or more creature cards in your graveyard. (It can't be blocked except by two or more creatures.)",
+				"source": {
+					"card": "Arnim Zola, Bio-Fanatic",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"tap": true
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						}
+					},
+					"atLeast": 2
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"tapped": true,
+						"spec": {
+							"name": "Villain Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Villain"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 2,
+							"toughness": 1,
+							"words": [
+								"menace"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

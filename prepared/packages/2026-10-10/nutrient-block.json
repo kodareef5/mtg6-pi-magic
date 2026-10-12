@@ -1,0 +1,84 @@
+{
+	"card": "Nutrient Block",
+	"generated": "2026-10-10",
+	"source": "c060e6d70abf4d749bde04e11f3b4d775095aaa823b9bc4a40b996d88b679ec2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nutrient Block",
+		"registers": [
+			{
+				"basis": "Indestructible (Effects that say \"destroy\" don't destroy this artifact.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"indestructible"
+					]
+				}
+			},
+			{
+				"basis": "When this artifact is put into a graveyard from the battlefield, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Nutrient Block",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Nutrient Block to gain 3 life",
+				"basis": "{2}, {T}, Sacrifice this artifact: You gain 3 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

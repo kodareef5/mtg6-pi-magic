@@ -1,0 +1,118 @@
+{
+	"card": "Yuna, Hope of Spira",
+	"generated": "2026-10-10",
+	"source": "49ca690c6c0803e345971df07295e23a009f8b81cc8a319829eeeb62a9b65044",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Yuna, Hope of Spira",
+		"registers": [
+			{
+				"basis": "During your turn, Yuna and enchantment creatures you control have trample, lifelink, and ward {2}.",
+				"kind": "continuous",
+				"if": {
+					"turn": "self"
+				},
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"any": [
+						{
+							"is": "this"
+						},
+						{
+							"controller": "you",
+							"all": [
+								{
+									"types": [
+										"enchantment"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									]
+								}
+							]
+						}
+					]
+				},
+				"change": {
+					"words": [
+						"trample",
+						"lifelink"
+					],
+					"registers": [
+						{
+							"basis": "During your turn, Yuna and enchantment creatures you control have trample, lifelink, and ward {2}.",
+							"kind": "watch",
+							"event": {
+								"on": "targeted",
+								"of": {
+									"is": "this"
+								},
+								"by": "opponent"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "counter",
+										"what": "event:source",
+										"unless": {
+											"who": "event:player",
+											"pays": {
+												"mana": "{2}"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, return up to one target enchantment card from your graveyard to the battlefield with a finality counter on it. (If a permanent with a finality counter on it would be put into a graveyard from the battlefield, exile it instead.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"enchantment"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"counters": {
+								"finality": 1
+							},
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

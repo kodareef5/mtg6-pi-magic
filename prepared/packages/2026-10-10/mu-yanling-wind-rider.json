@@ -1,0 +1,125 @@
+{
+	"card": "Mu Yanling, Wind Rider",
+	"generated": "2026-10-10",
+	"source": "7c58a1b24b6b036104f5940c0b0c4b088fdf88aa4036da808ca42179f7b3093b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mu Yanling, Wind Rider",
+		"registers": [
+			{
+				"basis": "When Mu Yanling enters, create a 3/2 colorless Vehicle artifact token with crew 1.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Vehicle Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Vehicle"
+								],
+								"colors": [],
+								"power": 3,
+								"toughness": 2,
+								"registers": [
+									{
+										"basis": "When Mu Yanling enters, create a 3/2 colorless Vehicle artifact token with crew 1.",
+										"kind": "activated",
+										"cost": {
+											"tap": {
+												"choose": {
+													"types": [
+														"creature"
+													],
+													"controller": "you",
+													"other": true
+												},
+												"totalPower": 1
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "this",
+													"until": "end-of-turn",
+													"change": {
+														"types": {
+															"add": [
+																"artifact",
+																"creature"
+															]
+														}
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vehicles you control have flying.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"subtypes": [
+						"Vehicle"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever one or more creatures you control with flying deal combat damage to a player, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"words": [
+							"flying"
+						]
+					},
+					"player": true,
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

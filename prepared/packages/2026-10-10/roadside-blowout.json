@@ -1,0 +1,95 @@
+{
+	"card": "Roadside Blowout",
+	"generated": "2026-10-10",
+	"source": "26d5fa0906dbc8390ba000a39680008591087c24ff973089c42900a2f074cc6f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Roadside Blowout",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Roadside Blowout",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return an opposing creature or Vehicle and draw a card, applying the mana-value-1 discount.",
+				"basis": "This spell costs {2} less to cast if it targets a permanent with mana value 1. ... Return target creature or Vehicle an opponent controls to its owner's hand. ... Draw a card.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"sum": [
+							{
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"is": "target:0",
+									"manaValue": {
+										"atLeast": 1,
+										"atMost": 1
+									}
+								}
+							},
+							{
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"is": "target:0",
+									"manaValue": {
+										"atLeast": 1,
+										"atMost": 1
+									}
+								}
+							}
+						]
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "opponent",
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Vehicle"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

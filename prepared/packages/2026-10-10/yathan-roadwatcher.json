@@ -1,0 +1,72 @@
+{
+	"card": "Yathan Roadwatcher",
+	"generated": "2026-10-10",
+	"source": "1fd435fab045161acb3fb66116990f5c85ccc004102186cf62625b2b9f8e21d5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Yathan Roadwatcher",
+		"registers": [
+			{
+				"basis": "When this creature enters, if you cast it, mill four cards. When you do, return target creature card with mana value 3 or less from your graveyard to the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 4,
+							"as": "milled"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "milled"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"creature"
+											],
+											"manaValue": {
+												"atMost": 3
+											}
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "battlefield",
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

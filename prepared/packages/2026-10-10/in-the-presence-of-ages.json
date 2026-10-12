@@ -1,0 +1,102 @@
+{
+	"card": "In the Presence of Ages",
+	"generated": "2026-10-10",
+	"source": "846e1710c890648c083e7d82759c1bc1e95718b10681678139b3670e16f4a28d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "In the Presence of Ages",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast In the Presence of Ages",
+				"basis": "Reveal the top four cards of your library. You may put a creature card and/or a land card from among them into your hand. Put the rest into your graveyard.",
+				"source": {
+					"card": "In the Presence of Ages",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "reveal",
+						"what": {
+							"top": 4,
+							"of": "you"
+						},
+						"as": "revealed"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:revealed",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "creature"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:revealed",
+							"types": [
+								"land"
+							],
+							"not": {
+								"is": "bound:creature"
+							}
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"any": [
+								{
+									"is": "bound:creature"
+								},
+								{
+									"is": "bound:land"
+								}
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:revealed"
+						},
+						"to": "graveyard",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

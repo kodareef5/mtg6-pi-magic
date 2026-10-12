@@ -1,0 +1,71 @@
+{
+	"card": "Bloombrute",
+	"generated": "2026-10-10",
+	"source": "e93c6f5311260bdf5f0df7dca71803d693462d6016a21d11eabd798f873eb101",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bloombrute",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, draw a card. This ability triggers only once each turn.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bloombrute",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant target creature trample and lifelink until end of turn",
+				"basis": "{4}{G}{W}: Target creature gains trample and lifelink until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{G}{W}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample",
+								"lifelink"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

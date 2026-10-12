@@ -1,0 +1,233 @@
+{
+	"card": "North Pole Patrol",
+	"generated": "2026-10-10",
+	"source": "dbcaafb7f5ab2c9e0947ea56317708d8ae6bb36802aee6893d1d4ee1576842b3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "North Pole Patrol",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "North Pole Patrol",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Untap another permanent you control",
+				"basis": "{T}: Untap another target permanent you control.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "untap",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "North Pole Patrol",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Waterbend using three mana and no helper taps",
+				"basis": "Waterbend {3}, {T}: Tap target creature an opponent controls. (While paying a waterbend cost, you can tap your artifacts and creatures to help. Each one pays for {1}.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "North Pole Patrol",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Waterbend using two mana and one helper tap",
+				"basis": "Waterbend {3}, {T}: Tap target creature an opponent controls. (While paying a waterbend cost, you can tap your artifacts and creatures to help. Each one pays for {1}.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": {
+						"source": true,
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"tapped": false,
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "North Pole Patrol",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Waterbend using one mana and two helper taps",
+				"basis": "Waterbend {3}, {T}: Tap target creature an opponent controls. (While paying a waterbend cost, you can tap your artifacts and creatures to help. Each one pays for {1}.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": {
+						"source": true,
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"tapped": false,
+							"other": true
+						},
+						"count": 2
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "North Pole Patrol",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Waterbend using no mana and three helper taps",
+				"basis": "Waterbend {3}, {T}: Tap target creature an opponent controls. (While paying a waterbend cost, you can tap your artifacts and creatures to help. Each one pays for {1}.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{0}",
+					"tap": {
+						"source": true,
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"tapped": false,
+							"other": true
+						},
+						"count": 3
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

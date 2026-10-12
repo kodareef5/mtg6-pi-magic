@@ -1,0 +1,73 @@
+{
+	"card": "Psychic Whorl",
+	"generated": "2026-10-10",
+	"source": "7bd33278850d50cb5b6cd22986161e7df208b80d6386a90144ef2f19cb61d530",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Psychic Whorl",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Psychic Whorl",
+				"basis": "Target opponent discards two cards. Then if you control a Rat, surveil 2. (Look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"source": {
+					"card": "Psychic Whorl",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "target:0"
+						},
+						"count": 2,
+						"as": "discarded"
+					},
+					{
+						"do": "move",
+						"what": "bound:discarded",
+						"to": "graveyard",
+						"reason": "discard"
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"subtypes": [
+										"Rat"
+									]
+								}
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

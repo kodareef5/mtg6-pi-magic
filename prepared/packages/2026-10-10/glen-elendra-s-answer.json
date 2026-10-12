@@ -1,0 +1,83 @@
+{
+	"card": "Glen Elendra's Answer",
+	"generated": "2026-10-10",
+	"source": "2d84e323f0e3d79312e6d157761d1ef44e613e502fc95994d843bd41bbe32326",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Glen Elendra's Answer",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Glen Elendra's Answer",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Glen Elendra's Answer",
+				"basis": "This spell can't be countered. ... Counter all spells your opponents control and all abilities your opponents control. Create a 1/1 blue and black Faerie creature token with flying for each spell and ability countered this way.",
+				"timing": "spell",
+				"words": [
+					"can't be countered"
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"stack"
+							],
+							"controller": "opponent"
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"stack"
+								],
+								"controller": "opponent"
+							}
+						},
+						"as": "opposing-stack"
+					},
+					{
+						"do": "counter",
+						"what": "bound:opposing-stack",
+						"as": "countered"
+					},
+					{
+						"do": "token",
+						"count": {
+							"bound": "countered"
+						},
+						"spec": {
+							"name": "Faerie Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Faerie"
+							],
+							"colors": [
+								"U",
+								"B"
+							],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

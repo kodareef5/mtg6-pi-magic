@@ -33,7 +33,7 @@
 					],
 					"controller": "self"
 				},
-				"claim": "Give this creature +1/+1 per permanent card in your graveyard until end of turn",
+				"claim": "Increase power and toughness for each permanent card in your graveyard",
 				"basis": "{8}: Until end of turn, this creature gets +1/+1 for each permanent card in your graveyard.",
 				"timing": "stack",
 				"cost": {
@@ -51,6 +51,7 @@
 										"graveyard"
 									],
 									"owner": "you",
+									"token": false,
 									"types": [
 										"artifact",
 										"battle",
@@ -67,6 +68,7 @@
 										"graveyard"
 									],
 									"owner": "you",
+									"token": false,
 									"types": [
 										"artifact",
 										"battle",

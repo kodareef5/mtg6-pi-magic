@@ -1,0 +1,86 @@
+{
+	"card": "Sphinx of the Final Word",
+	"generated": "2026-10-10",
+	"source": "677b46143216106d02451b98ef0870cadd42800cd3e5b03f732994a352370d6c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sphinx of the Final Word",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Hexproof (This creature can't be the target of spells or abilities your opponents control.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"hexproof"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Instant and sorcery spells you control can't be countered.",
+				"affects": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"instant",
+						"sorcery"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"can't be countered"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sphinx of the Final Word",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Sphinx of the Final Word",
+				"basis": "This spell can't be countered.",
+				"timing": "spell",
+				"words": [
+					"can't be countered"
+				],
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

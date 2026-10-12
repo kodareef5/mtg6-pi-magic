@@ -1,0 +1,86 @@
+{
+	"card": "Hulkling, Burgeoning Bruiser",
+	"generated": "2026-10-10",
+	"source": "ed6488e2e9596aa8689a39fbc199c3f983bf2e95f2d75fe959d6216b6c0a5fa7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hulkling, Burgeoning Bruiser",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another creature you control enters, if it has greater power or toughness than Hulkling, put a +1/+1 counter on Hulkling.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"if": {
+					"any": [
+						{
+							"amount": {
+								"power": "event:object"
+							},
+							"atLeast": {
+								"sum": [
+									{
+										"power": "this"
+									},
+									1
+								]
+							}
+						},
+						{
+							"amount": {
+								"toughness": "event:object"
+							},
+							"atLeast": {
+								"sum": [
+									{
+										"toughness": "this"
+									},
+									1
+								]
+							}
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

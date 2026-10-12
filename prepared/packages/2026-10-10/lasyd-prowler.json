@@ -1,0 +1,91 @@
+{
+	"card": "Lasyd Prowler",
+	"generated": "2026-10-10",
+	"source": "d950159730bb4fc3adb7b16524dd406a90e2d81a8b295915b04ff455040085b3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lasyd Prowler",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may mill cards equal to the number of lands you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"land"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lasyd Prowler",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Renew Lasyd Prowler to put counters on target creature",
+				"basis": "Renew — {1}{G}, Exile this card from your graveyard: Put X +1/+1 counters on target creature, where X is the number of land cards in your graveyard. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{1}{G}",
+					"exile": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": {
+							"count": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"land"
+								],
+								"token": false
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

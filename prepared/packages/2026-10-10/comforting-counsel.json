@@ -1,0 +1,57 @@
+{
+	"card": "Comforting Counsel",
+	"generated": "2026-10-10",
+	"source": "997a77587aa217171effb3c9cd2f5300c912255d022c4609887f47c8851655ed",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Comforting Counsel",
+		"registers": [
+			{
+				"basis": "Whenever you gain life, put a growth counter on this enchantment.",
+				"kind": "watch",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "growth",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "As long as there are five or more growth counters on this enchantment, creatures you control get +3/+3.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"if": {
+					"amount": {
+						"counters": "growth",
+						"on": "this"
+					},
+					"atLeast": 5
+				},
+				"change": {
+					"power": 3,
+					"toughness": 3
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

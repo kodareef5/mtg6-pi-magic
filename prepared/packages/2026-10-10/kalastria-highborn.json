@@ -1,0 +1,74 @@
+{
+	"card": "Kalastria Highborn",
+	"generated": "2026-10-10",
+	"source": "a323653031da851f5daee818da1ea07efdcdb5a91939bb696d279ea2ade3e823",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kalastria Highborn",
+		"registers": [
+			{
+				"basis": "Whenever this creature or another Vampire you control dies, you may pay {B}. If you do, target player loses 2 life and you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Vampire"
+								],
+								"controller": "you",
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{B}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "life",
+							"who": "target:0",
+							"amount": -2,
+							"if": {
+								"bound": "paid"
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

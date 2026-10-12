@@ -1,0 +1,73 @@
+{
+	"card": "Nettle Guard",
+	"generated": "2026-10-10",
+	"source": "5881268001d50fd9cd9ac8d7bb13152325be8c50debeaee8416e0ffe52e4bcf1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nettle Guard",
+		"registers": [
+			{
+				"basis": "Valiant — Whenever this creature becomes the target of a spell or ability you control for the first time each turn, it gets +0/+2 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 0,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Nettle Guard",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Nettle Guard to destroy target artifact or enchantment.",
+				"basis": "{1}, Sacrifice this creature: Destroy target artifact or enchantment.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

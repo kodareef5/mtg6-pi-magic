@@ -1,0 +1,73 @@
+{
+	"card": "Manhole Missile",
+	"generated": "2026-10-10",
+	"source": "3a1006b700baa88363bbb9ae35a5abd42004a4e6996ccd3b9b975d0bd4700de4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Manhole Missile",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Manhole Missile",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Manhole Missile",
+				"basis": "Manhole Missile deals 3 damage to target creature. You may put a card from your hand on the bottom of your library. If you do, draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"may": true,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve",
+						"as": "bottomed"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"bound": "bottomed"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

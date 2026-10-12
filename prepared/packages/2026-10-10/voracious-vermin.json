@@ -1,0 +1,75 @@
+{
+	"card": "Voracious Vermin",
+	"generated": "2026-10-10",
+	"source": "e7f2f8624926d4b92f9bf80ef903b3b40cd63c6a85b941da7f0f4a866e569362",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Voracious Vermin",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 1/1 black Rat creature token with \"This token can't block.\"",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Rat Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Rat"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"can't block"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever another creature you control dies, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

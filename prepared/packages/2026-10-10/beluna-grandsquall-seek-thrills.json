@@ -1,0 +1,94 @@
+{
+	"card": "Beluna Grandsquall // Seek Thrills",
+	"generated": "2026-10-10",
+	"source": "db24adf53fa94a089e22753b0c8f60bcba8739e79a4f5f648c62394b98f5399b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beluna Grandsquall // Seek Thrills",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Permanent spells you cast that have an Adventure cost {1} less to cast.",
+				"kind": "cost",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"types": [
+						"artifact",
+						"battle",
+						"creature",
+						"enchantment",
+						"planeswalker"
+					],
+					"hasAdventure": true
+				},
+				"reduce": 1
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Beluna Grandsquall // Seek Thrills",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Seek Thrills",
+				"basis": "Mill seven cards. Then put all cards that have an Adventure from among the milled cards into your hand.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 7,
+						"as": "milled"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield",
+								"graveyard",
+								"stack",
+								"exile",
+								"command",
+								"outside"
+							],
+							"is": "bound:milled",
+							"hasAdventure": true
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,68 @@
+{
+	"card": "Corroding Dragonstorm",
+	"generated": "2026-10-10",
+	"source": "92e9b8bda006121849bbd9182ce6eeb3421cdaee4ca7671bec2026b5ba2043f4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Corroding Dragonstorm",
+		"registers": [
+			{
+				"basis": "When this enchantment enters, each opponent loses 2 life and you gain 2 life. Surveil 2. (Look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						},
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			},
+			{
+				"basis": "When a Dragon you control enters, return this enchantment to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Dragon"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

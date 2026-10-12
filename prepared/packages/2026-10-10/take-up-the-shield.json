@@ -1,0 +1,57 @@
+{
+	"card": "Take Up the Shield",
+	"generated": "2026-10-10",
+	"source": "f1bd4d0ad48042b18e659910178657baa970519a84b9f4bd8c5c2a15a424deba",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Take Up the Shield",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Take Up the Shield",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put a +1/+1 counter on target creature and grant lifelink and indestructible until end of turn.",
+				"basis": "Put a +1/+1 counter on target creature. It gains lifelink and indestructible until end of turn. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"lifelink",
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

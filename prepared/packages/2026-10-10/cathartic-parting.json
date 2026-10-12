@@ -1,0 +1,82 @@
+{
+	"card": "Cathartic Parting",
+	"generated": "2026-10-10",
+	"source": "aaadc9689cfc309a9d895e0c3977b556ba43d01a744ebff59f0146a34532e972",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cathartic Parting",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cathartic Parting",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cathartic Parting",
+				"basis": "The owner of target artifact or enchantment an opponent controls shuffles it into their library. You may shuffle up to four target cards from your graveyard into your library.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"enchantment"
+							],
+							"controller": "opponent"
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						},
+						"count": 4,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "owner:target:0"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:1",
+								"to": "library",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "you"
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

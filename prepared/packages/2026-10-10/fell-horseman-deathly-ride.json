@@ -1,0 +1,74 @@
+{
+	"card": "Fell Horseman // Deathly Ride",
+	"generated": "2026-10-10",
+	"source": "867e3098bf40893fda3cea9432ab8312aead0e65905e9fa7a364ee0cf646147c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fell Horseman // Deathly Ride",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When this creature dies, put it on the bottom of its owner's library.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "library",
+							"position": "bottom",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Fell Horseman // Deathly Ride",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Deathly Ride",
+				"basis": "Return target creature card from your graveyard to your hand. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

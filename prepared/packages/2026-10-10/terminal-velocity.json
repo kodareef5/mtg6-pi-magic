@@ -1,0 +1,117 @@
+{
+	"card": "Terminal Velocity",
+	"generated": "2026-10-10",
+	"source": "76c9605269906615f02adc499d5e553a1e3becf6e5c2a10c042acc61286df009",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Terminal Velocity",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Terminal Velocity",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Terminal Velocity",
+				"basis": "You may put an artifact or creature card from your hand onto the battlefield. That permanent gains haste, \"When this permanent leaves the battlefield, it deals damage equal to its mana value to each creature,\" and \"At the beginning of your end step, sacrifice this permanent.\"",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "card"
+					},
+					{
+						"do": "move",
+						"what": "bound:card",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"as": "permanent"
+					},
+					{
+						"do": "modify",
+						"what": "bound:permanent",
+						"until": "indefinite",
+						"if": {
+							"bound": "permanent"
+						},
+						"change": {
+							"words": [
+								"haste"
+							],
+							"registers": [
+								{
+									"basis": "You may put an artifact or creature card from your hand onto the battlefield. That permanent gains haste, \"When this permanent leaves the battlefield, it deals damage equal to its mana value to each creature,\" and \"At the beginning of your end step, sacrifice this permanent.\"",
+									"kind": "watch",
+									"event": {
+										"on": "leaves",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "damage",
+												"every": {
+													"types": [
+														"creature"
+													]
+												},
+												"amount": {
+													"manaValue": "this"
+												},
+												"from": "this"
+											}
+										]
+									}
+								},
+								{
+									"basis": "You may put an artifact or creature card from your hand onto the battlefield. That permanent gains haste, \"When this permanent leaves the battlefield, it deals damage equal to its mana value to each creature,\" and \"At the beginning of your end step, sacrifice this permanent.\"",
+									"kind": "watch",
+									"event": {
+										"on": "step",
+										"step": "end",
+										"whose": "you"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": "this",
+												"to": "graveyard",
+												"reason": "sacrifice"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

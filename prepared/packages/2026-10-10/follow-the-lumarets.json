@@ -1,0 +1,124 @@
+{
+	"card": "Follow the Lumarets",
+	"generated": "2026-10-10",
+	"source": "04498ad35c309c83a69d53c8d30bce31f9a3e7d40fda598743fc2bcf370ef849",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Follow the Lumarets",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Follow the Lumarets",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Follow the Lumarets, optionally taking one eligible card or instead two if you gained life this turn",
+				"basis": "Infusion — Look at the top four cards of your library. You may reveal a creature or land card from among them and put it into your hand. If you gained life this turn, you may instead reveal two creature and/or land cards from among them and put them into your hand. Put the rest on the bottom of your library in a random order.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 4,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"if": {
+							"amount": {
+								"history": "life-gained",
+								"by": "you"
+							},
+							"atLeast": 1
+						},
+						"as": "used-infusion",
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"is": "bound:looked",
+									"types": [
+										"creature",
+										"land"
+									]
+								},
+								"count": 2,
+								"reveal": true,
+								"as": "infused"
+							},
+							{
+								"do": "move",
+								"what": "bound:infused",
+								"to": "hand",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"if": {
+							"not": {
+								"bound": "used-infusion"
+							}
+						},
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"is": "bound:looked",
+									"types": [
+										"creature",
+										"land"
+									]
+								},
+								"count": 1,
+								"reveal": true,
+								"as": "normal"
+							},
+							{
+								"do": "move",
+								"what": "bound:normal",
+								"to": "hand",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

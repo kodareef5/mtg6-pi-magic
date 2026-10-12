@@ -1,0 +1,72 @@
+{
+	"card": "Garrison Excavator",
+	"generated": "2026-10-10",
+	"source": "74f7c67788b6491bad7b9c081360bfbfd892b392dda67beb8a7c8ba70ec7feb7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Garrison Excavator",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more cards leave your graveyard, create a 2/2 red and white Spirit creature token.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"token": false
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Spirit Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spirit"
+								],
+								"colors": [
+									"R",
+									"W"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

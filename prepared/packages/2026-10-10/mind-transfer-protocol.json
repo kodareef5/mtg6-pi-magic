@@ -1,0 +1,62 @@
+{
+	"card": "Mind Transfer Protocol",
+	"generated": "2026-10-10",
+	"source": "87d4256283c373025b024c5c6b6ff3d784348a4dcee8fbb6a12c10a53391b6f7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mind Transfer Protocol",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mind Transfer Protocol",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mind Transfer Protocol",
+				"basis": "Until end of turn, target artifact or creature becomes an artifact creature with base power and toughness 4/5. ... Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							},
+							"base": {
+								"power": 4,
+								"toughness": 5
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

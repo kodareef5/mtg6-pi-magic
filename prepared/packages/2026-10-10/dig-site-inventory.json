@@ -1,0 +1,73 @@
+{
+	"card": "Dig Site Inventory",
+	"generated": "2026-10-10",
+	"source": "5b1d2c68de15a0e321e23cdd919f57ecc11cdb88cc4b73a6dd01a139103c35cf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dig Site Inventory",
+		"registers": [
+			{
+				"basis": "Flashback {W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"kind": "permit",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{W}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dig Site Inventory",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dig Site Inventory normally or using its flashback permission",
+				"basis": "Put a +1/+1 counter on target creature you control. It gains vigilance until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

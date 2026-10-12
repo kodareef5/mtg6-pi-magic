@@ -1,0 +1,151 @@
+{
+	"card": "Goblin Plate Mail",
+	"generated": "2026-10-10",
+	"source": "c657e07f93b09617bb252028d33b65a0eab61d842acfdf4680d772869739318e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goblin Plate Mail",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this Equipment enters, amass Goblins 1, then attach this Equipment to the amassed Army. (To amass Goblins 1, put a +1/+1 counter on an Army you control. It's also a Goblin. If you don't control an Army, create a 0/0 black Goblin Army creature token first.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Goblin Army Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Goblin",
+									"Army"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 0,
+								"toughness": 0
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Army"
+										],
+										"controller": "you"
+									}
+								},
+								"atMost": 0
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Army"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "army"
+						},
+						{
+							"do": "counters",
+							"on": "bound:army",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "modify",
+							"what": "bound:army",
+							"until": "indefinite",
+							"change": {
+								"subtypes": {
+									"add": [
+										"Goblin"
+									],
+									"of": "creature"
+								}
+							}
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:army"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +1/+0 and has menace.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 1,
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Goblin Plate Mail",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip a creature you control",
+				"basis": "Equip {4}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

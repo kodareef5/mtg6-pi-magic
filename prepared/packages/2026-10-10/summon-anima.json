@@ -1,0 +1,87 @@
+{
+	"card": "Summon: Anima",
+	"generated": "2026-10-10",
+	"source": "bb93dc13d1e51b125f393af57ecb65088c0a8094a20a5c6379c54f04ffe9c96d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: Anima",
+		"registers": [
+			{
+				"kind": "chapter",
+				"basis": "I, II, III — Pain — You draw a card and you lose 1 life.",
+				"numbers": [
+					1,
+					2,
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"basis": "IV — Oblivion — Each opponent sacrifices a creature of their choice and loses 3 life.",
+				"numbers": [
+					4
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": 1,
+							"actions": [
+								{
+									"sacrifice": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										]
+									}
+								}
+							]
+						},
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -3
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Menace",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

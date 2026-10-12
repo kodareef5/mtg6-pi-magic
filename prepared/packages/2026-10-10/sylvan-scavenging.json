@@ -1,0 +1,84 @@
+{
+	"card": "Sylvan Scavenging",
+	"generated": "2026-10-10",
+	"source": "70c3696a829327cef836a967c01670e4b987cee8acebf7f7dcfa282eca06f140",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sylvan Scavenging",
+		"registers": [
+			{
+				"basis": "At the beginning of your end step, choose one —\n• Put a +1/+1 counter on target creature you control.\n• Create a 3/3 green Raccoon creature token if you control a creature with power 4 or greater.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "target:0",
+									"kind": "+1/+1",
+									"amount": 1
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Raccoon Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Raccoon"
+										],
+										"colors": [
+											"G"
+										],
+										"power": 3,
+										"toughness": 3
+									},
+									"if": {
+										"amount": {
+											"count": {
+												"types": [
+													"creature"
+												],
+												"controller": "you",
+												"power": {
+													"atLeast": 4
+												}
+											}
+										},
+										"atLeast": 1
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

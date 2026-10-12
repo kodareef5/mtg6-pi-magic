@@ -1,0 +1,61 @@
+{
+	"card": "Ultimecia, Temporal Threat",
+	"generated": "2026-10-10",
+	"source": "f61fba94d0fc867a3050a5bea073a48c89805ad8f1d789968e0ce533d10ca1dd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ultimecia, Temporal Threat",
+		"registers": [
+			{
+				"basis": "When Ultimecia enters, tap all creatures your opponents control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "tap",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a creature you control deals combat damage to a player, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

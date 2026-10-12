@@ -1,0 +1,81 @@
+{
+	"card": "You're Not Alone",
+	"generated": "2026-10-10",
+	"source": "7a22bf5d950c71fc3550eee83f297d013b3f9d9a49eeb061c1b46fb83e3c8cfd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "You're Not Alone",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "You're Not Alone",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast You're Not Alone",
+				"basis": "Target creature gets +2/+2 until end of turn. If you control three or more creatures, it gets +4/+4 until end of turn instead.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"amount": {
+								"count": {
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 3
+						},
+						"as": "enhanced",
+						"instructions": [
+							{
+								"do": "modify",
+								"what": "target:0",
+								"until": "end-of-turn",
+								"change": {
+									"power": 4,
+									"toughness": 4
+								}
+							}
+						]
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						},
+						"if": {
+							"not": {
+								"bound": "enhanced"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

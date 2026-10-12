@@ -1,0 +1,84 @@
+{
+	"card": "Ultron, Artificial Malevolence",
+	"generated": "2026-10-10",
+	"source": "1688a9b4cf0b18cd9a486c5aed961c4b267716f99306b58364570bc5fe31c7fc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ultron, Artificial Malevolence",
+		"registers": [
+			{
+				"basis": "Whenever another nontoken artifact you control enters, you may pay {2}. If you do, create a token that's a copy of it. If the token isn't a creature, it becomes a 2/2 Robot Villain creature in addition to its other types.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact"
+						],
+						"controller": "you",
+						"other": true,
+						"token": false
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{2}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"copy": "event:object",
+							"if": {
+								"bound": "paid"
+							},
+							"as": "copy"
+						},
+						{
+							"do": "modify",
+							"what": "bound:copy",
+							"until": "indefinite",
+							"if": {
+								"is": "bound:copy",
+								"matches": {
+									"not": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							},
+							"change": {
+								"types": {
+									"add": [
+										"creature"
+									]
+								},
+								"subtypes": {
+									"add": [
+										"Robot",
+										"Villain"
+									]
+								},
+								"base": {
+									"power": 2,
+									"toughness": 2
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

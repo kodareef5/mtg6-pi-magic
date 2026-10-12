@@ -1,0 +1,68 @@
+{
+	"card": "Unflinching Courage",
+	"generated": "2026-10-10",
+	"source": "49bd7f48563002d50008b70c518883e68bbf41c344a0ab219d73cf08ad2748f1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unflinching Courage",
+		"registers": [
+			{
+				"basis": "Enchanted creature gets +2/+2 and has trample and lifelink. (Damage dealt by the creature also causes its controller to gain that much life.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2,
+					"words": [
+						"trample",
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unflinching Courage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Unflinching Courage enchanting target creature",
+				"basis": "Enchant creature",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

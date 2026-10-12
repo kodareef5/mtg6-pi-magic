@@ -1,0 +1,85 @@
+{
+	"card": "Feed the Cauldron",
+	"generated": "2026-10-10",
+	"source": "3ec651eb899bfce29c2f0e3f2da79ab02257d290730f78ceba71986ed0417f1a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Feed the Cauldron",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Feed the Cauldron",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Feed the Cauldron",
+				"basis": "Destroy target creature with mana value 3 or less. If it's your turn, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"turn": "self"
+						},
+						"spec": {
+							"name": "Food Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Food"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+									"cost": {
+										"mana": "{2}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "life",
+												"who": "you",
+												"amount": 3
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

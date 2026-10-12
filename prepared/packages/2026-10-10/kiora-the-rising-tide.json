@@ -1,0 +1,101 @@
+{
+	"card": "Kiora, the Rising Tide",
+	"generated": "2026-10-10",
+	"source": "623528aa9ad6451bed72c8cc8bda28c8d97dde5f897ad43096390432df6e6a74",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kiora, the Rising Tide",
+		"registers": [
+			{
+				"basis": "When Kiora enters, draw two cards, then discard two cards.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 2,
+							"as": "discards"
+						},
+						{
+							"do": "move",
+							"what": "bound:discards",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Threshold — Whenever Kiora attacks, if there are seven or more cards in your graveyard, you may create Scion of the Deep, a legendary 8/8 blue Octopus creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 7
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Scion of the Deep",
+								"types": [
+									"creature"
+								],
+								"supertypes": [
+									"legendary"
+								],
+								"subtypes": [
+									"Octopus"
+								],
+								"colors": [
+									"U"
+								],
+								"power": 8,
+								"toughness": 8
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

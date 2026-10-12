@@ -1,0 +1,136 @@
+{
+	"card": "Berta, Wise Extrapolator",
+	"generated": "2026-10-10",
+	"source": "2749fe6005f5972784687b0338ce2e0446f0dad5c0f4a7bfe028211245b75cd0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Berta, Wise Extrapolator",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Increment (Whenever you cast a spell, if the amount of mana you spent is greater than this creature's power or toughness, put a +1/+1 counter on this creature.)",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						]
+					}
+				},
+				"if": {
+					"any": [
+						{
+							"amount": {
+								"manaSpent": "event:object"
+							},
+							"atLeast": {
+								"sum": [
+									{
+										"power": "this"
+									},
+									1
+								]
+							}
+						},
+						{
+							"amount": {
+								"manaSpent": "event:object"
+							},
+							"atLeast": {
+								"sum": [
+									{
+										"toughness": "this"
+									},
+									1
+								]
+							}
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more +1/+1 counters are put on Berta, add one mana of any color.",
+				"event": {
+					"on": "counters",
+					"counter": "+1/+1",
+					"of": {
+						"is": "this"
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"any": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Berta, Wise Extrapolator",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a Fractal with X +1/+1 counters",
+				"basis": "{X}, {T}: Create a 0/0 green and blue Fractal creature token and put X +1/+1 counters on it.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{X}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Fractal Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Fractal"
+							],
+							"colors": [
+								"G",
+								"U"
+							],
+							"power": 0,
+							"toughness": 0
+						},
+						"as": "fractal"
+					},
+					{
+						"do": "counters",
+						"on": "bound:fractal",
+						"kind": "+1/+1",
+						"amount": {
+							"x": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

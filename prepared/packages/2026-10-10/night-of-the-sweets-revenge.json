@@ -1,0 +1,135 @@
+{
+	"card": "Night of the Sweets' Revenge",
+	"generated": "2026-10-10",
+	"source": "cfdb4b3077aae4a46ddfa897c740167ba680cabdf191f16465770cdeba3b5b27",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Night of the Sweets' Revenge",
+		"registers": [
+			{
+				"basis": "When this enchantment enters, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"kind": "activated",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Foods you control have \"{T}: Add {G}.\"",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Food"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Foods you control have \"{T}: Add {G}.\"",
+							"kind": "mana",
+							"cost": {
+								"tap": true
+							},
+							"colors": [
+								"G"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Night of the Sweets' Revenge",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice this enchantment to boost your creatures by the number of Foods you control at resolution",
+				"basis": "{5}{G}{G}, Sacrifice this enchantment: Creatures you control get +X/+X until end of turn, where X is the number of Foods you control. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{5}{G}{G}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"count": {
+									"subtypes": [
+										"Food"
+									],
+									"controller": "you"
+								}
+							},
+							"toughness": {
+								"count": {
+									"subtypes": [
+										"Food"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

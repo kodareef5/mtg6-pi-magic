@@ -1,0 +1,86 @@
+{
+	"card": "Angelic Destiny",
+	"generated": "2026-10-10",
+	"source": "53600785854fbec8db4cdbad062ca4e96e81b8192946f240c6e39dfd9cedcabd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Angelic Destiny",
+		"registers": [
+			{
+				"basis": "Enchanted creature gets +4/+4, has flying and first strike, and is an Angel in addition to its other types.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 4,
+					"toughness": 4,
+					"words": [
+						"flying",
+						"first strike"
+					],
+					"subtypes": {
+						"add": [
+							"Angel"
+						]
+					}
+				}
+			},
+			{
+				"basis": "When enchanted creature dies, return this card to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "attached"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any",
+					"card": "Angelic Destiny"
+				},
+				"claim": "Cast Angelic Destiny enchanting a creature",
+				"basis": "Enchant creature",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

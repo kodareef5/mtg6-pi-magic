@@ -1,0 +1,63 @@
+{
+	"card": "Stockpiling Celebrant",
+	"generated": "2026-10-10",
+	"source": "508b3d8fb0a321115be6d80f01e67baedfe0061a138ab8b5c1f4ad2f6af957fa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stockpiling Celebrant",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may return another target nonland permanent you control to its owner's hand. If you do, scry 2.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you",
+								"other": true,
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"return": "target:0"
+							},
+							"may": true,
+							"as": "returned"
+						},
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"bound": "returned"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

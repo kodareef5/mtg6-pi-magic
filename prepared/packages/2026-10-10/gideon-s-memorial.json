@@ -1,0 +1,96 @@
+{
+	"card": "Gideon's Memorial",
+	"generated": "2026-10-10",
+	"source": "f9b424fada97b3bb159ce07729fedf9664b0ef5fc28dfd90003e23a85c608143",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gideon's Memorial",
+		"registers": [
+			{
+				"basis": "Creature tokens you control get +1/+0 and have vigilance.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"token": true,
+					"controller": "you"
+				},
+				"change": {
+					"power": 1,
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast a planeswalker spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"planeswalker"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gideon's Memorial",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard Gideon's Memorial to deal 4 damage to an attacking or blocking creature",
+				"basis": "{1}{W}, Discard this card: It deals 4 damage to target attacking or blocking creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{W}",
+					"discard": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"any": [
+								{
+									"attacking": true
+								},
+								{
+									"blocking": true
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

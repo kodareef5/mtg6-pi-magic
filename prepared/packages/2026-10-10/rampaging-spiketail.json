@@ -1,0 +1,97 @@
+{
+	"card": "Rampaging Spiketail",
+	"generated": "2026-10-10",
+	"source": "27200fd6d13a93caed55428c86b5b558cbb14b509b69f56824deef3cb89d4296",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rampaging Spiketail",
+		"registers": [
+			{
+				"basis": "When this creature enters, target creature you control gets +2/+0 and gains indestructible until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"words": [
+									"indestructible"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rampaging Spiketail",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Swampcycle Rampaging Spiketail",
+				"basis": "Swampcycling {2} ({2}, Discard this card: Search your library for a Swamp card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Swamp"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "swamp"
+					},
+					{
+						"do": "move",
+						"what": "bound:swamp",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

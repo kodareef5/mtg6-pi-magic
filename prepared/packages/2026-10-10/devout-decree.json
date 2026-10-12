@@ -1,0 +1,61 @@
+{
+	"card": "Devout Decree",
+	"generated": "2026-10-10",
+	"source": "68954f010b253bc981ee1b6f03585eb2a407b549d8838746763d1a799c469d67",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Devout Decree",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Devout Decree",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Devout Decree",
+				"basis": "Exile target creature or planeswalker that's black or red. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"colors": [
+								"B",
+								"R"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "keyword",
+						"name": "scry",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

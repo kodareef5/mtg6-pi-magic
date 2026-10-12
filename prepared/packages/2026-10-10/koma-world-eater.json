@@ -1,0 +1,109 @@
+{
+	"card": "Koma, World-Eater",
+	"generated": "2026-10-10",
+	"source": "9652c6e4fa71b86a8e26c44ce9f5b586467662590a76d70c204fdb0649f9b097",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Koma, World-Eater",
+		"registers": [
+			{
+				"basis": "Trample, ward {4}",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Trample, ward {4}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{4}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Koma deals combat damage to a player, create four 3/3 blue Serpent creature tokens named Koma's Coil.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 4,
+							"spec": {
+								"name": "Koma's Coil",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Serpent"
+								],
+								"colors": [
+									"U"
+								],
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Koma, World-Eater",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Koma, World-Eater",
+				"basis": "This spell can't be countered.",
+				"timing": "spell",
+				"words": [
+					"can't be countered"
+				],
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

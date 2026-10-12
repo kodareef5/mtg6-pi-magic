@@ -1,0 +1,123 @@
+{
+	"card": "Kykar, Zephyr Awakener",
+	"generated": "2026-10-10",
+	"source": "fd6ad2c93bf65a6360d324fa87d9545b5b7c30d70b8fc8ebcd7c4a0cf97cca2e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kykar, Zephyr Awakener",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a noncreature spell, choose one —\n• Exile another target creature you control. Return that card to the battlefield under its owner's control at the beginning of the next end step.\n• Create a 1/1 white Spirit creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"other": true
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "move",
+									"what": "target:0",
+									"to": "exile",
+									"reason": "exile",
+									"as": "exiled"
+								},
+								{
+									"do": "delay",
+									"if": {
+										"bound": "exiled"
+									},
+									"event": {
+										"on": "step",
+										"step": "end",
+										"whose": "any"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": "bound:exiled",
+												"to": "battlefield",
+												"controller": "owner:bound:exiled",
+												"reason": "resolve"
+											}
+										]
+									}
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Spirit Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Spirit"
+										],
+										"colors": [
+											"W"
+										],
+										"power": 1,
+										"toughness": 1,
+										"words": [
+											"flying"
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

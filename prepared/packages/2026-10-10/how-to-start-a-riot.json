@@ -1,0 +1,73 @@
+{
+	"card": "How to Start a Riot",
+	"generated": "2026-10-10",
+	"source": "c459c2d0ee668e29e74f935aedd345517b2fadf59af839aca5bf006cebb58f4e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "How to Start a Riot",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "How to Start a Riot",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Grant a creature menace and give a player's creatures +2/+0 until end of turn.",
+				"basis": "Target creature gains menace until end of turn. (It can't be blocked except by two or more creatures.) ... Creatures target player controls get +2/+0 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"menace"
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "target:1"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

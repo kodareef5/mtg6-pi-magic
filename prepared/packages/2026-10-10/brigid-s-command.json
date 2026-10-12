@@ -1,0 +1,346 @@
+{
+	"card": "Brigid's Command",
+	"generated": "2026-10-10",
+	"source": "64224967d8468b30d88d8fa80eb6c91597dd76067bc9389f7e9165e5faceb7dc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brigid's Command",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Brigid's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and Kithkin token modes",
+				"basis": "Choose two —\n• Create a token that's a copy of target Kithkin you control.\n• Target player creates a 1/1 green and white Kithkin creature token.\n• Target creature you control gets +3/+3 until end of turn.\n• Target creature you control fights target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Kithkin"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "target:1",
+						"spec": {
+							"name": "Kithkin Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Kithkin"
+							],
+							"colors": [
+								"G",
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Brigid's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and +3/+3 modes",
+				"basis": "Choose two —\n• Create a token that's a copy of target Kithkin you control.\n• Target player creates a 1/1 green and white Kithkin creature token.\n• Target creature you control gets +3/+3 until end of turn.\n• Target creature you control fights target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Kithkin"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Brigid's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and fight modes",
+				"basis": "Choose two —\n• Create a token that's a copy of target Kithkin you control.\n• Target player creates a 1/1 green and white Kithkin creature token.\n• Target creature you control gets +3/+3 until end of turn.\n• Target creature you control fights target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Kithkin"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "fight",
+						"a": "target:1",
+						"b": "target:2"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Brigid's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose Kithkin token and +3/+3 modes",
+				"basis": "Choose two —\n• Create a token that's a copy of target Kithkin you control.\n• Target player creates a 1/1 green and white Kithkin creature token.\n• Target creature you control gets +3/+3 until end of turn.\n• Target creature you control fights target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "target:0",
+						"spec": {
+							"name": "Kithkin Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Kithkin"
+							],
+							"colors": [
+								"G",
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Brigid's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose Kithkin token and fight modes",
+				"basis": "Choose two —\n• Create a token that's a copy of target Kithkin you control.\n• Target player creates a 1/1 green and white Kithkin creature token.\n• Target creature you control gets +3/+3 until end of turn.\n• Target creature you control fights target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "target:0",
+						"spec": {
+							"name": "Kithkin Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Kithkin"
+							],
+							"colors": [
+								"G",
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "fight",
+						"a": "target:1",
+						"b": "target:2"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Brigid's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose +3/+3 and fight modes",
+				"basis": "Choose two —\n• Create a token that's a copy of target Kithkin you control.\n• Target player creates a 1/1 green and white Kithkin creature token.\n• Target creature you control gets +3/+3 until end of turn.\n• Target creature you control fights target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3
+						}
+					},
+					{
+						"do": "fight",
+						"a": "target:1",
+						"b": "target:2"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

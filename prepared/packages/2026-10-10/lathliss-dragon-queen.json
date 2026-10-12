@@ -1,0 +1,108 @@
+{
+	"card": "Lathliss, Dragon Queen",
+	"generated": "2026-10-10",
+	"source": "cebf6a75cfb8949f1fa82fb07c151f9d621cbc1b8f8d449d387f731031957666",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lathliss, Dragon Queen",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another nontoken Dragon you control enters, create a 5/5 red Dragon creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Dragon"
+						],
+						"controller": "you",
+						"other": true,
+						"token": false
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Dragon Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dragon"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 5,
+								"toughness": 5,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lathliss, Dragon Queen",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Dragons you control +1/+0 until end of turn",
+				"basis": "{1}{R}: Dragons you control get +1/+0 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"subtypes": [
+								"Dragon"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

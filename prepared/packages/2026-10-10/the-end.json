@@ -1,0 +1,211 @@
+{
+	"card": "The End",
+	"generated": "2026-10-10",
+	"source": "7e33716a272ec1b9c28b560a20c16bb38973ec882cf7953d4504bd8443a9d927",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The End",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "The End",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast The End without its low-life discount",
+				"basis": "This spell costs {2} less to cast if your life total is 5 or less. ... Exile target creature or planeswalker. Search its controller's graveyard, hand, and library for any number of cards with the same name as that permanent and exile them. That player shuffles, then draws a card for each card exiled from their hand this way.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"life": "you"
+					},
+					"atLeast": 6
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "look",
+						"who": "you",
+						"every": {
+							"zones": [
+								"hand",
+								"library"
+							],
+							"owner": "controller:target:0"
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard",
+								"hand",
+								"library"
+							],
+							"owner": "controller:target:0",
+							"nameOf": "target:0",
+							"token": false
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"graveyard",
+									"hand",
+									"library"
+								],
+								"owner": "controller:target:0",
+								"nameOf": "target:0",
+								"token": false
+							}
+						},
+						"upTo": true,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "exile",
+						"reason": "exile",
+						"countFrom": "hand",
+						"as": "exiled"
+					},
+					{
+						"do": "shuffle",
+						"who": "controller:target:0"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": {
+							"bound": "exiled"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "The End",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast The End with its low-life discount",
+				"basis": "This spell costs {2} less to cast if your life total is 5 or less. ... Exile target creature or planeswalker. Search its controller's graveyard, hand, and library for any number of cards with the same name as that permanent and exile them. That player shuffles, then draws a card for each card exiled from their hand this way.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"life": "you"
+					},
+					"atMost": 5
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "look",
+						"who": "you",
+						"every": {
+							"zones": [
+								"hand",
+								"library"
+							],
+							"owner": "controller:target:0"
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard",
+								"hand",
+								"library"
+							],
+							"owner": "controller:target:0",
+							"nameOf": "target:0",
+							"token": false
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"graveyard",
+									"hand",
+									"library"
+								],
+								"owner": "controller:target:0",
+								"nameOf": "target:0",
+								"token": false
+							}
+						},
+						"upTo": true,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "exile",
+						"reason": "exile",
+						"countFrom": "hand",
+						"as": "exiled"
+					},
+					{
+						"do": "shuffle",
+						"who": "controller:target:0"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": {
+							"bound": "exiled"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

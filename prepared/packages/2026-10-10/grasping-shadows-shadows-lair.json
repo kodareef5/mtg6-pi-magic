@@ -1,0 +1,118 @@
+{
+	"card": "Grasping Shadows // Shadows' Lair",
+	"generated": "2026-10-10",
+	"source": "52852d1c926a82f94ad6091490bd055bf7c89fbd112897300638a2cd3b0566d1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Grasping Shadows // Shadows' Lair",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever a creature you control attacks alone, it gains deathtouch and lifelink until end of turn. Put a dread counter on this enchantment. Then if there are three or more dread counters on it, transform it.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"is": "event:objects"
+						}
+					},
+					"atLeast": 1,
+					"atMost": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "event:objects",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"deathtouch",
+									"lifelink"
+								]
+							}
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "dread",
+							"amount": 1
+						},
+						{
+							"do": "transform",
+							"what": "this",
+							"if": {
+								"amount": {
+									"counters": "dread",
+									"on": "this"
+								},
+								"atLeast": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "{T}: Add {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Grasping Shadows // Shadows' Lair",
+					"face": 1,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card and lose 1 life",
+				"basis": "{B}, {T}, Remove a dread counter from this land: You draw a card and you lose 1 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{B}",
+					"tap": true,
+					"counters": {
+						"kind": "dread",
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

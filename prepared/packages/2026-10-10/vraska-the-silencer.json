@@ -1,0 +1,99 @@
+{
+	"card": "Vraska, the Silencer",
+	"generated": "2026-10-10",
+	"source": "de19d851785ef37deefba2fdcc9ddf956751a916b137a3442fafd87a8624962c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vraska, the Silencer",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Deathtouch",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a nontoken creature an opponent controls dies, you may pay {1}. If you do, return that card to the battlefield tapped under your control. It's a Treasure artifact with \"{T}, Sacrifice this artifact: Add one mana of any color,\" and it loses all other card types.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "opponent",
+						"token": false
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{1}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"tapped": true,
+							"controller": "you",
+							"reason": "resolve",
+							"if": {
+								"bound": "paid"
+							},
+							"change": {
+								"types": {
+									"set": [
+										"artifact"
+									]
+								},
+								"subtypes": {
+									"set": [
+										"Treasure"
+									],
+									"of": "artifact"
+								},
+								"registers": [
+									{
+										"kind": "mana",
+										"basis": "Whenever a nontoken creature an opponent controls dies, you may pay {1}. If you do, return that card to the battlefield tapped under your control. It's a Treasure artifact with \"{T}, Sacrifice this artifact: Add one mana of any color,\" and it loses all other card types.",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

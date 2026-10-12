@@ -1,0 +1,110 @@
+{
+	"card": "Rakish Crew",
+	"generated": "2026-10-10",
+	"source": "998a03b0b417a5963fef00db29df3d143f54c440706f924673af5a4b65c05db3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rakish Crew",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this enchantment enters, create a 1/1 red Mercenary creature token with \"{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.\"",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Mercenary Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Mercenary"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1,
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.",
+										"cost": {
+											"tap": true
+										},
+										"speed": "sorcery",
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"types": [
+															"creature"
+														],
+														"controller": "you"
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "target:0",
+													"until": "end-of-turn",
+													"change": {
+														"power": 1
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever an outlaw you control dies, each opponent loses 1 life and you gain 1 life. (Assassins, Mercenaries, Pirates, Rogues, and Warlocks are outlaws.)",
+				"event": {
+					"on": "dies",
+					"of": {
+						"controller": "you",
+						"subtypes": [
+							"Assassin",
+							"Mercenary",
+							"Pirate",
+							"Rogue",
+							"Warlock"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

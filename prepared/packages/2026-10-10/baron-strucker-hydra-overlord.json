@@ -1,0 +1,100 @@
+{
+	"card": "Baron Strucker, HYDRA Overlord",
+	"generated": "2026-10-10",
+	"source": "678919fb227ce1a002d1bfb7b1d19121365b0d61eb89423234c068345c6c2620",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Baron Strucker, HYDRA Overlord",
+		"registers": [
+			{
+				"kind": "cost",
+				"basis": "Villain spells you cast cost {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"subtypes": [
+						"Villain"
+					]
+				},
+				"reduce": 1
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever another Villain you control enters, you may have it connive. Do this only once each turn. (Draw a card, then discard a card. If you discarded a nonland card, put a +1/+1 counter on that creature.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"controller": "you",
+						"subtypes": [
+							"Villain"
+						],
+						"other": true
+					}
+				},
+				"may": true,
+				"limit": "once-per-turn-use",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "controller:event:object",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "controller:event:object",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "controller:event:object"
+							},
+							"count": 1,
+							"as": "discard-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard-card",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "counters",
+							"on": "event:object",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"all": [
+									{
+										"bound": "discarded"
+									},
+									{
+										"is": "bound:discard-card",
+										"matches": {
+											"zones": [
+												"hand"
+											],
+											"not": {
+												"types": [
+													"land"
+												]
+											}
+										},
+										"lastKnown": true
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

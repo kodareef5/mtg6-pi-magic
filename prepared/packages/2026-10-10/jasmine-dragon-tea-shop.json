@@ -1,0 +1,84 @@
+{
+	"card": "Jasmine Dragon Tea Shop",
+	"generated": "2026-10-10",
+	"source": "e944e39615fe0bda856b8daabbd334d09ee4615c9ae584aee10b7a356f98482c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jasmine Dragon Tea Shop",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast an Ally spell or activate an ability of an Ally source.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					],
+					"subtypes": [
+						"Ally"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Jasmine Dragon Tea Shop",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create an Ally token",
+				"basis": "{5}, {T}: Create a 1/1 white Ally creature token.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Ally Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Ally"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

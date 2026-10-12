@@ -1,0 +1,69 @@
+{
+	"card": "Glóin the Mighty // Easy Pickings",
+	"generated": "2026-10-10",
+	"source": "ed30df5912609dcdaf88a31a425fe8c29290955d8d94725cf8400ed1ec3cd3cd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Glóin the Mighty // Easy Pickings",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "At the beginning of your first main phase, add {R}{R}.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R",
+								"R"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Glóin the Mighty // Easy Pickings",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Easy Pickings",
+				"basis": "Easy Pickings deals 1 damage to each creature your opponents control. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

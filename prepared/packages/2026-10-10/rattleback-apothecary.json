@@ -1,0 +1,86 @@
+{
+	"card": "Rattleback Apothecary",
+	"generated": "2026-10-10",
+	"source": "c600b6f73a3ae14c80c4c18fcc2dff60b0a2e6636591053f9cc9ec6788c8bb68",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rattleback Apothecary",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you commit a crime, target creature you control gains your choice of menace or lifelink until end of turn. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.)",
+				"kind": "watch",
+				"event": {
+					"on": "crime",
+					"by": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "menace",
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"words": [
+											"menace"
+										]
+									}
+								}
+							]
+						},
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"lifelink"
+								]
+							},
+							"if": {
+								"not": {
+									"bound": "menace"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

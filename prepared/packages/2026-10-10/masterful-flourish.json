@@ -1,0 +1,54 @@
+{
+	"card": "Masterful Flourish",
+	"generated": "2026-10-10",
+	"source": "445d630c3bde1223606227b1bdd834a4a3a35c9069e13c5305b36b9fa3efd75d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Masterful Flourish",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Masterful Flourish",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature you control +1/+0 and indestructible until end of turn.",
+				"basis": "Target creature you control gets +1/+0 and gains indestructible until end of turn. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 0,
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

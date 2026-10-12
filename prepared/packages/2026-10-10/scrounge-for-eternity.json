@@ -1,0 +1,141 @@
+{
+	"card": "Scrounge for Eternity",
+	"generated": "2026-10-10",
+	"source": "b27e0a49344c258456f742131ad864484a296197390e7fc0cd0ec79b73d12ca1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scrounge for Eternity",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Scrounge for Eternity",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Scrounge for Eternity",
+				"basis": "As an additional cost to cast this spell, sacrifice an artifact or creature. ... Return target creature or Spacecraft card with mana value 5 or less from your graveyard to the battlefield. Then create a Lander token. (It's an artifact with \"{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\")",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"manaValue": {
+								"atMost": 5
+							},
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Spacecraft"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Lander Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Lander"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+									"cost": {
+										"mana": "{2}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"library"
+													],
+													"owner": "you",
+													"types": [
+														"land"
+													],
+													"supertypes": [
+														"basic"
+													],
+													"token": false
+												},
+												"count": 1,
+												"upTo": true,
+												"as": "land"
+											},
+											{
+												"do": "move",
+												"what": "bound:land",
+												"to": "battlefield",
+												"controller": "you",
+												"tapped": true,
+												"reason": "resolve"
+											},
+											{
+												"do": "shuffle",
+												"who": "you"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

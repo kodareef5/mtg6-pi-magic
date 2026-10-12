@@ -1,0 +1,173 @@
+{
+	"card": "Dai Li Indoctrination",
+	"generated": "2026-10-10",
+	"source": "1feb5b2f3aee60bc8d1f784216a6314b4e73dc5c114460c55d0ac73d541fbdee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dai Li Indoctrination",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dai Li Indoctrination",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dai Li Indoctrination: reveal hand and discard a nonland permanent card",
+				"basis": "Choose one — ... Target opponent reveals their hand. You choose a nonland permanent card from it. That player discards that card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "target:0"
+						},
+						"as": "hand"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"count": 1,
+						"as": "discard",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"is": "bound:hand",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"planeswalker"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Dai Li Indoctrination",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dai Li Indoctrination: earthbend 2",
+				"basis": "Choose one — ... Earthbend 2. (Target land you control becomes a 0/0 creature with haste that's still a land. Put two +1/+1 counters on it. When it dies or is exiled, return it to the battlefield tapped.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "dies",
+							"of": {
+								"is": "target:0"
+							}
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "event:object",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								}
+							]
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "leaves",
+							"of": {
+								"is": "target:0"
+							},
+							"to": [
+								"exile"
+							]
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "event:object",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

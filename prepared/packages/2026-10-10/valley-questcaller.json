@@ -1,0 +1,61 @@
+{
+	"card": "Valley Questcaller",
+	"generated": "2026-10-10",
+	"source": "cc7926e5a811893141c86d0f498580da2df3f430879caf46c5898ca5abe7d217",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Valley Questcaller",
+		"registers": [
+			{
+				"basis": "Whenever one or more other Rabbits, Bats, Birds, and/or Mice you control enter, scry 1.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"controller": "you",
+						"other": true,
+						"subtypes": [
+							"Rabbit",
+							"Bat",
+							"Bird",
+							"Mouse"
+						]
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Other Rabbits, Bats, Birds, and Mice you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"other": true,
+					"subtypes": [
+						"Rabbit",
+						"Bat",
+						"Bird",
+						"Mouse"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

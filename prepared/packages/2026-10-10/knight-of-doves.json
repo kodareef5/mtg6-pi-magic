@@ -1,0 +1,63 @@
+{
+	"card": "Knight of Doves",
+	"generated": "2026-10-10",
+	"source": "11c7188124c5bdf06289b0c3c2a05c6422a4e06c13565d095f7be83f437d43b5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Knight of Doves",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever an enchantment you control is put into a graveyard from the battlefield, create a 1/1 white Bird creature token with flying.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Bird Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Bird"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

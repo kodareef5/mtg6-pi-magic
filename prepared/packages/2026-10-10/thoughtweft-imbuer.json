@@ -1,0 +1,68 @@
+{
+	"card": "Thoughtweft Imbuer",
+	"generated": "2026-10-10",
+	"source": "8769a14643962ad1d89a567a967760cd33793756894689d4696a3f6b863e06c5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thoughtweft Imbuer",
+		"registers": [
+			{
+				"basis": "Whenever a creature you control attacks alone, it gets +X/+X until end of turn, where X is the number of Kithkin you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"attacking": true
+						}
+					},
+					"atLeast": 1,
+					"atMost": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "event:object",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"count": {
+										"subtypes": [
+											"Kithkin"
+										],
+										"controller": "you"
+									}
+								},
+								"toughness": {
+									"count": {
+										"subtypes": [
+											"Kithkin"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

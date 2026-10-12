@@ -1,0 +1,78 @@
+{
+	"card": "Prehistoric Pet",
+	"generated": "2026-10-10",
+	"source": "ec2291a961297e70c45f18739a7b52dcd6fdb5adf0c5890c84af80357b54673d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prehistoric Pet",
+		"registers": [
+			{
+				"basis": "This creature can't be blocked by creatures with greater power.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"is": "this"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						],
+						"power": {
+							"atLeast": {
+								"sum": [
+									{
+										"power": "this"
+									},
+									1
+								]
+							}
+						}
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Prehistoric Pet",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Return another creature you control to its owner's hand",
+				"basis": "{1}{W}, {T}: Return another target creature you control to its owner's hand. Activate only during your turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{W}",
+					"tap": true
+				},
+				"if": {
+					"turn": "self"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,86 @@
+{
+	"card": "Jenova, Ancient Calamity",
+	"generated": "2026-10-10",
+	"source": "cfae130cce9404c422c6d35a36a2b8752be3702a3ec65a8ec0b9d6fd29267eec",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jenova, Ancient Calamity",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, put a number of +1/+1 counters equal to Jenova's power on up to one other target creature. That creature becomes a Mutant in addition to its other types.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"other": true
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": {
+								"power": "this"
+							}
+						},
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"subtypes": {
+									"add": [
+										"Mutant"
+									]
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a Mutant you control dies during your turn, you draw cards equal to its power.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"subtypes": [
+							"Mutant"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"turn": "self"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"power": "event:object"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

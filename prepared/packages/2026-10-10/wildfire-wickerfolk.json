@@ -1,0 +1,61 @@
+{
+	"card": "Wildfire Wickerfolk",
+	"generated": "2026-10-10",
+	"source": "48361aa680390e1ec5db6da74527b979a9cd8ea43029abb05dd9ecf35cf666fb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wildfire Wickerfolk",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Delirium — This creature gets +1/+1 and has trample as long as there are four or more card types among cards in your graveyard.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 4
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1,
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

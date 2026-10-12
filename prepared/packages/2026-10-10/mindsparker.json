@@ -1,0 +1,61 @@
+{
+	"card": "Mindsparker",
+	"generated": "2026-10-10",
+	"source": "cd56eb3377c60aa541614fde746ae47a95f7c6b7f8e3f6a8b9186dad775d618e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mindsparker",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "First strike (This creature deals combat damage before creatures without first strike.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever an opponent casts a white or blue instant or sorcery spell, this creature deals 2 damage to that player.",
+				"event": {
+					"on": "cast",
+					"by": "opponent",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"colors": [
+							"W",
+							"U"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "event:player",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

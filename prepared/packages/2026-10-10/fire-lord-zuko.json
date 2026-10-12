@@ -1,0 +1,113 @@
+{
+	"card": "Fire Lord Zuko",
+	"generated": "2026-10-10",
+	"source": "f852e4e6efe9de7166ba7a60658d0c044cccd8c3fc28085600dc5143e96c723d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fire Lord Zuko",
+		"registers": [
+			{
+				"basis": "Firebending X, where X is Fire Lord Zuko's power. (Whenever this creature attacks, add X {R}. This mana lasts until end of combat.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R"
+							],
+							"times": {
+								"power": "this"
+							},
+							"until": "end-of-combat"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a spell from exile and whenever a permanent you control enters from exile, put a +1/+1 counter on each creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"from": [
+						"exile"
+					],
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"land",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a spell from exile and whenever a permanent you control enters from exile, put a +1/+1 counter on each creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"from": [
+						"exile"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

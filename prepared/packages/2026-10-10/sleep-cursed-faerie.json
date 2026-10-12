@@ -1,0 +1,87 @@
+{
+	"card": "Sleep-Cursed Faerie",
+	"generated": "2026-10-10",
+	"source": "4af7fd41a98d6fdc334060ce9c8d1fd27849220d0b7dd3d477b9df14476f521a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sleep-Cursed Faerie",
+		"registers": [
+			{
+				"basis": "Flying, ward {2}",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Flying, ward {2}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "This creature enters tapped with three stun counters on it. (If it would become untapped, remove a stun counter from it instead.)",
+				"kind": "enters",
+				"tapped": true,
+				"counters": {
+					"stun": 3
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sleep-Cursed Faerie",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate the untap ability",
+				"basis": "{1}{U}: Untap this creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{U}"
+				},
+				"instructions": [
+					{
+						"do": "untap",
+						"what": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

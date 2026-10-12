@@ -1,0 +1,129 @@
+{
+	"card": "Summon: Titan",
+	"generated": "2026-10-10",
+	"source": "6534d780f18f871839d8c6e0d8260abd383046b020a3d7349ae0b909979f32fe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: Titan",
+		"registers": [
+			{
+				"basis": "I — Mill five cards.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 5
+						}
+					]
+				}
+			},
+			{
+				"basis": "II — Return all land cards from your graveyard to the battlefield tapped.",
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"land"
+								]
+							},
+							"to": "battlefield",
+							"tapped": true,
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"basis": "III — Until end of turn, another target creature you control gains trample and gets +X/+X, where X is the number of lands you control.",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"trample"
+								],
+								"power": {
+									"count": {
+										"types": [
+											"land"
+										],
+										"controller": "you"
+									}
+								},
+								"toughness": {
+									"count": {
+										"types": [
+											"land"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Reach, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

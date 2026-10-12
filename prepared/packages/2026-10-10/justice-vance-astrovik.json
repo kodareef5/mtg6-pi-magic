@@ -1,0 +1,103 @@
+{
+	"card": "Justice, Vance Astrovik",
+	"generated": "2026-10-10",
+	"source": "276b34f14c0f3d28b904b1199310ef4b4ee665dfe37ca06a8cf1dae5815fc422",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Justice, Vance Astrovik",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When Justice enters, return up to one target nonland, nontoken permanent to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"not": {
+									"types": [
+										"land"
+									]
+								},
+								"token": false
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever another nonland permanent you control is returned to its owner's hand, put a +1/+1 counter on Justice.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"hand"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"controller": "you",
+						"other": true,
+						"not": {
+							"types": [
+								"land"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

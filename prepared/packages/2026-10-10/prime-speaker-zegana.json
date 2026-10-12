@@ -1,0 +1,56 @@
+{
+	"card": "Prime Speaker Zegana",
+	"generated": "2026-10-10",
+	"source": "5d73497f55dd233b2c1b508c4797a436faaca49c8dac2cb788def6f2dbec7d8f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prime Speaker Zegana",
+		"registers": [
+			{
+				"basis": "Prime Speaker Zegana enters with X +1/+1 counters on it, where X is the greatest power among other creatures you control.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": {
+						"aggregate": "max",
+						"of": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"value": "power"
+					}
+				}
+			},
+			{
+				"basis": "When Prime Speaker Zegana enters, draw cards equal to its power.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"power": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

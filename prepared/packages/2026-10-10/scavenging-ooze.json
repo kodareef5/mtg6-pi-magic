@@ -1,0 +1,76 @@
+{
+	"card": "Scavenging Ooze",
+	"generated": "2026-10-10",
+	"source": "b57595d79a8096e8e9f2a4838122406a52baeea090859720b5d6c7bcb248ec1c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scavenging Ooze",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Scavenging Ooze",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile a graveyard card; if it was a creature card, add a counter and gain 1 life.",
+				"basis": "{G}: Exile target card from a graveyard. If it was a creature card, put a +1/+1 counter on this creature and you gain 1 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{G}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"zones": [
+									"graveyard"
+								],
+								"types": [
+									"creature"
+								]
+							},
+							"lastKnown": true
+						},
+						"instructions": [
+							{
+								"do": "counters",
+								"on": "this",
+								"kind": "+1/+1",
+								"amount": 1
+							},
+							{
+								"do": "life",
+								"who": "you",
+								"amount": 1
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,83 @@
+{
+	"card": "Adorned Crocodile",
+	"generated": "2026-10-10",
+	"source": "9fba04f1fc95fbccabbf32dbf262f2958d40ba035507276c2554732c21206b17",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Adorned Crocodile",
+		"registers": [
+			{
+				"basis": "When this creature dies, create a 2/2 black Zombie Druid creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Zombie Druid Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Zombie",
+									"Druid"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Adorned Crocodile",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Renew: put a +1/+1 counter on target creature.",
+				"basis": "Renew — {B}, Exile this card from your graveyard: Put a +1/+1 counter on target creature. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{B}",
+					"exile": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,115 @@
+{
+	"card": "Lluwen, Exchange Student // Pest Friend",
+	"generated": "2026-10-10",
+	"source": "b0176e8b07cee148d02ee823720cffb2dd87b1358da12d3f2c9bda1d8baaf45d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lluwen, Exchange Student // Pest Friend",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Lluwen enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Lluwen, Exchange Student // Pest Friend",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Prepare Lluwen",
+				"basis": "Exile a creature card from your graveyard: Lluwen becomes prepared. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"exile": {
+						"choose": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "prepare",
+						"what": "this",
+						"prepared": true
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Lluwen, Exchange Student // Pest Friend",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Pest Friend copy",
+				"basis": "Create a 1/1 black and green Pest creature token with \"Whenever this token attacks, you gain 1 life.\"",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Pest Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Pest"
+							],
+							"colors": [
+								"B",
+								"G"
+							],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"basis": "Whenever this token attacks, you gain 1 life.",
+									"kind": "watch",
+									"event": {
+										"on": "attacks",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "life",
+												"who": "you",
+												"amount": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,112 @@
+{
+	"card": "Golbez, Crystal Collector",
+	"generated": "2026-10-10",
+	"source": "71a3f173b74b2572826bb5904bc2399c891202efa8e77c8f2bf88a9a1197b490",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Golbez, Crystal Collector",
+		"registers": [
+			{
+				"basis": "Whenever an artifact you control enters, surveil 1.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, if you control four or more artifacts, return target creature card from your graveyard to your hand. Then if you control eight or more artifacts, each opponent loses life equal to that card's power.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 4
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						},
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": {
+								"negate": {
+									"power": "target:0"
+								}
+							},
+							"if": {
+								"all": [
+									{
+										"amount": {
+											"count": {
+												"types": [
+													"artifact"
+												],
+												"controller": "you"
+											}
+										},
+										"atLeast": 8
+									},
+									{
+										"amount": {
+											"power": "target:0"
+										},
+										"atLeast": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

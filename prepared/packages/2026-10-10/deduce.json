@@ -9,8 +9,6 @@
 		"registers": [],
 		"procedures": [
 			{
-				"claim": "Cast Deduce",
-				"basis": "Draw a card. Investigate. (Create a Clue token. It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
 				"source": {
 					"card": "Deduce",
 					"zones": [
@@ -20,6 +18,8 @@
 					],
 					"controller": "any"
 				},
+				"claim": "Cast Deduce to draw a card and investigate.",
+				"basis": "Draw a card. Investigate. (Create a Clue token. It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
 				"timing": "spell",
 				"instructions": [
 					{
@@ -31,7 +31,7 @@
 						"do": "token",
 						"count": 1,
 						"spec": {
-							"name": "Clue",
+							"name": "Clue Token",
 							"types": [
 								"artifact"
 							],

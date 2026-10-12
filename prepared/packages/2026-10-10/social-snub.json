@@ -1,0 +1,98 @@
+{
+	"card": "Social Snub",
+	"generated": "2026-10-10",
+	"source": "5c458a264b3bf32390ce90705019da87f748fa83eeec5a6b1a910bdedbbccc0d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Social Snub",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When you cast this spell while you control a creature, you may copy this spell.",
+				"zones": [
+					"stack"
+				],
+				"event": {
+					"on": "cast",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"is": "this"
+					},
+					"by": "you"
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "copy-spell",
+							"what": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Social Snub",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Social Snub",
+				"basis": "Each player sacrifices a creature of their choice. Each opponent loses 1 life and you gain 1 life.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "each-player",
+						"count": 1,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,73 @@
+{
+	"card": "Ray of Ruin",
+	"generated": "2026-10-10",
+	"source": "3fdc4a7b41e7f08cd657ed0b39aadebead69a6efa781daa016cd256972615374",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ray of Ruin",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ray of Ruin",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ray of Ruin",
+				"basis": "Exile target creature, Vehicle, or nonbasic land. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Vehicle"
+									]
+								},
+								{
+									"types": [
+										"land"
+									],
+									"not": {
+										"supertypes": [
+											"basic"
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "keyword",
+						"name": "scry",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

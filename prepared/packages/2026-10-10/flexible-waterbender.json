@@ -1,0 +1,187 @@
+{
+	"card": "Flexible Waterbender",
+	"generated": "2026-10-10",
+	"source": "77aa3781d161f5ad1059a2dd4a4069b125d2db405736b4f3da7067998fcd89df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Flexible Waterbender",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Flexible Waterbender",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Waterbend paying three mana",
+				"basis": "Waterbend {3}: This creature has base power and toughness 5/2 until end of turn. (While paying a waterbend cost, you can tap your artifacts and creatures to help. Each one pays for {1}.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 5,
+								"toughness": 2
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Flexible Waterbender",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Waterbend tapping one artifact or creature and paying two mana",
+				"basis": "Waterbend {3}: This creature has base power and toughness 5/2 until end of turn. (While paying a waterbend cost, you can tap your artifacts and creatures to help. Each one pays for {1}.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"tapped": false
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 5,
+								"toughness": 2
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Flexible Waterbender",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Waterbend tapping two artifacts or creatures and paying one mana",
+				"basis": "Waterbend {3}: This creature has base power and toughness 5/2 until end of turn. (While paying a waterbend cost, you can tap your artifacts and creatures to help. Each one pays for {1}.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"tapped": false
+						},
+						"count": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 5,
+								"toughness": 2
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Flexible Waterbender",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Waterbend tapping three artifacts or creatures",
+				"basis": "Waterbend {3}: This creature has base power and toughness 5/2 until end of turn. (While paying a waterbend cost, you can tap your artifacts and creatures to help. Each one pays for {1}.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{0}",
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"tapped": false
+						},
+						"count": 3
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 5,
+								"toughness": 2
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

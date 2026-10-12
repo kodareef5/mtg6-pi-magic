@@ -1,0 +1,92 @@
+{
+	"card": "Gate Colossus",
+	"generated": "2026-10-10",
+	"source": "65bf214453d037bd050d69fb0fe396f43478c65aa57f863ef29b32eb1114b670",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gate Colossus",
+		"registers": [
+			{
+				"kind": "prohibit",
+				"basis": "This creature can't be blocked by creatures with power 2 or less.",
+				"block": {
+					"attacker": {
+						"is": "this"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						],
+						"power": {
+							"atMost": 2
+						}
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a Gate you control enters, you may put this card from your graveyard on top of your library.",
+				"zones": [
+					"graveyard"
+				],
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"subtypes": [
+							"Gate"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "library",
+							"position": "top",
+							"reason": "resolve",
+							"may": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gate Colossus",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gate Colossus with affinity for Gates",
+				"basis": "Affinity for Gates (This spell costs {1} less to cast for each Gate you control.)",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Gate"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

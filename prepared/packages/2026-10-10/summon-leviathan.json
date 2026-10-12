@@ -1,0 +1,108 @@
+{
+	"card": "Summon: Leviathan",
+	"generated": "2026-10-10",
+	"source": "4fdee08ba4e7eabcc30fae4505758e33c1c2ba4395f2eabb9501555bd1970cef",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: Leviathan",
+		"registers": [
+			{
+				"basis": "I — Return each creature that isn't a Kraken, Leviathan, Merfolk, Octopus, or Serpent to its owner's hand.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"not": {
+									"subtypes": [
+										"Kraken",
+										"Leviathan",
+										"Merfolk",
+										"Octopus",
+										"Serpent"
+									]
+								}
+							},
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			},
+			{
+				"basis": "II, III — Until end of turn, whenever a Kraken, Leviathan, Merfolk, Octopus, or Serpent attacks, draw a card.",
+				"kind": "chapter",
+				"numbers": [
+					2,
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "delay",
+							"event": {
+								"on": "attacks",
+								"of": {
+									"subtypes": [
+										"Kraken",
+										"Leviathan",
+										"Merfolk",
+										"Octopus",
+										"Serpent"
+									]
+								}
+							},
+							"until": "end-of-turn",
+							"effect": {
+								"instructions": [
+									{
+										"do": "draw",
+										"who": "you",
+										"count": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Ward {2}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,82 @@
+{
+	"card": "Vastlands Scavenger // Bind to Life",
+	"generated": "2026-10-10",
+	"source": "395f1ccdcebd1c5105a2fc76319cf3a30f59701ebe8e5fa7ac2845f18c92dd3d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vastlands Scavenger // Bind to Life",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Vastlands Scavenger // Bind to Life",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Bind to Life",
+				"basis": "Mill seven cards. Then put a creature card from among them onto the battlefield.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 7,
+						"as": "milled"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"is": "bound:milled",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 1,
+						"as": "creature"
+					},
+					{
+						"do": "move",
+						"what": "bound:creature",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,40 @@
+{
+	"card": "Overzealous Muscle",
+	"generated": "2026-10-10",
+	"source": "09271661801ca3262489cd7567cb02eac2c8d9512646871e13b3d554d34d0ccc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overzealous Muscle",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you commit a crime during your turn, this creature gains indestructible until end of turn. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime. Damage and effects that say \"destroy\" don't destroy a creature with indestructible.)",
+				"event": {
+					"on": "crime",
+					"by": "you"
+				},
+				"triggerIf": {
+					"turn": "self"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"indestructible"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

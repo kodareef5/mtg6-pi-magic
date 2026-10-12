@@ -1,0 +1,69 @@
+{
+	"card": "Skyknight Squire",
+	"generated": "2026-10-10",
+	"source": "f9307d2502debd3ea131a70ab5163326392a94478f0c4e016e00539378f8bb21",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Skyknight Squire",
+		"registers": [
+			{
+				"basis": "Whenever another creature you control enters, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "As long as this creature has three or more +1/+1 counters on it, it has flying and is a Knight in addition to its other types.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"counters": "+1/+1",
+						"on": "this"
+					},
+					"atLeast": 3
+				},
+				"change": {
+					"words": [
+						"flying"
+					],
+					"subtypes": {
+						"add": [
+							"Knight"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

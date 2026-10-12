@@ -1,0 +1,104 @@
+{
+	"card": "Sorceress's Schemes",
+	"generated": "2026-10-10",
+	"source": "2216de11104b7162be82bb227c723daa8be0b91e714a584a145d1fdaf83437bb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sorceress's Schemes",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {4}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{4}{R}",
+					"leavesStack": "exile"
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flashback {4}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command"
+					]
+				},
+				"change": {
+					"words": [
+						"flashback"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sorceress's Schemes",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Sorceress's Schemes with its printed cost or an earned casting permission",
+				"basis": "Return target instant or sorcery card from your graveyard or exiled card with flashback you own to your hand. Add {R}.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"types": [
+										"instant",
+										"sorcery"
+									]
+								},
+								{
+									"zones": [
+										"exile"
+									],
+									"owner": "you",
+									"words": [
+										"flashback"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "mana",
+						"who": "you",
+						"colors": [
+							"R"
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

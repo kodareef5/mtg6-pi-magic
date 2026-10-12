@@ -1,0 +1,50 @@
+{
+	"card": "Kindled Fury",
+	"generated": "2026-10-10",
+	"source": "b1ad43e9bb29d098488c1697d22534a599a5dfbdc2ced49c3b18197c0ca45e60",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kindled Fury",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kindled Fury",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +1/+0 and first strike until end of turn.",
+				"basis": "Target creature gets +1/+0 and gains first strike until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"words": [
+								"first strike"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

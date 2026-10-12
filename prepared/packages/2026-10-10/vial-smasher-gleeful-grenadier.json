@@ -1,0 +1,51 @@
+{
+	"card": "Vial Smasher, Gleeful Grenadier",
+	"generated": "2026-10-10",
+	"source": "1bdb13a271f2f69a89722e5fde350cc9a431a1a1ac28c7eb782179b9a00f330b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vial Smasher, Gleeful Grenadier",
+		"registers": [
+			{
+				"basis": "Whenever another outlaw you control enters, Vial Smasher deals 1 damage to target opponent. (Assassins, Mercenaries, Pirates, Rogues, and Warlocks are outlaws.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"subtypes": [
+							"Assassin",
+							"Mercenary",
+							"Pirate",
+							"Rogue",
+							"Warlock"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

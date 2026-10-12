@@ -1,0 +1,79 @@
+{
+	"card": "Mysterio, Master of Illusion",
+	"generated": "2026-10-10",
+	"source": "cf11c72467540f9f338a859ecd88d9a9e851c1fda8cb926250dfeccae2da0492",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mysterio, Master of Illusion",
+		"registers": [
+			{
+				"basis": "When Mysterio enters, create a 3/3 blue Illusion Villain creature token for each nontoken Villain you control. Exile those tokens when Mysterio leaves the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"subtypes": [
+										"Villain"
+									],
+									"token": false,
+									"controller": "you"
+								}
+							},
+							"spec": {
+								"name": "Illusion Villain Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Illusion",
+									"Villain"
+								],
+								"colors": [
+									"U"
+								],
+								"power": 3,
+								"toughness": 3
+							},
+							"as": "illusions"
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "leaves",
+								"of": {
+									"is": "this"
+								}
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:illusions",
+										"to": "exile",
+										"reason": "exile"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

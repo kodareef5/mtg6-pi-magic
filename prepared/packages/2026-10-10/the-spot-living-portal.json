@@ -1,0 +1,122 @@
+{
+	"card": "The Spot, Living Portal",
+	"generated": "2026-10-10",
+	"source": "36f300580f680e3553d8d4674dca846968ff2df97084a6264795a887518e3390",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Spot, Living Portal",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When The Spot enters, exile up to one target nonland permanent and up to one target nonland permanent card from a graveyard.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							},
+							"upTo": true
+						},
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"planeswalker"
+								],
+								"not": {
+									"types": [
+										"land"
+									]
+								},
+								"token": false
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"battlefield",
+									"graveyard"
+								],
+								"any": [
+									{
+										"is": "target:0"
+									},
+									{
+										"is": "target:1"
+									}
+								]
+							},
+							"to": "exile",
+							"reason": "exile",
+							"link": true
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When The Spot dies, put him on the bottom of his owner's library. If you do, return the exiled cards to their owners' hands.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "library",
+							"position": "bottom",
+							"reason": "resolve",
+							"as": "returned"
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"exile"
+								],
+								"linked": true,
+								"token": false
+							},
+							"to": "hand",
+							"reason": "bounce",
+							"if": {
+								"bound": "returned"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,79 @@
+{
+	"card": "Squad Rallier",
+	"generated": "2026-10-10",
+	"source": "f12124431f6269fa3cc5ae69f11ca560175b333485e89f3dbc83c5b27a9aabc1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Squad Rallier",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Squad Rallier",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Squad Rallier to inspect four cards and optionally take a creature with power 2 or less",
+				"basis": "{2}{W}: Look at the top four cards of your library. You may reveal a creature card with power 2 or less from among them and put it into your hand. Put the rest on the bottom of your library in a random order.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}"
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 4,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"types": [
+								"creature"
+							],
+							"power": {
+								"atMost": 2
+							}
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

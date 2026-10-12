@@ -1,0 +1,114 @@
+{
+	"card": "Kyoshi Island Plaza",
+	"generated": "2026-10-10",
+	"source": "832529a75fba86da6d8eb0e16282e76cbdbef47b4eb9587030d0392e4dd98d29",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kyoshi Island Plaza",
+		"registers": [
+			{
+				"basis": "When Kyoshi Island Plaza enters, search your library for up to X basic land cards, where X is the number of Shrines you control. Put those cards onto the battlefield tapped, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": {
+								"count": {
+									"subtypes": [
+										"Shrine"
+									],
+									"controller": "you"
+								}
+							},
+							"upTo": true,
+							"as": "lands"
+						},
+						{
+							"do": "move",
+							"what": "bound:lands",
+							"to": "battlefield",
+							"tapped": true,
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Shrine you control enters, search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Shrine"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "battlefield",
+							"tapped": true,
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,93 @@
+{
+	"card": "Iron Fist, Living Weapon",
+	"generated": "2026-10-10",
+	"source": "09340ebf1f218f738a25901c78a7cc8379facf031c876ee41fc107ef3a7b8ee7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Iron Fist, Living Weapon",
+		"registers": [
+			{
+				"basis": "Whenever you cast a spell that targets a creature you control, Iron Fist gains \"{T}: Iron Fist deals damage equal to his power to any other target\" until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						],
+						"targeting": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"registers": [
+									{
+										"basis": "Whenever you cast a spell that targets a creature you control, Iron Fist gains \"{T}: Iron Fist deals damage equal to his power to any other target\" until end of turn.",
+										"kind": "activated",
+										"cost": {
+											"tap": true
+										},
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"types": [
+															"creature",
+															"planeswalker",
+															"battle"
+														],
+														"not": {
+															"is": "this"
+														}
+													},
+													"player": "any"
+												}
+											],
+											"instructions": [
+												{
+													"do": "damage",
+													"to": "target:0",
+													"amount": {
+														"power": "this"
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

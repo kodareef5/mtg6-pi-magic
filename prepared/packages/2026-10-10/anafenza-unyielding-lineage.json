@@ -1,0 +1,123 @@
+{
+	"card": "Anafenza, Unyielding Lineage",
+	"generated": "2026-10-10",
+	"source": "310f8bebd63b6853e171b16a895989a72ccbcf512cde4570fa96aa0d052338bf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Anafenza, Unyielding Lineage",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "First strike",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another nontoken creature you control dies, Anafenza endures 2. (Put two +1/+1 counters on it or create a 2/2 white Spirit creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true,
+						"token": false
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"if": {
+								"is": "this",
+								"matches": {
+									"zones": [
+										"battlefield"
+									]
+								}
+							},
+							"as": "chose-counters",
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "this",
+									"kind": "+1/+1",
+									"amount": 2
+								}
+							]
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"not": {
+									"bound": "chose-counters"
+								}
+							},
+							"spec": {
+								"name": "Spirit Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spirit"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

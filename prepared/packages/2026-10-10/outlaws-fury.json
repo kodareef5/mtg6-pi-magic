@@ -1,0 +1,89 @@
+{
+	"card": "Outlaws' Fury",
+	"generated": "2026-10-10",
+	"source": "bc066ff1988c344cc9d823a9d1e600f22865998f706932bab10f0f01c5d44ec7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Outlaws' Fury",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Outlaws' Fury",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give controlled creatures +2/+0 and, if you control an outlaw permanent, exile the top card with permission to play it through your next turn",
+				"basis": "Creatures you control get +2/+0 until end of turn. If you control an outlaw, exile the top card of your library. Until the end of your next turn, you may play that card. (Assassins, Mercenaries, Pirates, Rogues, and Warlocks are outlaws.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2
+						}
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"subtypes": [
+										"Assassin",
+										"Mercenary",
+										"Pirate",
+										"Rogue",
+										"Warlock"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						"instructions": [
+							{
+								"do": "move",
+								"what": {
+									"top": 1,
+									"of": "you"
+								},
+								"to": "exile",
+								"reason": "exile",
+								"as": "exiled"
+							},
+							{
+								"do": "permit",
+								"what": "bound:exiled",
+								"who": "you",
+								"until": {
+									"endOfNextTurn": "you"
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

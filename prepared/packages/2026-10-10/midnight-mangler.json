@@ -1,0 +1,73 @@
+{
+	"card": "Midnight Mangler",
+	"generated": "2026-10-10",
+	"source": "cce5cf1cf90d0d035489417d480eb264324b84aecdc2d77e001c7661b2615694",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Midnight Mangler",
+		"registers": [
+			{
+				"basis": "During turns other than yours, this Vehicle is an artifact creature.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"turn": "opponent"
+				},
+				"change": {
+					"types": {
+						"add": [
+							"artifact",
+							"creature"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Midnight Mangler",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Midnight Mangler",
+				"basis": "Crew 2 (Tap any number of creatures you control with total power 2 or more: This Vehicle becomes an artifact creature until end of turn.)",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

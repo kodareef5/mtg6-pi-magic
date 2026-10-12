@@ -1,0 +1,68 @@
+{
+	"card": "Underwater Tunnel // Slimy Aquarium",
+	"generated": "2026-10-10",
+	"source": "803e6d100e6a78f57c6fda7cb42efac50b59c68f17aeb278812e27fe3c9c7248",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Underwater Tunnel // Slimy Aquarium",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When you unlock this door, surveil 2. (Look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When you unlock this door, manifest dread, then put a +1/+1 counter on that creature.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "manifest-dread",
+							"who": "you",
+							"as": "manifested"
+						},
+						{
+							"do": "counters",
+							"on": "bound:manifested",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		]
+	}
+}

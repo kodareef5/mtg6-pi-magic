@@ -1,0 +1,71 @@
+{
+	"card": "Tenured Concocter",
+	"generated": "2026-10-10",
+	"source": "39776bec8521a8982904b5c1d5a154528ac7f40bac2b08763b32bc9985e18dae",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tenured Concocter",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature becomes the target of a spell or ability an opponent controls, you may draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Infusion — This creature gets +2/+0 as long as you gained life this turn.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"history": "life-gained",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"power": 2,
+					"toughness": 0
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,170 @@
+{
+	"card": "Hungering Puppetbeast",
+	"generated": "2026-10-10",
+	"source": "c715899d9e8a974d3b602b53f798ec45ebcc2f695c3fcff8f46221539b89d092",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hungering Puppetbeast",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a Heartwood token. (It's a red and green artifact with \"{T}: Add {R} or {G}.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Heartwood Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Heartwood"
+								],
+								"colors": [
+									"R",
+									"G"
+								],
+								"registers": [
+									{
+										"basis": "{T}: Add {R} or {G}.",
+										"kind": "mana",
+										"cost": {
+											"tap": true
+										},
+										"colors": [
+											"R"
+										]
+									},
+									{
+										"basis": "{T}: Add {R} or {G}.",
+										"kind": "mana",
+										"cost": {
+											"tap": true
+										},
+										"colors": [
+											"G"
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hungering Puppetbeast",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another artifact to add a counter and choose trample, hexproof, or haste during resolution",
+				"basis": "{1}, Sacrifice another artifact: Put a +1/+1 counter on this creature. It gains your choice of trample, hexproof, or haste until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "trample-choice",
+						"instructions": [
+							{
+								"do": "modify",
+								"what": "this",
+								"until": "end-of-turn",
+								"change": {
+									"words": [
+										"trample"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"if": {
+							"not": {
+								"bound": "trample-choice"
+							}
+						},
+						"as": "hexproof-choice",
+						"instructions": [
+							{
+								"do": "modify",
+								"what": "this",
+								"until": "end-of-turn",
+								"change": {
+									"words": [
+										"hexproof"
+									]
+								}
+							}
+						]
+					},
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						},
+						"if": {
+							"all": [
+								{
+									"not": {
+										"bound": "trample-choice"
+									}
+								},
+								{
+									"not": {
+										"bound": "hexproof-choice"
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

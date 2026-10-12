@@ -1,0 +1,61 @@
+{
+	"card": "Syncopate",
+	"generated": "2026-10-10",
+	"source": "15606ca50ededb584213b4cd081ef7ab773f1e0edd3cd7e5d9993c591e14c0f9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Syncopate",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Syncopate",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Syncopate with chosen X",
+				"basis": "Counter target spell unless its controller pays {X}. If that spell is countered this way, exile it instead of putting it into its owner's graveyard.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"to": "exile",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{X}"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

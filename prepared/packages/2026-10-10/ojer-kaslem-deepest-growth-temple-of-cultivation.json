@@ -1,0 +1,197 @@
+{
+	"card": "Ojer Kaslem, Deepest Growth // Temple of Cultivation",
+	"generated": "2026-10-10",
+	"source": "baeeab50a4c1e95abd9c0a441e59cfd16cb6d81aff467ca3c57799465c4db82e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ojer Kaslem, Deepest Growth // Temple of Cultivation",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever Ojer Kaslem deals combat damage to a player, reveal that many cards from the top of your library. You may put a creature card and/or a land card from among them onto the battlefield. Put the rest on the bottom in a random order.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "reveal",
+							"what": {
+								"top": {
+									"event": "amount"
+								},
+								"of": "you"
+							},
+							"as": "revealed"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:revealed",
+								"types": [
+									"creature"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "creature"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:revealed",
+								"types": [
+									"land"
+								],
+								"not": {
+									"is": "bound:creature"
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"any": [
+									{
+										"is": "bound:creature"
+									},
+									{
+										"is": "bound:land"
+									}
+								]
+							},
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:revealed"
+							},
+							"position": "bottom",
+							"random": true
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "When Ojer Kaslem dies, return it to the battlefield tapped and transformed under its owner's control.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"tapped": true,
+							"face": 1,
+							"controller": "owner:event:object",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Ojer Kaslem, Deepest Growth // Temple of Cultivation",
+					"face": 1,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Transform Temple of Cultivation",
+				"basis": "{2}{G}, {T}: Transform this land. Activate only if you control ten or more permanents and only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}{G}",
+					"tap": true
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 10
+				},
+				"instructions": [
+					{
+						"do": "transform",
+						"what": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

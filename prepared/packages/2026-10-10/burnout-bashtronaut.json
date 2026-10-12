@@ -1,0 +1,89 @@
+{
+	"card": "Burnout Bashtronaut",
+	"generated": "2026-10-10",
+	"source": "876a1288ab9bf8d5a02ba3954abec4e0a4dac1bcf41137a2de113f6a638c4dac",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Burnout Bashtronaut",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Menace",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — This creature has double strike.",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Burnout Bashtronaut",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give this creature +1/+0 until end of turn.",
+				"basis": "{2}: This creature gets +1/+0 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

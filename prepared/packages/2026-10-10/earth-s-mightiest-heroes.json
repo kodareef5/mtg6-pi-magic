@@ -1,0 +1,146 @@
+{
+	"card": "Earth's Mightiest Heroes",
+	"generated": "2026-10-10",
+	"source": "9bc33af4c7a779f41f8b6afc2871485be466617a21a15adec84b74482c9bf1e0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Earth's Mightiest Heroes",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Earth's Mightiest Heroes",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast without teamwork",
+				"basis": "Teamwork 5 (As an additional cost to cast this spell, you may tap any number of creatures you control with total power 5 or more.) ... Reveal the top eight cards of your library. You may put a creature card from among them onto the battlefield. If this spell was cast using teamwork, put any number of creature cards from among them onto the battlefield instead. Put the rest into your graveyard.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "reveal",
+						"what": {
+							"top": 8,
+							"of": "you"
+						},
+						"as": "revealed"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:revealed",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:revealed"
+						},
+						"to": "graveyard",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Earth's Mightiest Heroes",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast using teamwork",
+				"basis": "Teamwork 5 (As an additional cost to cast this spell, you may tap any number of creatures you control with total power 5 or more.) ... Reveal the top eight cards of your library. You may put a creature card from among them onto the battlefield. If this spell was cast using teamwork, put any number of creature cards from among them onto the battlefield instead. Put the rest into your graveyard.",
+				"timing": "spell",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": false
+						},
+						"totalPower": 5
+					}
+				},
+				"instructions": [
+					{
+						"do": "reveal",
+						"what": {
+							"top": 8,
+							"of": "you"
+						},
+						"as": "revealed"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:revealed",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 8,
+						"upTo": true,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:revealed"
+						},
+						"to": "graveyard",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,81 @@
+{
+	"card": "Budding Insurgent",
+	"generated": "2026-10-10",
+	"source": "f8aa629c6bac39b54d57fcce5aef13f847fa70e46e5d5abeacf325b34a896491",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Budding Insurgent",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Budding Insurgent",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Budding Insurgent to destroy an artifact or enchantment, drawing if it was a legendary enchantment",
+				"basis": "Sacrifice this creature: Destroy target artifact or enchantment. If that permanent was a legendary enchantment, draw a card. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"types": [
+									"enchantment"
+								],
+								"supertypes": [
+									"legendary"
+								]
+							},
+							"lastKnown": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

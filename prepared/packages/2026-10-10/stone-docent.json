@@ -1,0 +1,45 @@
+{
+	"card": "Stone Docent",
+	"generated": "2026-10-10",
+	"source": "196abd933d87321a96a833c7d1173f27210c70d66c1800e84ddf300f75048c2e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stone Docent",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stone Docent",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Stone Docent from your graveyard to gain 2 life and surveil 1",
+				"basis": "{W}, Exile this card from your graveyard: You gain 2 life. Surveil 1. Activate only as a sorcery. (Look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{W}",
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

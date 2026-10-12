@@ -1,0 +1,84 @@
+{
+	"card": "Mudflat Village",
+	"generated": "2026-10-10",
+	"source": "d07a98aaccb4c68c0982b8ba240643b04e55f047190ba1373a0c4e3ce2d867fe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mudflat Village",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add {B}. Spend this mana only to cast a creature spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				],
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"creature"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mudflat Village",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Return a Bat, Lizard, Rat, or Squirrel card from your graveyard to your hand.",
+				"basis": "{1}{B}, {T}, Sacrifice this land: Return target Bat, Lizard, Rat, or Squirrel card from your graveyard to your hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Bat",
+								"Lizard",
+								"Rat",
+								"Squirrel"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

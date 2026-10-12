@@ -1,0 +1,95 @@
+{
+	"card": "Dazzling Denial",
+	"generated": "2026-10-10",
+	"source": "a7fa578b8d0d4f8b7991f5e11ec5f8efe4ceb1c187dd724e39dd429fb2d2e7d7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dazzling Denial",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Dazzling Denial; require four mana if I control a Bird, otherwise two",
+				"basis": "Counter target spell unless its controller pays {2}. If you control a Bird, counter that spell unless its controller pays {4} instead.",
+				"source": {
+					"card": "Dazzling Denial",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"subtypes": [
+										"Bird"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						"as": "bird-case",
+						"instructions": [
+							{
+								"do": "counter",
+								"what": "target:0",
+								"unless": {
+									"who": "controller:target:0",
+									"pays": {
+										"mana": "{4}"
+									}
+								}
+							}
+						]
+					},
+					{
+						"do": "counter",
+						"what": "target:0",
+						"if": {
+							"not": {
+								"bound": "bird-case"
+							}
+						},
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{2}"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

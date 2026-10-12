@@ -40,7 +40,7 @@
 							},
 							"tapped": true,
 							"spec": {
-								"name": "Zombie",
+								"name": "Zombie Token",
 								"types": [
 									"creature"
 								],
@@ -77,8 +77,7 @@
 								"creature"
 							],
 							"controller": "you",
-							"other": true,
-							"tapped": false
+							"other": true
 						},
 						"totalPower": 2
 					}

@@ -1,0 +1,100 @@
+{
+	"card": "Grave Researcher // Reanimate",
+	"generated": "2026-10-10",
+	"source": "c17335e73db66eb2db96e7b26fcbcb04b15fc93310230c51afb27f7d7e9705f1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Grave Researcher // Reanimate",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "At the beginning of your upkeep, surveil 1. Then if there are three or more creature cards in your graveyard, this creature becomes prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "prepare",
+							"what": "this",
+							"prepared": true,
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"types": [
+											"creature"
+										],
+										"token": false
+									}
+								},
+								"atLeast": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Grave Researcher // Reanimate",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Reanimate",
+				"basis": "Put target creature card from a graveyard onto the battlefield under your control. You lose life equal to that card's mana value.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"types": [
+								"creature"
+							],
+							"token": false
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"negate": {
+								"manaValue": "target:0"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

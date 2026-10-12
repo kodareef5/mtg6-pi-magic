@@ -1,0 +1,1190 @@
+{
+	"card": "Kithkeeper",
+	"generated": "2026-10-10",
+	"source": "22689763bd2146e60aad6c1f4cd83d661dfcbc4d9632672761a093efbe38c615",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kithkeeper",
+		"registers": [
+			{
+				"basis": "Vivid — When this creature enters, create X 1/1 green and white Kithkin creature tokens, where X is the number of colors among permanents you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "vivid-done",
+							"if": {
+								"all": [
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"W"
+												]
+											}
+										},
+										"atLeast": 1
+									},
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"U"
+												]
+											}
+										},
+										"atLeast": 1
+									},
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"B"
+												]
+											}
+										},
+										"atLeast": 1
+									},
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"R"
+												]
+											}
+										},
+										"atLeast": 1
+									},
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"G"
+												]
+											}
+										},
+										"atLeast": 1
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "token",
+									"count": 5,
+									"spec": {
+										"name": "Kithkin Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Kithkin"
+										],
+										"colors": [
+											"G",
+											"W"
+										],
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "vivid-done",
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "vivid-done"
+										}
+									},
+									{
+										"any": [
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											}
+										]
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "token",
+									"count": 4,
+									"spec": {
+										"name": "Kithkin Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Kithkin"
+										],
+										"colors": [
+											"G",
+											"W"
+										],
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "vivid-done",
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "vivid-done"
+										}
+									},
+									{
+										"any": [
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											}
+										]
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "token",
+									"count": 3,
+									"spec": {
+										"name": "Kithkin Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Kithkin"
+										],
+										"colors": [
+											"G",
+											"W"
+										],
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "vivid-done",
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "vivid-done"
+										}
+									},
+									{
+										"any": [
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											}
+										]
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "token",
+									"count": 2,
+									"spec": {
+										"name": "Kithkin Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Kithkin"
+										],
+										"colors": [
+											"G",
+											"W"
+										],
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "vivid-done",
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "vivid-done"
+										}
+									},
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"W",
+													"U",
+													"B",
+													"R",
+													"G"
+												]
+											}
+										},
+										"atLeast": 1
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Kithkin Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Kithkin"
+										],
+										"colors": [
+											"G",
+											"W"
+										],
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kithkeeper",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap three untapped creatures to give Kithkeeper +3/+0 and flying until end of turn",
+				"basis": "Tap three untapped creatures you control: This creature gets +3/+0 and gains flying until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": false
+						},
+						"count": 3
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

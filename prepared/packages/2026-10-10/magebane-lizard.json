@@ -1,0 +1,56 @@
+{
+	"card": "Magebane Lizard",
+	"generated": "2026-10-10",
+	"source": "d2353a6d112dee51d9cc626863649f9cab6e7cdacb4e5c9fc6eeedd22b2c7a0b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Magebane Lizard",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever a player casts a noncreature spell, this creature deals damage to that player equal to the number of noncreature spells they've cast this turn.",
+				"event": {
+					"on": "cast",
+					"by": "any",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"from": "this",
+							"to": "event:player",
+							"amount": {
+								"history": "cast",
+								"of": {
+									"zones": [
+										"stack"
+									],
+									"not": {
+										"types": [
+											"creature"
+										]
+									}
+								},
+								"by": "event:player"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

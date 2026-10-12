@@ -1,0 +1,132 @@
+{
+	"card": "Growing Rites of Itlimoc // Itlimoc, Cradle of the Sun",
+	"generated": "2026-10-10",
+	"source": "b08aba0c8eb02f7276d166a8335e4429ab55906ec3eeafd9b79e88be1fd34931",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Growing Rites of Itlimoc // Itlimoc, Cradle of the Sun",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When Growing Rites of Itlimoc enters, look at the top four cards of your library. You may reveal a creature card from among them and put it into your hand. Put the rest on the bottom of your library in any order.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 4,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"types": [
+									"creature"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "taken"
+						},
+						{
+							"do": "move",
+							"what": "bound:taken",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"position": "bottom"
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "At the beginning of your end step, if you control four or more creatures, transform Growing Rites of Itlimoc.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 4
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "transform",
+							"what": "this"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"face": 1,
+				"basis": "{T}: Add {G} for each creature you control.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"times": {
+					"count": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

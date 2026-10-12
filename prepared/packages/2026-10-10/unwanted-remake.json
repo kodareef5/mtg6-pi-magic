@@ -1,0 +1,48 @@
+{
+	"card": "Unwanted Remake",
+	"generated": "2026-10-10",
+	"source": "80a887507071f33359810f13ffb77dffe6cefcd81be01b6934ee085b7d91f57e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unwanted Remake",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unwanted Remake",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target creature; its controller manifests dread.",
+				"basis": "Destroy target creature. Its controller manifests dread. (That player looks at the top two cards of their library, then puts one onto the battlefield face down as a 2/2 creature and the other into their graveyard. If it's a creature card, it can be turned face up any time for its mana cost.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "keyword",
+						"name": "manifest-dread",
+						"who": "controller:target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,77 @@
+{
+	"card": "Loki, God of Mischief",
+	"generated": "2026-10-10",
+	"source": "c6bad13384a69330cf5b13bbc3ac5d7116213c92c695a28963c3ac57f9d73420",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Loki, God of Mischief",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever a player or permanent becomes the target of an ability you control, draw a card. This ability triggers only once each turn.",
+				"event": {
+					"on": "targeted",
+					"by": "you"
+				},
+				"triggerIf": {
+					"all": [
+						{
+							"is": "event:source",
+							"matches": {
+								"zones": [
+									"stack"
+								],
+								"ability": "any",
+								"controller": "you"
+							}
+						},
+						{
+							"any": [
+								{
+									"is": "event:object",
+									"matches": {
+										"zones": [
+											"battlefield"
+										]
+									}
+								},
+								{
+									"not": {
+										"is": "event:object",
+										"matches": {
+											"zones": [
+												"library",
+												"hand",
+												"battlefield",
+												"graveyard",
+												"stack",
+												"exile",
+												"command",
+												"outside"
+											]
+										}
+									}
+								}
+							]
+						}
+					]
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

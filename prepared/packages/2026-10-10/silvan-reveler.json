@@ -1,0 +1,118 @@
+{
+	"card": "Silvan Reveler",
+	"generated": "2026-10-10",
+	"source": "ec428e2c8d6daf60c4d40e6f59c214bd7fd50d4be9f246d318fde6200b5e1cbd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Silvan Reveler",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, draw a card, then discard a card. If you discard a land card this way, put it from your graveyard onto the battlefield tapped.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "chosen-discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen-discard",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "move",
+							"what": "bound:discarded",
+							"to": "battlefield",
+							"controller": "you",
+							"tapped": true,
+							"reason": "resolve",
+							"if": {
+								"is": "bound:discarded",
+								"matches": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"types": [
+										"land"
+									]
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Landfall — Whenever a land you control enters, you may pay {1}{G}{U}. If you do, return this card from your graveyard to your hand.",
+				"zones": [
+					"graveyard"
+				],
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{1}{G}{U}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "resolve",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

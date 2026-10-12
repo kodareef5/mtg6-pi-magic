@@ -1,0 +1,75 @@
+{
+	"card": "Slickshot Lockpicker",
+	"generated": "2026-10-10",
+	"source": "9b17c9cd4e8e9981056602a4db24f955d998d958a50ec338024014882ca6dc18",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Slickshot Lockpicker",
+		"registers": [
+			{
+				"basis": "When this creature enters, target instant or sorcery card in your graveyard gains flashback until end of turn. The flashback cost is equal to its mana cost. (You may cast that card from your graveyard for its flashback cost. Then exile it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"instant",
+									"sorcery"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "permit",
+							"what": "target:0",
+							"who": "you",
+							"mana": "printed",
+							"of": {
+								"types": [
+									"instant",
+									"sorcery"
+								]
+							},
+							"leavesStack": "exile",
+							"until": "end-of-turn"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Slickshot Lockpicker",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Slickshot Lockpicker",
+				"basis": "Plot {2}{U} (You may pay {2}{U} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{2}{U}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

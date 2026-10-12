@@ -1,0 +1,96 @@
+{
+	"card": "Dawn-Blessed Pennant",
+	"generated": "2026-10-10",
+	"source": "8913a0d9d113ff44e61a924cf3c8ebeef70f9b70b0bd80b94f72399c02030a34",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dawn-Blessed Pennant",
+		"registers": [
+			{
+				"basis": "As this artifact enters, choose Elemental, Elf, Faerie, Giant, Goblin, Kithkin, Merfolk, or Treefolk.",
+				"kind": "enters",
+				"choose": {
+					"as": "creatureType",
+					"options": [
+						"Elemental",
+						"Elf",
+						"Faerie",
+						"Giant",
+						"Goblin",
+						"Kithkin",
+						"Merfolk",
+						"Treefolk"
+					]
+				}
+			},
+			{
+				"basis": "Whenever a permanent you control of the chosen type enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"controller": "you",
+						"subtypes": {
+							"chosen": "creatureType"
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Return a card of the chosen type from your graveyard to your hand.",
+				"basis": "{2}, {T}, Sacrifice this artifact: Return target card of the chosen type from your graveyard to your hand.",
+				"source": {
+					"card": "Dawn-Blessed Pennant",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"subtypes": {
+								"chosen": "creatureType"
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

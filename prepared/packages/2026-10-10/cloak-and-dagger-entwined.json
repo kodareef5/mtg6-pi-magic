@@ -1,0 +1,108 @@
+{
+	"card": "Cloak and Dagger, Entwined",
+	"generated": "2026-10-10",
+	"source": "d6975991bb59820befdc125ab4562c96d618a3b93ec601dc51a7a3b95a5dbc66",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cloak and Dagger, Entwined",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Deathtouch, lifelink",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch",
+						"lifelink"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Cloak and Dagger enter, choose target opponent and up to one target creature they control. They reveal their hand. You may exile a nonland card from their hand or the chosen creature until Cloak and Dagger leave the battlefield.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						},
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "target:0"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "reveal",
+							"every": {
+								"zones": [
+									"hand"
+								],
+								"owner": "target:0"
+							},
+							"as": "hand"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"any": [
+									{
+										"zones": [
+											"hand"
+										],
+										"is": "bound:hand",
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									},
+									{
+										"zones": [
+											"battlefield"
+										],
+										"is": "target:1"
+									}
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "chosen"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

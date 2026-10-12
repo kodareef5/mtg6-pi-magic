@@ -1,0 +1,84 @@
+{
+	"card": "Marchesa, Dealer of Death",
+	"generated": "2026-10-10",
+	"source": "47fb1b710b87653b24c104895b614ae3837f80d01b354ca2ede78fd103240d3b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Marchesa, Dealer of Death",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you commit a crime, you may pay {1}. If you do, look at the top two cards of your library. Put one of them into your hand and the other into your graveyard. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.)",
+				"event": {
+					"on": "crime",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{1}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"bound": "paid"
+							},
+							"instructions": [
+								{
+									"do": "look",
+									"who": "you",
+									"what": {
+										"top": 2,
+										"of": "you"
+									},
+									"as": "looked"
+								},
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"is": "bound:looked"
+									},
+									"count": 1,
+									"as": "taken"
+								},
+								{
+									"do": "move",
+									"what": "bound:taken",
+									"to": "hand",
+									"reason": "resolve"
+								},
+								{
+									"do": "move",
+									"every": {
+										"zones": [
+											"library"
+										],
+										"is": "bound:looked"
+									},
+									"to": "graveyard",
+									"reason": "resolve"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

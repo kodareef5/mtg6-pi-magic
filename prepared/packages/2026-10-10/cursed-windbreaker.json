@@ -1,0 +1,95 @@
+{
+	"card": "Cursed Windbreaker",
+	"generated": "2026-10-10",
+	"source": "a5f5da76af918865eefe9d342ff97e26afde60a947f520d5fcf1145b8a66274c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cursed Windbreaker",
+		"registers": [
+			{
+				"basis": "When this Equipment enters, manifest dread, then attach this Equipment to that creature. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "manifest-dread",
+							"who": "you",
+							"as": "manifested"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:manifested"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature has flying.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					],
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Equip Cursed Windbreaker to target creature you control",
+				"basis": "Equip {3}",
+				"source": {
+					"card": "Cursed Windbreaker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"zones": [
+								"battlefield"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

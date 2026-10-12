@@ -1,0 +1,79 @@
+{
+	"card": "Midgar, City of Mako // Reactor Raid",
+	"generated": "2026-10-10",
+	"source": "08657edccd58d24e590ca66dbcc5c89875ad6798213e5a379d827158a5d7ea2d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Midgar, City of Mako // Reactor Raid",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"face": 0,
+				"basis": "{T}: Add {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Midgar, City of Mako // Reactor Raid",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Reactor Raid",
+				"basis": "You may sacrifice an artifact or creature. If you do, draw two cards. (Then exile this card. You may play the land later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"sacrifice": {
+								"choose": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"types": [
+										"artifact",
+										"creature"
+									]
+								},
+								"count": 1
+							}
+						},
+						"may": true,
+						"as": "sacrificed"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"bound": "sacrificed"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

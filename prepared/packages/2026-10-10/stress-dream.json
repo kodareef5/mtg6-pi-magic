@@ -1,0 +1,83 @@
+{
+	"card": "Stress Dream",
+	"generated": "2026-10-10",
+	"source": "5c1acf2a7ffdff288ee5e04e5b5d8ba83b7db77cc2cac21462ee8b878ab8726c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stress Dream",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stress Dream",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Stress Dream",
+				"basis": "Stress Dream deals 5 damage to up to one target creature. Look at the top two cards of your library. Put one of those cards into your hand and the other on the bottom of your library.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 5
+					},
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 2,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"count": 1,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

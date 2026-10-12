@@ -1,0 +1,133 @@
+{
+	"card": "Great Gilded Boat",
+	"generated": "2026-10-10",
+	"source": "e3e4a5d7ad512c0a794cdfcd0fcbf798003b0131439cb504c45ef8e6c5bda4a0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Great Gilded Boat",
+		"registers": [
+			{
+				"basis": "Whenever you attack, recruit. (Draw a card, then discard a card. If you discarded a nonland card, create a 1/1 white Human Soldier creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "card"
+						},
+						{
+							"do": "move",
+							"what": "bound:card",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"is": "bound:discarded",
+								"matches": {
+									"zones": [
+										"graveyard",
+										"exile",
+										"battlefield",
+										"stack",
+										"command"
+									],
+									"not": {
+										"types": [
+											"land"
+										]
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Great Gilded Boat",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Great Gilded Boat",
+				"basis": "Crew 2 (Tap any number of creatures you control with total power 2 or more: This Vehicle becomes an artifact creature until end of turn.)",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

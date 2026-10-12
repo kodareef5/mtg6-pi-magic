@@ -1,0 +1,100 @@
+{
+	"card": "Burning Curiosity",
+	"generated": "2026-10-10",
+	"source": "311013c85b1f26cf9470c30b720b21a3a0442a9f3c3f0fc211ee0bdf5cb9e7a6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Burning Curiosity",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Burning Curiosity",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Burning Curiosity without blighting",
+				"basis": "As an additional cost to cast this spell, you may blight 1. (You may put a -1/-1 counter on a creature you control.)\nExile the top two cards of your library. If this spell's additional cost was paid, exile the top three cards instead. Until the end of your next turn, you may play those cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 2,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": {
+							"endOfNextTurn": "you"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Burning Curiosity",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Burning Curiosity with blight 1",
+				"basis": "As an additional cost to cast this spell, you may blight 1. (You may put a -1/-1 counter on a creature you control.)\nExile the top two cards of your library. If this spell's additional cost was paid, exile the top three cards instead. Until the end of your next turn, you may play those cards.",
+				"timing": "spell",
+				"cost": {
+					"counters": {
+						"kind": "-1/-1",
+						"count": 1,
+						"put": true,
+						"on": {
+							"choose": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"count": 1
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 3,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": {
+							"endOfNextTurn": "you"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

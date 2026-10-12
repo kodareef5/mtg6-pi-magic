@@ -1,0 +1,84 @@
+{
+	"card": "Pitiless Carnage",
+	"generated": "2026-10-10",
+	"source": "fa8d5b82a274dea8746055d7945a88f7e3b92e03724323e084b6faf84cbe0a0c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pitiless Carnage",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pitiless Carnage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pitiless Carnage",
+				"basis": "Sacrifice any number of permanents you control, then draw that many cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you"
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you"
+							}
+						},
+						"upTo": true,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "graveyard",
+						"reason": "sacrifice",
+						"countFrom": "battlefield",
+						"as": "sacrificed"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"bound": "sacrificed"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Pitiless Carnage",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Pitiless Carnage",
+				"basis": "Plot {1}{B}{B} (You may pay {1}{B}{B} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{1}{B}{B}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

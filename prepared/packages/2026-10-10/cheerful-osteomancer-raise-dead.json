@@ -1,0 +1,56 @@
+{
+	"card": "Cheerful Osteomancer // Raise Dead",
+	"generated": "2026-10-10",
+	"source": "6f74cb41fd1a12a0cfa636d4650eef51042dfeda4ede46829838f7ed75e252dd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cheerful Osteomancer // Raise Dead",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Cheerful Osteomancer // Raise Dead",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Raise Dead copy",
+				"basis": "Return target creature card from your graveyard to your hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

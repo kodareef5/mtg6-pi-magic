@@ -1,0 +1,107 @@
+{
+	"card": "Patient Instructor",
+	"generated": "2026-10-10",
+	"source": "8826017a66f7e14ded9d72a424ca0586af4af721b63c40bd2acd09570a82abc3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Patient Instructor",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, recruit. (Draw a card, then discard a card. If you discarded a nonland card, create a 1/1 white Human Soldier creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "chosen-discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen-discard",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"is": "bound:discarded",
+								"matches": {
+									"zones": [
+										"battlefield",
+										"graveyard",
+										"exile",
+										"stack",
+										"command",
+										"outside"
+									],
+									"not": {
+										"types": [
+											"land"
+										]
+									}
+								},
+								"lastKnown": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

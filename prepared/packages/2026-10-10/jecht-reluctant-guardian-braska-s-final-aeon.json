@@ -1,0 +1,138 @@
+{
+	"card": "Jecht, Reluctant Guardian // Braska's Final Aeon",
+	"generated": "2026-10-10",
+	"source": "0b699568d281d9876ba6b9c14ac0e0a572f9b0bf4efbb13feea90b656c35f71b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jecht, Reluctant Guardian // Braska's Final Aeon",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever Jecht deals combat damage to a player, you may exile it, then return it to the battlefield transformed under its owner's control.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "exile",
+							"reason": "exile",
+							"as": "jecht"
+						},
+						{
+							"do": "move",
+							"what": "bound:jecht",
+							"to": "battlefield",
+							"face": 1,
+							"controller": "owner:bound:jecht",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "I, II — Jecht Beam — Each opponent discards a card and you draw a card.",
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": 1,
+							"actions": [
+								{
+									"discard": true
+								}
+							]
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "III — Ultimate Jecht Shot — Each opponent sacrifices two creatures of their choice.",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": 2,
+							"actions": [
+								{
+									"sacrifice": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,165 @@
+{
+	"card": "Vivien Reid",
+	"generated": "2026-10-10",
+	"source": "d01a1b3caf88430479d7485f568d2dcff481c12f78c6d1362224c2d259ac3ab9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vivien Reid",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vivien Reid",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Look at four cards and optionally take a creature or land",
+				"basis": "+1: Look at the top four cards of your library. You may reveal a creature or land card from among them and put it into your hand. Put the rest on the bottom of your library in a random order.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": 1
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 4,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"types": [
+								"creature",
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Vivien Reid",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Destroy an artifact, enchantment, or flying creature",
+				"basis": "−3: Destroy target artifact, enchantment, or creature with flying.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": -3
+				},
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									],
+									"words": [
+										"flying"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Vivien Reid",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create Vivien's emblem",
+				"basis": "−8: You get an emblem with \"Creatures you control get +2/+2 and have vigilance, trample, and indestructible.\"",
+				"timing": "stack",
+				"cost": {
+					"loyalty": -8
+				},
+				"instructions": [
+					{
+						"do": "emblem",
+						"who": "you",
+						"registers": [
+							{
+								"kind": "continuous",
+								"basis": "Creatures you control get +2/+2 and have vigilance, trample, and indestructible.",
+								"affects": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								},
+								"change": {
+									"power": 2,
+									"toughness": 2,
+									"words": [
+										"vigilance",
+										"trample",
+										"indestructible"
+									]
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

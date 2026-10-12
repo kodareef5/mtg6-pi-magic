@@ -1,0 +1,132 @@
+{
+	"card": "Choco, Seeker of Paradise",
+	"generated": "2026-10-10",
+	"source": "081a89615d8c09964c976886dbb8d2122079cbda263a53af336ed72e5c722cdc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Choco, Seeker of Paradise",
+		"registers": [
+			{
+				"basis": "Whenever one or more Birds you control attack, look at that many cards from the top of your library. You may put one of them into your hand. Then put any number of land cards from among them onto the battlefield tapped and the rest into your graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"of": {
+						"subtypes": [
+							"Bird"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": {
+									"event": "amount"
+								},
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "taken"
+						},
+						{
+							"do": "move",
+							"what": "bound:taken",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"types": [
+									"land"
+								]
+							},
+							"count": {
+								"count": {
+									"zones": [
+										"library"
+									],
+									"is": "bound:looked",
+									"types": [
+										"land"
+									]
+								}
+							},
+							"upTo": true,
+							"as": "lands"
+						},
+						{
+							"do": "move",
+							"what": "bound:lands",
+							"to": "battlefield",
+							"controller": "you",
+							"tapped": true,
+							"reason": "resolve"
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"to": "graveyard",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, Choco gets +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"card": "Three Tree City",
+	"generated": "2026-10-10",
+	"source": "e033d26d70a4f848f325bbc23b69971e495823d67bf2bf47d7ab2ac7ef6fab96",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Three Tree City",
+		"registers": [
+			{
+				"basis": "As Three Tree City enters, choose a creature type.",
+				"kind": "enters",
+				"choose": {
+					"as": "creatureType",
+					"from": "creature-type"
+				}
+			},
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{2}, {T}: Choose a color. Add an amount of mana of that color equal to the number of creatures you control of the chosen type.",
+				"kind": "mana",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"any": 1,
+				"times": {
+					"count": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"subtypes": {
+							"chosen": "creatureType"
+						}
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

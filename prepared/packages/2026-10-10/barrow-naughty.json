@@ -1,0 +1,87 @@
+{
+	"card": "Barrow Naughty",
+	"generated": "2026-10-10",
+	"source": "fc362c6f2ae910937b28fdf199a87a0278470b061575d416f2af432228c602ae",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Barrow Naughty",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "This creature has lifelink as long as you control another Faerie.",
+				"kind": "continuous",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Faerie"
+							],
+							"controller": "you",
+							"other": true
+						}
+					},
+					"atLeast": 1
+				},
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self",
+					"card": "Barrow Naughty"
+				},
+				"claim": "Pump Barrow Naughty",
+				"basis": "{2}{B}: This creature gets +1/+0 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{B}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

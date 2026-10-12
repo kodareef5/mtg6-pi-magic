@@ -1,0 +1,72 @@
+{
+	"card": "Whiplash, Vengeful Engineer",
+	"generated": "2026-10-10",
+	"source": "6ca5628d4a30a7c53dc3a0349cf919c3cdcadf4ae78510f091711e9968219b87",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Whiplash, Vengeful Engineer",
+		"registers": [
+			{
+				"basis": "Whiplash enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "Whenever Whiplash attacks, if he's equipped, each opponent loses X life and you gain X life, where X is the number of Equipment attached to him.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"subtypes": [
+								"Equipment"
+							],
+							"attachedTo": "this"
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": {
+								"negate": {
+									"count": {
+										"subtypes": [
+											"Equipment"
+										],
+										"attachedTo": "this"
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"count": {
+									"subtypes": [
+										"Equipment"
+									],
+									"attachedTo": "this"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

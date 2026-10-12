@@ -1,0 +1,57 @@
+{
+	"card": "Living Library",
+	"generated": "2026-10-10",
+	"source": "29c2491e43c2f08232ac7b86fbff20c5746200f8883a7b02645ff7b20fa734bb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Living Library",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Living Library",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Living Library to shuffle an opposing creature or planeswalker into its owner's library",
+				"basis": "{6}, Sacrifice this creature: Choose target creature or planeswalker an opponent controls. Its owner shuffles it into their library.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "owner:target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

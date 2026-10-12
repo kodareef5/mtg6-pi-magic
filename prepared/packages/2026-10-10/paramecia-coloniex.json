@@ -1,0 +1,87 @@
+{
+	"card": "Paramecia Coloniex",
+	"generated": "2026-10-10",
+	"source": "f2a510320235e7c36ff2f108c3db3fb1ad1f812dd0553922d060325c7c2d7d7a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Paramecia Coloniex",
+		"registers": [
+			{
+				"basis": "When this creature enters, mill three cards. (Put the top three cards of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, you may exile it. When you do, put target creature card from your graveyard on top of your library.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "exile",
+							"reason": "exile",
+							"may": true,
+							"as": "exiled"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "exiled"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"creature"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "library",
+										"position": "top",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

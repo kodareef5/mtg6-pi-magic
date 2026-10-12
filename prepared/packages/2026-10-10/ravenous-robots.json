@@ -1,0 +1,87 @@
+{
+	"card": "Ravenous Robots",
+	"generated": "2026-10-10",
+	"source": "54e320d9f8dba91be653c8884094079d59ee65faefc106c8b9067ba2dbb9e975",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ravenous Robots",
+		"registers": [
+			{
+				"basis": "Whenever you cast an artifact spell, create a 1/1 colorless Robot artifact creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact"
+						]
+					},
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Robot Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Robot"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ravenous Robots",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give creature tokens you control haste until end of turn",
+				"basis": "{R}, {T}: Creature tokens you control gain haste until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{R}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"token": true,
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

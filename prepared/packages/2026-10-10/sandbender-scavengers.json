@@ -1,0 +1,97 @@
+{
+	"card": "Sandbender Scavengers",
+	"generated": "2026-10-10",
+	"source": "25ce67ef5ea274b4b6266c3c24f5c486da46a40a910e6b7d4f0b8ab9b163336e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sandbender Scavengers",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you sacrifice another permanent, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature dies, you may exile it. When you do, return target creature card with mana value less than or equal to this creature's power from your graveyard to the battlefield.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "exile",
+							"reason": "exile",
+							"may": true,
+							"as": "exiled"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "exiled"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"creature"
+											],
+											"manaValue": {
+												"atMost": {
+													"power": "this"
+												}
+											}
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "battlefield",
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

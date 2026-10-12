@@ -1,0 +1,168 @@
+{
+	"card": "Camellia, the Seedmiser",
+	"generated": "2026-10-10",
+	"source": "c8bc1421d4aa623ae4fa27e0fe792b7f245dc435a742b2232cca8138340e2c3c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Camellia, the Seedmiser",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Menace",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Other Squirrels you control have menace.",
+				"affects": {
+					"subtypes": [
+						"Squirrel"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you sacrifice one or more Foods, create a 1/1 green Squirrel creature token.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"subtypes": [
+							"Food"
+						]
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Squirrel Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Squirrel"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Camellia, the Seedmiser",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Forage by exiling three graveyard cards; put counters on other Squirrels",
+				"basis": "{2}, Forage: Put a +1/+1 counter on each other Squirrel you control. (To forage, exile three cards from your graveyard or sacrifice a Food.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"exile": {
+						"choose": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						},
+						"count": 3
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"every": {
+							"subtypes": [
+								"Squirrel"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Camellia, the Seedmiser",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Forage by sacrificing a Food; put counters on other Squirrels",
+				"basis": "{2}, Forage: Put a +1/+1 counter on each other Squirrel you control. (To forage, exile three cards from your graveyard or sacrifice a Food.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Food"
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"every": {
+							"subtypes": [
+								"Squirrel"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,86 @@
+{
+	"card": "Opera Love Song",
+	"generated": "2026-10-10",
+	"source": "a9299f01aab6a929876b725bf4de75b71414a434ad3cf734714f2a40bf411565",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Opera Love Song",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Opera Love Song: exile two cards and permit playing them until your next end step",
+				"basis": "Choose one — ... Exile the top two cards of your library. You may play those cards until your next end step.",
+				"source": {
+					"card": "Opera Love Song",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 2,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": {
+							"nextEndStep": "you"
+						}
+					}
+				]
+			},
+			{
+				"claim": "Opera Love Song: give one or two creatures +2/+0 until end of turn",
+				"basis": "Choose one — ... One or two target creatures each get +2/+0 until end of turn.",
+				"source": {
+					"card": "Opera Love Song",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"atLeast": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

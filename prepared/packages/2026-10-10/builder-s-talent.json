@@ -1,0 +1,219 @@
+{
+	"card": "Builder's Talent",
+	"generated": "2026-10-10",
+	"source": "9580778b23f73531793107466c3427678266dff7164dac67524017f18e9c5fb1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Builder's Talent",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this Class enters, create a 0/4 white Wall creature token with defender.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Wall Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Wall"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 0,
+								"toughness": 4,
+								"words": [
+									"defender"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{W}: Level 2",
+				"cost": {
+					"mana": "{W}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 1,
+							"atMost": 1
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Whenever one or more noncreature, nonland permanents you control enter, put a +1/+1 counter on target creature you control.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 2
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "Whenever one or more noncreature, nonland permanents you control enter, put a +1/+1 counter on target creature you control.",
+							"event": {
+								"on": "enters",
+								"of": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"not": {
+										"types": [
+											"creature",
+											"land"
+										]
+									}
+								},
+								"batch": true
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "counters",
+										"on": "target:0",
+										"kind": "+1/+1",
+										"amount": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{4}{W}: Level 3",
+				"cost": {
+					"mana": "{4}{W}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 2,
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "When this Class becomes level 3, return target noncreature, nonland permanent card from your graveyard to the battlefield.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 3
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "When this Class becomes level 3, return target noncreature, nonland permanent card from your graveyard to the battlefield.",
+							"event": {
+								"on": "level",
+								"of": {
+									"is": "this"
+								},
+								"level": 3
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact",
+												"battle",
+												"enchantment",
+												"planeswalker"
+											],
+											"not": {
+												"types": [
+													"creature",
+													"land"
+												]
+											}
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "battlefield",
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

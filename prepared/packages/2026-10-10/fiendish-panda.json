@@ -1,0 +1,78 @@
+{
+	"card": "Fiendish Panda",
+	"generated": "2026-10-10",
+	"source": "5d9afe60ad3d847d10f02a215fa05b65ae833293707a08f16ec1bc1487df5592",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fiendish Panda",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature dies, return another target non-Bear creature card with mana value less than or equal to this creature's power from your graveyard to the battlefield.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"other": true,
+								"not": {
+									"subtypes": [
+										"Bear"
+									]
+								},
+								"manaValue": {
+									"atMost": {
+										"power": "this"
+									}
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

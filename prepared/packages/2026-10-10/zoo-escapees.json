@@ -1,0 +1,80 @@
+{
+	"card": "Zoo Escapees",
+	"generated": "2026-10-10",
+	"source": "d8f3fb9900bb05e6e612549204888280a252e7bdf15a3855e7f4e2fcc0b86b0b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zoo Escapees",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature leaves the battlefield, create a Mutagen token. (It's an artifact with \"{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.\")",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Mutagen Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Mutagen"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.",
+										"speed": "sorcery",
+										"cost": {
+											"mana": "{1}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"zones": [
+															"battlefield"
+														],
+														"types": [
+															"creature"
+														]
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "counters",
+													"on": "target:0",
+													"kind": "+1/+1",
+													"amount": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

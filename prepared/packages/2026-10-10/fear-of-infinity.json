@@ -1,0 +1,112 @@
+{
+	"card": "Fear of Infinity",
+	"generated": "2026-10-10",
+	"source": "8d519104fbf77a7f14f2b5437b9eb1c18ee501729bfe556612bc9b241bae7533",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fear of Infinity",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, lifelink",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"lifelink"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "This creature can't block.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"can't block"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Eerie — Whenever an enchantment you control enters and whenever you fully unlock a Room, you may return this card from your graveyard to your hand.",
+				"zones": [
+					"graveyard"
+				],
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "bounce",
+							"may": true
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Eerie — Whenever an enchantment you control enters and whenever you fully unlock a Room, you may return this card from your graveyard to your hand.",
+				"zones": [
+					"graveyard"
+				],
+				"event": {
+					"on": "unlocks",
+					"by": "you",
+					"fully": true,
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"enchantment"
+						],
+						"subtypes": [
+							"Room"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "bounce",
+							"may": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

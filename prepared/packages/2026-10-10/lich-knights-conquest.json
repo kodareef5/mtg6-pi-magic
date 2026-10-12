@@ -1,0 +1,107 @@
+{
+	"card": "Lich-Knights' Conquest",
+	"generated": "2026-10-10",
+	"source": "2160cbd221c3a43b5df1b1f6acfdfd8fb5e42c27e2fc51e8223c61391ec38a46",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lich-Knights' Conquest",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lich-Knights' Conquest",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Sacrifice any number of eligible permanents, then return that many creature cards",
+				"basis": "Sacrifice any number of artifacts, enchantments, and/or tokens. Return that many creature cards from your graveyard to the battlefield.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"token": true
+								}
+							]
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you",
+								"any": [
+									{
+										"types": [
+											"artifact",
+											"enchantment"
+										]
+									},
+									{
+										"token": true
+									}
+								]
+							}
+						},
+						"upTo": true,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "graveyard",
+						"reason": "sacrifice",
+						"countFrom": "battlefield",
+						"as": "sacrificed"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						},
+						"count": {
+							"bound": "sacrificed"
+						},
+						"as": "creatures"
+					},
+					{
+						"do": "move",
+						"what": "bound:creatures",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

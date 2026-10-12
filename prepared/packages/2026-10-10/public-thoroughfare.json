@@ -1,0 +1,72 @@
+{
+	"card": "Public Thoroughfare",
+	"generated": "2026-10-10",
+	"source": "f15acf21909eddcebfe5afb46910254e08694a7e7679bb0623d21dfcc987a046",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Public Thoroughfare",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "When this land enters, sacrifice it unless you tap an untapped artifact or land you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"tap": {
+									"choose": {
+										"types": [
+											"artifact",
+											"land"
+										],
+										"controller": "you",
+										"tapped": false
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice",
+							"if": {
+								"not": {
+									"bound": "paid"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

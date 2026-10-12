@@ -1,0 +1,105 @@
+{
+	"card": "Warrior's Sword",
+	"generated": "2026-10-10",
+	"source": "896178a95cfaf3de09a98024e461d6c51689f96ac1d051e485a4991fcd486f4b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Warrior's Sword",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Job select (When this Equipment enters, create a 1/1 colorless Hero creature token, then attach this to it.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Hero Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							},
+							"as": "hero"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:hero"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +3/+2 and is a Warrior in addition to its other types.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 3,
+					"toughness": 2,
+					"subtypes": {
+						"add": [
+							"Warrior"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Equip Warrior's Sword",
+				"basis": "Equip {5} ({5}: Attach to target creature you control. Equip only as a sorcery.)",
+				"source": {
+					"card": "Warrior's Sword",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{5}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,119 @@
+{
+	"card": "Ill-Timed Explosion",
+	"generated": "2026-10-10",
+	"source": "be5db825ddaf12880eda1b181edda03a435aa05c77f4e3d5b38fcfdb68480618",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ill-Timed Explosion",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ill-Timed Explosion",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ill-Timed Explosion",
+				"basis": "Draw two cards. Then you may discard two cards. When you do, Ill-Timed Explosion deals X damage to each creature, where X is the greatest mana value among cards discarded this way.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"hand"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 2
+						},
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"hand"
+									],
+									"controller": "you"
+								},
+								"count": 2,
+								"as": "discard-cards"
+							},
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"hand"
+									],
+									"controller": "you",
+									"is": "bound:discard-cards",
+									"manaValue": {
+										"atLeast": {
+											"aggregate": "max",
+											"of": {
+												"zones": [
+													"hand"
+												],
+												"controller": "you",
+												"is": "bound:discard-cards"
+											},
+											"value": "manaValue"
+										}
+									}
+								},
+								"count": 1,
+								"as": "highest"
+							},
+							{
+								"do": "move",
+								"what": "bound:discard-cards",
+								"to": "graveyard",
+								"reason": "discard"
+							},
+							{
+								"do": "reflect",
+								"effect": {
+									"instructions": [
+										{
+											"do": "damage",
+											"every": {
+												"zones": [
+													"battlefield"
+												],
+												"types": [
+													"creature"
+												]
+											},
+											"amount": {
+												"manaValue": "bound:highest"
+											},
+											"from": "this"
+										}
+									]
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

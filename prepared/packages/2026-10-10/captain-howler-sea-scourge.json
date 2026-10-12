@@ -1,0 +1,101 @@
+{
+	"card": "Captain Howler, Sea Scourge",
+	"generated": "2026-10-10",
+	"source": "e37fb28e36703cd721c7a90e9723ec351313938cdd642cb474b11a9fe6a0cef2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Captain Howler, Sea Scourge",
+		"registers": [
+			{
+				"basis": "Ward—{2}, Pay 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}",
+									"life": 2
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you discard one or more cards, target creature gets +2/+0 until end of turn for each card discarded this way. Whenever that creature deals combat damage to a player this turn, you draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "discarded",
+					"by": "you",
+					"batch": true
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"sum": [
+										{
+											"event": "amount"
+										},
+										{
+											"event": "amount"
+										}
+									]
+								}
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "combat-damage",
+								"of": {
+									"is": "target:0"
+								},
+								"player": true
+							},
+							"until": "end-of-turn",
+							"effect": {
+								"instructions": [
+									{
+										"do": "draw",
+										"who": "you",
+										"count": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

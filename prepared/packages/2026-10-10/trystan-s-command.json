@@ -1,0 +1,337 @@
+{
+	"card": "Trystan's Command",
+	"generated": "2026-10-10",
+	"source": "2a0c0164c669df263634c1498c3b00dcf54e18ec97da899c20348c62690736d3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Trystan's Command",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Trystan's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and graveyard return",
+				"basis": "Choose two — ... • Create a token that's a copy of target Elf you control. ... • Return one or two target permanent cards from your graveyard to your hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Elf"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						},
+						"count": 2,
+						"atLeast": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "move",
+						"what": "target:1",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trystan's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and destruction",
+				"basis": "Choose two — ... • Create a token that's a copy of target Elf you control. ... • Destroy target creature or enchantment.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Elf"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "destroy",
+						"what": "target:1"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trystan's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and creature boost with untap",
+				"basis": "Choose two — ... • Create a token that's a copy of target Elf you control. ... • Creatures target player controls get +3/+3 until end of turn. Untap them.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Elf"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:1"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3
+						},
+						"as": "boosted"
+					},
+					{
+						"do": "untap",
+						"what": "bound:boosted"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trystan's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose graveyard return and destruction",
+				"basis": "Choose two — ... • Return one or two target permanent cards from your graveyard to your hand. ... • Destroy target creature or enchantment.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						},
+						"count": 2,
+						"atLeast": 1
+					},
+					{
+						"object": {
+							"types": [
+								"creature",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "destroy",
+						"what": "target:1"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trystan's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose graveyard return and creature boost with untap",
+				"basis": "Choose two — ... • Return one or two target permanent cards from your graveyard to your hand. ... • Creatures target player controls get +3/+3 until end of turn. Untap them.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						},
+						"count": 2,
+						"atLeast": 1
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:1"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3
+						},
+						"as": "boosted"
+					},
+					{
+						"do": "untap",
+						"what": "bound:boosted"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trystan's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose destruction and creature boost with untap",
+				"basis": "Choose two — ... • Destroy target creature or enchantment. ... • Creatures target player controls get +3/+3 until end of turn. Untap them.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"enchantment"
+							]
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:1"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3
+						},
+						"as": "boosted"
+					},
+					{
+						"do": "untap",
+						"what": "bound:boosted"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,185 @@
+{
+	"card": "Along the Crooked Way",
+	"generated": "2026-10-10",
+	"source": "049918d67b13023d47983e37d341dca95c504a404b549d980d0a887c99277a98",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Along the Crooked Way",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this enchantment enters, return target creature card from your graveyard to your hand.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"token": false
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a creature card leaves your graveyard, amass Goblins 1.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"types": [
+							"creature"
+						],
+						"token": false
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Goblin Army Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Goblin",
+									"Army"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 0,
+								"toughness": 0
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Army"
+										],
+										"controller": "you"
+									}
+								},
+								"atMost": 0
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Army"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "army"
+						},
+						{
+							"do": "counters",
+							"on": "bound:army",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "modify",
+							"what": "bound:army",
+							"until": "indefinite",
+							"change": {
+								"subtypes": {
+									"add": [
+										"Goblin"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Along the Crooked Way",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant menace to Goblins and Orcs you control",
+				"basis": "{1}{B}: Goblins and Orcs you control gain menace until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Goblin",
+								"Orc"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"menace"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

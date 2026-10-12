@@ -1,0 +1,70 @@
+{
+	"card": "Narset, Jeskai Waymaster",
+	"generated": "2026-10-10",
+	"source": "bb6bf4ec7648848fc34f80dbbfb84b5836290c5b2a6f0e15ae82f80db2dd5920",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Narset, Jeskai Waymaster",
+		"registers": [
+			{
+				"basis": "At the beginning of your end step, you may discard your hand. If you do, draw cards equal to the number of spells you've cast this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "move",
+									"every": {
+										"zones": [
+											"hand"
+										],
+										"controller": "you"
+									},
+									"to": "graveyard",
+									"reason": "discard"
+								},
+								{
+									"do": "draw",
+									"who": "you",
+									"count": {
+										"history": "cast",
+										"by": "you",
+										"of": {
+											"zones": [
+												"stack"
+											],
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"instant",
+												"kindred",
+												"planeswalker",
+												"sorcery"
+											]
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

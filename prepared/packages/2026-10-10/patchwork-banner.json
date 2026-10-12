@@ -1,0 +1,48 @@
+{
+	"card": "Patchwork Banner",
+	"generated": "2026-10-10",
+	"source": "ea7e8504c1491c091b72b0a1e443a0debc99c6adfd852066f4abf327cb9b4da6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Patchwork Banner",
+		"registers": [
+			{
+				"basis": "As this artifact enters, choose a creature type.",
+				"kind": "enters",
+				"choose": {
+					"as": "creatureType",
+					"from": "creature-type"
+				}
+			},
+			{
+				"basis": "Creatures you control of the chosen type get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"subtypes": {
+						"chosen": "creatureType"
+					}
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

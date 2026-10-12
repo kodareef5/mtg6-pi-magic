@@ -1,0 +1,117 @@
+{
+	"card": "Restless Bivouac",
+	"generated": "2026-10-10",
+	"source": "2f07dc24ed0e005bbe322b1c94beaab55889f5ff97da548beaf75507fe82c245",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Restless Bivouac",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {R} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {R} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"basis": "Whenever this land attacks, put a +1/+1 counter on target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Restless Bivouac",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Animate Restless Bivouac",
+				"basis": "{1}{R}{W}: This land becomes a 2/2 red and white Ox creature until end of turn. It's still a land.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"set": [
+									"Ox"
+								],
+								"of": "creature"
+							},
+							"colors": {
+								"set": [
+									"R",
+									"W"
+								]
+							},
+							"base": {
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

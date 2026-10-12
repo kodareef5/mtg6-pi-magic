@@ -1,0 +1,62 @@
+{
+	"card": "Goblin Glasswright // Craft with Pride",
+	"generated": "2026-10-10",
+	"source": "72b5d80fbe5cbc7a46e65f866fd4f42d1e9cfd665f6e49b44bea823233edea32",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goblin Glasswright // Craft with Pride",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared.",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Goblin Glasswright // Craft with Pride",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Craft with Pride",
+				"basis": "Create a Treasure token.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Treasure Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

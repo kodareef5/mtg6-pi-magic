@@ -1,0 +1,99 @@
+{
+	"card": "Talion's Messenger",
+	"generated": "2026-10-10",
+	"source": "4f064793054d2f8fb9320d27f01280d18f658463333e8631bca73494b7dc7e68",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Talion's Messenger",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you attack with one or more Faeries, draw a card, then discard a card. When you discard a card this way, put a +1/+1 counter on target Faerie you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"subtypes": [
+							"Faerie"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "chosen-discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen-discard",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "discarded"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"subtypes": [
+												"Faerie"
+											],
+											"controller": "you"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "counters",
+										"on": "target:0",
+										"kind": "+1/+1",
+										"amount": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

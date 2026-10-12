@@ -1,0 +1,149 @@
+{
+	"card": "Fecund Greenshell",
+	"generated": "2026-10-10",
+	"source": "92565ef2faf014d588e9e11ec1623ef8b1a007eb64866c5e7f12b3842bf108e5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fecund Greenshell",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "As long as you control ten or more lands, creatures you control get +2/+2.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 10
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2
+				}
+			},
+			{
+				"basis": "Whenever this creature or another creature you control with toughness greater than its power enters, look at the top card of your library. If it's a land card, you may put it onto the battlefield tapped. Otherwise, put it into your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						]
+					}
+				},
+				"triggerIf": {
+					"any": [
+						{
+							"is": "event:object",
+							"matches": {
+								"is": "this"
+							}
+						},
+						{
+							"amount": {
+								"toughness": "event:object"
+							},
+							"atLeast": {
+								"sum": [
+									{
+										"power": "event:object"
+									},
+									1
+								]
+							}
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "move",
+							"what": "bound:looked",
+							"to": "battlefield",
+							"controller": "you",
+							"tapped": true,
+							"reason": "resolve",
+							"may": true,
+							"if": {
+								"is": "bound:looked",
+								"matches": {
+									"zones": [
+										"library"
+									],
+									"types": [
+										"land"
+									]
+								}
+							}
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							},
+							"to": "hand",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

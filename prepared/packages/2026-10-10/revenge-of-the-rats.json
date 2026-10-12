@@ -1,0 +1,72 @@
+{
+	"card": "Revenge of the Rats",
+	"generated": "2026-10-10",
+	"source": "7aefe2229b4bedd5045545611e7d0102d8f310a44afb40136e2e559e9888b767",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Revenge of the Rats",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {2}{B}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{2}{B}{B}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Revenge of the Rats",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Revenge of the Rats, including through its flashback permission",
+				"basis": "Create a tapped 1/1 black Rat creature token for each creature card in your graveyard.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"count": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"token": false
+							}
+						},
+						"tapped": true,
+						"spec": {
+							"name": "Rat Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rat"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

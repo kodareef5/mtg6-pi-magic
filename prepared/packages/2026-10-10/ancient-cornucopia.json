@@ -1,0 +1,1121 @@
+{
+	"card": "Ancient Cornucopia",
+	"generated": "2026-10-10",
+	"source": "32860ad3e505773159eabcbeb486b4e4b4055312bc9140abea2cb789438ef722",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ancient Cornucopia",
+		"registers": [
+			{
+				"kind": "mana",
+				"basis": "{T}: Add one mana of any color.",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a spell that's one or more colors, you may gain 1 life for each of that spell's colors. Do this only once each turn.",
+				"may": true,
+				"limit": "once-per-turn-use",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"colors": [
+							"W",
+							"U",
+							"B",
+							"R",
+							"G"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"colors": [
+										"W"
+									],
+									"not": {
+										"colors": [
+											"U",
+											"B",
+											"R",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"colors": [
+										"U"
+									],
+									"not": {
+										"colors": [
+											"W",
+											"B",
+											"R",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"colors": [
+										"B"
+									],
+									"not": {
+										"colors": [
+											"W",
+											"U",
+											"R",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"colors": [
+										"R"
+									],
+									"not": {
+										"colors": [
+											"W",
+											"U",
+											"B",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"colors": [
+										"G"
+									],
+									"not": {
+										"colors": [
+											"W",
+											"U",
+											"B",
+											"R"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"U"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"B",
+											"R",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"U",
+											"R",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"U",
+											"B",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"U",
+											"B",
+											"R"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W",
+											"R",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W",
+											"B",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W",
+											"B",
+											"R"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W",
+											"U",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W",
+											"U",
+											"R"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"R"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W",
+											"U",
+											"B"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"R",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"B",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"B",
+											"R"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"U",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"U",
+											"R"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"U",
+											"B"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W",
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W",
+											"R"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W",
+											"B"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W",
+											"U"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 4,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"G"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 4,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"R"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 4,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"B"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 4,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"U"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 4,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									],
+									"not": {
+										"colors": [
+											"W"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 5,
+							"if": {
+								"is": "event:object",
+								"lastKnown": true,
+								"matches": {
+									"zones": [
+										"stack"
+									],
+									"all": [
+										{
+											"colors": [
+												"W"
+											]
+										},
+										{
+											"colors": [
+												"U"
+											]
+										},
+										{
+											"colors": [
+												"B"
+											]
+										},
+										{
+											"colors": [
+												"R"
+											]
+										},
+										{
+											"colors": [
+												"G"
+											]
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

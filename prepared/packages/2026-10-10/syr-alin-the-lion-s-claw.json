@@ -1,0 +1,60 @@
+{
+	"card": "Syr Alin, the Lion's Claw",
+	"generated": "2026-10-10",
+	"source": "0b8a981b7bd37e2babd9a818fba86b55fb6157baf78f33cb1be7e69e0767fe2e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Syr Alin, the Lion's Claw",
+		"registers": [
+			{
+				"basis": "First strike (This creature deals combat damage before creatures without first strike.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Syr Alin attacks, other creatures you control get +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

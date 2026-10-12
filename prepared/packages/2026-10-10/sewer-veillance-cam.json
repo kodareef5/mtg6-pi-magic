@@ -1,0 +1,150 @@
+{
+	"card": "Sewer-veillance Cam",
+	"generated": "2026-10-10",
+	"source": "737910934b51929e509d8d1adcf4a14cfc2853cfcca1d326c7958bd2756c6802",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sewer-veillance Cam",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield",
+						"library",
+						"command"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When this artifact enters or leaves the battlefield, you may tap or untap target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "tap-chosen",
+							"instructions": [
+								{
+									"do": "tap",
+									"what": "target:0"
+								}
+							]
+						},
+						{
+							"do": "untap",
+							"what": "target:0",
+							"may": true,
+							"if": {
+								"not": {
+									"bound": "tap-chosen"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this artifact enters or leaves the battlefield, you may tap or untap target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "tap-chosen",
+							"instructions": [
+								{
+									"do": "tap",
+									"what": "target:0"
+								}
+							]
+						},
+						{
+							"do": "untap",
+							"what": "target:0",
+							"may": true,
+							"if": {
+								"not": {
+									"bound": "tap-chosen"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sewer-veillance Cam",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Sewer-veillance Cam to draw two cards",
+				"basis": "{3}{U}, Sacrifice this artifact: Draw two cards.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{U}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

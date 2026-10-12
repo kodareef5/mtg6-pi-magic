@@ -1,0 +1,73 @@
+{
+	"card": "Afterthought Sentry",
+	"generated": "2026-10-10",
+	"source": "e19887531384d815efb7b7d1d9e079d84bc00da3178ad411bffc85bd0405c248",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Afterthought Sentry",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, exile up to one target card from a graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Afterthought Sentry",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Gain flying until end of turn",
+				"basis": "{2}: This creature gains flying until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

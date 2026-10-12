@@ -1,0 +1,125 @@
+{
+	"card": "Pinnacle Emissary",
+	"generated": "2026-10-10",
+	"source": "208ae5a22f92d03dfe0c26e4fd2c60572c2f3f15a48b2e23bf5499494abcd2c4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pinnacle Emissary",
+		"registers": [
+			{
+				"basis": "Whenever you cast an artifact spell, create a 1/1 colorless Drone artifact creature token with flying and \"This token can block only creatures with flying.\"",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Drone Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Drone"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								],
+								"registers": [
+									{
+										"basis": "Whenever you cast an artifact spell, create a 1/1 colorless Drone artifact creature token with flying and \"This token can block only creatures with flying.\"",
+										"kind": "prohibit",
+										"block": {
+											"attacker": {
+												"types": [
+													"creature"
+												],
+												"not": {
+													"words": [
+														"flying"
+													]
+												}
+											},
+											"blocker": {
+												"is": "this"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Pinnacle Emissary for its warp cost",
+				"basis": "Warp {U/R} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+				"source": {
+					"card": "Pinnacle Emissary",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"timing": "spell",
+				"cost": {
+					"alternative": "warp",
+					"mana": "{U/R}"
+				},
+				"instructions": [
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "this",
+									"to": "exile",
+									"reason": "exile",
+									"as": "warped"
+								},
+								{
+									"do": "permit",
+									"what": "bound:warped",
+									"who": "owner",
+									"from": "next-turn",
+									"until": "indefinite",
+									"if": {
+										"bound": "warped"
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

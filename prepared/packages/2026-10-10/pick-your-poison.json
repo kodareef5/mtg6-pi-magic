@@ -1,0 +1,118 @@
+{
+	"card": "Pick Your Poison",
+	"generated": "2026-10-10",
+	"source": "6d0121ce28b2ace968936251afabc0c75845671761861e6413f9698eeea7bb60",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pick Your Poison",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pick Your Poison",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pick Your Poison — each opponent sacrifices an artifact",
+				"basis": "Choose one —\n• Each opponent sacrifices an artifact of their choice.\n• Each opponent sacrifices an enchantment of their choice.\n• Each opponent sacrifices a creature with flying of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 1,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"artifact"
+									]
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Pick Your Poison",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pick Your Poison — each opponent sacrifices an enchantment",
+				"basis": "Choose one —\n• Each opponent sacrifices an artifact of their choice.\n• Each opponent sacrifices an enchantment of their choice.\n• Each opponent sacrifices a creature with flying of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 1,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"enchantment"
+									]
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Pick Your Poison",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pick Your Poison — each opponent sacrifices a creature with flying",
+				"basis": "Choose one —\n• Each opponent sacrifices an artifact of their choice.\n• Each opponent sacrifices an enchantment of their choice.\n• Each opponent sacrifices a creature with flying of their choice.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 1,
+						"actions": [
+							{
+								"sacrifice": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"words": [
+										"flying"
+									]
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

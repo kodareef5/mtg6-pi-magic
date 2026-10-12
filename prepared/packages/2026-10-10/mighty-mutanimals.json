@@ -1,0 +1,82 @@
+{
+	"card": "Mighty Mutanimals",
+	"generated": "2026-10-10",
+	"source": "d83b8b54605988e255f954356b0c537ecaeacf168dc91da5abbe0334b08df7e9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mighty Mutanimals",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 2/2 red Mutant creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Mutant Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Mutant"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Alliance — Whenever another creature you control enters, put a +1/+1 counter on target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

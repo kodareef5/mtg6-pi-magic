@@ -1,0 +1,217 @@
+{
+	"card": "Bruse Tarl, Roving Rancher",
+	"generated": "2026-10-10",
+	"source": "37b087184e5a93066695a0c03931a1967c8b28b8702a956ec9210a9538021ad0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bruse Tarl, Roving Rancher",
+		"registers": [
+			{
+				"basis": "Oxen you control have double strike.",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"subtypes": [
+						"Ox"
+					]
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Bruse Tarl enters or attacks, exile the top card of your library. If it's a land card, create a 2/2 white Ox creature token. Otherwise, you may cast it until the end of your next turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Ox Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Ox"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 2
+							},
+							"if": {
+								"is": "bound:exiled",
+								"matches": {
+									"zones": [
+										"exile"
+									],
+									"types": [
+										"land"
+									]
+								}
+							}
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							},
+							"of": {
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"instant",
+									"kindred",
+									"planeswalker",
+									"sorcery"
+								]
+							},
+							"if": {
+								"all": [
+									{
+										"bound": "exiled"
+									},
+									{
+										"not": {
+											"is": "bound:exiled",
+											"matches": {
+												"zones": [
+													"exile"
+												],
+												"types": [
+													"land"
+												]
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Bruse Tarl enters or attacks, exile the top card of your library. If it's a land card, create a 2/2 white Ox creature token. Otherwise, you may cast it until the end of your next turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Ox Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Ox"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 2
+							},
+							"if": {
+								"is": "bound:exiled",
+								"matches": {
+									"zones": [
+										"exile"
+									],
+									"types": [
+										"land"
+									]
+								}
+							}
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							},
+							"of": {
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"instant",
+									"kindred",
+									"planeswalker",
+									"sorcery"
+								]
+							},
+							"if": {
+								"all": [
+									{
+										"bound": "exiled"
+									},
+									{
+										"not": {
+											"is": "bound:exiled",
+											"matches": {
+												"zones": [
+													"exile"
+												],
+												"types": [
+													"land"
+												]
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

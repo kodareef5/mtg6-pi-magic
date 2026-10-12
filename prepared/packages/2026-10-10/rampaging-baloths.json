@@ -41,7 +41,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Beast",
+								"name": "Beast Token",
 								"types": [
 									"creature"
 								],

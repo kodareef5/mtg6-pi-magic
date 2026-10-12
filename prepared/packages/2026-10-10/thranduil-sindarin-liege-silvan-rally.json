@@ -1,0 +1,116 @@
+{
+	"card": "Thranduil, Sindarin Liege // Silvan Rally",
+	"generated": "2026-10-10",
+	"source": "b3941746471567b747af02a8fba6830d0227d15dc095cd7b279ea787b4c05820",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thranduil, Sindarin Liege // Silvan Rally",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Other Elves you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Elf"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Landfall — Whenever a land you control enters, create a 1/1 green Elf creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Elf Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Elf"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Thranduil, Sindarin Liege // Silvan Rally",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Silvan Rally",
+				"basis": "Mill four cards, then put up to two land cards from among them into your hand. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 4,
+						"as": "milled"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard",
+								"exile"
+							],
+							"is": "bound:milled",
+							"types": [
+								"land"
+							],
+							"token": false
+						},
+						"count": 2,
+						"upTo": true,
+						"as": "lands"
+					},
+					{
+						"do": "move",
+						"what": "bound:lands",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

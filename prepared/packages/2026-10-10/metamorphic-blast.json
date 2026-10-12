@@ -1,0 +1,171 @@
+{
+	"card": "Metamorphic Blast",
+	"generated": "2026-10-10",
+	"source": "4031dcdc62dba4a17cee57800723a92fc7714dc7a648d5b48c33e54163e0e4c8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Metamorphic Blast",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Metamorphic Blast",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Metamorphic Blast with the Rabbit mode",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Until end of turn, target creature becomes a white Rabbit with base power and toughness 0/1.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-rabbit",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"colors": {
+								"set": [
+									"W"
+								]
+							},
+							"subtypes": {
+								"set": [
+									"Rabbit"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 1
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Metamorphic Blast",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Metamorphic Blast with the draw mode",
+				"basis": "Spree (Choose one or more additional costs.) ... + {3} — Target player draws two cards.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-draw",
+							"mana": "{3}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Metamorphic Blast",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Metamorphic Blast with both modes",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Until end of turn, target creature becomes a white Rabbit with base power and toughness 0/1. ... + {3} — Target player draws two cards.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-rabbit",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-draw",
+							"mana": "{3}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"colors": {
+								"set": [
+									"W"
+								]
+							},
+							"subtypes": {
+								"set": [
+									"Rabbit"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 1
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "target:1",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

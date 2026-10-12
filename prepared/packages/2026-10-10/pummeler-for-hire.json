@@ -1,0 +1,104 @@
+{
+	"card": "Pummeler for Hire",
+	"generated": "2026-10-10",
+	"source": "7fb155f7b38cd2274415607347be224bb0d304f4574468f1888c5808cc6fadf7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pummeler for Hire",
+		"registers": [
+			{
+				"basis": "Reach, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Ward {2} (Whenever this creature becomes the target of a spell or ability an opponent controls, counter it unless that player pays {2}.)",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, you gain X life, where X is the greatest power among Giants you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"aggregate": "max",
+								"of": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"subtypes": [
+										"Giant"
+									]
+								},
+								"value": "power"
+							},
+							"if": {
+								"amount": {
+									"aggregate": "max",
+									"of": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"subtypes": [
+											"Giant"
+										]
+									},
+									"value": "power"
+								},
+								"atLeast": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,50 @@
+{
+	"card": "Long Goodbye",
+	"generated": "2026-10-10",
+	"source": "bd3ee931b083935107f61eff473292407ed4ec933cafa95f688b8912e4779548",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Long Goodbye",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Long Goodbye",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Long Goodbye",
+				"basis": "This spell can't be countered. (This includes by the ward ability.) ... Destroy target creature or planeswalker with mana value 3 or less.",
+				"timing": "spell",
+				"words": [
+					"can't be countered"
+				],
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

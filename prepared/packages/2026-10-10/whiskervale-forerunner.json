@@ -1,0 +1,96 @@
+{
+	"card": "Whiskervale Forerunner",
+	"generated": "2026-10-10",
+	"source": "ab21ed0195857fb794d7d4de5422200a27ebbc011919d547a6cdddf51231c138",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Whiskervale Forerunner",
+		"registers": [
+			{
+				"basis": "Valiant — Whenever this creature becomes the target of a spell or ability you control for the first time each turn, look at the top five cards of your library. You may reveal a creature card with mana value 3 or less from among them. You may put it onto the battlefield if it's your turn. If you don't put it onto the battlefield, put it into your hand. Put the rest on the bottom of your library in a random order.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 5,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"types": [
+									"creature"
+								],
+								"manaValue": {
+									"atMost": 3
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "revealed"
+						},
+						{
+							"do": "move",
+							"what": "bound:revealed",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"if": {
+								"turn": "self"
+							},
+							"may": true,
+							"as": "placed"
+						},
+						{
+							"do": "move",
+							"what": "bound:revealed",
+							"to": "hand",
+							"reason": "resolve",
+							"if": {
+								"not": {
+									"bound": "placed"
+								}
+							}
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"position": "bottom",
+							"random": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

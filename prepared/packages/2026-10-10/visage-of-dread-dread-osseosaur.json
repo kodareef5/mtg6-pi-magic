@@ -1,0 +1,182 @@
+{
+	"card": "Visage of Dread // Dread Osseosaur",
+	"generated": "2026-10-10",
+	"source": "6189ddbcded97279dbb1ed58f7c701afd18683202f9f19dc7da19550827f8e61",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Visage of Dread // Dread Osseosaur",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When this artifact enters, target opponent reveals their hand. You choose an artifact or creature card from it. That player discards that card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "reveal",
+							"every": {
+								"zones": [
+									"hand"
+								],
+								"owner": "target:0"
+							},
+							"as": "hand"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"count": 1,
+							"as": "discard",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"is": "bound:hand",
+								"types": [
+									"artifact",
+									"creature"
+								]
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever this creature enters or attacks, you may mill two cards. (You may put the top two cards of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever this creature enters or attacks, you may mill two cards. (You may put the top two cards of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Visage of Dread // Dread Osseosaur",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Craft with two creatures to return Dread Osseosaur",
+				"basis": "Craft with two creatures {5}{B} ({5}{B}, Exile this artifact, Exile the two from among creatures you control and/or creature cards in your graveyard: Return this card transformed under its owner's control. Craft only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{5}{B}",
+					"exile": {
+						"source": true,
+						"choose": {
+							"any": [
+								{
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								},
+								{
+									"zones": [
+										"graveyard"
+									],
+									"types": [
+										"creature"
+									],
+									"owner": "you"
+								}
+							]
+						},
+						"count": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "bound:cost-source",
+						"to": "battlefield",
+						"face": 1,
+						"controller": "owner:bound:cost-source",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

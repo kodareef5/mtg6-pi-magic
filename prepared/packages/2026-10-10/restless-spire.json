@@ -1,0 +1,127 @@
+{
+	"card": "Restless Spire",
+	"generated": "2026-10-10",
+	"source": "70998d51a571fb09cc5824b3559ffbf6717579d60d0289e8b750571729e5d31f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Restless Spire",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {U} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			},
+			{
+				"basis": "{T}: Add {U} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "Whenever this land attacks, scry 1.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Restless Spire",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Animate Restless Spire",
+				"basis": "{U}{R}: Until end of turn, this land becomes a 2/1 blue and red Elemental creature with \"During your turn, this creature has first strike.\" It's still a land.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{U}{R}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"set": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"colors": {
+								"set": [
+									"U",
+									"R"
+								]
+							},
+							"base": {
+								"power": 2,
+								"toughness": 1
+							},
+							"registers": [
+								{
+									"basis": "{U}{R}: Until end of turn, this land becomes a 2/1 blue and red Elemental creature with \"During your turn, this creature has first strike.\" It's still a land.",
+									"kind": "continuous",
+									"affects": {
+										"is": "this",
+										"zones": [
+											"battlefield"
+										]
+									},
+									"if": {
+										"turn": "self"
+									},
+									"change": {
+										"words": [
+											"first strike"
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

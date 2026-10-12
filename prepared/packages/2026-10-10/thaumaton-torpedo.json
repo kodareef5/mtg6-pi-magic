@@ -1,0 +1,123 @@
+{
+	"card": "Thaumaton Torpedo",
+	"generated": "2026-10-10",
+	"source": "9d123e148b3ee391c710e668ee6309acdd71a7f9d9e2988fc16c6ed87f06d5ad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thaumaton Torpedo",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thaumaton Torpedo",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Torpedo without its Spacecraft discount",
+				"basis": "{6}, {T}, Sacrifice this artifact: Destroy target nonland permanent. This ability costs {3} less to activate if you attacked with a Spacecraft this turn.",
+				"timing": "stack",
+				"if": {
+					"not": {
+						"amount": {
+							"history": "attacked",
+							"by": "you",
+							"of": {
+								"zones": [
+									"battlefield"
+								],
+								"subtypes": [
+									"Spacecraft"
+								]
+							}
+						},
+						"atLeast": 1
+					}
+				},
+				"cost": {
+					"mana": "{6}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Thaumaton Torpedo",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Torpedo with its Spacecraft discount",
+				"basis": "{6}, {T}, Sacrifice this artifact: Destroy target nonland permanent. This ability costs {3} less to activate if you attacked with a Spacecraft this turn.",
+				"timing": "stack",
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"by": "you",
+						"of": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Spacecraft"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"mana": "{6}",
+					"tap": true,
+					"sacrifice": "this",
+					"reduce": 3
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

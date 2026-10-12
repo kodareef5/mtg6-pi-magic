@@ -1,0 +1,61 @@
+{
+	"card": "Dauntless Dismantler",
+	"generated": "2026-10-10",
+	"source": "ece11d4cdfb1ff398658bf1663c18d0f5555966d9ba0d121d1a678fc519c810e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dauntless Dismantler",
+		"registers": [
+			{
+				"basis": "Artifacts your opponents control enter tapped.",
+				"kind": "enters",
+				"affects": {
+					"types": [
+						"artifact"
+					],
+					"controller": "opponent"
+				},
+				"tapped": true
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dauntless Dismantler",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Dauntless Dismantler to destroy each artifact with mana value X",
+				"basis": "{X}{X}{W}, Sacrifice this creature: Destroy each artifact with mana value X.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{X}{X}{W}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"artifact"
+							],
+							"manaValue": {
+								"atLeast": {
+									"x": true
+								},
+								"atMost": {
+									"x": true
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

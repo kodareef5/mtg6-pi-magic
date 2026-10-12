@@ -1,0 +1,80 @@
+{
+	"card": "Squirming Emergence",
+	"generated": "2026-10-10",
+	"source": "7055c8e87d51d48b5de6faf25abbfbb51a540c81d124bc7fbe483d3d3f7e2c4d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Squirming Emergence",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Squirming Emergence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return a qualifying nonland permanent card from your graveyard to the battlefield",
+				"basis": "Fathomless descent — Return to the battlefield target nonland permanent card in your graveyard with mana value less than or equal to the number of permanent cards in your graveyard.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"planeswalker"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							},
+							"manaValue": {
+								"atMost": {
+									"count": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"token": false,
+										"types": [
+											"artifact",
+											"battle",
+											"creature",
+											"enchantment",
+											"land",
+											"planeswalker"
+										]
+									}
+								}
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

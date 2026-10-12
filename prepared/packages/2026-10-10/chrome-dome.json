@@ -1,0 +1,101 @@
+{
+	"card": "Chrome Dome",
+	"generated": "2026-10-10",
+	"source": "eef0a5338a989e475a6e988c9770b6c948ec0fcab18f7ecbf45b081a49251394",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chrome Dome",
+		"registers": [
+			{
+				"basis": "Other artifact creatures you control get +1/+0.",
+				"kind": "continuous",
+				"affects": {
+					"all": [
+						{
+							"types": [
+								"artifact"
+							]
+						},
+						{
+							"types": [
+								"creature"
+							]
+						}
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Chrome Dome",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a hasty copy of another artifact and sacrifice it at the next end step",
+				"basis": "{5}: Create a token that's a copy of another target artifact you control. That token gains haste. Sacrifice it at the beginning of the next end step.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0",
+						"as": "copy"
+					},
+					{
+						"do": "modify",
+						"what": "bound:copy",
+						"until": "indefinite",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:copy",
+									"to": "graveyard",
+									"reason": "sacrifice"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

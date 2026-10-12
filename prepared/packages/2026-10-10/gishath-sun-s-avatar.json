@@ -1,0 +1,99 @@
+{
+	"card": "Gishath, Sun's Avatar",
+	"generated": "2026-10-10",
+	"source": "3c02e8f8f54e98d9b06bb6542acc24bb2336559f840c80c6518b056b9b3d3bd1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gishath, Sun's Avatar",
+		"registers": [
+			{
+				"basis": "Vigilance, trample, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance",
+						"trample",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Gishath deals combat damage to a player, reveal that many cards from the top of your library. Put any number of Dinosaur creature cards from among them onto the battlefield and the rest on the bottom of your library in a random order.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "reveal",
+							"what": {
+								"top": {
+									"event": "amount"
+								},
+								"of": "you"
+							},
+							"as": "revealed"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:revealed",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dinosaur"
+								]
+							},
+							"count": {
+								"event": "amount"
+							},
+							"upTo": true,
+							"as": "dinosaurs"
+						},
+						{
+							"do": "move",
+							"what": "bound:dinosaurs",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:revealed"
+							},
+							"position": "bottom",
+							"random": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

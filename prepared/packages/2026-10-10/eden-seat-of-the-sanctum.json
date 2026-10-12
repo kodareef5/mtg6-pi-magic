@@ -1,0 +1,102 @@
+{
+	"card": "Eden, Seat of the Sanctum",
+	"generated": "2026-10-10",
+	"source": "78d48b80b5cd5ac53f0529559af8eaecf63dadcf0c9da7e3cb3422532fc961b3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eden, Seat of the Sanctum",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Eden, Seat of the Sanctum",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Mill two cards, then optionally sacrifice Eden to return another permanent card",
+				"basis": "{5}, {T}: Mill two cards. Then you may sacrifice this land. When you do, return another target permanent card from your graveyard to your hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "move",
+						"what": "this",
+						"to": "graveyard",
+						"reason": "sacrifice",
+						"may": true,
+						"as": "sacrificed",
+						"if": {
+							"is": "this",
+							"matches": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you"
+							}
+						}
+					},
+					{
+						"do": "reflect",
+						"if": {
+							"bound": "sacrificed"
+						},
+						"effect": {
+							"targets": [
+								{
+									"object": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"types": [
+											"artifact",
+											"battle",
+											"creature",
+											"enchantment",
+											"land",
+											"planeswalker"
+										],
+										"not": {
+											"is": "bound:sacrificed"
+										}
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "move",
+									"what": "target:0",
+									"to": "hand",
+									"reason": "resolve"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

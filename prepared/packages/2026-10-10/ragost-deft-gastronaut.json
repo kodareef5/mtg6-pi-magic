@@ -1,0 +1,112 @@
+{
+	"card": "Ragost, Deft Gastronaut",
+	"generated": "2026-10-10",
+	"source": "b65b1770b4d2b53868742d69c233599a48c10dea4f794494215eb3bc413e045e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ragost, Deft Gastronaut",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Artifacts you control are Foods in addition to their other types and have \"{2}, {T}, Sacrifice this artifact: You gain 3 life.\"",
+				"affects": {
+					"types": [
+						"artifact"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"subtypes": {
+						"add": [
+							"Food"
+						],
+						"of": "artifact"
+					},
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Artifacts you control are Foods in addition to their other types and have \"{2}, {T}, Sacrifice this artifact: You gain 3 life.\"",
+							"cost": {
+								"mana": "{2}",
+								"tap": true,
+								"sacrifice": "this"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "life",
+										"who": "you",
+										"amount": 3
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of each end step, if you gained life this turn, untap Ragost.",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "any"
+				},
+				"if": {
+					"amount": {
+						"history": "life-gained",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "untap",
+							"what": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ragost, Deft Gastronaut",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice a Food to deal 3 damage to each opponent",
+				"basis": "{1}, {T}, Sacrifice a Food: Ragost deals 3 damage to each opponent.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"subtypes": [
+								"Food"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "opponent",
+						"amount": 3,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

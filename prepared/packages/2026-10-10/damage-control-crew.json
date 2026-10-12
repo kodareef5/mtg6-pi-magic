@@ -1,0 +1,75 @@
+{
+	"card": "Damage Control Crew",
+	"generated": "2026-10-10",
+	"source": "dcb7dc6d2f5ec3205c7661f51bf6618e8915a7d494a5591a51dab8fd7c35690e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Damage Control Crew",
+		"registers": [
+			{
+				"basis": "When this creature enters, choose one —\n• Repair — Return target card with mana value 4 or greater from your graveyard to your hand.\n• Impound — Exile target artifact or enchantment.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"manaValue": {
+											"atLeast": 4
+										}
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "move",
+									"what": "target:0",
+									"to": "hand",
+									"reason": "bounce"
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"artifact",
+											"enchantment"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "move",
+									"what": "target:0",
+									"to": "exile",
+									"reason": "exile"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

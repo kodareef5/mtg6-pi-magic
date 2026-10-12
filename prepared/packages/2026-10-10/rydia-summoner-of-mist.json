@@ -1,0 +1,111 @@
+{
+	"card": "Rydia, Summoner of Mist",
+	"generated": "2026-10-10",
+	"source": "8d16a6daa22aad9a5b191f768cc601cd607b5c17071e9dba7f122c3f0bfc6205",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rydia, Summoner of Mist",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, you may discard a card. If you do, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rydia, Summoner of Mist",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Summon a Saga from your graveyard",
+				"basis": "Summon — {X}, {T}: Return target Saga card with mana value X from your graveyard to the battlefield with a finality counter on it. It gains haste until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{X}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Saga"
+							],
+							"manaValue": {
+								"atLeast": {
+									"x": true
+								},
+								"atMost": {
+									"x": true
+								}
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"counters": {
+							"finality": 1
+						},
+						"as": "summoned"
+					},
+					{
+						"do": "modify",
+						"what": "bound:summoned",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

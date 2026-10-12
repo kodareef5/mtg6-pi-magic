@@ -1,0 +1,123 @@
+{
+	"card": "Valley Floodcaller",
+	"generated": "2026-10-10",
+	"source": "b115da48d8df2e6de73185d758867052703460f37f34fad828e42c40aec988d2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Valley Floodcaller",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "permit",
+				"basis": "You may cast noncreature spells as though they had flash.",
+				"flash": {
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack"
+					],
+					"types": [
+						"artifact",
+						"battle",
+						"enchantment",
+						"instant",
+						"kindred",
+						"planeswalker",
+						"sorcery"
+					],
+					"not": {
+						"types": [
+							"creature"
+						]
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a noncreature spell, Birds, Frogs, Otters, and Rats you control get +1/+1 until end of turn. Untap them.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you",
+								"subtypes": [
+									"Bird",
+									"Frog",
+									"Otter",
+									"Rat"
+								]
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							},
+							"as": "boosted"
+						},
+						{
+							"do": "untap",
+							"what": "bound:boosted"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

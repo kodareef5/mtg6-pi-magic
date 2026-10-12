@@ -1,0 +1,131 @@
+{
+	"card": "Paladin's Arms",
+	"generated": "2026-10-10",
+	"source": "13092192ffbe8c23f937585a30a5c06ae86eadee42c7008e68a0519ff66bf3fb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Paladin's Arms",
+		"registers": [
+			{
+				"basis": "Job select (When this Equipment enters, create a 1/1 colorless Hero creature token, then attach this to it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Hero Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							},
+							"as": "hero"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:hero"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +2/+1, has ward {1}, and is a Knight in addition to its other types.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 1,
+					"subtypes": {
+						"add": [
+							"Knight"
+						]
+					},
+					"registers": [
+						{
+							"basis": "Equipped creature gets +2/+1, has ward {1}, and is a Knight in addition to its other types.",
+							"kind": "watch",
+							"event": {
+								"on": "targeted",
+								"of": {
+									"is": "this"
+								},
+								"by": "opponent"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "counter",
+										"what": "event:source",
+										"unless": {
+											"who": "event:player",
+											"pays": {
+												"mana": "{1}"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Paladin's Arms",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Paladin's Arms",
+				"basis": "Lightbringer and Hero's Shield — Equip {4} ({4}: Attach to target creature you control. Equip only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

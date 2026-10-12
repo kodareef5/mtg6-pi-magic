@@ -1,0 +1,101 @@
+{
+	"card": "Genemorph Imago",
+	"generated": "2026-10-10",
+	"source": "53f53376f6787925d68e28caa643194aef1caf171f503e8fdd9adb88ab4a540e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Genemorph Imago",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, target creature has base power and toughness 3/3 until end of turn. If you control six or more lands, that creature has base power and toughness 6/6 until end of turn instead.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"base": {
+									"power": 3,
+									"toughness": 3
+								}
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"land"
+										],
+										"controller": "you"
+									}
+								},
+								"atMost": 5
+							}
+						},
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"base": {
+									"power": 6,
+									"toughness": 6
+								}
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"land"
+										],
+										"controller": "you"
+									}
+								},
+								"atLeast": 6
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

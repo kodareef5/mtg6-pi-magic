@@ -1,0 +1,136 @@
+{
+	"card": "Nature's Rhythm",
+	"generated": "2026-10-10",
+	"source": "3f99e2e867c82282e262687ee9c8581c7d5e176b83f47459ac2eaa69544df83e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nature's Rhythm",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Harmonize {X}{G}{G}{G}{G} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by an amount of generic mana equal to its power. Then exile this spell.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{X}{G}{G}{G}{G}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Nature's Rhythm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Nature's Rhythm",
+				"basis": "Search your library for a creature card with mana value X or less, put it onto the battlefield, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atMost": {
+									"x": true
+								}
+							}
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "creature"
+					},
+					{
+						"do": "move",
+						"what": "bound:creature",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Nature's Rhythm",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "any"
+				},
+				"claim": "Harmonize Nature's Rhythm with an optional creature tap",
+				"basis": "Search your library for a creature card with mana value X or less, put it onto the battlefield, then shuffle. ... Harmonize {X}{G}{G}{G}{G} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by an amount of generic mana equal to its power. Then exile this spell.)",
+				"timing": "spell",
+				"cost": {
+					"mana": "{X}{G}{G}{G}{G}",
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"upTo": true,
+						"reduce": "power"
+					}
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atMost": {
+									"x": true
+								}
+							}
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "creature"
+					},
+					{
+						"do": "move",
+						"what": "bound:creature",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

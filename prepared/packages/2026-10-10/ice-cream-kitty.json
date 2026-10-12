@@ -1,0 +1,82 @@
+{
+	"card": "Ice Cream Kitty",
+	"generated": "2026-10-10",
+	"source": "384810072edc49ac23d691862849b4c89cd93f33962b4e59bc6e1e60454fa3b5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ice Cream Kitty",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ice Cream Kitty",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature or token to draw a card",
+				"basis": "{2}, Sacrifice another creature or token: Draw a card. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"other": true,
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"token": true
+								}
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ice Cream Kitty",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap and sacrifice Ice Cream Kitty to gain 3 life",
+				"basis": "{2}, {T}, Sacrifice this creature: You gain 3 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

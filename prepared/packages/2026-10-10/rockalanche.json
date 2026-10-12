@@ -1,0 +1,114 @@
+{
+	"card": "Rockalanche",
+	"generated": "2026-10-10",
+	"source": "25ae472fa85ab27794a03993c225838cbe8918ebdfcc3ccb9a8380350962ac2f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rockalanche",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {5}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{5}{G}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rockalanche",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rockalanche, including through its flashback permission",
+				"basis": "Earthbend X, where X is the number of Forests you control. (Target land you control becomes a 0/0 creature with haste that's still a land. Put X +1/+1 counters on it. When it dies or is exiled, return it to the battlefield tapped.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"subtypes": [
+									"Forest"
+								],
+								"controller": "you"
+							}
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "leaves",
+							"of": {
+								"is": "target:0"
+							},
+							"to": [
+								"graveyard",
+								"exile"
+							]
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "event:object",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

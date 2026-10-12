@@ -1,0 +1,126 @@
+{
+	"card": "Tidings of War",
+	"generated": "2026-10-10",
+	"source": "6b2dbce8d29de830a01773b91a342fea62a79dc2b52dc37c77af92c6c738faa2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tidings of War",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {3}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{3}{R}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tidings of War",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Tidings of War; amass Goblins 3 if cast from a graveyard, otherwise 1, with flashback price and departure replacement supplied by its permission",
+				"basis": "Amass Goblins 1. If this spell was cast from a graveyard, amass Goblins 3 instead. (To amass Goblins X, put X +1/+1 counters on an Army you control. It's also a Goblin. If you don't control an Army, create a 0/0 black Goblin Army creature token first.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Goblin Army Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Goblin",
+								"Army"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 0,
+							"toughness": 0
+						},
+						"if": {
+							"amount": {
+								"count": {
+									"types": [
+										"creature"
+									],
+									"subtypes": [
+										"Army"
+									],
+									"controller": "you"
+								}
+							},
+							"atMost": 0
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Army"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "army"
+					},
+					{
+						"do": "counters",
+						"on": "bound:army",
+						"kind": "+1/+1",
+						"amount": 1,
+						"if": {
+							"not": {
+								"cast": "this",
+								"from": "graveyard"
+							}
+						}
+					},
+					{
+						"do": "counters",
+						"on": "bound:army",
+						"kind": "+1/+1",
+						"amount": 3,
+						"if": {
+							"cast": "this",
+							"from": "graveyard"
+						}
+					},
+					{
+						"do": "modify",
+						"what": "bound:army",
+						"until": "indefinite",
+						"change": {
+							"subtypes": {
+								"add": [
+									"Goblin"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

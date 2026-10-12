@@ -1,0 +1,64 @@
+{
+	"card": "Living Brain, Mechanical Marvel",
+	"generated": "2026-10-10",
+	"source": "4b2d5892b8457ce1b4e5df1383e827ae9b9a6f2f3912a3b96ec77604951057b5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Living Brain, Mechanical Marvel",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, target non-Equipment artifact you control becomes an artifact creature with base power and toughness 3/3 until end of turn. Untap it.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact"
+								],
+								"controller": "you",
+								"not": {
+									"subtypes": [
+										"Equipment"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"types": {
+									"add": [
+										"artifact",
+										"creature"
+									]
+								},
+								"base": {
+									"power": 3,
+									"toughness": 3
+								}
+							}
+						},
+						{
+							"do": "untap",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

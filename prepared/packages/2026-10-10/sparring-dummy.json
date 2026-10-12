@@ -1,0 +1,101 @@
+{
+	"card": "Sparring Dummy",
+	"generated": "2026-10-10",
+	"source": "e61085de898ff00fb9993a77d9dbf53b572aeb6fbefbdccad17834f306a0e0fa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sparring Dummy",
+		"registers": [
+			{
+				"basis": "Defender",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"defender"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Mill a card, optionally put a milled land into hand, then gain 2 life if a Lesson was milled",
+				"basis": "{T}: Mill a card. You may put a land card milled this way into your hand. You gain 2 life if a Lesson card is milled this way. (To mill a card, put the top card of your library into your graveyard.)",
+				"source": {
+					"card": "Sparring Dummy",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 1,
+						"as": "milled"
+					},
+					{
+						"do": "move",
+						"what": "bound:milled",
+						"to": "hand",
+						"reason": "resolve",
+						"may": true,
+						"if": {
+							"is": "bound:milled",
+							"matches": {
+								"zones": [
+									"battlefield",
+									"graveyard",
+									"exile",
+									"stack",
+									"command",
+									"outside"
+								],
+								"types": [
+									"land"
+								]
+							}
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2,
+						"if": {
+							"is": "bound:milled",
+							"matches": {
+								"zones": [
+									"battlefield",
+									"graveyard",
+									"exile",
+									"stack",
+									"command",
+									"outside"
+								],
+								"subtypes": [
+									"Lesson"
+								]
+							},
+							"lastKnown": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

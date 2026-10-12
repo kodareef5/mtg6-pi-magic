@@ -1,0 +1,74 @@
+{
+	"card": "Dread Summons",
+	"generated": "2026-10-10",
+	"source": "3483c05926239ebcd0f7739f5dd433f1905f306dcadaaf07e67ed5eac6a6d872",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dread Summons",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dread Summons",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dread Summons with chosen X",
+				"basis": "Each player mills X cards. For each creature card put into a graveyard this way, you create a tapped 2/2 black Zombie creature token.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": {
+								"x": true
+							},
+							"of": "each-player"
+						},
+						"to": "graveyard",
+						"reason": "mill",
+						"as": "milled"
+					},
+					{
+						"do": "token",
+						"count": {
+							"count": {
+								"zones": [
+									"graveyard"
+								],
+								"is": "bound:milled",
+								"types": [
+									"creature"
+								],
+								"token": false
+							}
+						},
+						"tapped": true,
+						"spec": {
+							"name": "Zombie Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Zombie"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,79 @@
+{
+	"card": "Fear of Impostors",
+	"generated": "2026-10-10",
+	"source": "233a9adead1be8e27b95ae5f0cd51adb33d1e1c5e512348990b1a5dece6dbc2d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fear of Impostors",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, counter target spell. Its controller manifests dread. (That player looks at the top two cards of their library, then puts one onto the battlefield face down as a 2/2 creature and the other into their graveyard. If it's a creature card, it can be turned face up any time for its mana cost.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"stack"
+								],
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"instant",
+									"kindred",
+									"planeswalker",
+									"sorcery"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "target:0"
+						},
+						{
+							"do": "keyword",
+							"name": "manifest-dread",
+							"who": "controller:target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

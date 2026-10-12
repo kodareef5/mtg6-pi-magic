@@ -1,0 +1,106 @@
+{
+	"card": "Toph, the First Metalbender",
+	"generated": "2026-10-10",
+	"source": "159e671960f1ea8824c4d36b3640296f7df0a437164f2af9991ad48712662b9a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Toph, the First Metalbender",
+		"registers": [
+			{
+				"basis": "Nontoken artifacts you control are lands in addition to their other types. (They don't gain the ability to {T} for mana.)",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"artifact"
+					],
+					"controller": "you",
+					"token": false
+				},
+				"change": {
+					"types": {
+						"add": [
+							"land"
+						]
+					}
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, earthbend 2. (Target land you control becomes a 0/0 creature with haste that's still a land. Put two +1/+1 counters on it. When it dies or is exiled, return it to the battlefield tapped.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"types": {
+									"add": [
+										"creature"
+									]
+								},
+								"base": {
+									"power": 0,
+									"toughness": 0
+								},
+								"words": [
+									"haste"
+								]
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 2
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "leaves",
+								"of": {
+									"is": "target:0"
+								},
+								"to": [
+									"graveyard",
+									"exile"
+								]
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "event:object",
+										"to": "battlefield",
+										"tapped": true,
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

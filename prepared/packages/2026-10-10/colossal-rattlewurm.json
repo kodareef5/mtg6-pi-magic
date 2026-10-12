@@ -1,0 +1,112 @@
+{
+	"card": "Colossal Rattlewurm",
+	"generated": "2026-10-10",
+	"source": "1a172dda847831f74b18c550160ab898c5d9a60efabb753a57a0c5fe507275a2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Colossal Rattlewurm",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Colossal Rattlewurm has flash as long as you control a Desert.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Desert"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Colossal Rattlewurm",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Colossal Rattlewurm to search for a Desert",
+				"basis": "{1}{G}, Exile this card from your graveyard: Search your library for a Desert card, put it onto the battlefield tapped, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{G}",
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Desert"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "desert"
+					},
+					{
+						"do": "move",
+						"what": "bound:desert",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

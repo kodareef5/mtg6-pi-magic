@@ -1,0 +1,88 @@
+{
+	"card": "Aatchik, Emerald Radian",
+	"generated": "2026-10-10",
+	"source": "dcb3bf85b8a7037c72250fb17beeed4a751b89541fc965200eac9681145e887f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aatchik, Emerald Radian",
+		"registers": [
+			{
+				"basis": "When Aatchik enters, create a 1/1 green Insect creature token for each artifact and/or creature card in your graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"types": [
+										"artifact",
+										"creature"
+									],
+									"token": false
+								}
+							},
+							"spec": {
+								"name": "Insect Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Insect"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Insect you control dies, put a +1/+1 counter on Aatchik. Each opponent loses 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"subtypes": [
+							"Insect"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

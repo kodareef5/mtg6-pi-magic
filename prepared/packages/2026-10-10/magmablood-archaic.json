@@ -1,0 +1,81 @@
+{
+	"card": "Magmablood Archaic",
+	"generated": "2026-10-10",
+	"source": "56c631770aa18226cc14e0d49c5458e32b0e72f140b42b0430e5884bc40532e5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Magmablood Archaic",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Reach, trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "enters",
+				"basis": "Converge — This creature enters with a +1/+1 counter on it for each color of mana spent to cast it.",
+				"counters": {
+					"+1/+1": {
+						"colorsSpent": "this"
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast an instant or sorcery spell, creatures you control get +1/+0 until end of turn for each color of mana spent to cast that spell.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"colorsSpent": "event:object"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

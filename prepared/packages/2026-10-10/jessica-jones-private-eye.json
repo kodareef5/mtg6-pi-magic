@@ -1,0 +1,56 @@
+{
+	"card": "Jessica Jones, Private Eye",
+	"generated": "2026-10-10",
+	"source": "170c937dc9e973a62d2a6653958ecf012ce99923f7f711ddd340cad146c88ee8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jessica Jones, Private Eye",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Jessica Jones, Private Eye",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap Jessica Jones and put a stun counter on her to exile cards equal to her power and permit playing them this turn",
+				"basis": "{T}, Put a stun counter on Jessica Jones: Exile the top X cards of your library, where X is Jessica Jones's power. You may play those cards this turn. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"counters": {
+						"kind": "stun",
+						"count": 1,
+						"put": true
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": {
+								"power": "this"
+							},
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": "end-of-turn"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,116 @@
+{
+	"card": "Blood Spatter Analysis",
+	"generated": "2026-10-10",
+	"source": "e6e006fc93d2480c6dec3bbe73f30885488a20e1d1238d6dc30db29a589f1811",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blood Spatter Analysis",
+		"registers": [
+			{
+				"basis": "When this enchantment enters, it deals 3 damage to target creature an opponent controls.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"from": "this",
+							"to": "target:0",
+							"amount": 3
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever one or more creatures die, mill a card and put a bloodstain counter on this enchantment. Then sacrifice it if it has five or more bloodstain counters on it. When you do, return target creature card from your graveyard to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						]
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "bloodstain",
+							"amount": 1
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice",
+							"if": {
+								"amount": {
+									"counters": "bloodstain",
+									"on": "this"
+								},
+								"atLeast": 5
+							},
+							"as": "sacrificed"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"types": [
+												"creature"
+											],
+											"owner": "you"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "hand",
+										"reason": "bounce"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

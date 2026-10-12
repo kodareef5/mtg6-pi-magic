@@ -1,0 +1,190 @@
+{
+	"card": "Dragonhawk, Fate's Tempest",
+	"generated": "2026-10-10",
+	"source": "98169313f9d0f0db5cbeb93741d489d573f724dda9f76a2dbfd3ada5dbcb6c5c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragonhawk, Fate's Tempest",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Dragonhawk enters or attacks, exile the top X cards of your library, where X is the number of creatures you control with power 4 or greater. You may play those cards until your next end step. At the beginning of your next end step, Dragonhawk deals 2 damage to each opponent for each of those cards that are still exiled.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"power": {
+											"atLeast": 4
+										}
+									}
+								},
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"nextEndStep": "you"
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "you"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "damage",
+										"to": "opponent",
+										"from": "this",
+										"amount": {
+											"sum": [
+												{
+													"count": {
+														"zones": [
+															"exile"
+														],
+														"is": "bound:exiled"
+													}
+												},
+												{
+													"count": {
+														"zones": [
+															"exile"
+														],
+														"is": "bound:exiled"
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Dragonhawk enters or attacks, exile the top X cards of your library, where X is the number of creatures you control with power 4 or greater. You may play those cards until your next end step. At the beginning of your next end step, Dragonhawk deals 2 damage to each opponent for each of those cards that are still exiled.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"power": {
+											"atLeast": 4
+										}
+									}
+								},
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"nextEndStep": "you"
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "you"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "damage",
+										"to": "opponent",
+										"from": "this",
+										"amount": {
+											"sum": [
+												{
+													"count": {
+														"zones": [
+															"exile"
+														],
+														"is": "bound:exiled"
+													}
+												},
+												{
+													"count": {
+														"zones": [
+															"exile"
+														],
+														"is": "bound:exiled"
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

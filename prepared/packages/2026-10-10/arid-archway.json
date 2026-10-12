@@ -1,0 +1,95 @@
+{
+	"card": "Arid Archway",
+	"generated": "2026-10-10",
+	"source": "6d8905fa605b7510c08ff494a4b44215cd1dc435d54b2878897ee6ba7eb95815",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Arid Archway",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "When this land enters, return a land you control to its owner's hand. If another Desert was returned this way, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "chosen-land"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen-land",
+							"to": "hand",
+							"reason": "bounce",
+							"as": "returned-land"
+						},
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"all": [
+									{
+										"bound": "returned-land"
+									},
+									{
+										"is": "bound:chosen-land",
+										"matches": {
+											"zones": [
+												"battlefield"
+											],
+											"subtypes": [
+												"Desert"
+											],
+											"not": {
+												"is": "this"
+											}
+										},
+										"lastKnown": true
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {C}{C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C",
+					"C"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

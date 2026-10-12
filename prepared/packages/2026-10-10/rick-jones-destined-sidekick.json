@@ -1,0 +1,75 @@
+{
+	"card": "Rick Jones, Destined Sidekick",
+	"generated": "2026-10-10",
+	"source": "a27f39626dca40b5451aa247c30c8569597aa708615d08041aecb04ec8704b22",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rick Jones, Destined Sidekick",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rick Jones, Destined Sidekick",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Mill four cards, then optionally put a Hero or enchantment card from among them into your hand",
+				"basis": "{3}, {T}: Mill four cards. You may put a Hero or enchantment card from among those cards into your hand. (To mill four cards, put the top four cards of your library into your graveyard.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 4,
+						"as": "milled"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard",
+								"exile",
+								"battlefield",
+								"stack",
+								"command"
+							],
+							"is": "bound:milled",
+							"any": [
+								{
+									"subtypes": [
+										"Hero"
+									]
+								},
+								{
+									"types": [
+										"enchantment"
+									]
+								}
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

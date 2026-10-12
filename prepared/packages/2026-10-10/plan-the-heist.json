@@ -1,0 +1,70 @@
+{
+	"card": "Plan the Heist",
+	"generated": "2026-10-10",
+	"source": "0612785b4f6eb5cf673f0695ba07d2ec7472ec0795bd4cd30a2fe8c0ff6d465e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Plan the Heist",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Plan the Heist",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Plan the Heist",
+				"basis": "Surveil 3 if you have no cards in hand. Then draw three cards. (To surveil 3, look at the top three cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 3,
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"hand"
+									],
+									"controller": "you"
+								}
+							},
+							"atMost": 0
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Plan the Heist",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Plan the Heist",
+				"basis": "Plot {3}{U} (You may pay {3}{U} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{3}{U}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,122 @@
+{
+	"card": "My Precious // Allure of Power",
+	"generated": "2026-10-10",
+	"source": "402480ee2ef023a983f84d4ee45b0f2b0baa229d72589e75c13a7c6d6d46c144",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "My Precious // Allure of Power",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Equipped creature has hexproof and can't be blocked.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"words": [
+						"hexproof"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Equipped creature has hexproof and can't be blocked.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"is": "attached",
+						"types": [
+							"creature"
+						]
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "My Precious // Allure of Power",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip My Precious",
+				"basis": "Equip—{2}, Pay 2 life.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}",
+					"life": 2
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "My Precious // Allure of Power",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Allure of Power",
+				"basis": "As an additional cost to cast this spell, sacrifice a creature. ... Draw two cards.",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

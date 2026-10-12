@@ -1,0 +1,101 @@
+{
+	"card": "Emeritus of Abundance // Regrowth",
+	"generated": "2026-10-10",
+	"source": "89dcb9ceef0b99ca5342fbda29cc03bdef63a404f053a3e6e1da3818a443cde4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Emeritus of Abundance // Regrowth",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "This creature enters prepared.",
+				"kind": "enters",
+				"prepared": true
+			},
+			{
+				"face": 0,
+				"basis": "Whenever this creature attacks, if you control eight or more lands, this creature becomes prepared.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 8
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "prepare",
+							"what": "this",
+							"prepared": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Emeritus of Abundance // Regrowth",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Regrowth copy",
+				"basis": "Return target card from your graveyard to your hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

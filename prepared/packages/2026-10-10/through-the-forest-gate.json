@@ -1,0 +1,72 @@
+{
+	"card": "Through the Forest Gate",
+	"generated": "2026-10-10",
+	"source": "e3f5977112eb9808686c897be0a656332e5b81ad0df9656547c9d597eae6dd37",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Through the Forest Gate",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Through the Forest Gate",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Through the Forest Gate",
+				"basis": "Look at the top twenty cards of your library, put any number of land cards from among them onto the battlefield tapped, then shuffle. You gain 8 life.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 20,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"types": [
+								"land"
+							]
+						},
+						"count": 20,
+						"upTo": true,
+						"as": "lands"
+					},
+					{
+						"do": "move",
+						"what": "bound:lands",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 8
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

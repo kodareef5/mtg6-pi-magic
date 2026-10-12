@@ -1,0 +1,67 @@
+{
+	"card": "The Spirit Oasis",
+	"generated": "2026-10-10",
+	"source": "addbf07ff98a43decaf38ef4e180a5c49d969f33db735a9f5174ed4a62cf293c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Spirit Oasis",
+		"registers": [
+			{
+				"basis": "When The Spirit Oasis enters, draw a card for each Shrine you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"subtypes": [
+										"Shrine"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Shrine you control enters, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Shrine"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

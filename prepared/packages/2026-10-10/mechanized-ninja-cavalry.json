@@ -22,7 +22,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Robot",
+								"name": "Robot Token",
 								"types": [
 									"artifact",
 									"creature"

@@ -1,0 +1,90 @@
+{
+	"card": "Take the Fall",
+	"generated": "2026-10-10",
+	"source": "adf0d5b2709d8bd7aae794decc8fd57155fac01d6fa95d892707251105ae8980",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Take the Fall",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Take the Fall",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Take the Fall",
+				"basis": "Target creature gets -1/-0 until end of turn. It gets -4/-0 until end of turn instead if you control an outlaw. (Assassins, Mercenaries, Pirates, Rogues, and Warlocks are outlaws.) ... Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"as": "ordinary",
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"subtypes": [
+										"Assassin",
+										"Mercenary",
+										"Pirate",
+										"Rogue",
+										"Warlock"
+									]
+								}
+							},
+							"atMost": 0
+						},
+						"instructions": [
+							{
+								"do": "modify",
+								"what": "target:0",
+								"until": "end-of-turn",
+								"change": {
+									"power": -1
+								}
+							}
+						]
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -4
+						},
+						"if": {
+							"not": {
+								"bound": "ordinary"
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

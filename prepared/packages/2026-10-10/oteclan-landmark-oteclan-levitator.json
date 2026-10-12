@@ -1,0 +1,147 @@
+{
+	"card": "Oteclan Landmark // Oteclan Levitator",
+	"generated": "2026-10-10",
+	"source": "825b78b28c12b6a42acac22c029adc789b6b457513c098e120322afb9e7c059f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Oteclan Landmark // Oteclan Levitator",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When this artifact enters, scry 2.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever this creature attacks, target attacking creature without flying gains flying until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"attacking": true,
+								"not": {
+									"words": [
+										"flying"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Oteclan Landmark // Oteclan Levitator",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Craft with another artifact",
+				"basis": "Craft with artifact {2}{W} ({2}{W}, Exile this artifact, Exile another artifact you control or an artifact card from your graveyard: Return this card transformed under its owner's control. Craft only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}{W}",
+					"exile": {
+						"source": true,
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"any": [
+								{
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"other": true
+								},
+								{
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you"
+								}
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "bound:cost-source",
+						"to": "battlefield",
+						"face": 1,
+						"controller": "owner:bound:cost-source",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,132 @@
+{
+	"card": "Horned Loch-Whale // Lagoon Breach",
+	"generated": "2026-10-10",
+	"source": "d85626d9a20b09992fe329911b6b306badbfc33776f61e1d8b7cf6e7d1ad3cb5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Horned Loch-Whale // Lagoon Breach",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Ward {2}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "This creature enters tapped unless it's your turn.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"turn": "self"
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Horned Loch-Whale // Lagoon Breach",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Lagoon Breach; the target's owner chooses bottom or top of their library",
+				"basis": "The owner of target attacking creature you don't control puts it on their choice of the top or bottom of their library.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"attacking": true,
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "chose-bottom",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "bottom",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "top",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "chose-bottom"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

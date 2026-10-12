@@ -1,0 +1,161 @@
+{
+	"card": "Ajani, Outland Chaperone",
+	"generated": "2026-10-10",
+	"source": "fffa0538a21215714d8da35bcb5bc3d41287e38cbd9f8ca666d97b1941ca3181",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ajani, Outland Chaperone",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ajani, Outland Chaperone",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a Kithkin token",
+				"basis": "+1: Create a 1/1 green and white Kithkin creature token.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": 1
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Kithkin Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Kithkin"
+							],
+							"colors": [
+								"G",
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ajani, Outland Chaperone",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Deal 4 damage to a tapped creature",
+				"basis": "−2: Ajani deals 4 damage to target tapped creature.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": -2
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"tapped": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "this",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ajani, Outland Chaperone",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Look at cards equal to your life total, put eligible permanents onto the battlefield, then shuffle",
+				"basis": "−8: Look at the top X cards of your library, where X is your life total. You may put any number of nonland permanent cards with mana value 3 or less from among them onto the battlefield. Then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": -8
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": {
+								"life": "you"
+							},
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"planeswalker"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							},
+							"manaValue": {
+								"atMost": 3
+							}
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							}
+						},
+						"upTo": true,
+						"as": "selected"
+					},
+					{
+						"do": "move",
+						"what": "bound:selected",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

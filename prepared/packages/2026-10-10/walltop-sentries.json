@@ -42,7 +42,8 @@
 							"owner": "you",
 							"subtypes": [
 								"Lesson"
-							]
+							],
+							"token": false
 						}
 					},
 					"atLeast": 1

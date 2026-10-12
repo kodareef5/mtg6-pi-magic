@@ -1,0 +1,143 @@
+{
+	"card": "Machinist's Arsenal",
+	"generated": "2026-10-10",
+	"source": "269caba4d9ee01a03090655c4c39ac19f28f3283239d0b6703402f1cc2e3e188",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Machinist's Arsenal",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Job select (When this Equipment enters, create a 1/1 colorless Hero creature token, then attach this to it.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Hero Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							},
+							"as": "hero"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:hero"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +2/+2 for each artifact you control and is an Artificer in addition to its other types.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": {
+						"sum": [
+							{
+								"count": {
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								}
+							},
+							{
+								"count": {
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								}
+							}
+						]
+					},
+					"toughness": {
+						"sum": [
+							{
+								"count": {
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								}
+							},
+							{
+								"count": {
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								}
+							}
+						]
+					},
+					"subtypes": {
+						"add": [
+							"Artificer"
+						],
+						"of": "creature"
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Equip Machinist's Arsenal",
+				"basis": "Machina — Equip {4} ({4}: Attach to target creature you control. Equip only as a sorcery.)",
+				"source": {
+					"card": "Machinist's Arsenal",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

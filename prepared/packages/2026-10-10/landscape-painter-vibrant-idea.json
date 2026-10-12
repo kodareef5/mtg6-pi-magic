@@ -1,0 +1,42 @@
+{
+	"card": "Landscape Painter // Vibrant Idea",
+	"generated": "2026-10-10",
+	"source": "75660472be7df2bf17ada450c0abf8d56137903c61804bb9736496665650c1fc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Landscape Painter // Vibrant Idea",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Landscape Painter // Vibrant Idea",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Vibrant Idea",
+				"basis": "Draw two cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

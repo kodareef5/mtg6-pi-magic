@@ -1,0 +1,286 @@
+{
+	"card": "Delivery Moogle",
+	"generated": "2026-10-10",
+	"source": "66db128af6f925b922f96a3efdbdca377dbc54a092b9f4b3dccccdfeab5ed1c3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Delivery Moogle",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, search your library and/or graveyard for an artifact card with mana value 2 or less, reveal it, and put it into your hand. If you search your library this way, shuffle.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "searched-graveyard",
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you"
+									},
+									"count": 0
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "searched-library",
+							"if": {
+								"bound": "searched-graveyard"
+							},
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you"
+									},
+									"count": 0
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "searched-library",
+							"if": {
+								"not": {
+									"bound": "searched-graveyard"
+								}
+							},
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you"
+									},
+									"count": 0
+								}
+							]
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"types": [
+									"artifact"
+								],
+								"manaValue": {
+									"atMost": 2
+								},
+								"token": false
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "found",
+							"if": {
+								"not": {
+									"bound": "searched-graveyard"
+								}
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"artifact"
+								],
+								"manaValue": {
+									"atMost": 2
+								},
+								"token": false
+							},
+							"count": 1,
+							"as": "found",
+							"if": {
+								"all": [
+									{
+										"bound": "searched-graveyard"
+									},
+									{
+										"not": {
+											"bound": "searched-library"
+										}
+									}
+								]
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library",
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"artifact"
+								],
+								"manaValue": {
+									"atMost": 2
+								},
+								"token": false
+							},
+							"count": 1,
+							"as": "found",
+							"if": {
+								"all": [
+									{
+										"bound": "searched-graveyard"
+									},
+									{
+										"bound": "searched-library"
+									},
+									{
+										"amount": {
+											"count": {
+												"zones": [
+													"graveyard"
+												],
+												"owner": "you",
+												"types": [
+													"artifact"
+												],
+												"manaValue": {
+													"atMost": 2
+												},
+												"token": false
+											}
+										},
+										"atLeast": 1
+									}
+								]
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library",
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"artifact"
+								],
+								"manaValue": {
+									"atMost": 2
+								},
+								"token": false
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "found",
+							"if": {
+								"all": [
+									{
+										"bound": "searched-graveyard"
+									},
+									{
+										"bound": "searched-library"
+									},
+									{
+										"amount": {
+											"count": {
+												"zones": [
+													"graveyard"
+												],
+												"owner": "you",
+												"types": [
+													"artifact"
+												],
+												"manaValue": {
+													"atMost": 2
+												},
+												"token": false
+											}
+										},
+										"atMost": 0
+									}
+								]
+							}
+						},
+						{
+							"do": "reveal",
+							"what": "bound:found"
+						},
+						{
+							"do": "move",
+							"what": "bound:found",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you",
+							"if": {
+								"bound": "searched-library"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

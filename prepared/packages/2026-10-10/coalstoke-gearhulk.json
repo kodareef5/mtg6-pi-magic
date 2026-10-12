@@ -1,0 +1,103 @@
+{
+	"card": "Coalstoke Gearhulk",
+	"generated": "2026-10-10",
+	"source": "7dac211cab4043606aeeb7cf34f8ec069394254ff126da441885e878f4de1d3b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Coalstoke Gearhulk",
+		"registers": [
+			{
+				"basis": "Menace, deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace",
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, put target creature card with mana value 4 or less from a graveyard onto the battlefield under your control with a finality counter on it. That creature gains menace, deathtouch, and haste. At the beginning of your next end step, exile that creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"types": [
+									"creature"
+								],
+								"manaValue": {
+									"atMost": 4
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"counters": {
+								"finality": 1
+							},
+							"reason": "resolve",
+							"as": "returned"
+						},
+						{
+							"do": "modify",
+							"what": "bound:returned",
+							"until": "indefinite",
+							"change": {
+								"words": [
+									"menace",
+									"deathtouch",
+									"haste"
+								]
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "you"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:returned",
+										"to": "exile",
+										"reason": "exile"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

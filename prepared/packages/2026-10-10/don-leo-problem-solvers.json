@@ -1,0 +1,96 @@
+{
+	"card": "Don & Leo, Problem Solvers",
+	"generated": "2026-10-10",
+	"source": "7f56b2a8cffccdc1b8a8a3a85e17c4eb596bb3ccc027b8e4b0e6190217473d8d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Don & Leo, Problem Solvers",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, exile up to one target artifact you control and up to one target creature you control. Then return them to the battlefield under their owners' control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"artifact"
+								],
+								"controller": "you"
+							},
+							"upTo": true
+						},
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"any": [
+									{
+										"is": "target:0"
+									},
+									{
+										"is": "target:1"
+									}
+								]
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "move",
+							"what": "bound:exiled",
+							"to": "battlefield",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

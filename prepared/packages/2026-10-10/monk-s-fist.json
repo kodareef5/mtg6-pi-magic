@@ -1,0 +1,103 @@
+{
+	"card": "Monk's Fist",
+	"generated": "2026-10-10",
+	"source": "88b9317dcf71caf509d854ce795e9a475ea9cb873a3d66a6ff3bd33962305feb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Monk's Fist",
+		"registers": [
+			{
+				"basis": "Job select (When this Equipment enters, create a 1/1 colorless Hero creature token, then attach this to it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Hero Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							},
+							"as": "hero"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:hero"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +1/+0 and is a Monk in addition to its other types.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 1,
+					"subtypes": {
+						"add": [
+							"Monk"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Monk's Fist",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Monk's Fist",
+				"basis": "Equip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

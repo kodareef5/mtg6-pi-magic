@@ -1,0 +1,170 @@
+{
+	"card": "Way of the Healer",
+	"generated": "2026-10-10",
+	"source": "48f27fb817cb0844b0509ebbe099832e43d91de9a49bafca5005f7fc20a0b0de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Way of the Healer",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Way of the Healer enters, empower Jace 5. (Put five loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"types": [
+											"planeswalker"
+										],
+										"subtypes": [
+											"Jace"
+										],
+										"token": true
+									}
+								},
+								"atMost": 0
+							},
+							"spec": {
+								"name": "Jace Token",
+								"types": [
+									"planeswalker"
+								],
+								"subtypes": [
+									"Jace"
+								],
+								"colors": [
+									"U"
+								],
+								"loyalty": 0,
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "[−1]: Surveil 1",
+										"cost": {
+											"loyalty": -1
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "keyword",
+													"name": "surveil",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									},
+									{
+										"kind": "activated",
+										"basis": "[−3]: Draw a card.",
+										"cost": {
+											"loyalty": -3
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"controller": "you",
+								"types": [
+									"planeswalker"
+								],
+								"subtypes": [
+									"Jace"
+								],
+								"token": true
+							},
+							"count": 1,
+							"as": "jace"
+						},
+						{
+							"do": "counters",
+							"on": "bound:jace",
+							"kind": "loyalty",
+							"amount": 5
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Planeswalkers you control have \"[−2]: Create a 2/2 colorless Wizard Soldier creature token named Cadet. Surveil 1.\"",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"planeswalker"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Planeswalkers you control have \"[−2]: Create a 2/2 colorless Wizard Soldier creature token named Cadet. Surveil 1.\"",
+							"cost": {
+								"loyalty": -2
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "token",
+										"count": 1,
+										"spec": {
+											"name": "Cadet",
+											"types": [
+												"creature"
+											],
+											"subtypes": [
+												"Wizard",
+												"Soldier"
+											],
+											"colors": [],
+											"power": 2,
+											"toughness": 2
+										}
+									},
+									{
+										"do": "keyword",
+										"name": "surveil",
+										"who": "you",
+										"count": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

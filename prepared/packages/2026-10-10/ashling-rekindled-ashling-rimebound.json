@@ -1,0 +1,217 @@
+{
+	"card": "Ashling, Rekindled // Ashling, Rimebound",
+	"generated": "2026-10-10",
+	"source": "2125017635545da9aae3695e3b673e0d8f997b2a6916a6988e43e914668161cb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ashling, Rekindled // Ashling, Rimebound",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever this creature enters or transforms into Ashling, Rekindled, you may discard a card. If you do, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever this creature enters or transforms into Ashling, Rekindled, you may discard a card. If you do, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "transforms",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "At the beginning of your first main phase, you may pay {U}. If you do, transform Ashling.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{U}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "transform",
+							"what": "this",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever this creature transforms into Ashling, Rimebound and at the beginning of your first main phase, add two mana of any one color. Spend this mana only to cast spells with mana value 4 or greater.",
+				"kind": "watch",
+				"event": {
+					"on": "transforms",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"any": 2,
+							"spendOnly": {
+								"zones": [
+									"stack"
+								],
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"instant",
+									"kindred",
+									"planeswalker",
+									"sorcery"
+								],
+								"manaValue": {
+									"atLeast": 4
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever this creature transforms into Ashling, Rimebound and at the beginning of your first main phase, add two mana of any one color. Spend this mana only to cast spells with mana value 4 or greater.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"any": 2,
+							"spendOnly": {
+								"zones": [
+									"stack"
+								],
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"instant",
+									"kindred",
+									"planeswalker",
+									"sorcery"
+								],
+								"manaValue": {
+									"atLeast": 4
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "At the beginning of your first main phase, you may pay {R}. If you do, transform Ashling.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{R}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "transform",
+							"what": "this",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

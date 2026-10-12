@@ -1,0 +1,70 @@
+{
+	"card": "Spider-Girl, Legacy Hero",
+	"generated": "2026-10-10",
+	"source": "ddc5b4a459f71a9d59f6d5350b5b38275da2e5cc8b6839b241f30f5db3e72f1e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider-Girl, Legacy Hero",
+		"registers": [
+			{
+				"basis": "During your turn, Spider-Girl has flying.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"turn": "self"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When Spider-Girl leaves the battlefield, create a 1/1 green and white Human Citizen creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Citizen Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Citizen"
+								],
+								"colors": [
+									"G",
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

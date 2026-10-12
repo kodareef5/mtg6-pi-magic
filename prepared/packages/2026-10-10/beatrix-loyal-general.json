@@ -1,0 +1,80 @@
+{
+	"card": "Beatrix, Loyal General",
+	"generated": "2026-10-10",
+	"source": "766062a986766ab97340a27cb0ffaef995d015a1ec31de800041283e160e54a2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beatrix, Loyal General",
+		"registers": [
+			{
+				"basis": "Vigilance (Attacking doesn't cause this creature to tap.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of combat on your turn, you may attach any number of Equipment you control to target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"may": true,
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"subtypes": [
+									"Equipment"
+								],
+								"controller": "you"
+							},
+							"count": {
+								"count": {
+									"subtypes": [
+										"Equipment"
+									],
+									"controller": "you"
+								}
+							},
+							"upTo": true,
+							"as": "equipment"
+						},
+						{
+							"do": "attach",
+							"what": "bound:equipment",
+							"to": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,61 @@
+{
+	"card": "Consuming Ashes",
+	"generated": "2026-10-10",
+	"source": "d4914dd2fd1dbb47e97be6bfdbb9c998869845736f362cf79d913ee90e9efbca",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Consuming Ashes",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Consuming Ashes",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Exile target creature, then surveil 2 if it had mana value 3 or less",
+				"basis": "Exile target creature. If it had mana value 3 or less, surveil 2. (Look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"manaValue": {
+									"atMost": 3
+								}
+							},
+							"lastKnown": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

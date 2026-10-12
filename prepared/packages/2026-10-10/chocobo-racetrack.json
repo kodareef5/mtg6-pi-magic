@@ -1,0 +1,77 @@
+{
+	"card": "Chocobo Racetrack",
+	"generated": "2026-10-10",
+	"source": "c5f24388242fad2627f49440821f60fcc982551e339ffcfd92cd8f728b3d746e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chocobo Racetrack",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Bird Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Bird"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 2,
+								"toughness": 2,
+								"registers": [
+									{
+										"basis": "Landfall — Whenever a land you control enters, create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+										"kind": "watch",
+										"event": {
+											"on": "enters",
+											"of": {
+												"types": [
+													"land"
+												],
+												"controller": "you"
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "this",
+													"until": "end-of-turn",
+													"change": {
+														"power": 1
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

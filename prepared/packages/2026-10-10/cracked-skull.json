@@ -1,0 +1,120 @@
+{
+	"card": "Cracked Skull",
+	"generated": "2026-10-10",
+	"source": "3f77df50f5a5786e6aac050c268933b8b3c980efd352343d0ff7ea2f15ff52bb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cracked Skull",
+		"registers": [
+			{
+				"basis": "When this Aura enters, look at target player's hand. You may choose a nonland card from it. That player discards that card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"every": {
+								"zones": [
+									"hand"
+								],
+								"owner": "target:0"
+							},
+							"as": "hand"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"is": "bound:hand",
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			},
+			{
+				"basis": "When enchanted creature is dealt damage, destroy it.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"received": true,
+					"of": {
+						"is": "attached"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "event:object"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cracked Skull",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cracked Skull enchanting a creature",
+				"basis": "Enchant creature",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

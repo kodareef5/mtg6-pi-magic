@@ -1,0 +1,104 @@
+{
+	"card": "Three Blind Mice",
+	"generated": "2026-10-10",
+	"source": "d4215f371b0b5370304f2956eec3b03f25be4901a9b6ed6281851be639c98cbe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Three Blind Mice",
+		"registers": [
+			{
+				"basis": "I — Create a 1/1 white Mouse creature token.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Mouse Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Mouse"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "II, III — Create a token that's a copy of target token you control.",
+				"kind": "chapter",
+				"numbers": [
+					2,
+					3
+				],
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"token": true,
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"copy": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"basis": "IV — Creatures you control get +1/+1 and gain vigilance until end of turn.",
+				"kind": "chapter",
+				"numbers": [
+					4
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"vigilance"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

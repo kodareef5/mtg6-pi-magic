@@ -1,0 +1,169 @@
+{
+	"card": "Down, Down to Goblin-town",
+	"generated": "2026-10-10",
+	"source": "c011373186d3432bcbc8dbf143dd610f44eac601b8e9dfc782556cc9890d835f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Down, Down to Goblin-town",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Target opponent reveals their hand. You choose a nonland card from it. That player discards that card.",
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "reveal",
+							"every": {
+								"zones": [
+									"hand"
+								],
+								"owner": "target:0"
+							},
+							"as": "hand"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"count": 1,
+							"as": "discard",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"is": "bound:hand",
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"basis": "II — Amass Goblins 1. (Put a +1/+1 counter on an Army you control. It's also a Goblin. If you don't control an Army, create a 0/0 black Goblin Army creature token first.)",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Goblin Army Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Goblin",
+									"Army"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 0,
+								"toughness": 0
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Army"
+										],
+										"controller": "you"
+									}
+								},
+								"atMost": 0
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Army"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "army"
+						},
+						{
+							"do": "counters",
+							"on": "bound:army",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "modify",
+							"what": "bound:army",
+							"until": "indefinite",
+							"change": {
+								"subtypes": {
+									"add": [
+										"Goblin"
+									]
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					3,
+					4
+				],
+				"basis": "III, IV — Target opponent loses 1 life and you gain 1 life.",
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "life",
+							"who": "target:0",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

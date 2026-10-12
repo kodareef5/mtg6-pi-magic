@@ -1,0 +1,213 @@
+{
+	"card": "Aerid Konstrari",
+	"generated": "2026-10-10",
+	"source": "cda6f0dca4b5b6bf67468e27b31f74d855eeeca797067f4da68bdc246fe323d1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aerid Konstrari",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When Aerid Konstrari enters or dies, create a Heartwood token. (It's a red and green artifact with \"{T}: Add {R} or {G}.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Heartwood Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Heartwood"
+								],
+								"colors": [
+									"R",
+									"G"
+								],
+								"registers": [
+									{
+										"basis": "{T}: Add {R} or {G}.",
+										"kind": "mana",
+										"cost": {
+											"tap": true
+										},
+										"colors": [
+											"R"
+										]
+									},
+									{
+										"basis": "{T}: Add {R} or {G}.",
+										"kind": "mana",
+										"cost": {
+											"tap": true
+										},
+										"colors": [
+											"G"
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When Aerid Konstrari enters or dies, create a Heartwood token. (It's a red and green artifact with \"{T}: Add {R} or {G}.\")",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Heartwood Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Heartwood"
+								],
+								"colors": [
+									"R",
+									"G"
+								],
+								"registers": [
+									{
+										"basis": "{T}: Add {R} or {G}.",
+										"kind": "mana",
+										"cost": {
+											"tap": true
+										},
+										"colors": [
+											"R"
+										]
+									},
+									{
+										"basis": "{T}: Add {R} or {G}.",
+										"kind": "mana",
+										"cost": {
+											"tap": true
+										},
+										"colors": [
+											"G"
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Aerid Konstrari",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a Heartwood token, then increase Aerid Konstrari's power by the number of artifacts you control until end of turn.",
+				"basis": "{6}: Create a Heartwood token. Then Aerid Konstrari gets +X/+0 until end of turn, where X is the number of artifacts you control.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Heartwood Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Heartwood"
+							],
+							"colors": [
+								"R",
+								"G"
+							],
+							"registers": [
+								{
+									"basis": "{T}: Add {R} or {G}.",
+									"kind": "mana",
+									"cost": {
+										"tap": true
+									},
+									"colors": [
+										"R"
+									]
+								},
+								{
+									"basis": "{T}: Add {R} or {G}.",
+									"kind": "mana",
+									"cost": {
+										"tap": true
+									},
+									"colors": [
+										"G"
+									]
+								}
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

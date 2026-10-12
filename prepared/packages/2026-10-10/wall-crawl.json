@@ -1,0 +1,97 @@
+{
+	"card": "Wall Crawl",
+	"generated": "2026-10-10",
+	"source": "5b822556844db9c4f81066a57b5afefd29d297848fc26de32d3e9816ab80e450",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wall Crawl",
+		"registers": [
+			{
+				"basis": "When this enchantment enters, create a 2/1 green Spider creature token with reach, then you gain 1 life for each Spider you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Spider Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spider"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 2,
+								"toughness": 1,
+								"words": [
+									"reach"
+								]
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"count": {
+									"subtypes": [
+										"Spider"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Spiders you control get +1/+1 and can't be blocked by creatures with defender.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Spider"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"basis": "Spiders you control get +1/+1 and can't be blocked by creatures with defender.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"subtypes": [
+							"Spider"
+						],
+						"controller": "you"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						],
+						"words": [
+							"defender"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

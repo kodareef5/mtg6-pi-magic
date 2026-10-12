@@ -18,7 +18,7 @@
 					],
 					"controller": "any"
 				},
-				"claim": "Cast Release the Dogs to create four Dog tokens.",
+				"claim": "Create four Dog tokens.",
 				"basis": "Create four 1/1 white Dog creature tokens.",
 				"timing": "spell",
 				"instructions": [
@@ -26,7 +26,7 @@
 						"do": "token",
 						"count": 4,
 						"spec": {
-							"name": "Dog",
+							"name": "Dog Token",
 							"types": [
 								"creature"
 							],
@@ -43,7 +43,6 @@
 				]
 			}
 		],
-		"assessed": true,
-		"printedCast": false
+		"assessed": true
 	}
 }

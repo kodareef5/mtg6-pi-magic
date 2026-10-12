@@ -1,0 +1,83 @@
+{
+	"card": "Galuf's Final Act",
+	"generated": "2026-10-10",
+	"source": "3ce18bc3ffe8accbe2001d5f69492dc90b3c4c95ac1782d7de4d11b9cf1ea106",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Galuf's Final Act",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Galuf's Final Act",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Galuf's Final Act",
+				"basis": "Until end of turn, target creature gets +1/+0 and gains \"When this creature dies, put a number of +1/+1 counters equal to its power on up to one target creature.\"",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"registers": [
+								{
+									"kind": "watch",
+									"basis": "When this creature dies, put a number of +1/+1 counters equal to its power on up to one target creature.",
+									"event": {
+										"on": "dies",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"targets": [
+											{
+												"object": {
+													"types": [
+														"creature"
+													]
+												},
+												"upTo": true
+											}
+										],
+										"instructions": [
+											{
+												"do": "counters",
+												"on": "target:0",
+												"kind": "+1/+1",
+												"amount": {
+													"power": "this"
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,89 @@
+{
+	"card": "Spectacular Tactics",
+	"generated": "2026-10-10",
+	"source": "cabad0f468c75ae4131dd8dcb1354cbaf4fb17b18739b28415312ecc0df3f6ef",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spectacular Tactics",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spectacular Tactics",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Spectacular Tactics — counter and hexproof",
+				"basis": "Choose one —\n• Put a +1/+1 counter on target creature you control. It gains hexproof until end of turn.\n• Destroy target creature with power 4 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"hexproof"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Spectacular Tactics",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Spectacular Tactics — destroy creature with power 4 or greater",
+				"basis": "Choose one —\n• Put a +1/+1 counter on target creature you control. It gains hexproof until end of turn.\n• Destroy target creature with power 4 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"power": {
+								"atLeast": 4
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

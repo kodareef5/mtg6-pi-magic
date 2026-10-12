@@ -1,0 +1,90 @@
+{
+	"card": "Fire Nation Cadets",
+	"generated": "2026-10-10",
+	"source": "724acdd47016c67022fc21b0d635f267c9bcf0af706987fff8538beec7496cd2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fire Nation Cadets",
+		"registers": [
+			{
+				"basis": "This creature has firebending 2 as long as there's a Lesson card in your graveyard. (Whenever this creature attacks, add {R}{R}. This mana lasts until end of combat.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Lesson"
+							],
+							"token": false
+						}
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "This creature has firebending 2 as long as there's a Lesson card in your graveyard. (Whenever this creature attacks, add {R}{R}. This mana lasts until end of combat.)",
+							"kind": "watch",
+							"event": {
+								"on": "attacks",
+								"of": {
+									"is": "this"
+								}
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "mana",
+										"who": "you",
+										"colors": [
+											"R",
+											"R"
+										],
+										"until": "end-of-combat"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fire Nation Cadets",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give this creature +1/+0 until end of turn",
+				"basis": "{2}: This creature gets +1/+0 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

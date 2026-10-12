@@ -1,0 +1,87 @@
+{
+	"card": "Akul the Unrepentant",
+	"generated": "2026-10-10",
+	"source": "73d225253d60cca79079c2e4fd1f50056fff0b2cfb48f4a247e18299c4d55d6c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Akul the Unrepentant",
+		"registers": [
+			{
+				"basis": "Flying, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Akul the Unrepentant",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice three other creatures to optionally put a creature card from hand onto the battlefield",
+				"basis": "Sacrifice three other creatures: You may put a creature card from your hand onto the battlefield. Activate only as a sorcery and only once each turn.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"limit": "once-per-turn",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"other": true
+						},
+						"count": 3
+					}
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "creature"
+					},
+					{
+						"do": "move",
+						"what": "bound:creature",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

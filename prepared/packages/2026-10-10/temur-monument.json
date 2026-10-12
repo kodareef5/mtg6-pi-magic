@@ -1,0 +1,104 @@
+{
+	"card": "Temur Monument",
+	"generated": "2026-10-10",
+	"source": "23033ab457c50417df25801f8abf7887059b29e6b60f983c572c2e024a3b3429",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Temur Monument",
+		"registers": [
+			{
+				"basis": "When this artifact enters, search your library for a basic Forest, Island, or Mountain card, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"token": false,
+								"supertypes": [
+									"basic"
+								],
+								"subtypes": [
+									"Forest",
+									"Island",
+									"Mountain"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "reveal",
+							"what": "bound:land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Temur Monument",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a 5/5 green Elephant creature token",
+				"basis": "{3}{G}{U}{R}, {T}, Sacrifice this artifact: Create a 5/5 green Elephant creature token. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}{G}{U}{R}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Elephant Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elephant"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 5,
+							"toughness": 5
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

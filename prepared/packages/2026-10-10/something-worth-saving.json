@@ -1,0 +1,78 @@
+{
+	"card": "Something Worth Saving",
+	"generated": "2026-10-10",
+	"source": "e3dbde23d23da4b1feb7c4c1dd8ac249d085027388e436a21a40142d9bb2ac8a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Something Worth Saving",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Something Worth Saving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Something Worth Saving",
+				"basis": "Mill four cards. You may put a permanent card from among them into your hand. You gain 1 life. (To mill four cards, put the top four cards of your library into your graveyard.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 4,
+							"of": "you"
+						},
+						"to": "graveyard",
+						"reason": "mill",
+						"as": "milled"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard",
+								"exile",
+								"battlefield",
+								"command",
+								"stack"
+							],
+							"is": "bound:milled",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "saved"
+					},
+					{
+						"do": "move",
+						"what": "bound:saved",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

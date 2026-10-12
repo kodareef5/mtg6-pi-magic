@@ -1,0 +1,273 @@
+{
+	"card": "Chandra, Spark Hunter",
+	"generated": "2026-10-10",
+	"source": "c5527cc1b5239684457ff824b528f09b5267a9d92e8a63941882d163e1f42f81",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chandra, Spark Hunter",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "At the beginning of combat on your turn, choose up to one target Vehicle you control. Until end of turn, it becomes an artifact creature and gains haste.",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"subtypes": [
+									"Vehicle"
+								],
+								"controller": "you"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"types": {
+									"add": [
+										"artifact",
+										"creature"
+									]
+								},
+								"words": [
+									"haste"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Chandra, Spark Hunter",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Add two loyalty; optionally sacrifice an artifact or discard a card to draw",
+				"basis": "+2: You may sacrifice an artifact or discard a card. If you do, draw a card.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": 2
+				},
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"if": {
+							"amount": {
+								"sum": [
+									{
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									{
+										"count": {
+											"zones": [
+												"hand"
+											],
+											"controller": "you"
+										}
+									}
+								]
+							},
+							"atLeast": 1
+						},
+						"instructions": [
+							{
+								"do": "choose-actions",
+								"who": "you",
+								"count": 1,
+								"actions": [
+									{
+										"sacrifice": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									{
+										"discard": true
+									}
+								]
+							},
+							{
+								"do": "draw",
+								"who": "you",
+								"count": 1
+							}
+						]
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Chandra, Spark Hunter",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a Vehicle token",
+				"basis": "0: Create a 3/2 colorless Vehicle artifact token with crew 1.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": 0
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Vehicle Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Vehicle"
+							],
+							"colors": [],
+							"power": 3,
+							"toughness": 2,
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "Crew 1",
+									"cost": {
+										"tap": {
+											"choose": {
+												"zones": [
+													"battlefield"
+												],
+												"types": [
+													"creature"
+												],
+												"controller": "you",
+												"other": true
+											},
+											"totalPower": 1
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "this",
+												"until": "end-of-turn",
+												"change": {
+													"types": {
+														"add": [
+															"artifact",
+															"creature"
+														]
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Chandra, Spark Hunter",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create the artifact-entry damage emblem",
+				"basis": "−7: You get an emblem with \"Whenever an artifact you control enters, this emblem deals 3 damage to any target.\"",
+				"timing": "stack",
+				"cost": {
+					"loyalty": -7
+				},
+				"instructions": [
+					{
+						"do": "emblem",
+						"who": "you",
+						"registers": [
+							{
+								"kind": "watch",
+								"basis": "Whenever an artifact you control enters, this emblem deals 3 damage to any target.",
+								"zones": [
+									"command"
+								],
+								"event": {
+									"on": "enters",
+									"of": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"artifact"
+										],
+										"controller": "you"
+									}
+								},
+								"effect": {
+									"targets": [
+										{
+											"object": {
+												"zones": [
+													"battlefield"
+												],
+												"types": [
+													"creature",
+													"planeswalker",
+													"battle"
+												]
+											},
+											"player": "any"
+										}
+									],
+									"instructions": [
+										{
+											"do": "damage",
+											"from": "this",
+											"to": "target:0",
+											"amount": 3
+										}
+									]
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

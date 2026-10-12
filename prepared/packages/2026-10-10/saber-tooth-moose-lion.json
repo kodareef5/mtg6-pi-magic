@@ -1,0 +1,77 @@
+{
+	"card": "Saber-Tooth Moose-Lion",
+	"generated": "2026-10-10",
+	"source": "f8b3f467a58d4e86cf982b316864359b65353f52a4ba27e728f61753007544d8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Saber-Tooth Moose-Lion",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Reach",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Saber-Tooth Moose-Lion",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Forestcycle Saber-Tooth Moose-Lion",
+				"basis": "Forestcycling {2} ({2}, Discard this card: Search your library for a Forest card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Forest"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "forest"
+					},
+					{
+						"do": "move",
+						"what": "bound:forest",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

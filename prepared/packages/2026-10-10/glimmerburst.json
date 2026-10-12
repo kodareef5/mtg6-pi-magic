@@ -31,7 +31,7 @@
 						"do": "token",
 						"count": 1,
 						"spec": {
-							"name": "Glimmer",
+							"name": "Glimmer Token",
 							"types": [
 								"enchantment",
 								"creature"
@@ -49,8 +49,6 @@
 				]
 			}
 		],
-		"assessed": true,
-		"printedCast": false,
-		"deferred": []
+		"assessed": true
 	}
 }

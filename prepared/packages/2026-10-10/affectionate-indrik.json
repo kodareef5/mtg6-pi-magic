@@ -1,0 +1,48 @@
+{
+	"card": "Affectionate Indrik",
+	"generated": "2026-10-10",
+	"source": "1ec6cde3b844538a37a9ca59e24a5210361eacbaa5a55425ef3b783aaf98ce2a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Affectionate Indrik",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may have it fight target creature you don't control. (Each deals damage equal to its power to the other.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"may": true,
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "fight",
+							"a": "this",
+							"b": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

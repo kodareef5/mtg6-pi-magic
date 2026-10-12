@@ -1,0 +1,118 @@
+{
+	"card": "Gloom Ripper",
+	"generated": "2026-10-10",
+	"source": "512a12c185c9b647c224572b312ac4885a03ada8fd29945ddb6265acec984b26",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gloom Ripper",
+		"registers": [
+			{
+				"basis": "When this creature enters, target creature you control gets +X/+0 until end of turn and up to one target creature an opponent controls gets -0/-X until end of turn, where X is the number of Elves you control plus the number of Elf cards in your graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						},
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"sum": [
+										{
+											"count": {
+												"zones": [
+													"battlefield"
+												],
+												"subtypes": [
+													"Elf"
+												],
+												"controller": "you"
+											}
+										},
+										{
+											"count": {
+												"zones": [
+													"graveyard"
+												],
+												"subtypes": [
+													"Elf"
+												],
+												"owner": "you",
+												"token": false
+											}
+										}
+									]
+								}
+							}
+						},
+						{
+							"do": "modify",
+							"what": "target:1",
+							"until": "end-of-turn",
+							"change": {
+								"toughness": {
+									"negate": {
+										"sum": [
+											{
+												"count": {
+													"zones": [
+														"battlefield"
+													],
+													"subtypes": [
+														"Elf"
+													],
+													"controller": "you"
+												}
+											},
+											{
+												"count": {
+													"zones": [
+														"graveyard"
+													],
+													"subtypes": [
+														"Elf"
+													],
+													"owner": "you",
+													"token": false
+												}
+											}
+										]
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,83 @@
+{
+	"card": "Reverent Howl",
+	"generated": "2026-10-10",
+	"source": "f928e49c14b003d663b41cd96266a49ebe7d4bff11c27d39d38b849f9ebece58",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Reverent Howl",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Reverent Howl",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Reverent Howl: draw two cards and lose 2 life",
+				"basis": "Choose one —\n• Target player draws two cards and loses 2 life.\n• Target creature gets +2/+2 and gains lifelink until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 2
+					},
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": -2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Reverent Howl",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Reverent Howl: +2/+2 and lifelink",
+				"basis": "Choose one —\n• Target player draws two cards and loses 2 life.\n• Target creature gets +2/+2 and gains lifelink until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"lifelink"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

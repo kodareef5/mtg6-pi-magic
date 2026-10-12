@@ -1,0 +1,108 @@
+{
+	"card": "Tend the Sprigs",
+	"generated": "2026-10-10",
+	"source": "ed9babeb17b6f16681f746c46e7832fded81a3efd32c079080f10453627c4145",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tend the Sprigs",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tend the Sprigs",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Tend the Sprigs",
+				"basis": "Search your library for a basic land card, put it onto the battlefield tapped, then shuffle. Then if you control seven or more lands and/or Treefolk, create a 3/4 green Treefolk creature token with reach.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"supertypes": [
+								"basic"
+							],
+							"types": [
+								"land"
+							],
+							"token": false
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "battlefield",
+						"controller": "you",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"any": [
+										{
+											"types": [
+												"land"
+											]
+										},
+										{
+											"subtypes": [
+												"Treefolk"
+											]
+										}
+									]
+								}
+							},
+							"atLeast": 7
+						},
+						"spec": {
+							"name": "Treefolk Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Treefolk"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 3,
+							"toughness": 4,
+							"words": [
+								"reach"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

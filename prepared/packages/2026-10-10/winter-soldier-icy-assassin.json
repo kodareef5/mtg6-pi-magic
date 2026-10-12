@@ -1,0 +1,118 @@
+{
+	"card": "Winter Soldier, Icy Assassin",
+	"generated": "2026-10-10",
+	"source": "32e7f86fcdd19b3cabc6dfc0d10bf006e30784b4306a4b2ef5127845cf058462",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Winter Soldier, Icy Assassin",
+		"registers": [
+			{
+				"basis": "Vigilance, menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance",
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Winter Soldier gets +2/+0 for each Equipment attached to him.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"sum": [
+							{
+								"count": {
+									"subtypes": [
+										"Equipment"
+									],
+									"attachedTo": "this"
+								}
+							},
+							{
+								"count": {
+									"subtypes": [
+										"Equipment"
+									],
+									"attachedTo": "this"
+								}
+							}
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Winter Soldier, Icy Assassin",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Winter Soldier with a finality counter, then optionally attach an Equipment",
+				"basis": "{3}{W}{B}: Return this card from your graveyard to the battlefield with a finality counter on him. Then you may attach an Equipment you control to him. (If a creature with a finality counter on it would die, exile it instead.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{W}{B}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"finality": 1
+						},
+						"reason": "resolve",
+						"as": "soldier"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Equipment"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"may": true,
+						"as": "equipment",
+						"if": {
+							"bound": "soldier"
+						}
+					},
+					{
+						"do": "attach",
+						"what": "bound:equipment",
+						"to": "bound:soldier",
+						"if": {
+							"bound": "equipment"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

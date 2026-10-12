@@ -1,0 +1,82 @@
+{
+	"card": "Valorous Stance",
+	"generated": "2026-10-10",
+	"source": "095330a6c9f60a6028cd0e13c266c4945d95ba9beff2fa63ae58fdf4e7bab799",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Valorous Stance",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Valorous Stance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Valorous Stance: grant indestructible",
+				"basis": "Choose one — ... Target creature gains indestructible until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Valorous Stance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Valorous Stance: destroy a creature with toughness 4 or greater",
+				"basis": "Choose one — ... Destroy target creature with toughness 4 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"toughness": {
+								"atLeast": 4
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

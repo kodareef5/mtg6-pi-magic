@@ -1,0 +1,76 @@
+{
+	"card": "Boom Box",
+	"generated": "2026-10-10",
+	"source": "58078656e5101e65c1b9e431fa208f29f4d393abf060e59b8e61ab69a0384526",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boom Box",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Boom Box",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Destroy up to one artifact, up to one creature, and up to one land.",
+				"basis": "{6}, {T}, Sacrifice this artifact: Destroy up to one target artifact, up to one target creature, and up to one target land.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact"
+							]
+						},
+						"upTo": true
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					},
+					{
+						"object": {
+							"types": [
+								"land"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"any": [
+								{
+									"is": "target:0"
+								},
+								{
+									"is": "target:1"
+								},
+								{
+									"is": "target:2"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

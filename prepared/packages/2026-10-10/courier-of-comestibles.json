@@ -1,0 +1,104 @@
+{
+	"card": "Courier of Comestibles",
+	"generated": "2026-10-10",
+	"source": "721dc6a5985faaf4f9e8e3194644bc56751f056a97bd12765073911845bb6c5d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Courier of Comestibles",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, you may search your library for a Food card, reveal it, put it into your hand, then shuffle. If you don't put a card into your hand this way, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"subtypes": [
+											"Food"
+										],
+										"token": false
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "food"
+								},
+								{
+									"do": "move",
+									"what": "bound:food",
+									"to": "hand",
+									"reason": "resolve",
+									"as": "food-in-hand"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"not": {
+									"bound": "food-in-hand"
+								}
+							},
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

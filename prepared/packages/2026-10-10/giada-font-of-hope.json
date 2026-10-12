@@ -1,0 +1,78 @@
+{
+	"card": "Giada, Font of Hope",
+	"generated": "2026-10-10",
+	"source": "b3ab4d0e2e2f4ffc4ed2b1cdfa7e7510d38061d2b1eb18cac3825eac34ffd2aa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Giada, Font of Hope",
+		"registers": [
+			{
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Each other Angel you control enters with an additional +1/+1 counter on it for each Angel you already control.",
+				"kind": "enters",
+				"affects": {
+					"subtypes": [
+						"Angel"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"counters": {
+					"+1/+1": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Angel"
+							],
+							"controller": "you"
+						}
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {W}. Spend this mana only to cast an Angel spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				],
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"creature",
+						"kindred"
+					],
+					"subtypes": [
+						"Angel"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

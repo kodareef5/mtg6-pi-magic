@@ -1,0 +1,128 @@
+{
+	"card": "Biomechan Engineer",
+	"generated": "2026-10-10",
+	"source": "933ceed3b1cd76227482be24cb929f2f3c012040f8cc762bd231cfe15f45abc3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Biomechan Engineer",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, create a Lander token. (It's an artifact with \"{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Lander Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Lander"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "choose",
+													"who": "you",
+													"from": {
+														"zones": [
+															"library"
+														],
+														"owner": "you",
+														"types": [
+															"land"
+														],
+														"supertypes": [
+															"basic"
+														]
+													},
+													"count": 1,
+													"upTo": true,
+													"as": "land"
+												},
+												{
+													"do": "move",
+													"what": "bound:land",
+													"to": "battlefield",
+													"tapped": true,
+													"reason": "resolve"
+												},
+												{
+													"do": "shuffle",
+													"who": "you"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Biomechan Engineer",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw two cards and create a Robot token",
+				"basis": "{8}: Draw two cards and create a 2/2 colorless Robot artifact creature token.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{8}"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Robot Token",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"subtypes": [
+								"Robot"
+							],
+							"colors": [],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

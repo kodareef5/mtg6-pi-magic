@@ -1,0 +1,87 @@
+{
+	"card": "Haunt the Network",
+	"generated": "2026-10-10",
+	"source": "76d6182d7b9fe310cd7364ecdb442ce626cd6d5039202e03c59372df23e87135",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Haunt the Network",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Haunt the Network",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Haunt the Network",
+				"basis": "Choose target opponent. Create two 1/1 colorless Thopter artifact creature tokens with flying. Then the chosen player loses X life and you gain X life, where X is the number of artifacts you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Thopter Token",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"subtypes": [
+								"Thopter"
+							],
+							"colors": [],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"flying"
+							]
+						}
+					},
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": {
+							"negate": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"artifact"
+								],
+								"controller": "you"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

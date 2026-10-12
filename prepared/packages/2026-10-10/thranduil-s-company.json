@@ -1,0 +1,92 @@
+{
+	"card": "Thranduil's Company",
+	"generated": "2026-10-10",
+	"source": "d382ec1c4d5da2bce3eb07ecf1ddbf6332aaf12b95a6f573f5117fdf3bd3c209",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thranduil's Company",
+		"registers": [
+			{
+				"basis": "As long as you control another Elf, you may play an additional land on each of your turns.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Elf"
+							],
+							"other": true
+						}
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "As long as you control another Elf, you may play an additional land on each of your turns.",
+							"kind": "permit",
+							"lands": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, put two +1/+1 counters on target creature you control. It gains vigilance until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 2
+						},
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"vigilance"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

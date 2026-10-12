@@ -1,0 +1,70 @@
+{
+	"card": "Elixir",
+	"generated": "2026-10-10",
+	"source": "65e66794ef7189744b6c2ef88367a7464876b8f83133a12fbf60b5bd1207adbd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elixir",
+		"registers": [
+			{
+				"basis": "This artifact enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Elixir",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Elixir to shuffle all nonland graveyard cards into your library and gain that much life",
+				"basis": "{5}, {T}, Exile this artifact: Shuffle all nonland cards from your graveyard into your library. You gain life equal to the number of cards shuffled into your library this way.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}",
+					"tap": true,
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"not": {
+								"types": [
+									"land"
+								]
+							},
+							"token": false
+						},
+						"to": "library",
+						"reason": "resolve",
+						"as": "shuffled",
+						"countFrom": "graveyard"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"bound": "shuffled"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

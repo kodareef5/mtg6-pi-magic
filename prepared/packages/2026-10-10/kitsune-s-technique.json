@@ -1,0 +1,116 @@
+{
+	"card": "Kitsune's Technique",
+	"generated": "2026-10-10",
+	"source": "62d1fe2caa3693b85c22e36e69349c093e8fa297beace46ecdde6d0dfe2650f9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kitsune's Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kitsune's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Kitsune's Technique normally",
+				"basis": "Target opponent mills half their library, rounded up.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "target:0",
+						"count": {
+							"half": {
+								"count": {
+									"zones": [
+										"library"
+									],
+									"owner": "target:0"
+								}
+							},
+							"round": "up"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Kitsune's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Kitsune's Technique for sneak",
+				"basis": "Sneak {1}{U} (You may cast this spell for {1}{U} if you also return an unblocked attacker you control to hand during the declare blockers step.) ... Target opponent mills half their library, rounded up.",
+				"timing": "spell",
+				"if": {
+					"all": [
+						{
+							"turn": "self"
+						},
+						{
+							"step": "declare-blockers"
+						}
+					]
+				},
+				"cost": {
+					"alternative": "sneak",
+					"mana": "{1}{U}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true,
+							"blocked": false
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "target:0",
+						"count": {
+							"half": {
+								"count": {
+									"zones": [
+										"library"
+									],
+									"owner": "target:0"
+								}
+							},
+							"round": "up"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,64 @@
+{
+	"card": "Under the Skin",
+	"generated": "2026-10-10",
+	"source": "8cfb3ef8bae36ae51ada1ad27801374c5b9960459f62ca45ed84e987bfa359bb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Under the Skin",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Under the Skin",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Manifest dread, then optionally return a permanent card from your graveyard to your hand.",
+				"basis": "Manifest dread. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)\nYou may return a permanent card from your graveyard to your hand.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "manifest-dread",
+						"who": "you"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "returned-card"
+					},
+					{
+						"do": "move",
+						"what": "bound:returned-card",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

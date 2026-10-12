@@ -1,0 +1,76 @@
+{
+	"card": "Focus Fire",
+	"generated": "2026-10-10",
+	"source": "18cda280039d9051efff077766238653afd61684151ab41bbca6e2bc1836f3df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Focus Fire",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Focus Fire",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Focus Fire",
+				"basis": "Focus Fire deals X damage to target attacking or blocking creature, where X is 2 plus the number of creatures and/or Spacecraft you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"any": [
+								{
+									"attacking": true
+								},
+								{
+									"blocking": true
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"sum": [
+								2,
+								{
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"any": [
+											{
+												"types": [
+													"creature"
+												]
+											},
+											{
+												"subtypes": [
+													"Spacecraft"
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

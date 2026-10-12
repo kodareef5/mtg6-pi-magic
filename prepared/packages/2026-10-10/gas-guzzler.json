@@ -1,0 +1,85 @@
+{
+	"card": "Gas Guzzler",
+	"generated": "2026-10-10",
+	"source": "a2b28e0f46a8541ebff32d11a5cf0c130892ccb2b4d918f7bad6f36ce0641f71",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gas Guzzler",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "enters",
+				"basis": "This creature enters tapped.",
+				"tapped": true
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — {B}, Sacrifice another creature or Vehicle: Draw a card.",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Max speed — {B}, Sacrifice another creature or Vehicle: Draw a card.",
+							"cost": {
+								"mana": "{B}",
+								"sacrifice": {
+									"choose": {
+										"controller": "you",
+										"other": true,
+										"any": [
+											{
+												"types": [
+													"creature"
+												]
+											},
+											{
+												"subtypes": [
+													"Vehicle"
+												]
+											}
+										]
+									},
+									"count": 1
+								}
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "draw",
+										"who": "you",
+										"count": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

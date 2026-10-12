@@ -1,0 +1,71 @@
+{
+	"card": "Crawling Barrens",
+	"generated": "2026-10-10",
+	"source": "96475db05f62319fac9838b7b3a613153b4072152e47147ad5f13ba183e9e330",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Crawling Barrens",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Crawling Barrens",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put two counters on Crawling Barrens, then optionally animate it",
+				"basis": "{4}: Put two +1/+1 counters on this land. Then you may have it become a 0/0 Elemental creature until end of turn. It's still a land.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}"
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 2
+					},
+					{
+						"do": "modify",
+						"what": "this",
+						"may": true,
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

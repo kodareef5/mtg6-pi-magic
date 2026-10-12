@@ -1,0 +1,105 @@
+{
+	"card": "Beorn the Fierce",
+	"generated": "2026-10-10",
+	"source": "282e6081c009a02f300d5fff76316b8d98f3ab3f3e89f518ae31f8042c5bf8a8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beorn the Fierce",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Other Bears you control get +2/+2.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Bear"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2
+				}
+			},
+			{
+				"basis": "At the beginning of combat on your turn, put a trample counter on up to one target creature you control. It becomes a Bear in addition to its other types. Then if you control three or more Bears, draw two cards.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "trample",
+							"amount": 1
+						},
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"subtypes": {
+									"add": [
+										"Bear"
+									]
+								}
+							}
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"amount": {
+									"count": {
+										"subtypes": [
+											"Bear"
+										],
+										"controller": "you"
+									}
+								},
+								"atLeast": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

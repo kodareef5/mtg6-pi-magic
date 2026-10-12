@@ -1,0 +1,105 @@
+{
+	"card": "Hoarding Dragon",
+	"generated": "2026-10-10",
+	"source": "7a721b6f1985715394d599c52ca47fb558bc0d27f5a9a3ebdb9784e45cbd5b94",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hoarding Dragon",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, you may search your library for an artifact card, exile it, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"types": [
+											"artifact"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"as": "artifact"
+								},
+								{
+									"do": "move",
+									"what": "bound:artifact",
+									"to": "exile",
+									"reason": "exile",
+									"link": true
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, you may put the exiled card into its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"exile"
+								],
+								"linked": true
+							},
+							"to": "hand",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

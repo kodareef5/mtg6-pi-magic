@@ -1,0 +1,104 @@
+{
+	"card": "Jeskai Monument",
+	"generated": "2026-10-10",
+	"source": "049caf07548cdadcfcf1de210ea09acd67475e843fd16ff5b4efd6e447ce8dca",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jeskai Monument",
+		"registers": [
+			{
+				"basis": "When this artifact enters, search your library for a basic Island, Mountain, or Plains card, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"subtypes": [
+									"Island",
+									"Mountain",
+									"Plains"
+								],
+								"token": false
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "basic"
+						},
+						{
+							"do": "move",
+							"what": "bound:basic",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Jeskai Monument",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Jeskai Monument to create two Birds",
+				"basis": "{1}{U}{R}{W}, {T}, Sacrifice this artifact: Create two 1/1 white Bird creature tokens with flying. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{1}{U}{R}{W}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Bird Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Bird"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

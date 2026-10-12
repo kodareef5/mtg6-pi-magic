@@ -1,0 +1,109 @@
+{
+	"card": "Lindblum, Industrial Regency // Mage Siege",
+	"generated": "2026-10-10",
+	"source": "371f0b37f09f999870d1d42f588181e0f642e95e8588a305d2022fa76d96b8cd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lindblum, Industrial Regency // Mage Siege",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"face": 0,
+				"basis": "{T}: Add {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Lindblum, Industrial Regency // Mage Siege",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mage Siege",
+				"basis": "Create a 0/1 black Wizard creature token with \"Whenever you cast a noncreature spell, this token deals 1 damage to each opponent.\"",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Wizard Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Wizard"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 0,
+							"toughness": 1,
+							"registers": [
+								{
+									"kind": "watch",
+									"basis": "Whenever you cast a noncreature spell, this token deals 1 damage to each opponent.",
+									"event": {
+										"on": "cast",
+										"by": "you",
+										"of": {
+											"zones": [
+												"stack"
+											],
+											"types": [
+												"artifact",
+												"battle",
+												"enchantment",
+												"instant",
+												"kindred",
+												"land",
+												"planeswalker",
+												"sorcery"
+											],
+											"not": {
+												"types": [
+													"creature"
+												]
+											}
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "damage",
+												"to": "opponent",
+												"amount": 1,
+												"from": "this"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

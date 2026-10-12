@@ -1,0 +1,63 @@
+{
+	"card": "Bestial Incursion",
+	"generated": "2026-10-10",
+	"source": "291b93ac6e7fd973026a2f471549d35f9f931dbee2dc08dd41cc879188bbb2a7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bestial Incursion",
+		"registers": [
+			{
+				"basis": "Flashback {5}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"kind": "permit",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{5}{G}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bestial Incursion",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bestial Incursion, normally or using its flashback permission",
+				"basis": "Create a 4/4 green Beast creature token with trample. ... Flashback {5}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Beast Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Beast"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 4,
+							"toughness": 4,
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

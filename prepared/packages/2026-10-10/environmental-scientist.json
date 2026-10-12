@@ -1,0 +1,67 @@
+{
+	"card": "Environmental Scientist",
+	"generated": "2026-10-10",
+	"source": "f9a0b54c6f4c378b7aac3f371f00111a8bee1e9cf3f460da0fcb168bb029841a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Environmental Scientist",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, you may search your library for a basic land card, reveal it, put it into your hand, then shuffle.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"supertypes": [
+											"basic"
+										],
+										"types": [
+											"land"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "land"
+								},
+								{
+									"do": "move",
+									"what": "bound:land",
+									"to": "hand",
+									"reason": "resolve"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

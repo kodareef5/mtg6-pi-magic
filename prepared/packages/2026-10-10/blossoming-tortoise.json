@@ -1,0 +1,140 @@
+{
+	"card": "Blossoming Tortoise",
+	"generated": "2026-10-10",
+	"source": "7155b83b5a6769635b7f32b9f40272b1f1efaa544d7136e8d2aaeec3aefa4441",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blossoming Tortoise",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature enters or attacks, mill three cards, then return a land card from your graveyard to the battlefield tapped.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "battlefield",
+							"tapped": true,
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature enters or attacks, mill three cards, then return a land card from your graveyard to the battlefield tapped.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "battlefield",
+							"tapped": true,
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Activated abilities of lands you control cost {1} less to activate.",
+				"activate": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"land"
+					],
+					"controller": "you"
+				},
+				"reduce": 1
+			},
+			{
+				"kind": "continuous",
+				"basis": "Land creatures you control get +1/+1.",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "you",
+					"all": [
+						{
+							"types": [
+								"land"
+							]
+						},
+						{
+							"types": [
+								"creature"
+							]
+						}
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

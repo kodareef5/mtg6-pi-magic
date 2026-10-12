@@ -1,0 +1,58 @@
+{
+	"card": "Ravine Raider",
+	"generated": "2026-10-10",
+	"source": "229356993979ae7efd08c73495b3d76de5ebbf0cb5e63b3201d32239618f7bc4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ravine Raider",
+		"registers": [
+			{
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ravine Raider",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Ravine Raider +1/+1 until end of turn.",
+				"basis": "{1}{B}: This creature gets +1/+1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

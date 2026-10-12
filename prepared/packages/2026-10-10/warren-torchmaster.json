@@ -1,0 +1,80 @@
+{
+	"card": "Warren Torchmaster",
+	"generated": "2026-10-10",
+	"source": "74f74fc3a3444d04b2b299c7565100ac0162dd7a5bbe0bd9a19820f15c29ddbf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Warren Torchmaster",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, you may blight 1. When you do, target creature gains haste until end of turn. (To blight 1, put a -1/-1 counter on a creature you control.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"may": true,
+							"cost": {
+								"counters": {
+									"kind": "-1/-1",
+									"count": 1,
+									"put": true,
+									"on": {
+										"choose": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										},
+										"count": 1
+									}
+								}
+							},
+							"as": "blighted"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "blighted"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "target:0",
+										"until": "end-of-turn",
+										"change": {
+											"words": [
+												"haste"
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

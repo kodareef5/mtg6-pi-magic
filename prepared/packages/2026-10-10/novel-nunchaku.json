@@ -1,0 +1,146 @@
+{
+	"card": "Novel Nunchaku",
+	"generated": "2026-10-10",
+	"source": "6c64e3f723368404069a7a2c1a2dc85b089b596febf51a6c8fc5901c5705b204",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Novel Nunchaku",
+		"registers": [
+			{
+				"basis": "When this Equipment enters, attach it to target creature you control. When you do, equipped creature fights up to one target creature an opponent controls. (Each deals damage equal to its power to the other.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "target:0",
+							"as": "attachment"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "attachment"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											],
+											"controller": "opponent"
+										},
+										"upTo": true
+									}
+								],
+								"instructions": [
+									{
+										"do": "each",
+										"objects": {
+											"zones": [
+												"battlefield"
+											],
+											"types": [
+												"creature"
+											]
+										},
+										"instructions": [
+											{
+												"do": "fight",
+												"a": "bound:object",
+												"b": "target:0",
+												"if": {
+													"is": "this",
+													"matches": {
+														"zones": [
+															"battlefield"
+														],
+														"attachedTo": "bound:object"
+													},
+													"lastKnown": true
+												}
+											}
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +1/+1 and has trample.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1,
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Equip Novel Nunchaku",
+				"basis": "Equip {3} ({3}: Attach to target creature you control. Equip only as a sorcery.)",
+				"source": {
+					"card": "Novel Nunchaku",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

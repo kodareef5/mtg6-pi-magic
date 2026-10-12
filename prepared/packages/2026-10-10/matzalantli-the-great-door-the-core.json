@@ -1,0 +1,1073 @@
+{
+	"card": "Matzalantli, the Great Door // The Core",
+	"generated": "2026-10-10",
+	"source": "67d221a9eec2aa00ad60f542c3b68e74efd4ebc5f298283c581047546a28de5d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Matzalantli, the Great Door // The Core",
+		"registers": [
+			{
+				"face": 1,
+				"basis": "Fathomless descent — {T}: Add X mana of any one color, where X is the number of permanent cards in your graveyard.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"times": {
+					"count": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"token": false,
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"land",
+							"planeswalker"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Matzalantli, the Great Door // The Core",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card, then discard a card",
+				"basis": "{T}: Draw a card, then discard a card.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			},
+			{
+				"face": 0,
+				"source": {
+					"card": "Matzalantli, the Great Door // The Core",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Transform Matzalantli with four or more permanent types among cards in your graveyard",
+				"basis": "{4}, {T}: Transform Matzalantli. Activate only if there are four or more permanent types among cards in your graveyard. (Artifact, battle, creature, enchantment, land, and planeswalker are permanent types.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true
+				},
+				"if": {
+					"any": [
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"battle"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"creature"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"enchantment"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"battle"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"creature"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"land"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"battle"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"creature"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"planeswalker"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"battle"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"enchantment"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"land"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"battle"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"enchantment"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"planeswalker"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"battle"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"land"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"planeswalker"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"creature"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"enchantment"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"land"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"creature"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"enchantment"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"planeswalker"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"creature"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"land"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"planeswalker"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"enchantment"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"land"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"planeswalker"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"battle"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"creature"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"enchantment"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"land"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"battle"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"creature"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"enchantment"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"planeswalker"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"battle"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"creature"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"land"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"planeswalker"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"battle"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"enchantment"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"land"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"planeswalker"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"creature"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"enchantment"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"land"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"planeswalker"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "transform",
+						"what": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

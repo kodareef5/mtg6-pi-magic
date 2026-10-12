@@ -1,0 +1,205 @@
+{
+	"card": "Hunter's Talent",
+	"generated": "2026-10-10",
+	"source": "aabb7946c5d03126d3ecbfab52176f8dc2e9ef978e01cb0f738d4ef0a5f47849",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hunter's Talent",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this Class enters, target creature you control deals damage equal to its power to target creature you don't control.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						},
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"from": "target:0",
+							"to": "target:1",
+							"amount": {
+								"power": "target:0"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{1}{G}: Level 2",
+				"cost": {
+					"mana": "{1}{G}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 1,
+							"atMost": 1
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Whenever you attack, target attacking creature gets +1/+0 and gains trample until end of turn.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 2
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "Whenever you attack, target attacking creature gets +1/+0 and gains trample until end of turn.",
+							"event": {
+								"on": "attacked-with",
+								"by": "you"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											],
+											"attacking": true
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "target:0",
+										"until": "end-of-turn",
+										"change": {
+											"power": 1,
+											"words": [
+												"trample"
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{3}{G}: Level 3",
+				"cost": {
+					"mana": "{3}{G}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 2,
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "At the beginning of your end step, if you control a creature with power 4 or greater, draw a card.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 3
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "At the beginning of your end step, if you control a creature with power 4 or greater, draw a card.",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "you"
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"power": {
+											"atLeast": 4
+										}
+									}
+								},
+								"atLeast": 1
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "draw",
+										"who": "you",
+										"count": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

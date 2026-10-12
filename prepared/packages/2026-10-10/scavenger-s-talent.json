@@ -1,0 +1,251 @@
+{
+	"card": "Scavenger's Talent",
+	"generated": "2026-10-10",
+	"source": "357c1128f9c4879e824261dd54e7fca4666f233b0b72d3289b14aaa84dd77815",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scavenger's Talent",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more creatures you control die, create a Food token. This ability triggers only once each turn.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					},
+					"batch": true
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{1}{B}: Level 2",
+				"cost": {
+					"mana": "{1}{B}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 1,
+							"atMost": 1
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Whenever you sacrifice a permanent, target player mills two cards.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 2
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "Whenever you sacrifice a permanent, target player mills two cards.",
+							"event": {
+								"on": "sacrificed",
+								"by": "you",
+								"of": {
+									"zones": [
+										"battlefield"
+									]
+								}
+							},
+							"effect": {
+								"targets": [
+									{
+										"player": "any"
+									}
+								],
+								"instructions": [
+									{
+										"do": "mill",
+										"who": "target:0",
+										"count": 2
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{2}{B}: Level 3",
+				"cost": {
+					"mana": "{2}{B}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 2,
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "At the beginning of your end step, you may sacrifice three other nonland permanents. If you do, return a creature card from your graveyard to the battlefield with a finality counter on it.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 3
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "At the beginning of your end step, you may sacrifice three other nonland permanents. If you do, return a creature card from your graveyard to the battlefield with a finality counter on it.",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "you"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "pay",
+										"who": "you",
+										"cost": {
+											"sacrifice": {
+												"choose": {
+													"zones": [
+														"battlefield"
+													],
+													"controller": "you",
+													"other": true,
+													"not": {
+														"types": [
+															"land"
+														]
+													}
+												},
+												"count": 3
+											}
+										},
+										"may": true,
+										"as": "sacrificed"
+									},
+									{
+										"do": "choose",
+										"who": "you",
+										"from": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"creature"
+											],
+											"token": false
+										},
+										"count": 1,
+										"as": "creature",
+										"if": {
+											"bound": "sacrificed"
+										}
+									},
+									{
+										"do": "move",
+										"what": "bound:creature",
+										"to": "battlefield",
+										"controller": "you",
+										"counters": {
+											"finality": 1
+										},
+										"reason": "resolve",
+										"if": {
+											"bound": "sacrificed"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

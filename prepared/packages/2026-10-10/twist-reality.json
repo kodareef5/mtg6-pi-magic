@@ -1,0 +1,74 @@
+{
+	"card": "Twist Reality",
+	"generated": "2026-10-10",
+	"source": "a64c791b4470c0875b32bd78a946e5adff0ae267ae290d5fe91ff3b37a357364",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Twist Reality",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Twist Reality",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Twist Reality: counter target spell",
+				"basis": "Choose one —\n• Counter target spell.\n• Manifest dread. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Twist Reality",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Twist Reality: manifest dread",
+				"basis": "Choose one —\n• Counter target spell.\n• Manifest dread. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "manifest-dread",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

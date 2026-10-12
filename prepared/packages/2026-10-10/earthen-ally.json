@@ -1,0 +1,214 @@
+{
+	"card": "Earthen Ally",
+	"generated": "2026-10-10",
+	"source": "f163a1018335b8ac33e843394ab72538d2e1f9128fcebaf8c797f509e13c5461",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Earthen Ally",
+		"registers": [
+			{
+				"basis": "This creature gets +1/+0 for each color among Allies you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 1
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Ally"
+							],
+							"colors": [
+								"W"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "This creature gets +1/+0 for each color among Allies you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 1
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Ally"
+							],
+							"colors": [
+								"U"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "This creature gets +1/+0 for each color among Allies you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 1
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Ally"
+							],
+							"colors": [
+								"B"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "This creature gets +1/+0 for each color among Allies you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 1
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Ally"
+							],
+							"colors": [
+								"R"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "This creature gets +1/+0 for each color among Allies you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 1
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Ally"
+							],
+							"colors": [
+								"G"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Earthen Ally",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Earthbend 5",
+				"basis": "{2}{W}{U}{B}{R}{G}: Earthbend 5. (Target land you control becomes a 0/0 creature with haste that's still a land. Put five +1/+1 counters on it. When it dies or is exiled, return it to the battlefield tapped.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}{U}{B}{R}{G}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"base": {
+								"power": 0,
+								"toughness": 0
+							},
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 5
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "leaves",
+							"of": {
+								"is": "target:0"
+							},
+							"to": [
+								"graveyard",
+								"exile"
+							]
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "event:object",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

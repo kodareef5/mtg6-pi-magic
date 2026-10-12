@@ -1,0 +1,104 @@
+{
+	"card": "Soul Search",
+	"generated": "2026-10-10",
+	"source": "6a37825804c632ca9a930a60e92279b2a00ab120d00402ee557962959e998a03",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Soul Search",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Soul Search",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Soul Search",
+				"basis": "Target opponent reveals their hand. You choose a nonland card from it. Exile that card. If the card's mana value is 1 or less, create a 1/1 white and black Spirit creature token with flying.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "target:0"
+						},
+						"as": "hand"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"is": "bound:hand",
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"count": 1,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"is": "bound:chosen",
+							"matches": {
+								"zones": [
+									"hand"
+								],
+								"manaValue": {
+									"atMost": 1
+								}
+							},
+							"lastKnown": true
+						},
+						"spec": {
+							"name": "Spirit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Spirit"
+							],
+							"colors": [
+								"W",
+								"B"
+							],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

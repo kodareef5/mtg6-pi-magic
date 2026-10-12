@@ -1,0 +1,53 @@
+{
+	"card": "Blossoming Defense",
+	"generated": "2026-10-10",
+	"source": "6fdb4845317c284f4185abb7072d91ff6c4ee319a3396773aaf369e1069d396e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blossoming Defense",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Blossoming Defense",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature you control +2/+2 and hexproof until end of turn.",
+				"basis": "Target creature you control gets +2/+2 and gains hexproof until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"hexproof"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

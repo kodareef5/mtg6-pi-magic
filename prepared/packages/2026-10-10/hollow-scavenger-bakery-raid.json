@@ -1,0 +1,104 @@
+{
+	"card": "Hollow Scavenger // Bakery Raid",
+	"generated": "2026-10-10",
+	"source": "72f28de8409158161da9a240191181785ebf72d9c3ed80d981b22d3c6a9d8fba",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hollow Scavenger // Bakery Raid",
+		"registers": [],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Hollow Scavenger // Bakery Raid",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Hollow Scavenger's Food sacrifice ability",
+				"basis": "{1}, Sacrifice a Food: This creature gets +2/+2 until end of turn. Activate only once each turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": {
+						"choose": {
+							"controller": "you",
+							"subtypes": [
+								"Food"
+							]
+						},
+						"count": 1
+					}
+				},
+				"limit": "once-per-turn",
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Hollow Scavenger // Bakery Raid",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bakery Raid",
+				"basis": "Create a Food token. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Food Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Food"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+									"cost": {
+										"mana": "{2}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "life",
+												"who": "you",
+												"amount": 3
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

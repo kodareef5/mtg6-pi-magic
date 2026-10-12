@@ -1,0 +1,91 @@
+{
+	"card": "Fountainport Bell",
+	"generated": "2026-10-10",
+	"source": "e1e96beed09665c37afd4e0135c78756d5e2a42e9d74e15275b0423382326500",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fountainport Bell",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters, you may search your library for a basic land card, reveal it, then shuffle and put that card on top.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"supertypes": [
+											"basic"
+										],
+										"types": [
+											"land"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "land"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								},
+								{
+									"do": "move",
+									"what": "bound:land",
+									"to": "library",
+									"position": "top",
+									"reason": "resolve"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fountainport Bell",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Fountainport Bell to draw a card",
+				"basis": "{1}, Sacrifice this artifact: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

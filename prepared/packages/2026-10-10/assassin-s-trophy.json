@@ -1,0 +1,83 @@
+{
+	"card": "Assassin's Trophy",
+	"generated": "2026-10-10",
+	"source": "406e0d05f6ea6cbb4aab32287e754ae7f721b408faf01a8ef35b98065c37d59f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Assassin's Trophy",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Destroy an opponent's permanent; its controller may search for a basic land",
+				"source": {
+					"card": "Assassin's Trophy",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"basis": "Destroy target permanent an opponent controls. Its controller may search their library for a basic land card, put it onto the battlefield, then shuffle.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "perform",
+						"who": "controller:target:0",
+						"may": true,
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "controller:target:0",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "controller:target:0",
+									"supertypes": [
+										"basic"
+									],
+									"types": [
+										"land"
+									]
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "land"
+							},
+							{
+								"do": "move",
+								"what": "bound:land",
+								"to": "battlefield",
+								"controller": "controller:target:0",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "controller:target:0"
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

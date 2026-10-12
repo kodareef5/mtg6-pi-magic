@@ -1,0 +1,76 @@
+{
+	"card": "Food Fight",
+	"generated": "2026-10-10",
+	"source": "da16518b98be0a4def945a2c66bbd45b0963c52611bbcc5bfda9d89474a424ff",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Food Fight",
+		"registers": [
+			{
+				"basis": "Artifacts you control have \"{2}, Sacrifice this artifact: It deals damage to any target equal to 1 plus the number of permanents named Food Fight you control.\"",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"artifact"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Artifacts you control have \"{2}, Sacrifice this artifact: It deals damage to any target equal to 1 plus the number of permanents named Food Fight you control.\"",
+							"kind": "activated",
+							"cost": {
+								"mana": "{2}",
+								"sacrifice": "this"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature",
+												"planeswalker",
+												"battle"
+											]
+										},
+										"player": "any"
+									}
+								],
+								"instructions": [
+									{
+										"do": "damage",
+										"from": "this",
+										"to": "target:0",
+										"amount": {
+											"sum": [
+												1,
+												{
+													"count": {
+														"zones": [
+															"battlefield"
+														],
+														"name": "Food Fight",
+														"controller": "you"
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,89 @@
+{
+	"card": "Inside Source",
+	"generated": "2026-10-10",
+	"source": "ac05fdcbb3876306c6f1aa8de930122cbcc0115c96658d62799017bd8f31da7e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Inside Source",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 2/2 white and blue Detective creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Detective Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Detective"
+								],
+								"colors": [
+									"W",
+									"U"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Inside Source",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give a controlled Detective +2/+0 and vigilance until end of turn",
+				"basis": "{3}, {T}: Target Detective you control gets +2/+0 and gains vigilance until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Detective"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"words": [
+								"vigilance"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

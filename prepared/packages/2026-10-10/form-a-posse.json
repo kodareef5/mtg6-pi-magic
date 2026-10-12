@@ -1,0 +1,83 @@
+{
+	"card": "Form a Posse",
+	"generated": "2026-10-10",
+	"source": "26d7e2ddbd76703370e50e2796f2221fa0c5e32e22a721fe8f45a0e8c2e3bc81",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Form a Posse",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Form a Posse",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Form a Posse to create X Mercenary tokens",
+				"basis": "Create X 1/1 red Mercenary creature tokens with \"{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.\"",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"x": true
+						},
+						"spec": {
+							"name": "Mercenary Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Mercenary"
+							],
+							"colors": [
+								"R"
+							],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"basis": "{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.",
+									"kind": "activated",
+									"cost": {
+										"tap": true
+									},
+									"speed": "sorcery",
+									"effect": {
+										"targets": [
+											{
+												"object": {
+													"types": [
+														"creature"
+													],
+													"controller": "you"
+												}
+											}
+										],
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "target:0",
+												"until": "end-of-turn",
+												"change": {
+													"power": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

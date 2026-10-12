@@ -1,0 +1,95 @@
+{
+	"card": "Requiem Monolith",
+	"generated": "2026-10-10",
+	"source": "9b72e520df6bbc2ee2e08ff81632bad134999f0c1b369439169a4919a7583c03",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Requiem Monolith",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Requiem Monolith",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant the damage-triggered draw and life-loss ability, then offer its controller 1 damage",
+				"basis": "{T}: Until end of turn, target creature gains \"Whenever this creature is dealt damage, you draw that many cards and lose that much life.\" That creature's controller may have this artifact deal 1 damage to it. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"registers": [
+								{
+									"basis": "{T}: Until end of turn, target creature gains \"Whenever this creature is dealt damage, you draw that many cards and lose that much life.\" That creature's controller may have this artifact deal 1 damage to it. Activate only as a sorcery.",
+									"kind": "watch",
+									"event": {
+										"on": "damage",
+										"received": true,
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": {
+													"event": "amount"
+												}
+											},
+											{
+												"do": "life",
+												"who": "you",
+												"amount": {
+													"negate": {
+														"event": "amount"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "perform",
+						"who": "controller:target:0",
+						"may": true,
+						"instructions": [
+							{
+								"do": "damage",
+								"from": "this",
+								"to": "target:0",
+								"amount": 1
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

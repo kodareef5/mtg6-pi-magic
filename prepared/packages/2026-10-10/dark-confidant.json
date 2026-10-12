@@ -1,0 +1,52 @@
+{
+	"card": "Dark Confidant",
+	"generated": "2026-10-10",
+	"source": "f0938cb04f6e1c84d58353ddef8e44ad6afb10049a0c63d5c576335eeb64b5b3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dark Confidant",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, reveal the top card of your library and put that card into your hand. You lose life equal to its mana value.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "reveal",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"as": "revealed"
+						},
+						{
+							"do": "move",
+							"what": "bound:revealed",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"negate": {
+									"manaValue": "bound:revealed"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

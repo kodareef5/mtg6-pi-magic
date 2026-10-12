@@ -1,0 +1,71 @@
+{
+	"card": "Roll-Roll-Roll-Roll",
+	"generated": "2026-10-10",
+	"source": "7e88526c8317f084987509b88ee35ad5b7dd85572d19ba2be1b47eeee5af6985",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Roll-Roll-Roll-Roll",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2,
+					3,
+					4
+				],
+				"basis": "I, II, III, IV — Exile up to one target creature or land you control. If you do, return it to the battlefield under its owner's control at the beginning of the next end step.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"land"
+								],
+								"controller": "you"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "delay",
+							"if": {
+								"bound": "exiled"
+							},
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:exiled",
+										"to": "battlefield",
+										"controller": "owner:bound:exiled",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

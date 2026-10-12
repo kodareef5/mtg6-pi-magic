@@ -1,0 +1,75 @@
+{
+	"card": "Family Reunion",
+	"generated": "2026-10-10",
+	"source": "7ac57b595e19c0ac8d915017c5bc1b9403fcb715e3985e26e975a36ed9bc1afe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Family Reunion",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Family Reunion",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Family Reunion: creatures you control get +1/+1",
+				"basis": "Choose one —\n• Creatures you control get +1/+1 until end of turn.\n• Creatures you control gain hexproof until end of turn. (They can't be the targets of spells or abilities your opponents control.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Family Reunion",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Family Reunion: creatures you control gain hexproof",
+				"basis": "Choose one —\n• Creatures you control get +1/+1 until end of turn.\n• Creatures you control gain hexproof until end of turn. (They can't be the targets of spells or abilities your opponents control.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"hexproof"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

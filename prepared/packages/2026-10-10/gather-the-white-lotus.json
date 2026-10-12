@@ -1,0 +1,64 @@
+{
+	"card": "Gather the White Lotus",
+	"generated": "2026-10-10",
+	"source": "e0b521244af91075b3a99a2974302f519378f4b1ba2e6815f4aa81b245a03a82",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gather the White Lotus",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Gather the White Lotus",
+				"basis": "Create a 1/1 white Ally creature token for each Plains you control. Scry 2. (Look at the top two cards of your library, then put any number of them on the bottom and the rest on top in any order.)",
+				"source": {
+					"card": "Gather the White Lotus",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"subtypes": [
+									"Plains"
+								],
+								"controller": "you"
+							}
+						},
+						"spec": {
+							"name": "Ally Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Ally"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "keyword",
+						"name": "scry",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

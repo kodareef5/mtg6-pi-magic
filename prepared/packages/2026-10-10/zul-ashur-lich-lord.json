@@ -1,0 +1,92 @@
+{
+	"card": "Zul Ashur, Lich Lord",
+	"generated": "2026-10-10",
+	"source": "bc1747e278484c9cfe03c0e12dfc8018715737a9335d048a3389f0dfecf3d10c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zul Ashur, Lich Lord",
+		"registers": [
+			{
+				"basis": "Ward—Pay 2 life. (Whenever this creature becomes the target of a spell or ability an opponent controls, counter it unless that player pays 2 life.)",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"life": 2
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Zul Ashur, Lich Lord",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Permit casting the targeted Zombie creature card from your graveyard this turn",
+				"basis": "{T}: You may cast target Zombie creature card from your graveyard this turn.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Zombie"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "permit",
+						"what": "target:0",
+						"who": "you",
+						"until": "end-of-turn",
+						"of": {
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

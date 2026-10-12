@@ -1,0 +1,121 @@
+{
+	"card": "Lassoed by the Law",
+	"generated": "2026-10-10",
+	"source": "d54f11373c85e60aeaf30d9a3f06c637e200ebaa67bd00ab694b3da46ab66e97",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lassoed by the Law",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this enchantment enters, exile target nonland permanent an opponent controls until this enchantment leaves the battlefield.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "opponent",
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this enchantment enters, create a 1/1 red Mercenary creature token with \"{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.\"",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Mercenary Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Mercenary"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1,
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.",
+										"cost": {
+											"tap": true
+										},
+										"speed": "sorcery",
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"zones": [
+															"battlefield"
+														],
+														"types": [
+															"creature"
+														],
+														"controller": "you"
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "target:0",
+													"until": "end-of-turn",
+													"change": {
+														"power": 1
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

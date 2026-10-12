@@ -1,0 +1,92 @@
+{
+	"card": "Chief Warg's Company",
+	"generated": "2026-10-10",
+	"source": "d5e444df93f16c25368f7c748ff4f9f5753fb41f90cdf0fb3f9b66ab31b31181",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chief Warg's Company",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "This creature can't attack unless you control two or more other Wolves.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Wolf"
+							],
+							"other": true
+						}
+					},
+					"atMost": 1
+				},
+				"change": {
+					"words": [
+						"can't attack"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your upkeep, create a 2/2 green Wolf creature token.",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Wolf Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Wolf"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

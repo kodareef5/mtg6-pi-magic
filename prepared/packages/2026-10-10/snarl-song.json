@@ -1,0 +1,65 @@
+{
+	"card": "Snarl Song",
+	"generated": "2026-10-10",
+	"source": "081b60c65b5bb5494d0d13d4afd582867a41f2560e5b77347d7c9883aca0dff5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Snarl Song",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Snarl Song",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Snarl Song",
+				"basis": "Converge — Create two 0/0 green and blue Fractal creature tokens. Put X +1/+1 counters on each of them and you gain X life, where X is the number of colors of mana spent to cast this spell.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Fractal Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Fractal"
+							],
+							"colors": [
+								"G",
+								"U"
+							],
+							"power": 0,
+							"toughness": 0
+						},
+						"as": "fractals"
+					},
+					{
+						"do": "counters",
+						"on": "bound:fractals",
+						"kind": "+1/+1",
+						"amount": {
+							"colorsSpent": "this"
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"colorsSpent": "this"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,85 @@
+{
+	"card": "Fleeting Effigy",
+	"generated": "2026-10-10",
+	"source": "b49da5de9545ca20b1080ec70c87a8f085a9216d1405c5d41bdf37516494fc58",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fleeting Effigy",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, return this creature to its owner's hand. (Return it only if it's on the battlefield.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "bounce",
+							"if": {
+								"is": "this",
+								"matches": {
+									"zones": [
+										"battlefield"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Give Fleeting Effigy +2/+0 until end of turn.",
+				"basis": "{2}{R}: This creature gets +2/+0 until end of turn.",
+				"source": {
+					"card": "Fleeting Effigy",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{R}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

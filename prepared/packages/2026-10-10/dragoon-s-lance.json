@@ -1,0 +1,115 @@
+{
+	"card": "Dragoon's Lance",
+	"generated": "2026-10-10",
+	"source": "bc2dc4f58e21e681cdcd57ef9357d4021294e3b7c98a22e737760efbdc79339b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragoon's Lance",
+		"registers": [
+			{
+				"basis": "Job select (When this Equipment enters, create a 1/1 colorless Hero creature token, then attach this to it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Hero Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							},
+							"as": "hero"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:hero"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +1/+0 and is a Knight in addition to its other types.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 1,
+					"subtypes": {
+						"add": [
+							"Knight"
+						]
+					}
+				}
+			},
+			{
+				"basis": "During your turn, equipped creature has flying.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"if": {
+					"turn": "self"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dragoon's Lance",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Dragoon's Lance",
+				"basis": "Gae Bolg — Equip {4}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

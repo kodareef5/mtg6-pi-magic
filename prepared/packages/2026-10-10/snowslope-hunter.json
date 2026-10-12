@@ -1,0 +1,64 @@
+{
+	"card": "Snowslope Hunter",
+	"generated": "2026-10-10",
+	"source": "78ecb9b979be781ab2b3273f38a395c441ba794ee282f2228c11a951941afbb2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Snowslope Hunter",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Snowslope Hunter",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature or artifact to exile the top card and allow playing it until the end of your next turn",
+				"basis": "Sacrifice another creature or artifact: Exile the top card of your library. You may play it until the end of your next turn. Activate only during your turn and only once each turn.",
+				"timing": "stack",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"controller": "you",
+							"types": [
+								"creature",
+								"artifact"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"if": {
+					"turn": "self"
+				},
+				"limit": "once-per-turn",
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 1,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": {
+							"endOfNextTurn": "you"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

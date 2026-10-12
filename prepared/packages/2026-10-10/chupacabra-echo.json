@@ -1,0 +1,84 @@
+{
+	"card": "Chupacabra Echo",
+	"generated": "2026-10-10",
+	"source": "94bbe185909dbcca4f94e08133c0a26dbcc7d84584cd70a8901326d3d80be44e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chupacabra Echo",
+		"registers": [
+			{
+				"basis": "Fathomless descent — When this creature enters, target creature an opponent controls gets -X/-X until end of turn, where X is the number of permanent cards in your graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"negate": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"land",
+												"planeswalker"
+											]
+										}
+									}
+								},
+								"toughness": {
+									"negate": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"land",
+												"planeswalker"
+											]
+										}
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,76 @@
+{
+	"card": "Frenzied Baloth",
+	"generated": "2026-10-10",
+	"source": "e9b2663ee6bf1914978b9f1eb477994014de2f2bf1883efba6832bf1ab40062d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Frenzied Baloth",
+		"registers": [
+			{
+				"basis": "Trample, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"trample",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Creature spells you control can't be countered.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"can't be countered"
+					]
+				}
+			},
+			{
+				"basis": "Combat damage can't be prevented.",
+				"kind": "damage-rule",
+				"mode": "unpreventable",
+				"combat": true
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Frenzied Baloth",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Frenzied Baloth",
+				"basis": "This spell can't be countered.",
+				"timing": "spell",
+				"words": [
+					"can't be countered"
+				],
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

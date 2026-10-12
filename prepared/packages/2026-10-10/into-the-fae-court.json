@@ -1,0 +1,77 @@
+{
+	"card": "Into the Fae Court",
+	"generated": "2026-10-10",
+	"source": "c65da27a5a84e8ff82946947704926030867cae0dc247c3a16663e6e84a76f34",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Into the Fae Court",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Into the Fae Court",
+				"basis": "Draw three cards. Create a 1/1 blue Faerie creature token with flying and \"This token can block only creatures with flying.\"",
+				"source": {
+					"card": "Into the Fae Court",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Faerie Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Faerie"
+							],
+							"colors": [
+								"U"
+							],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"flying"
+							],
+							"registers": [
+								{
+									"basis": "Create a 1/1 blue Faerie creature token with flying and \"This token can block only creatures with flying.\"",
+									"kind": "prohibit",
+									"block": {
+										"attacker": {
+											"types": [
+												"creature"
+											],
+											"not": {
+												"words": [
+													"flying"
+												]
+											}
+										},
+										"blocker": {
+											"is": "this"
+										}
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

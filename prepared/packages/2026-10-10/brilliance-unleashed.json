@@ -1,0 +1,261 @@
+{
+	"card": "Brilliance Unleashed",
+	"generated": "2026-10-10",
+	"source": "7cfd83c280162411b7deefe0227b093a151d042b9d30be9ac7e809e5c70878e1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brilliance Unleashed",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Brilliance Unleashed",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Brilliance Unleashed choosing damage only",
+				"basis": "Choose one or both — ... Brilliance Unleashed deals 5 damage to target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 5
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Brilliance Unleashed",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Brilliance Unleashed choosing artifact return only",
+				"basis": "Choose one or both — ... Choose target artifact card in your graveyard. Return it to the battlefield if it's an artifact creature card. Otherwise, return it to the battlefield and it's a 3/3 Robot artifact creature with flying.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"zones": [
+									"graveyard"
+								],
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"all": [
+									{
+										"types": [
+											"artifact"
+										]
+									},
+									{
+										"types": [
+											"creature"
+										]
+									}
+								]
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"zones": [
+									"graveyard"
+								],
+								"types": [
+									"artifact"
+								],
+								"not": {
+									"types": [
+										"creature"
+									]
+								}
+							}
+						},
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							},
+							"subtypes": {
+								"set": [
+									"Robot"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 3,
+								"toughness": 3
+							},
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Brilliance Unleashed",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Brilliance Unleashed choosing both modes",
+				"basis": "Choose one or both — ... Brilliance Unleashed deals 5 damage to target creature. ... Choose target artifact card in your graveyard. Return it to the battlefield if it's an artifact creature card. Otherwise, return it to the battlefield and it's a 3/3 Robot artifact creature with flying.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 5
+					},
+					{
+						"do": "move",
+						"what": "target:1",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"if": {
+							"is": "target:1",
+							"matches": {
+								"zones": [
+									"graveyard"
+								],
+								"all": [
+									{
+										"types": [
+											"artifact"
+										]
+									},
+									{
+										"types": [
+											"creature"
+										]
+									}
+								]
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "target:1",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"if": {
+							"is": "target:1",
+							"matches": {
+								"zones": [
+									"graveyard"
+								],
+								"types": [
+									"artifact"
+								],
+								"not": {
+									"types": [
+										"creature"
+									]
+								}
+							}
+						},
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							},
+							"subtypes": {
+								"set": [
+									"Robot"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 3,
+								"toughness": 3
+							},
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

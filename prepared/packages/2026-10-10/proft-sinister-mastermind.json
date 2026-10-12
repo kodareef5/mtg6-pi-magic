@@ -1,0 +1,98 @@
+{
+	"card": "Proft, Sinister Mastermind",
+	"generated": "2026-10-10",
+	"source": "0d65adb071487afd8aafa071a8292e8d7d022ac7753ea6732080fadee1663a93",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Proft, Sinister Mastermind",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Proft, Sinister Mastermind",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Proft only with seven or more other cards remaining in your graveyard",
+				"basis": "Threshold — You can't cast this spell unless there are seven or more cards in your graveyard.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"is": "this"
+							}
+						}
+					},
+					"atLeast": 7
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Proft, Sinister Mastermind",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard Proft to give target creature -3/-1 until end of turn",
+				"basis": "{B}, Discard this card: Target creature gets -3/-1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{B}",
+					"discard": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -3,
+							"toughness": -1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

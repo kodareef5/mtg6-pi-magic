@@ -1,0 +1,107 @@
+{
+	"card": "Behind the Mask",
+	"generated": "2026-10-10",
+	"source": "bce0afc1d5f1bab963dba4f49a8b4316f6ab26331081a7859bdb1de7f63edde1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Behind the Mask",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Behind the Mask",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast without collecting evidence",
+				"basis": "As an additional cost to cast this spell, you may collect evidence 6. (Exile cards with total mana value 6 or greater from your graveyard.)\nUntil end of turn, target artifact or creature becomes an artifact creature with base power and toughness 4/3. If evidence was collected, it has base power and toughness 1/1 until end of turn instead.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							},
+							"base": {
+								"power": 4,
+								"toughness": 3
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Behind the Mask",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast collecting evidence 6",
+				"basis": "As an additional cost to cast this spell, you may collect evidence 6. (Exile cards with total mana value 6 or greater from your graveyard.)\nUntil end of turn, target artifact or creature becomes an artifact creature with base power and toughness 4/3. If evidence was collected, it has base power and toughness 1/1 until end of turn instead.",
+				"timing": "spell",
+				"cost": {
+					"exile": {
+						"graveyard": {},
+						"totalManaValue": 6
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							},
+							"base": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

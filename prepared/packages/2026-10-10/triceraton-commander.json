@@ -1,0 +1,117 @@
+{
+	"card": "Triceraton Commander",
+	"generated": "2026-10-10",
+	"source": "6d2f7de7411de4fb24dd5db2dc08af2bfc53d439e3e020f266b378c810ab87e5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Triceraton Commander",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create X 2/2 white Dinosaur Soldier creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"x": true
+							},
+							"spec": {
+								"name": "Dinosaur Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dinosaur",
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, Dinosaurs you control other than this creature get +1/+1 and gain flying until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"subtypes": [
+									"Dinosaur"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Triceraton Commander",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Triceraton Commander with announced X",
+				"basis": "When this creature enters, create X 2/2 white Dinosaur Soldier creature tokens.",
+				"timing": "spell",
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

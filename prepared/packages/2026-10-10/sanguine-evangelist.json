@@ -1,0 +1,113 @@
+{
+	"card": "Sanguine Evangelist",
+	"generated": "2026-10-10",
+	"source": "bc12ea001c3d471c34aeb2507dfc6bc3edcb803decf3ea3b4d8787057de554d4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sanguine Evangelist",
+		"registers": [
+			{
+				"basis": "Battle cry (Whenever this creature attacks, each other attacking creature gets +1/+0 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"attacking": true,
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters or dies, create a 1/1 black Bat creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Bat Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Bat"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters or dies, create a 1/1 black Bat creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Bat Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Bat"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

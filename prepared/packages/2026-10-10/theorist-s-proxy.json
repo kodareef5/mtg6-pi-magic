@@ -1,0 +1,168 @@
+{
+	"card": "Theorist's Proxy",
+	"generated": "2026-10-10",
+	"source": "e79edf53455ae7517fa9efec245dbcf72608b775da4c985672ae94763d54be71",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Theorist's Proxy",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, empower Jace 3. (Put three loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"types": [
+											"planeswalker"
+										],
+										"subtypes": [
+											"Jace"
+										],
+										"token": true
+									}
+								},
+								"atMost": 0
+							},
+							"spec": {
+								"name": "Jace Token",
+								"types": [
+									"planeswalker"
+								],
+								"subtypes": [
+									"Jace"
+								],
+								"colors": [
+									"U"
+								],
+								"loyalty": 0,
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "[−1]: Surveil 1",
+										"cost": {
+											"loyalty": -1
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "keyword",
+													"name": "surveil",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									},
+									{
+										"kind": "activated",
+										"basis": "[−3]: Draw a card",
+										"cost": {
+											"loyalty": -3
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"controller": "you",
+								"types": [
+									"planeswalker"
+								],
+								"subtypes": [
+									"Jace"
+								],
+								"token": true
+							},
+							"count": 1,
+							"as": "jace"
+						},
+						{
+							"do": "counters",
+							"on": "bound:jace",
+							"kind": "loyalty",
+							"amount": 3
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Theorist's Proxy",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice this creature to protect the next spell cast this turn",
+				"basis": "{U}, Sacrifice this creature: The next spell you cast this turn can't be countered.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{U}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "spell-words",
+						"who": "you",
+						"words": [
+							"can't be countered"
+						],
+						"next": true,
+						"until": "end-of-turn"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

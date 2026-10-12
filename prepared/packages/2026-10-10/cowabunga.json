@@ -1,0 +1,85 @@
+{
+	"card": "Cowabunga!",
+	"generated": "2026-10-10",
+	"source": "2860948bfc3215881af44c916b8cdcd1aeaa95de1d366df72c1523d702df0569",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cowabunga!",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cowabunga!",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cowabunga!",
+				"basis": "Look at the top four cards of your library. You may reveal a Mutant, Ninja, Turtle, or land card from among them and put it into your hand. Put the rest on the bottom of your library in a random order.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 4,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"any": [
+								{
+									"subtypes": [
+										"Mutant",
+										"Ninja",
+										"Turtle"
+									]
+								},
+								{
+									"types": [
+										"land"
+									]
+								}
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

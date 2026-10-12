@@ -1,0 +1,56 @@
+{
+	"card": "Endrider Catalyzer",
+	"generated": "2026-10-10",
+	"source": "4d9bdd3c056bd24d60474a5ffce46c376af5c9a66baf31e059c210932d5a5b6b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Endrider Catalyzer",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — {T}: Add {R}{R}.",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "mana",
+							"basis": "Max speed — {T}: Add {R}{R}.",
+							"cost": {
+								"tap": true
+							},
+							"colors": [
+								"R",
+								"R"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

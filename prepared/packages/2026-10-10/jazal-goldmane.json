@@ -1,0 +1,87 @@
+{
+	"card": "Jazal Goldmane",
+	"generated": "2026-10-10",
+	"source": "ab035df39757ecb0c5621cc6ded2663a265e1ba6baab7124e26c3491c5cb0615",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jazal Goldmane",
+		"registers": [
+			{
+				"basis": "First strike (This creature deals combat damage before creatures without first strike.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Jazal Goldmane",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Boost attacking creatures you control",
+				"basis": "{3}{W}{W}: Attacking creatures you control get +X/+X until end of turn, where X is the number of attacking creatures.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{W}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"attacking": true
+								}
+							},
+							"toughness": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"attacking": true
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

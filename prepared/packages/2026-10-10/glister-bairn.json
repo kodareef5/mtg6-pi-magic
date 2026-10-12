@@ -1,0 +1,1186 @@
+{
+	"card": "Glister Bairn",
+	"generated": "2026-10-10",
+	"source": "c519ddec338bd84f49adc9f4d1fd0e4c032d32ca47bfef98b058621574be13f5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Glister Bairn",
+		"registers": [
+			{
+				"basis": "Vivid — At the beginning of combat on your turn, another target creature you control gets +X/+X until end of turn, where X is the number of colors among permanents you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "five",
+							"if": {
+								"all": [
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"W"
+												]
+											}
+										},
+										"atLeast": 1
+									},
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"U"
+												]
+											}
+										},
+										"atLeast": 1
+									},
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"B"
+												]
+											}
+										},
+										"atLeast": 1
+									},
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"R"
+												]
+											}
+										},
+										"atLeast": 1
+									},
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"G"
+												]
+											}
+										},
+										"atLeast": 1
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"power": 5,
+										"toughness": 5
+									}
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "four",
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "five"
+										}
+									},
+									{
+										"any": [
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											}
+										]
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"power": 4,
+										"toughness": 4
+									}
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "three",
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "five"
+										}
+									},
+									{
+										"not": {
+											"bound": "four"
+										}
+									},
+									{
+										"any": [
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											}
+										]
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"power": 3,
+										"toughness": 3
+									}
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "two",
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "five"
+										}
+									},
+									{
+										"not": {
+											"bound": "four"
+										}
+									},
+									{
+										"not": {
+											"bound": "three"
+										}
+									},
+									{
+										"any": [
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"W"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"U"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"B"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											},
+											{
+												"all": [
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"R"
+																]
+															}
+														},
+														"atLeast": 1
+													},
+													{
+														"amount": {
+															"count": {
+																"controller": "you",
+																"colors": [
+																	"G"
+																]
+															}
+														},
+														"atLeast": 1
+													}
+												]
+											}
+										]
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"power": 2,
+										"toughness": 2
+									}
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"as": "one",
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "five"
+										}
+									},
+									{
+										"not": {
+											"bound": "four"
+										}
+									},
+									{
+										"not": {
+											"bound": "three"
+										}
+									},
+									{
+										"not": {
+											"bound": "two"
+										}
+									},
+									{
+										"amount": {
+											"count": {
+												"controller": "you",
+												"colors": [
+													"W",
+													"U",
+													"B",
+													"R",
+													"G"
+												]
+											}
+										},
+										"atLeast": 1
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "five"
+										}
+									},
+									{
+										"not": {
+											"bound": "four"
+										}
+									},
+									{
+										"not": {
+											"bound": "three"
+										}
+									},
+									{
+										"not": {
+											"bound": "two"
+										}
+									},
+									{
+										"not": {
+											"bound": "one"
+										}
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"power": 0,
+										"toughness": 0
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

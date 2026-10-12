@@ -1,0 +1,162 @@
+{
+	"card": "Sokka, Tenacious Tactician",
+	"generated": "2026-10-10",
+	"source": "c6540b5bca50650c8736dc1eba7a15fbfcaa4a2bcf98d00810af73d4c365f038",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sokka, Tenacious Tactician",
+		"registers": [
+			{
+				"basis": "Menace, prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"menace",
+						"prowess"
+					]
+				}
+			},
+			{
+				"basis": "Menace, prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Other Allies you control have menace and prowess.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"subtypes": [
+						"Ally"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"words": [
+						"menace",
+						"prowess"
+					],
+					"registers": [
+						{
+							"basis": "Other Allies you control have menace and prowess.",
+							"kind": "watch",
+							"event": {
+								"on": "cast",
+								"by": "you",
+								"of": {
+									"zones": [
+										"stack"
+									],
+									"not": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "this",
+										"until": "end-of-turn",
+										"change": {
+											"power": 1,
+											"toughness": 1
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a noncreature spell, create a 1/1 white Ally creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Ally Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Ally"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

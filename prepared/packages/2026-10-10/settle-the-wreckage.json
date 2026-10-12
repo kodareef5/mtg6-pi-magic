@@ -1,0 +1,94 @@
+{
+	"card": "Settle the Wreckage",
+	"generated": "2026-10-10",
+	"source": "9ada5c3e04d0c8bb8fedc2623ca951d4ae315d216fead64856a8cc1cd01ec6bb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Settle the Wreckage",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Settle the Wreckage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Settle the Wreckage",
+				"basis": "Exile all attacking creatures target player controls. That player may search their library for that many basic land cards, put those cards onto the battlefield tapped, then shuffle.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"attacking": true,
+							"controller": "target:0"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled",
+						"countFrom": "battlefield"
+					},
+					{
+						"do": "perform",
+						"who": "target:0",
+						"may": true,
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "target:0",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "target:0",
+									"supertypes": [
+										"basic"
+									],
+									"types": [
+										"land"
+									]
+								},
+								"count": {
+									"bound": "exiled"
+								},
+								"upTo": true,
+								"as": "lands"
+							},
+							{
+								"do": "move",
+								"what": "bound:lands",
+								"to": "battlefield",
+								"tapped": true,
+								"controller": "target:0",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "target:0"
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

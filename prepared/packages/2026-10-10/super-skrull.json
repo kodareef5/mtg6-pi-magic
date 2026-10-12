@@ -1,0 +1,163 @@
+{
+	"card": "Super-Skrull",
+	"generated": "2026-10-10",
+	"source": "492e489f06beaa06e8638b33131358366222dcc94510d8919b617a672b7a41d0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Super-Skrull",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Super-Skrull",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a Wall token",
+				"basis": "{2}{W}: Create a 0/4 colorless Wall creature token with defender.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Wall Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Wall"
+							],
+							"colors": [],
+							"power": 0,
+							"toughness": 4,
+							"words": [
+								"defender"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Super-Skrull",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Super-Skrull gets +4/+4 until end of turn",
+				"basis": "{3}{G}: Super-Skrull gets +4/+4 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{G}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 4,
+							"toughness": 4
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Super-Skrull",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Deal 4 damage to target creature",
+				"basis": "{4}{R}: Super-Skrull deals 4 damage to target creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{R}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"zones": [
+								"battlefield"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4,
+						"from": "this"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Super-Skrull",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Target player draws four cards",
+				"basis": "{5}{U}: Target player draws four cards.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}{U}"
+				},
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 4
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,65 @@
+{
+	"card": "Anim Pakal, Thousandth Moon",
+	"generated": "2026-10-10",
+	"source": "dc4444cabcb04f51b5dcc7646a3f23cba7ab935e3fdbd99f3ef94db04badb50f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Anim Pakal, Thousandth Moon",
+		"registers": [
+			{
+				"basis": "Whenever you attack with one or more non-Gnome creatures, put a +1/+1 counter on Anim Pakal, then create X 1/1 colorless Gnome artifact creature tokens that are tapped and attacking, where X is the number of +1/+1 counters on Anim Pakal.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"not": {
+							"subtypes": [
+								"Gnome"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "token",
+							"count": {
+								"counters": "+1/+1",
+								"on": "this"
+							},
+							"tapped": true,
+							"attacking": true,
+							"spec": {
+								"name": "Gnome Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Gnome"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

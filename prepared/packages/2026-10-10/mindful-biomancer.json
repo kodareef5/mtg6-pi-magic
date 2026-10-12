@@ -1,0 +1,62 @@
+{
+	"card": "Mindful Biomancer",
+	"generated": "2026-10-10",
+	"source": "a1ca628eacde8e62a1311804869a1195088da979d88602f422848fe82b9a6982",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mindful Biomancer",
+		"registers": [
+			{
+				"basis": "When this creature enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mindful Biomancer",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Mindful Biomancer +2/+2 until end of turn.",
+				"basis": "{2}{G}: This creature gets +2/+2 until end of turn. Activate only once each turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{G}"
+				},
+				"limit": "once-per-turn",
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

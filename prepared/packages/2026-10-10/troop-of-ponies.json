@@ -1,0 +1,95 @@
+{
+	"card": "Troop of Ponies",
+	"generated": "2026-10-10",
+	"source": "b2037cb460361a2572b9e956897dddf92762622774c447edea13f11981c45083",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Troop of Ponies",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Troop of Ponies",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Troop of Ponies to search for up to two basic land cards",
+				"basis": "{2}, {T}, Sacrifice this creature: Search your library for up to two basic land cards, reveal them, put one onto the battlefield tapped and the other into your hand, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							]
+						},
+						"count": 2,
+						"upTo": true,
+						"reveal": true,
+						"as": "lands"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:lands"
+						},
+						"count": 1,
+						"as": "field-land",
+						"if": {
+							"bound": "lands"
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:field-land",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve",
+						"if": {
+							"bound": "field-land"
+						}
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:lands"
+						},
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

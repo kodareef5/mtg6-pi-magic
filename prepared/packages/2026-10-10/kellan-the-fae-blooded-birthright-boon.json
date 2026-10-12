@@ -1,0 +1,105 @@
+{
+	"card": "Kellan, the Fae-Blooded // Birthright Boon",
+	"generated": "2026-10-10",
+	"source": "3764dc7f2104f23cb6e150e5743d0f839fb1422e286445d5b72130c957f8c3d7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kellan, the Fae-Blooded // Birthright Boon",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Double strike",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Other creatures you control get +1/+0 for each Aura and Equipment attached to Kellan.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Aura",
+								"Equipment"
+							],
+							"attachedTo": "this"
+						}
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Kellan, the Fae-Blooded // Birthright Boon",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Birthright Boon",
+				"basis": "Search your library for an Aura or Equipment card, reveal it, put it into your hand, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Aura",
+								"Equipment"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

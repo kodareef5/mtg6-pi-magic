@@ -1,0 +1,94 @@
+{
+	"card": "Loot, Exuberant Explorer",
+	"generated": "2026-10-10",
+	"source": "51c40e65690ee2ab437cf51c05504f3d1a4e247759a399b4ea650fb22194b275",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Loot, Exuberant Explorer",
+		"registers": [
+			{
+				"basis": "You may play an additional land on each of your turns.",
+				"kind": "permit",
+				"lands": 1
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Loot, Exuberant Explorer",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Inspect six cards and optionally put an eligible creature onto the battlefield",
+				"basis": "{4}{G}{G}, {T}: Look at the top six cards of your library. You may reveal a creature card with mana value less than or equal to the number of lands you control from among them and put it onto the battlefield. Put the rest on the bottom in a random order.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{G}{G}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 6,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atMost": {
+									"count": {
+										"types": [
+											"land"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

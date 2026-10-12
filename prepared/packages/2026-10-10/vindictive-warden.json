@@ -1,0 +1,77 @@
+{
+	"card": "Vindictive Warden",
+	"generated": "2026-10-10",
+	"source": "280d27289d344d7ea39058503ade5dc1ffc9bce389c7aca6b80b5994998e1d2b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vindictive Warden",
+		"registers": [
+			{
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Firebending 1 (Whenever this creature attacks, add {R}. This mana lasts until end of combat.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R"
+							],
+							"until": "end-of-combat"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vindictive Warden",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Deal 1 damage to each opponent",
+				"basis": "{3}: This creature deals 1 damage to each opponent.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}"
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "this",
+						"to": "opponent",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

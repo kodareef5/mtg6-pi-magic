@@ -1,0 +1,154 @@
+{
+	"card": "Samut, the Driving Force",
+	"generated": "2026-10-10",
+	"source": "38b475a73772ba0906d718c5b0631a64b7edf2fabaffabc054c9e63b62c0ee1a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Samut, the Driving Force",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "First strike, vigilance, haste",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike",
+						"vigilance",
+						"haste"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Other creatures you control get +X/+0, where X is your speed.",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": {
+						"speed": "you"
+					}
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Noncreature spells you cast cost {X} less to cast, where X is your speed.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"not": {
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"reduce": 1,
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 1,
+					"atMost": 1
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Noncreature spells you cast cost {X} less to cast, where X is your speed.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"not": {
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"reduce": 2,
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 2,
+					"atMost": 2
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Noncreature spells you cast cost {X} less to cast, where X is your speed.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"not": {
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"reduce": 3,
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 3,
+					"atMost": 3
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Noncreature spells you cast cost {X} less to cast, where X is your speed.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"not": {
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"reduce": 4,
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,69 @@
+{
+	"card": "Dark Endurance",
+	"generated": "2026-10-10",
+	"source": "89c716cad635b7cb295db09086ad8bbaf781fc6e58b9ca20b88f53b9f750a4d1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dark Endurance",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dark Endurance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dark Endurance",
+				"basis": "This spell costs {1} less to cast if it targets a blocking creature. ... Target creature gets +2/+0 and gains indestructible until end of turn. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"is": "target:0",
+							"types": [
+								"creature"
+							],
+							"blocking": true
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

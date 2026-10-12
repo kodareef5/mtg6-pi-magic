@@ -1,0 +1,118 @@
+{
+	"card": "Analyze the Pollen",
+	"generated": "2026-10-10",
+	"source": "fbd17e744e4749a4ee57ead14f4a77a1769964eedad72eb8709eca515717771e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Analyze the Pollen",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Analyze the Pollen",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast without collecting evidence",
+				"basis": "As an additional cost to cast this spell, you may collect evidence 8. (Exile cards with total mana value 8 or greater from your graveyard.)\nSearch your library for a basic land card. If evidence was collected, instead search your library for a creature or land card. Reveal that card, put it into your hand, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "card"
+					},
+					{
+						"do": "reveal",
+						"what": "bound:card"
+					},
+					{
+						"do": "move",
+						"what": "bound:card",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Analyze the Pollen",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast collecting evidence 8",
+				"basis": "As an additional cost to cast this spell, you may collect evidence 8. (Exile cards with total mana value 8 or greater from your graveyard.)\nSearch your library for a basic land card. If evidence was collected, instead search your library for a creature or land card. Reveal that card, put it into your hand, then shuffle.",
+				"timing": "spell",
+				"cost": {
+					"exile": {
+						"graveyard": {},
+						"totalManaValue": 8
+					}
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"creature",
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "card"
+					},
+					{
+						"do": "reveal",
+						"what": "bound:card"
+					},
+					{
+						"do": "move",
+						"what": "bound:card",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,127 @@
+{
+	"card": "Wingnut, Bat on the Belfry",
+	"generated": "2026-10-10",
+	"source": "f917dfe77d59d7eea7c45079dd14174dcc8104790105503c82f7c29f027e988e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wingnut, Bat on the Belfry",
+		"registers": [
+			{
+				"basis": "Alliance — Whenever another creature you control enters, Wingnut gains your choice of flying, menace, or haste until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "flying-choice",
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "this",
+									"until": "end-of-turn",
+									"change": {
+										"words": [
+											"flying"
+										]
+									}
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"if": {
+								"not": {
+									"bound": "flying-choice"
+								}
+							},
+							"as": "menace-choice",
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "this",
+									"until": "end-of-turn",
+									"change": {
+										"words": [
+											"menace"
+										]
+									}
+								}
+							]
+						},
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"haste"
+								]
+							},
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "flying-choice"
+										}
+									},
+									{
+										"not": {
+											"bound": "menace-choice"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Wingnut attacks, each other attacking creature gets +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"attacking": true,
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

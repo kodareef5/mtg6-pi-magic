@@ -1,0 +1,61 @@
+{
+	"card": "Xu-Ifit, Osteoharmonist",
+	"generated": "2026-10-10",
+	"source": "26f778b10b1d15dea31511c23a75782fb0f524d53ed00b8f5d83380c14fe1f76",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Xu-Ifit, Osteoharmonist",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Xu-Ifit, Osteoharmonist",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Return a creature card as an abilityless Skeleton.",
+				"basis": "{T}: Return target creature card from your graveyard to the battlefield. It's a Skeleton in addition to its other types and has no abilities. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"change": {
+							"subtypes": {
+								"add": [
+									"Skeleton"
+								]
+							},
+							"loseAbilities": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

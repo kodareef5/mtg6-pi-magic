@@ -1,0 +1,111 @@
+{
+	"card": "Accumulate Wisdom",
+	"generated": "2026-10-10",
+	"source": "d5e301a95e9602909b9d1b6d5c1e9df26bb5b7b8b700a7f7656121e46ed71310",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Accumulate Wisdom",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Accumulate Wisdom",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Accumulate Wisdom",
+				"basis": "Look at the top three cards of your library. Put one of those cards into your hand and the rest on the bottom of your library in any order. Put each of those cards into your hand instead if there are three or more Lesson cards in your graveyard.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 3,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"subtypes": [
+										"Lesson"
+									],
+									"token": false
+								}
+							},
+							"atLeast": 3
+						},
+						"as": "all-taken",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "bound:looked",
+								"to": "hand",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"not": {
+								"bound": "all-taken"
+							}
+						},
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"is": "bound:looked"
+								},
+								"count": 1,
+								"as": "taken"
+							},
+							{
+								"do": "move",
+								"what": "bound:taken",
+								"to": "hand",
+								"reason": "resolve"
+							},
+							{
+								"do": "order",
+								"who": "you",
+								"every": {
+									"zones": [
+										"library"
+									],
+									"is": "bound:looked",
+									"not": {
+										"is": "bound:taken"
+									}
+								},
+								"position": "bottom"
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,74 @@
+{
+	"card": "End of the Hunt",
+	"generated": "2026-10-10",
+	"source": "bc7cf8f4de00734d4e8e1b93989979630b559519e496ea86698ddf6e917c07a8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "End of the Hunt",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "End of the Hunt",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast End of the Hunt",
+				"basis": "Target opponent exiles a creature or planeswalker they control with the greatest mana value among creatures and planeswalkers they control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "target:0",
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atLeast": {
+									"aggregate": "max",
+									"of": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "target:0",
+										"types": [
+											"creature",
+											"planeswalker"
+										]
+									},
+									"value": "manaValue"
+								}
+							}
+						},
+						"count": 1,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,81 @@
+{
+	"card": "Myojin of Night's Reach",
+	"generated": "2026-10-10",
+	"source": "429b41497e5b46c90b561beec97dcf9ad272cff22869e0d3dfa983f1242d8329",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Myojin of Night's Reach",
+		"registers": [
+			{
+				"basis": "Myojin of Night's Reach enters with a divinity counter on it if you cast it from your hand.",
+				"kind": "enters",
+				"counters": {
+					"divinity": 1
+				},
+				"if": {
+					"cast": "this",
+					"from": "hand",
+					"by": "you"
+				}
+			},
+			{
+				"basis": "Myojin of Night's Reach has indestructible as long as it has a divinity counter on it.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"counters": "divinity",
+						"on": "this"
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"words": [
+						"indestructible"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Myojin of Night's Reach",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Remove a divinity counter; each opponent discards their hand",
+				"basis": "Remove a divinity counter from Myojin of Night's Reach: Each opponent discards their hand.",
+				"timing": "stack",
+				"cost": {
+					"counters": {
+						"kind": "divinity",
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "opponent"
+						},
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

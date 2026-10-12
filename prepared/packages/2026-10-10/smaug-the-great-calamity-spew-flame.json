@@ -1,0 +1,64 @@
+{
+	"card": "Smaug, the Great Calamity // Spew Flame",
+	"generated": "2026-10-10",
+	"source": "aaa15a419fc811c1685f0f6a47a023858e3e2d24b81d2b435263d39e839ee7c4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Smaug, the Great Calamity // Spew Flame",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Smaug, the Great Calamity // Spew Flame",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Spew Flame",
+				"basis": "Spew Flame deals 5 damage to target creature. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 5
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

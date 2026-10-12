@@ -1,0 +1,69 @@
+{
+	"card": "Massacre Girl, Most Wanted",
+	"generated": "2026-10-10",
+	"source": "c33dcba2fbcc8055728cc033f39442a7c8bdd0b4511860205e6dc99c6fdbb037",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Massacre Girl, Most Wanted",
+		"registers": [
+			{
+				"basis": "Whenever another creature or planeswalker you control dies, Massacre Girl deals 1 damage to target opponent and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature",
+							"planeswalker"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever an opponent is dealt noncombat damage, put a +1/+1 counter on Massacre Girl.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"combat": false,
+					"received": true,
+					"player": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

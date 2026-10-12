@@ -1,0 +1,101 @@
+{
+	"card": "Weapons Vendor",
+	"generated": "2026-10-10",
+	"source": "e8c32c92b681053d26efd688135dbf55012a667de4542ef7dfb1e5b53bb402cf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Weapons Vendor",
+		"registers": [
+			{
+				"basis": "When this creature enters, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of combat on your turn, if you control an Equipment, you may pay {1}. When you do, attach target Equipment you control to target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"subtypes": [
+								"Equipment"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{1}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "paid"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"subtypes": [
+												"Equipment"
+											],
+											"controller": "you"
+										}
+									},
+									{
+										"object": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "attach",
+										"what": "target:0",
+										"to": "target:1"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

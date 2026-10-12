@@ -1,0 +1,39 @@
+{
+	"card": "Defiant Survivor",
+	"generated": "2026-10-10",
+	"source": "2345f1e03df7d35e0abdbd5cc10cdce89bbef28dfaf6bdbad900a78990091efa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Defiant Survivor",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Survival — At the beginning of your second main phase, if this creature is tapped, manifest dread. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)",
+				"event": {
+					"on": "step",
+					"step": "postcombat-main",
+					"whose": "you"
+				},
+				"if": {
+					"is": "this",
+					"matches": {
+						"tapped": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "manifest-dread",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

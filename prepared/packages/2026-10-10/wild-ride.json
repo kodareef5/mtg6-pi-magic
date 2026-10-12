@@ -1,0 +1,111 @@
+{
+	"card": "Wild Ride",
+	"generated": "2026-10-10",
+	"source": "967541ab6a878cccfb018a64c778f4a33027735cd33373f830a732c0d79add3b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wild Ride",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Harmonize {4}{R} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{4}{R}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Wild Ride",
+				"source": {
+					"card": "Wild Ride",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"basis": "Target creature gets +3/+0 and gains haste until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			},
+			{
+				"claim": "Harmonize Wild Ride with an optional creature tap",
+				"source": {
+					"card": "Wild Ride",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "any"
+				},
+				"basis": "Target creature gets +3/+0 and gains haste until end of turn. ... Harmonize {4}{R} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"timing": "spell",
+				"cost": {
+					"mana": "{4}{R}",
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"upTo": true,
+						"reduce": "power"
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

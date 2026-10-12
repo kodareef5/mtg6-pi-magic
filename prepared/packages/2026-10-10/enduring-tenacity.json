@@ -1,0 +1,73 @@
+{
+	"card": "Enduring Tenacity",
+	"generated": "2026-10-10",
+	"source": "acbacb5528c7c3a6678890c9d0014d1f33cea973d4d441513ca098c74e4aafa1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Enduring Tenacity",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, target opponent loses that much life.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "life",
+							"who": "target:0",
+							"amount": {
+								"negate": {
+									"event": "amount"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Enduring Tenacity dies, if it was a creature, return it to the battlefield under its owner's control. It's an enchantment. (It's not a creature.)",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this",
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "owner:event:object",
+							"reason": "resolve",
+							"change": {
+								"types": {
+									"set": [
+										"enchantment"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

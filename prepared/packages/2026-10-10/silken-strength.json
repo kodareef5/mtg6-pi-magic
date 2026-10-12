@@ -1,0 +1,111 @@
+{
+	"card": "Silken Strength",
+	"generated": "2026-10-10",
+	"source": "d2f9d696f8e4f16a3938976765c7c19724e46b9af3df523d018d9b2628ab0998",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Silken Strength",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this Aura enters, untap enchanted permanent.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "untap",
+							"what": "attached"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Enchanted permanent gets +1/+2 and has reach.",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 2,
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Silken Strength",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Silken Strength enchanting a creature or Vehicle",
+				"basis": "Flash ... Enchant creature or Vehicle",
+				"timing": "spell",
+				"speed": "instant",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Vehicle"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,53 @@
+{
+	"card": "Your Fate Ends Here",
+	"generated": "2026-10-10",
+	"source": "4804ab6d9a74744402f0b956461ade23621c53c39bffa3f12e87d410c03ffde3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Your Fate Ends Here",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Your Fate Ends Here",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Your Fate Ends Here",
+				"basis": "Destroy target creature or planeswalker with mana value 3 or greater. Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atLeast": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

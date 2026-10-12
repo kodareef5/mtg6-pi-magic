@@ -1,0 +1,96 @@
+{
+	"card": "Spinneret and Spiderling",
+	"generated": "2026-10-10",
+	"source": "d8bf02f41a7912b6b91587fe00817eb66ddb9b8ba05fecdc7c7561bbd7789c56",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spinneret and Spiderling",
+		"registers": [
+			{
+				"basis": "Whenever you attack with two or more Spiders, put a +1/+1 counter on Spinneret and Spiderling.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"subtypes": [
+							"Spider"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"is": "event:objects",
+							"subtypes": [
+								"Spider"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Spinneret and Spiderling deals 4 or more damage, exile the top card of your library. Until the end of your next turn, you may play that card.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"of": {
+						"is": "this"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"event": "amount"
+					},
+					"atLeast": 4
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

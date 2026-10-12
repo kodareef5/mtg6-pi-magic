@@ -1,0 +1,86 @@
+{
+	"card": "March of the World Ooze",
+	"generated": "2026-10-10",
+	"source": "432b24d6aba1dd6c62092653692546f33979bfdb5a5ef5a5fc6250fbb8e773d3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "March of the World Ooze",
+		"registers": [
+			{
+				"basis": "Creatures you control have base power and toughness 6/6 and are Oozes in addition to their other types.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"base": {
+						"power": 6,
+						"toughness": 6
+					},
+					"subtypes": {
+						"add": [
+							"Ooze"
+						]
+					}
+				}
+			},
+			{
+				"basis": "Whenever an opponent casts a spell, if it's not their turn, you create a 3/3 green Elephant creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "opponent",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"if": {
+					"not": {
+						"turn": "opponent"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Elephant Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Elephant"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

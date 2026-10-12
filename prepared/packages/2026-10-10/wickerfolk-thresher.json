@@ -1,0 +1,88 @@
+{
+	"card": "Wickerfolk Thresher",
+	"generated": "2026-10-10",
+	"source": "4c30760b12a23f7a2529ad172e4f5e2d62ba20ded8203f5e6b104b7bb31ae327",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wickerfolk Thresher",
+		"registers": [
+			{
+				"basis": "Delirium — Whenever this creature attacks, if there are four or more card types among cards in your graveyard, look at the top card of your library. If it's a land card, you may put it onto the battlefield. If you don't put the card onto the battlefield, put it into your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 4
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "move",
+							"what": "bound:looked",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"may": true,
+							"if": {
+								"is": "bound:looked",
+								"matches": {
+									"zones": [
+										"library"
+									],
+									"types": [
+										"land"
+									]
+								}
+							},
+							"as": "landed"
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"to": "hand",
+							"reason": "resolve",
+							"if": {
+								"not": {
+									"bound": "landed"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

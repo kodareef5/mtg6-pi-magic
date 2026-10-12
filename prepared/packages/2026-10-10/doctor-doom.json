@@ -1,0 +1,112 @@
+{
+	"card": "Doctor Doom",
+	"generated": "2026-10-10",
+	"source": "ced14d49973a6e477a822f3310791bef5e14318f7b7ecd2eba2210e499a85478",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Doctor Doom",
+		"registers": [
+			{
+				"basis": "When Doctor Doom enters, create two 3/3 colorless Robot Villain artifact creature tokens named Doombot.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Doombot",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Robot",
+									"Villain"
+								],
+								"colors": [],
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "As long as you control an artifact creature or a Plan, Doctor Doom has indestructible.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"any": [
+								{
+									"all": [
+										{
+											"types": [
+												"artifact"
+											]
+										},
+										{
+											"types": [
+												"creature"
+											]
+										}
+									]
+								},
+								{
+									"subtypes": [
+										"Plan"
+									]
+								}
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"words": [
+						"indestructible"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, you draw a card and lose 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

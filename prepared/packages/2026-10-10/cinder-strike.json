@@ -1,0 +1,91 @@
+{
+	"card": "Cinder Strike",
+	"generated": "2026-10-10",
+	"source": "83b62e2b2db24179f6d60921f5c215ccdc747237629fb5cb305b6fc2a018acdb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cinder Strike",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cinder Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cinder Strike without blighting",
+				"basis": "As an additional cost to cast this spell, you may blight 1. (You may put a -1/-1 counter on a creature you control.)\nCinder Strike deals 2 damage to target creature. It deals 4 damage to that creature instead if this spell's additional cost was paid.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Cinder Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cinder Strike with blight 1",
+				"basis": "As an additional cost to cast this spell, you may blight 1. (You may put a -1/-1 counter on a creature you control.)\nCinder Strike deals 2 damage to target creature. It deals 4 damage to that creature instead if this spell's additional cost was paid.",
+				"timing": "spell",
+				"cost": {
+					"counters": {
+						"kind": "-1/-1",
+						"count": 1,
+						"put": true,
+						"on": {
+							"choose": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"count": 1
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

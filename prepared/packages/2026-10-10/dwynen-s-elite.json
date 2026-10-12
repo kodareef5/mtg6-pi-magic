@@ -34,7 +34,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Elf Warrior",
+								"name": "Elf Warrior Token",
 								"types": [
 									"creature"
 								],

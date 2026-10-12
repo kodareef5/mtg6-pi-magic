@@ -1,0 +1,109 @@
+{
+	"card": "Unstable Experiment",
+	"generated": "2026-10-10",
+	"source": "bd8dd8c2b47983d760eab4bb64cbb55c0f932fbbb86ed24cab027d563e4b3c38",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unstable Experiment",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Unstable Experiment",
+				"basis": "Target player draws a card, then up to one target creature you control connives. (Draw a card, then discard a card. If you discarded a nonland card, put a +1/+1 counter on that creature.)",
+				"source": {
+					"card": "Unstable Experiment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 1
+					},
+					{
+						"do": "perform",
+						"who": "controller:target:1",
+						"if": {
+							"is": "target:1",
+							"matches": {},
+							"lastKnown": true
+						},
+						"instructions": [
+							{
+								"do": "draw",
+								"who": "controller:target:1",
+								"count": 1
+							},
+							{
+								"do": "choose",
+								"who": "controller:target:1",
+								"from": {
+									"zones": [
+										"hand"
+									],
+									"controller": "controller:target:1"
+								},
+								"count": 1,
+								"as": "discard-choice"
+							},
+							{
+								"do": "move",
+								"what": "bound:discard-choice",
+								"to": "graveyard",
+								"reason": "discard",
+								"as": "discarded"
+							},
+							{
+								"do": "counters",
+								"on": "target:1",
+								"kind": "+1/+1",
+								"amount": 1,
+								"if": {
+									"is": "bound:discarded",
+									"matches": {
+										"zones": [
+											"battlefield",
+											"graveyard",
+											"exile",
+											"stack",
+											"command"
+										],
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									},
+									"lastKnown": true
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

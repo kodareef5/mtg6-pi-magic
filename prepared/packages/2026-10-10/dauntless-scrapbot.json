@@ -1,0 +1,101 @@
+{
+	"card": "Dauntless Scrapbot",
+	"generated": "2026-10-10",
+	"source": "b6f51529f9f5d57529c6f0939b01d8430aadb5f791ca26117d017b1e75f560c5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dauntless Scrapbot",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, exile each opponent's graveyard. Create a Lander token. (It's an artifact with \"{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "opponent"
+							},
+							"to": "exile",
+							"reason": "exile"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Lander Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Lander"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "choose",
+													"who": "you",
+													"from": {
+														"zones": [
+															"library"
+														],
+														"owner": "you",
+														"types": [
+															"land"
+														],
+														"supertypes": [
+															"basic"
+														],
+														"token": false
+													},
+													"count": 1,
+													"upTo": true,
+													"as": "land"
+												},
+												{
+													"do": "move",
+													"what": "bound:land",
+													"to": "battlefield",
+													"tapped": true,
+													"controller": "you",
+													"reason": "resolve"
+												},
+												{
+													"do": "shuffle",
+													"who": "you"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

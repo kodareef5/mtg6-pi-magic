@@ -1,0 +1,69 @@
+{
+	"card": "Starlit Soothsayer",
+	"generated": "2026-10-10",
+	"source": "6601d13ab9431ba27fb2f477d4bf1c1e8703c34e0bfac6b8f44597598465a5d4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Starlit Soothsayer",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, if you gained or lost life this turn, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"any": [
+						{
+							"amount": {
+								"history": "life-gained",
+								"by": "you"
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"history": "life-lost",
+								"by": "you"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

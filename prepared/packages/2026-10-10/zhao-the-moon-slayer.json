@@ -1,0 +1,99 @@
+{
+	"card": "Zhao, the Moon Slayer",
+	"generated": "2026-10-10",
+	"source": "bf55ec70823f1e9d9161262a5120abdae6c06e31b4fc01e85c4fe2e1971bc249",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zhao, the Moon Slayer",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Nonbasic lands enter tapped.",
+				"kind": "enters",
+				"affects": {
+					"types": [
+						"land"
+					],
+					"not": {
+						"supertypes": [
+							"basic"
+						]
+					}
+				},
+				"tapped": true
+			},
+			{
+				"basis": "As long as Zhao has a conqueror counter on him, nonbasic lands are Mountains. (They lose all other land types and abilities and have \"{T}: Add {R}.\")",
+				"kind": "continuous",
+				"if": {
+					"amount": {
+						"counters": "conqueror",
+						"on": "this"
+					},
+					"atLeast": 1
+				},
+				"affects": {
+					"types": [
+						"land"
+					],
+					"not": {
+						"supertypes": [
+							"basic"
+						]
+					}
+				},
+				"change": {
+					"subtypes": {
+						"set": [
+							"Mountain"
+						],
+						"of": "land"
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Zhao, the Moon Slayer",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a conqueror counter on Zhao",
+				"basis": "{7}: Put a conqueror counter on Zhao.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{7}"
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "conqueror",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

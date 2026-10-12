@@ -1,0 +1,78 @@
+{
+	"card": "Explosive Getaway",
+	"generated": "2026-10-10",
+	"source": "b6fede866a80494547c70d7d71022104e372018dca717d745dc8707d6c80ab7f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Explosive Getaway",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Explosive Getaway",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Explosive Getaway",
+				"basis": "Exile up to one target artifact or creature. Return it to the battlefield under its owner's control at the beginning of the next end step. ... Explosive Getaway deals 4 damage to each creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:exiled",
+									"to": "battlefield",
+									"controller": "owner:bound:exiled",
+									"reason": "resolve"
+								}
+							]
+						}
+					},
+					{
+						"do": "damage",
+						"every": {
+							"types": [
+								"creature"
+							]
+						},
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

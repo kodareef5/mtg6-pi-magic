@@ -1,0 +1,65 @@
+{
+	"card": "Loxodon Surveyor",
+	"generated": "2026-10-10",
+	"source": "04bf9cb8356aef6ac8e5b29a3ce93afbb3b30ae15fcfd6157e9e9e0d0cde9857",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Loxodon Surveyor",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — {3}, Exile this card from your graveyard: Draw a card.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"graveyard"
+					]
+				},
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Max speed — {3}, Exile this card from your graveyard: Draw a card.",
+							"cost": {
+								"mana": "{3}",
+								"exile": "this"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "draw",
+										"who": "you",
+										"count": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

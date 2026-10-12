@@ -1,0 +1,29 @@
+{
+	"card": "Spider-Islanders",
+	"generated": "2026-10-10",
+	"source": "c4f9cf3bd0f2f7a0a266633b973e8e46077ac547b04620a2843c70d828bad7f8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider-Islanders",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Mayhem {1}{R} (You may cast this card from your graveyard for {1}{R} if you discarded it this turn. Timing rules still apply.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{1}{R}",
+					"if": {
+						"discardedThisTurn": "this",
+						"by": "you"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

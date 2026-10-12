@@ -1,0 +1,88 @@
+{
+	"card": "Baron Bertram Graywater",
+	"generated": "2026-10-10",
+	"source": "3d158bfbe775cdcb69be772ee3e05ad80afcb99724dc51a54732724b528a7f75",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Baron Bertram Graywater",
+		"registers": [
+			{
+				"basis": "Whenever one or more tokens you control enter, create a 1/1 black Vampire Rogue creature token with lifelink. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"token": true,
+						"controller": "you"
+					},
+					"batch": true
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Vampire Rogue Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Vampire",
+									"Rogue"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"lifelink"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Baron Bertram Graywater",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature or artifact to draw a card",
+				"basis": "{1}{B}, Sacrifice another creature or artifact: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}",
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"creature",
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,100 @@
+{
+	"card": "Teyo, Diamondblade Mage",
+	"generated": "2026-10-10",
+	"source": "74e13bc7ee82033de4f9de2f0961ef4b571ba79421e0d11ec9e76fec6d98987c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Teyo, Diamondblade Mage",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Teyo enters, target permanent you control gains deathtouch until end of turn. Put a +1/+1 counter on it if it's a creature. Put a loyalty counter on it if it's a planeswalker.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"deathtouch"
+								]
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"is": "target:0",
+								"matches": {
+									"types": [
+										"creature"
+									]
+								}
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "loyalty",
+							"amount": 1,
+							"if": {
+								"is": "target:0",
+								"matches": {
+									"types": [
+										"planeswalker"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

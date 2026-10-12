@@ -1,0 +1,67 @@
+{
+	"card": "Vraska Joins Up",
+	"generated": "2026-10-10",
+	"source": "ac873e6e4bfed5e28f0686f37788787531597770591f0d16bc91d01953be99f1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vraska Joins Up",
+		"registers": [
+			{
+				"basis": "When Vraska Joins Up enters, put a deathtouch counter on each creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "deathtouch",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a legendary creature you control deals combat damage to a player, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"supertypes": [
+							"legendary"
+						],
+						"controller": "you"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

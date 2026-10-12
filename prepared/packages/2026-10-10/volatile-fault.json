@@ -1,0 +1,127 @@
+{
+	"card": "Volatile Fault",
+	"generated": "2026-10-10",
+	"source": "b1d808452f1e0b6daffec46816b8bdde107cb4fb546c8acaca0d07a023f2d4e1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Volatile Fault",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Volatile Fault",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Destroy an opposing nonbasic land, offer its controller a basic-land search, and create a Treasure",
+				"basis": "{1}, {T}, Sacrifice this land: Destroy target nonbasic land an opponent controls. That player may search their library for a basic land card, put it onto the battlefield, then shuffle. You create a Treasure token.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							],
+							"controller": "opponent",
+							"not": {
+								"supertypes": [
+									"basic"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "perform",
+						"who": "controller:target:0",
+						"may": true,
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "controller:target:0",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "controller:target:0",
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									]
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "land"
+							},
+							{
+								"do": "move",
+								"what": "bound:land",
+								"to": "battlefield",
+								"controller": "controller:target:0",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "controller:target:0"
+							}
+						]
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Treasure Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

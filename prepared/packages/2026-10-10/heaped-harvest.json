@@ -1,0 +1,146 @@
+{
+	"card": "Heaped Harvest",
+	"generated": "2026-10-10",
+	"source": "c5b8b9f7fdc2bc2f54dd1b52222cbdc3f075f896c18854a71925eb19fdc541f6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Heaped Harvest",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters and when you sacrifice it, you may search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"types": [
+											"land"
+										],
+										"supertypes": [
+											"basic"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"as": "land"
+								},
+								{
+									"do": "move",
+									"what": "bound:land",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters and when you sacrifice it, you may search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"types": [
+											"land"
+										],
+										"supertypes": [
+											"basic"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"as": "land"
+								},
+								{
+									"do": "move",
+									"what": "bound:land",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Sacrifice Heaped Harvest to gain 3 life",
+				"basis": "{2}, {T}, Sacrifice this artifact: You gain 3 life.",
+				"source": {
+					"card": "Heaped Harvest",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

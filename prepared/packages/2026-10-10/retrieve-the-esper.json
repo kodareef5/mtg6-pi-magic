@@ -1,0 +1,75 @@
+{
+	"card": "Retrieve the Esper",
+	"generated": "2026-10-10",
+	"source": "84cdc307be1634af8d4bd7efcdfbba99302d3eb4f2df19d46ba26748a8c493fb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Retrieve the Esper",
+		"registers": [
+			{
+				"basis": "Flashback {5}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"kind": "permit",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{5}{U}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Retrieve the Esper",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Create a Robot Warrior token, then add two counters if this spell was cast from a graveyard",
+				"basis": "Create a 3/3 blue Robot Warrior artifact creature token. Then if this spell was cast from a graveyard, put two +1/+1 counters on that token.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Robot Warrior Token",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"subtypes": [
+								"Robot",
+								"Warrior"
+							],
+							"colors": [
+								"U"
+							],
+							"power": 3,
+							"toughness": 3
+						},
+						"as": "robot"
+					},
+					{
+						"do": "counters",
+						"on": "bound:robot",
+						"kind": "+1/+1",
+						"amount": 2,
+						"if": {
+							"cast": "this",
+							"from": "graveyard"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

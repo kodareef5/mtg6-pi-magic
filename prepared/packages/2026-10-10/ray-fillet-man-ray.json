@@ -1,0 +1,132 @@
+{
+	"card": "Ray Fillet, Man Ray",
+	"generated": "2026-10-10",
+	"source": "41d74c608a556da7d7dca032d3a00f134c8dc979113c8a82623a3f0e73df3a50",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ray Fillet, Man Ray",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Ray Fillet enters, create a Mutagen token. (It's an artifact with \"{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Mutagen Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Mutagen"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.",
+										"speed": "sorcery",
+										"cost": {
+											"mana": "{1}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"zones": [
+															"battlefield"
+														],
+														"types": [
+															"creature"
+														]
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "counters",
+													"on": "target:0",
+													"kind": "+1/+1",
+													"amount": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Remove a +1/+1 counter from a controlled creature to draw a card",
+				"basis": "{2}, Remove a +1/+1 counter from a creature you control: Draw a card.",
+				"source": {
+					"card": "Ray Fillet, Man Ray",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"counters": {
+						"kind": "+1/+1",
+						"count": 1,
+						"on": {
+							"choose": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"count": 1
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

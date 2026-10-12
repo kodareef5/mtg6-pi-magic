@@ -1,0 +1,122 @@
+{
+	"card": "Ajani, Caller of the Pride",
+	"generated": "2026-10-10",
+	"source": "e37c44072ee7d215211ac1995a98a9b016f06dbd1aee01c806f0df96180caa3f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ajani, Caller of the Pride",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Put a +1/+1 counter on up to one target creature",
+				"basis": "+1: Put a +1/+1 counter on up to one target creature.",
+				"source": {
+					"card": "Ajani, Caller of the Pride",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"loyalty": 1
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"claim": "Give target creature flying and double strike until end of turn",
+				"basis": "−3: Target creature gains flying and double strike until end of turn.",
+				"source": {
+					"card": "Ajani, Caller of the Pride",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"loyalty": -3
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"flying",
+								"double strike"
+							]
+						}
+					}
+				]
+			},
+			{
+				"claim": "Create 2/2 white Cat creature tokens equal to your life total",
+				"basis": "−8: Create X 2/2 white Cat creature tokens, where X is your life total.",
+				"source": {
+					"card": "Ajani, Caller of the Pride",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"loyalty": -8
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"life": "you"
+						},
+						"spec": {
+							"name": "Cat Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Cat"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

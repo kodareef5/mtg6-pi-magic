@@ -1,0 +1,103 @@
+{
+	"card": "Resplendent Angel",
+	"generated": "2026-10-10",
+	"source": "4690afcfbf669dd8912f77c8f53cbe3186840883fe43245baf039fd220bd1309",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Resplendent Angel",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of each end step, if you gained 5 or more life this turn, create a 4/4 white Angel creature token with flying and vigilance.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "any"
+				},
+				"if": {
+					"amount": {
+						"history": "life-gained",
+						"by": "you"
+					},
+					"atLeast": 5
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Angel Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Angel"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 4,
+								"toughness": 4,
+								"words": [
+									"flying",
+									"vigilance"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Resplendent Angel",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Resplendent Angel +2/+2 and lifelink until end of turn",
+				"basis": "{3}{W}{W}{W}: Until end of turn, this creature gets +2/+2 and gains lifelink.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{W}{W}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"lifelink"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

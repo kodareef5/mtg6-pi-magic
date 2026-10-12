@@ -1,0 +1,109 @@
+{
+	"card": "Hexhaven Dueling Arena",
+	"generated": "2026-10-10",
+	"source": "7e1fabc78c7924cb9b9c329d8f1b6167cdb5fa7bd9de9c893074f71cb3694b29",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hexhaven Dueling Arena",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hexhaven Dueling Arena",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Prepare a creature that attacked this turn",
+				"basis": "{2}, {T}: Target creature that attacked this turn becomes prepared. Activate only as a sorcery. (Only creatures with prepare spells can become prepared.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"of": {
+							"is": "target:0"
+						}
+					},
+					"atLeast": 1
+				},
+				"instructions": [
+					{
+						"do": "prepare",
+						"what": "target:0",
+						"prepared": true,
+						"if": {
+							"amount": {
+								"history": "attacked",
+								"of": {
+									"is": "target:0"
+								}
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Hexhaven Dueling Arena",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Prepare a creature",
+				"basis": "{4}, {T}: Target creature becomes prepared.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "prepare",
+						"what": "target:0",
+						"prepared": true
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

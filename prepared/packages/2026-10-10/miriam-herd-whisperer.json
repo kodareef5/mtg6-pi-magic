@@ -1,0 +1,65 @@
+{
+	"card": "Miriam, Herd Whisperer",
+	"generated": "2026-10-10",
+	"source": "210d86c42c425591d5dd93623d2bda744e8b76acee6cff688cd6cd8f70a43480",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Miriam, Herd Whisperer",
+		"registers": [
+			{
+				"basis": "During your turn, Mounts and Vehicles you control have hexproof.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "you",
+					"subtypes": [
+						"Mount",
+						"Vehicle"
+					]
+				},
+				"if": {
+					"turn": "self"
+				},
+				"change": {
+					"words": [
+						"hexproof"
+					]
+				}
+			},
+			{
+				"basis": "Whenever a Mount or Vehicle you control attacks, put a +1/+1 counter on it.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"controller": "you",
+						"subtypes": [
+							"Mount",
+							"Vehicle"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "event:object",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

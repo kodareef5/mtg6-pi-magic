@@ -1,0 +1,113 @@
+{
+	"card": "Tithing Blade // Consuming Sepulcher",
+	"generated": "2026-10-10",
+	"source": "aefe166fd629cd7a91ca2fd39fc162fb23c0f8d40e876a64a3a9c6f71102f755",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tithing Blade // Consuming Sepulcher",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When this artifact enters, each opponent sacrifices a creature of their choice.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": 1,
+							"actions": [
+								{
+									"sacrifice": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "At the beginning of your upkeep, each opponent loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Tithing Blade // Consuming Sepulcher",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Craft Tithing Blade with a creature",
+				"basis": "Craft with creature {4}{B} ({4}{B}, Exile this artifact, Exile a creature you control or a creature card from your graveyard: Return this card transformed under its owner's control. Craft only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}{B}",
+					"exile": {
+						"source": true,
+						"choose": {
+							"zones": [
+								"battlefield",
+								"graveyard"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "bound:cost-source",
+						"to": "battlefield",
+						"face": 1,
+						"controller": "owner:bound:cost-source",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

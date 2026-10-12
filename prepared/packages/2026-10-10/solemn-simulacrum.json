@@ -1,0 +1,87 @@
+{
+	"card": "Solemn Simulacrum",
+	"generated": "2026-10-10",
+	"source": "d0410092dcc282d5702fbd51327715c44181b5103bebe8dfc4e3fe3661b553a6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Solemn Simulacrum",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"supertypes": [
+											"basic"
+										],
+										"types": [
+											"land"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"as": "land"
+								},
+								{
+									"do": "move",
+									"what": "bound:land",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, you may draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

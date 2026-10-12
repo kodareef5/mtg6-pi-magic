@@ -1,0 +1,75 @@
+{
+	"card": "Arnyn, Deathbloom Botanist",
+	"generated": "2026-10-10",
+	"source": "c431196f2519344ce67964dc70644b9660066ea22b404c4a11b9b531c0d4f84d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Arnyn, Deathbloom Botanist",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "Whenever a creature you control with power or toughness 1 or less dies, target opponent loses 2 life and you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"any": [
+							{
+								"power": {
+									"atMost": 1
+								}
+							},
+							{
+								"toughness": {
+									"atMost": 1
+								}
+							}
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "life",
+							"who": "target:0",
+							"amount": -2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

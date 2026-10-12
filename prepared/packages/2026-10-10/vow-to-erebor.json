@@ -1,0 +1,90 @@
+{
+	"card": "Vow to Erebor",
+	"generated": "2026-10-10",
+	"source": "89b33693b3134a6178c1af545348034da2e4e75d87d8979c7c4d95472437743c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vow to Erebor",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vow to Erebor",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Untap and strengthen a creature, then optionally attach an Equipment if it is a Dwarf.",
+				"basis": "Untap target creature you control. It gets +2/+2 until end of turn. If it's a Dwarf, you may attach an Equipment you control to it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "untap",
+						"what": "target:0"
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"subtypes": [
+									"Dwarf"
+								]
+							}
+						},
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"types": [
+										"artifact"
+									],
+									"subtypes": [
+										"Equipment"
+									],
+									"controller": "you"
+								},
+								"count": 1,
+								"as": "equipment"
+							},
+							{
+								"do": "attach",
+								"what": "bound:equipment",
+								"to": "target:0"
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

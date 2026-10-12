@@ -1,0 +1,69 @@
+{
+	"card": "Dust Animus",
+	"generated": "2026-10-10",
+	"source": "eb695608d55c66c220f128a768c5f389bb3eb3e0b3a1f391a47e3eb898ccb3fe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dust Animus",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "If you control five or more untapped lands, this creature enters with two +1/+1 counters and a lifelink counter on it.",
+				"kind": "enters",
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"controller": "you",
+							"tapped": false
+						}
+					},
+					"atLeast": 5
+				},
+				"counters": {
+					"+1/+1": 2,
+					"lifelink": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dust Animus",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Dust Animus",
+				"basis": "Plot {1}{W} (You may pay {1}{W} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{1}{W}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

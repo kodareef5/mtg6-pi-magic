@@ -1,0 +1,75 @@
+{
+	"card": "Stillness in Motion",
+	"generated": "2026-10-10",
+	"source": "6c801d604fe0fa611b139298937bdc3be8ae8b21ce451d0ce1c1ecb58b555277",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stillness in Motion",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, mill three cards. Then if your library has no cards in it, exile this enchantment and put five cards from your graveyard on top of your library in any order.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"library"
+										],
+										"owner": "you"
+									}
+								},
+								"atMost": 0
+							},
+							"instructions": [
+								{
+									"do": "move",
+									"what": "this",
+									"to": "exile",
+									"reason": "exile"
+								},
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you"
+									},
+									"count": 5,
+									"as": "returned"
+								},
+								{
+									"do": "move",
+									"what": "bound:returned",
+									"to": "library",
+									"position": "top",
+									"reason": "resolve"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,328 @@
+{
+	"card": "Grub's Command",
+	"generated": "2026-10-10",
+	"source": "59109df5f32abf7017be87ec6e34978347fb63567fefd508be59a960c9432f39",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Grub's Command",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Grub's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and creature boost",
+				"basis": "Choose two — ... Create a token that's a copy of target Goblin you control. ... Creatures target player controls get +1/+1 and gain haste until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Goblin"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:1"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Grub's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and destruction",
+				"basis": "Choose two — ... Create a token that's a copy of target Goblin you control. ... Destroy target artifact or creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Goblin"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "destroy",
+						"what": "target:1"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Grub's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and mill with Goblin recovery",
+				"basis": "Choose two — ... Create a token that's a copy of target Goblin you control. ... Target player mills five cards, then puts each Goblin card milled this way into their hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Goblin"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "mill",
+						"who": "target:1",
+						"count": 5,
+						"as": "milled"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"is": "bound:milled",
+							"subtypes": [
+								"Goblin"
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Grub's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose creature boost and destruction",
+				"basis": "Choose two — ... Creatures target player controls get +1/+1 and gain haste until end of turn. ... Destroy target artifact or creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "destroy",
+						"what": "target:1"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Grub's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose creature boost and mill with Goblin recovery",
+				"basis": "Choose two — ... Creatures target player controls get +1/+1 and gain haste until end of turn. ... Target player mills five cards, then puts each Goblin card milled this way into their hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "mill",
+						"who": "target:1",
+						"count": 5,
+						"as": "milled"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"is": "bound:milled",
+							"subtypes": [
+								"Goblin"
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Grub's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose destruction and mill with Goblin recovery",
+				"basis": "Choose two — ... Destroy target artifact or creature. ... Target player mills five cards, then puts each Goblin card milled this way into their hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "mill",
+						"who": "target:1",
+						"count": 5,
+						"as": "milled"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"is": "bound:milled",
+							"subtypes": [
+								"Goblin"
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

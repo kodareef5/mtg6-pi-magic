@@ -1,0 +1,73 @@
+{
+	"card": "Xande, Dark Mage",
+	"generated": "2026-10-10",
+	"source": "b8a1f90a496f3ef5ce280db79da4794d15b7f79bd7b7b548a1e5c0e7cff2a7a2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Xande, Dark Mage",
+		"registers": [
+			{
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Xande gets +1/+1 for each noncreature, nonland card in your graveyard.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"power": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"types": [
+									"creature",
+									"land"
+								]
+							}
+						}
+					},
+					"toughness": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"types": [
+									"creature",
+									"land"
+								]
+							}
+						}
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

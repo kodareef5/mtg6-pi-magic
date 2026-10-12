@@ -1,0 +1,70 @@
+{
+	"card": "Ancestral Anger",
+	"generated": "2026-10-10",
+	"source": "e8b43ccee0a734a1dafa211d39bc8acb6e72c407b002c8e4d7f1641c4ceb0d04",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ancestral Anger",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ancestral Anger",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ancestral Anger",
+				"basis": "Target creature gains trample and gets +X/+0 until end of turn, where X is 1 plus the number of cards named Ancestral Anger in your graveyard. ... Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							],
+							"power": {
+								"sum": [
+									1,
+									{
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"name": "Ancestral Anger",
+											"token": false
+										}
+									}
+								]
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

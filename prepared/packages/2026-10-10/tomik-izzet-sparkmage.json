@@ -1,0 +1,78 @@
+{
+	"card": "Tomik, Izzet Sparkmage",
+	"generated": "2026-10-10",
+	"source": "0d2f6d3f0f43444a39426e2e7aa14ad0eab55da7786c118eddb7a8109a1dabef",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tomik, Izzet Sparkmage",
+		"registers": [
+			{
+				"basis": "Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "If a source you control would deal noncombat damage to an opponent or a permanent an opponent controls, it deals that much damage plus 1 instead.",
+				"kind": "damage-rule",
+				"mode": "add",
+				"amount": 1,
+				"combat": false,
+				"from": {
+					"controller": "you"
+				},
+				"to": {
+					"player": "opponent"
+				}
+			},
+			{
+				"basis": "If a source you control would deal noncombat damage to an opponent or a permanent an opponent controls, it deals that much damage plus 1 instead.",
+				"kind": "damage-rule",
+				"mode": "add",
+				"amount": 1,
+				"combat": false,
+				"from": {
+					"controller": "you"
+				},
+				"to": {
+					"object": {
+						"zones": [
+							"battlefield"
+						],
+						"controller": "opponent"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,338 @@
+{
+	"card": "Clash of the Eikons",
+	"generated": "2026-10-10",
+	"source": "87a7343186cfdf65a63b4a2ca374af9c9424ca82f22584631c0ed07eca458448",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Clash of the Eikons",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Clash of the Eikons",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing fight only",
+				"basis": "Choose one or more — ... Target creature you control fights target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Clash of the Eikons",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing remove lore only",
+				"basis": "Choose one or more — ... Remove a lore counter from target Saga you control. (Removing lore counters doesn't cause chapter abilities to trigger.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Saga"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "lore",
+						"amount": -1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Clash of the Eikons",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing put lore only",
+				"basis": "Choose one or more — ... Put a lore counter on target Saga you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Saga"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "lore",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Clash of the Eikons",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing fight and remove lore",
+				"basis": "Choose one or more — ... Target creature you control fights target creature an opponent controls. ... Remove a lore counter from target Saga you control. (Removing lore counters doesn't cause chapter abilities to trigger.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					},
+					{
+						"object": {
+							"subtypes": [
+								"Saga"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					},
+					{
+						"do": "counters",
+						"on": "target:2",
+						"kind": "lore",
+						"amount": -1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Clash of the Eikons",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing fight and put lore",
+				"basis": "Choose one or more — ... Target creature you control fights target creature an opponent controls. ... Put a lore counter on target Saga you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					},
+					{
+						"object": {
+							"subtypes": [
+								"Saga"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					},
+					{
+						"do": "counters",
+						"on": "target:2",
+						"kind": "lore",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Clash of the Eikons",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing remove lore and put lore",
+				"basis": "Choose one or more — ... Remove a lore counter from target Saga you control. (Removing lore counters doesn't cause chapter abilities to trigger.) ... Put a lore counter on target Saga you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Saga"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"subtypes": [
+								"Saga"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "lore",
+						"amount": -1
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "lore",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Clash of the Eikons",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing all three modes",
+				"basis": "Choose one or more — ... Target creature you control fights target creature an opponent controls. ... Remove a lore counter from target Saga you control. (Removing lore counters doesn't cause chapter abilities to trigger.) ... Put a lore counter on target Saga you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					},
+					{
+						"object": {
+							"subtypes": [
+								"Saga"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"subtypes": [
+								"Saga"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					},
+					{
+						"do": "counters",
+						"on": "target:2",
+						"kind": "lore",
+						"amount": -1
+					},
+					{
+						"do": "counters",
+						"on": "target:3",
+						"kind": "lore",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,97 @@
+{
+	"card": "S.H.I.E.L.D. Spy Kit",
+	"generated": "2026-10-10",
+	"source": "8a50b47521f6f825dcf26f823513969f80411a0ba17af31407576e78392cae72",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "S.H.I.E.L.D. Spy Kit",
+		"registers": [
+			{
+				"basis": "Equipped creature gets +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"basis": "Whenever equipped creature attacks alone, untap it and scry 1. (Look at the top card of your library. You may put that card on the bottom.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "attached"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "controller:event:object",
+							"attacking": true
+						}
+					},
+					"atLeast": 1,
+					"atMost": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "untap",
+							"what": "event:object"
+						},
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Equip S.H.I.E.L.D. Spy Kit",
+				"basis": "Equip {1} ({1}: Attach to target creature you control. Equip only as a sorcery.)",
+				"source": {
+					"card": "S.H.I.E.L.D. Spy Kit",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{1}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,63 @@
+{
+	"card": "Chelonian Tackle",
+	"generated": "2026-10-10",
+	"source": "4ab8ca9a4abbb684632b6f6083755ab5e13facfaed38e4cbdd8e84edeae76de4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chelonian Tackle",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Chelonian Tackle",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Chelonian Tackle",
+				"basis": "Target creature you control gets +0/+10 until end of turn. Then it fights up to one target creature an opponent controls. (Each deals damage equal to its power to the other.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 0,
+							"toughness": 10
+						}
+					},
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

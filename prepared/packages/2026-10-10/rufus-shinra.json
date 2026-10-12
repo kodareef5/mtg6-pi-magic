@@ -1,0 +1,66 @@
+{
+	"card": "Rufus Shinra",
+	"generated": "2026-10-10",
+	"source": "1cc0f48b443973387cc55a676d23b8d975333408aac42815fd0c8242da3efa8a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rufus Shinra",
+		"registers": [
+			{
+				"basis": "Whenever Rufus Shinra attacks, if you don't control a creature named Darkstar, create Darkstar, a legendary 2/2 white and black Dog creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"name": "Darkstar"
+						}
+					},
+					"atMost": 0
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Darkstar",
+								"supertypes": [
+									"legendary"
+								],
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dog"
+								],
+								"colors": [
+									"W",
+									"B"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

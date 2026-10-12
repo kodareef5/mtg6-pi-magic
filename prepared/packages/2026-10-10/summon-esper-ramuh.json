@@ -1,0 +1,81 @@
+{
+	"card": "Summon: Esper Ramuh",
+	"generated": "2026-10-10",
+	"source": "bdf489da10b9462df2ff805993ebb28ef8f9e993073e324a07c3a3e662fc191e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: Esper Ramuh",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Judgment Bolt — This creature deals damage equal to the number of noncreature, nonland cards in your graveyard to target creature an opponent controls.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"token": false,
+									"not": {
+										"types": [
+											"creature",
+											"land"
+										]
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2,
+					3
+				],
+				"basis": "II, III — Wizards you control get +1/+0 until end of turn.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"subtypes": [
+									"Wizard"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

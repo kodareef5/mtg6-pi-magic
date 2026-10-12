@@ -18,7 +18,7 @@
 					],
 					"controller": "any"
 				},
-				"claim": "Create two flying Faeries, then trigger tapping an opposing creature.",
+				"claim": "Create two Faeries, then create the reflexive tap trigger.",
 				"basis": "Create two 1/1 blue Faerie creature tokens with flying. When you do, tap target creature an opponent controls.",
 				"timing": "spell",
 				"instructions": [
@@ -26,7 +26,7 @@
 						"do": "token",
 						"count": 2,
 						"spec": {
-							"name": "Faerie",
+							"name": "Faerie Token",
 							"types": [
 								"creature"
 							],

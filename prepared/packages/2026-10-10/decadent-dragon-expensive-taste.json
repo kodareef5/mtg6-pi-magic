@@ -1,0 +1,118 @@
+{
+	"card": "Decadent Dragon // Expensive Taste",
+	"generated": "2026-10-10",
+	"source": "4389d90280605f9435ed021e2f0c5f40e45cbfe59ba74f4e7a8cda24b19272a6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Decadent Dragon // Expensive Taste",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"trample"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever this creature attacks, create a Treasure token.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Decadent Dragon // Expensive Taste",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Expensive Taste",
+				"basis": "Exile the top two cards of target opponent's library face down. You may look at and play those cards for as long as they remain exiled.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 2,
+							"of": "target:0"
+						},
+						"to": "exile",
+						"faceDown": true,
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "look",
+						"who": "you",
+						"what": "bound:exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": "indefinite"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

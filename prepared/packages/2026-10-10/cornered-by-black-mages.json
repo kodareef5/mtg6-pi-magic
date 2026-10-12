@@ -1,0 +1,117 @@
+{
+	"card": "Cornered by Black Mages",
+	"generated": "2026-10-10",
+	"source": "53288f342be698354ebc51948c71f67dcd9fa19bb0565f372e8c71792073aa22",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cornered by Black Mages",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cornered by Black Mages",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cornered by Black Mages",
+				"basis": "Target opponent sacrifices a creature of their choice. ... Create a 0/1 black Wizard creature token with \"Whenever you cast a noncreature spell, this token deals 1 damage to each opponent.\"",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						},
+						"count": 1,
+						"as": "sacrifice"
+					},
+					{
+						"do": "move",
+						"what": "bound:sacrifice",
+						"to": "graveyard",
+						"reason": "sacrifice"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Wizard Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Wizard"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 0,
+							"toughness": 1,
+							"registers": [
+								{
+									"kind": "watch",
+									"basis": "Create a 0/1 black Wizard creature token with \"Whenever you cast a noncreature spell, this token deals 1 damage to each opponent.\"",
+									"event": {
+										"on": "cast",
+										"by": "you",
+										"of": {
+											"zones": [
+												"stack"
+											],
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"instant",
+												"kindred",
+												"land",
+												"planeswalker",
+												"sorcery"
+											],
+											"not": {
+												"types": [
+													"creature"
+												]
+											}
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "damage",
+												"from": "this",
+												"to": "opponent",
+												"amount": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

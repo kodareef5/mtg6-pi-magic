@@ -1,0 +1,51 @@
+{
+	"card": "Tunnel Tipster",
+	"generated": "2026-10-10",
+	"source": "f1ac1ce91d38104050ab247881d500143f3a538a28fc066fb4ac1d34e6262175",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tunnel Tipster",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your end step, if a face-down creature entered the battlefield under your control this turn, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "entered-face-down",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "mana",
+				"basis": "{T}: Add {G}.",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

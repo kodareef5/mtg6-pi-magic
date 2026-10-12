@@ -1,0 +1,97 @@
+{
+	"card": "Prowler, Clawed Thief",
+	"generated": "2026-10-10",
+	"source": "7c063bc20410fb92256da9e2d0ee5aa96a337f48c1237771061632afae0796d3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prowler, Clawed Thief",
+		"registers": [
+			{
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Villain you control enters, Prowler connives. (Draw a card, then discard a card. If you discarded a nonland card, put a +1/+1 counter on this creature.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Villain"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "controller:this",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "controller:this",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "controller:this"
+							},
+							"count": 1,
+							"as": "connive-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:connive-card",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded-card"
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"is": "bound:discarded-card",
+								"matches": {
+									"zones": [
+										"battlefield",
+										"graveyard",
+										"exile",
+										"stack",
+										"command"
+									],
+									"not": {
+										"types": [
+											"land"
+										]
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,68 @@
+{
+	"card": "Harnesser of Storms",
+	"generated": "2026-10-10",
+	"source": "a22bf0b663813d11cd977cdc8b2f39460b1af9d8c7bedc6d326c6a1e2830315d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Harnesser of Storms",
+		"registers": [
+			{
+				"basis": "Whenever you cast a noncreature or Otter spell, you may exile the top card of your library. Until end of turn, you may play that card. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"any": [
+							{
+								"not": {
+									"types": [
+										"creature"
+									]
+								}
+							},
+							{
+								"subtypes": [
+									"Otter"
+								]
+							}
+						]
+					}
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"may": true,
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": "end-of-turn",
+							"if": {
+								"bound": "exiled"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

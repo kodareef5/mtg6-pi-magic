@@ -1,0 +1,163 @@
+{
+	"card": "Tifa's Limit Break",
+	"generated": "2026-10-10",
+	"source": "853109b98392bcc82e12e5b7e721cd4a182c3546cf173340a57e14373cbf620a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tifa's Limit Break",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tifa's Limit Break",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Somersault tier",
+				"basis": "Tiered (Choose one additional cost.) ... • Somersault — {0} — Target creature gets +2/+2 until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "somersault",
+							"mana": "{0}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Tifa's Limit Break",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Meteor Strikes tier",
+				"basis": "Tiered (Choose one additional cost.) ... • Meteor Strikes — {2} — Double target creature's power and toughness until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "meteor-strikes",
+							"mana": "{2}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"power": "target:0"
+							},
+							"toughness": {
+								"toughness": "target:0"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Tifa's Limit Break",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Final Heaven tier",
+				"basis": "Tiered (Choose one additional cost.) ... • Final Heaven — {6}{G} — Triple target creature's power and toughness until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "final-heaven",
+							"mana": "{6}{G}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"sum": [
+									{
+										"power": "target:0"
+									},
+									{
+										"power": "target:0"
+									}
+								]
+							},
+							"toughness": {
+								"sum": [
+									{
+										"toughness": "target:0"
+									},
+									{
+										"toughness": "target:0"
+									}
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

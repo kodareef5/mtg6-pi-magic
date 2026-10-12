@@ -1,0 +1,63 @@
+{
+	"card": "Efflorescence",
+	"generated": "2026-10-10",
+	"source": "4cd2329bf393ada923e528af8254e2b1b9e2decaef686b567eee3ef4f81ece1b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Efflorescence",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Efflorescence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Efflorescence",
+				"basis": "Put two +1/+1 counters on target creature. ... Infusion — If you gained life this turn, that creature also gains trample and indestructible until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample",
+								"indestructible"
+							]
+						},
+						"if": {
+							"amount": {
+								"history": "life-gained",
+								"by": "you"
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

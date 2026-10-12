@@ -1,0 +1,91 @@
+{
+	"card": "Harbinger of the Tides",
+	"generated": "2026-10-10",
+	"source": "3ba37e1052598d01d4864a714a7829bea2a9f838fe5aae020f99c8e533b526f4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Harbinger of the Tides",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may return target tapped creature an opponent controls to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "opponent",
+								"tapped": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce",
+							"may": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Harbinger of the Tides",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Harbinger of the Tides with normal creature timing",
+				"basis": "You may cast this spell as though it had flash if you pay {2} more to cast it. (You may cast it any time you could cast an instant.)",
+				"timing": "spell",
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Harbinger of the Tides",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Harbinger of the Tides as though it had flash by paying an additional {2}",
+				"basis": "You may cast this spell as though it had flash if you pay {2} more to cast it. (You may cast it any time you could cast an instant.)",
+				"timing": "spell",
+				"speed": "instant",
+				"cost": {
+					"additional": [
+						{
+							"name": "flash",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

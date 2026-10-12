@@ -1,0 +1,112 @@
+{
+	"card": "Relive the Past",
+	"generated": "2026-10-10",
+	"source": "04832ac9d4b88b593f1607421980501f2a23a348a90c8f34e1f0960119e20a18",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Relive the Past",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Relive the Past",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return up to one artifact, one land, and one non-Aura enchantment as 5/5 Elemental creatures",
+				"basis": "Return up to one target artifact card, up to one target land card, and up to one target non-Aura enchantment card from your graveyard to the battlefield. They are 5/5 Elemental creatures in addition to their other types.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact"
+							]
+						},
+						"upTo": true
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							]
+						},
+						"upTo": true
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"enchantment"
+							],
+							"not": {
+								"subtypes": [
+									"Aura"
+								]
+							}
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"any": [
+								{
+									"is": "target:0"
+								},
+								{
+									"is": "target:1"
+								},
+								{
+									"is": "target:2"
+								}
+							]
+						},
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								]
+							},
+							"base": {
+								"power": 5,
+								"toughness": 5
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,87 @@
+{
+	"card": "Ride the Shoopuf",
+	"generated": "2026-10-10",
+	"source": "02da028375239b22c60273d05a02119aebd107736ca6b8853d591ec734183018",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ride the Shoopuf",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, put a +1/+1 counter on target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ride the Shoopuf",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Become a 7/7 Beast creature in addition to other types",
+				"basis": "{5}{G}{G}: This enchantment becomes a 7/7 Beast creature in addition to its other types.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}{G}{G}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Beast"
+								]
+							},
+							"base": {
+								"power": 7,
+								"toughness": 7
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

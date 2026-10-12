@@ -1,0 +1,154 @@
+{
+	"card": "Restoration Magic",
+	"generated": "2026-10-10",
+	"source": "0393dc18c3b3ff6f57d778dae9223242905b8201d20ba34137598cbc397c85a5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Restoration Magic",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Restoration Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Restoration Magic — Cure",
+				"basis": "Tiered (Choose one additional cost.) ... • Cure — {0} — Target permanent gains hexproof and indestructible until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "cure",
+							"mana": "{0}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"hexproof",
+								"indestructible"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Restoration Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Restoration Magic — Cura",
+				"basis": "Tiered (Choose one additional cost.) ... • Cura — {1} — Target permanent gains hexproof and indestructible until end of turn. You gain 3 life.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "cura",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"hexproof",
+								"indestructible"
+							]
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Restoration Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Restoration Magic — Curaga",
+				"basis": "Tiered (Choose one additional cost.) ... • Curaga — {3}{W} — Permanents you control gain hexproof and indestructible until end of turn. You gain 6 life.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "curaga",
+							"mana": "{3}{W}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"hexproof",
+								"indestructible"
+							]
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 6
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,79 @@
+{
+	"card": "Mole Man, Moloid Master",
+	"generated": "2026-10-10",
+	"source": "a94fc10ad5ae92487a3686a37a9210e676eb22c32154a6449fd570fa7f0257eb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mole Man, Moloid Master",
+		"registers": [
+			{
+				"basis": "You may play lands from your graveyard.",
+				"kind": "permit",
+				"landsFrom": [
+					"graveyard"
+				]
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, create a 1/1 green Minion creature token named Moloid with \"Whenever this token attacks, you may mill a card.\"",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Moloid",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Minion"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 1,
+								"toughness": 1,
+								"registers": [
+									{
+										"kind": "watch",
+										"basis": "Whenever this token attacks, you may mill a card.",
+										"event": {
+											"on": "attacks",
+											"of": {
+												"is": "this"
+											}
+										},
+										"may": true,
+										"effect": {
+											"instructions": [
+												{
+													"do": "mill",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

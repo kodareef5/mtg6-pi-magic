@@ -1,0 +1,72 @@
+{
+	"card": "Baxter Building",
+	"generated": "2026-10-10",
+	"source": "6fdfd9b74498b6a82da70557ea14641323d39254e0811c2d8433cbc8b59e4d57",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Baxter Building",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{4}, {T}: Add four mana in any combination of colors.",
+				"kind": "mana",
+				"cost": {
+					"mana": "{4}",
+					"tap": true
+				},
+				"any": 4,
+				"combination": true
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Baxter Building",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card",
+				"basis": "{4}, {T}: Draw a card. Activate only if you control a creature with toughness 4 or greater.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"toughness": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atLeast": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

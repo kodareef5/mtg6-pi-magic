@@ -1,0 +1,139 @@
+{
+	"card": "Krovod Haunch",
+	"generated": "2026-10-10",
+	"source": "9bdd2a0a61e41185f3c78203650cb34e940fd0b99640074a5fa9943c6d1e4a97",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Krovod Haunch",
+		"registers": [
+			{
+				"basis": "Equipped creature gets +2/+0.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2
+				}
+			},
+			{
+				"basis": "When this Equipment is put into a graveyard from the battlefield, you may pay {1}{W}. If you do, create two 1/1 white Dog creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					},
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{1}{W}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Dog Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dog"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Krovod Haunch",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Krovod Haunch to gain 3 life",
+				"basis": "{2}, {T}, Sacrifice this Equipment: You gain 3 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Krovod Haunch",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Krovod Haunch",
+				"basis": "Equip {2}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

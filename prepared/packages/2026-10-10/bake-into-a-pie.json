@@ -19,7 +19,7 @@
 					"controller": "any"
 				},
 				"claim": "Cast Bake into a Pie",
-				"basis": "Destroy target creature. Create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"basis": "Destroy target creature. Create a Food token.",
 				"timing": "spell",
 				"targets": [
 					{
@@ -39,7 +39,7 @@
 						"do": "token",
 						"count": 1,
 						"spec": {
-							"name": "Food",
+							"name": "Food Token",
 							"types": [
 								"artifact"
 							],
@@ -72,6 +72,8 @@
 				]
 			}
 		],
-		"assessed": true
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
 	}
 }

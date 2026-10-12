@@ -1,0 +1,106 @@
+{
+	"card": "Puppet Crafting",
+	"generated": "2026-10-10",
+	"source": "f9a9232d52203da265795699085af98763247903e651c10049292d87648dd2dc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Puppet Crafting",
+		"registers": [
+			{
+				"basis": "Enchanted permanent is a Construct creature with base power and toughness 5/5 in addition to its other types.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"types": {
+						"add": [
+							"creature"
+						]
+					},
+					"subtypes": {
+						"add": [
+							"Construct"
+						]
+					},
+					"base": {
+						"power": 5,
+						"toughness": 5
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Puppet Crafting",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Puppet Crafting enchanting an artifact or non-Aura enchantment",
+				"basis": "Enchant artifact or non-Aura enchantment",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"artifact"
+									]
+								},
+								{
+									"types": [
+										"enchantment"
+									],
+									"not": {
+										"subtypes": [
+											"Aura"
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Puppet Crafting",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Puppet Crafting from your graveyard to your hand",
+				"basis": "{4}{G}: Return this card from your graveyard to your hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{G}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

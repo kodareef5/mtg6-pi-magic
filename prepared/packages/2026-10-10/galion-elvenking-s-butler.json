@@ -1,0 +1,56 @@
+{
+	"card": "Galion, Elvenking's Butler",
+	"generated": "2026-10-10",
+	"source": "efdd4cf401ce7d2ded1b4d233237c5ae656075034eef3799cea721001bd911e3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Galion, Elvenking's Butler",
+		"registers": [
+			{
+				"basis": "Whenever Galion attacks, choose up to one other target creature you control. Its base power and toughness become equal to Galion's power and toughness until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"base": {
+									"power": {
+										"power": "this"
+									},
+									"toughness": {
+										"toughness": "this"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

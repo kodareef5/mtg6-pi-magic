@@ -1,0 +1,93 @@
+{
+	"card": "Colossus of the Blood Age",
+	"generated": "2026-10-10",
+	"source": "9b4bb3d5ce44327de20aba03f9b9c6c8edd958d0e893f1bc464672c9786f205e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Colossus of the Blood Age",
+		"registers": [
+			{
+				"basis": "When this creature enters, it deals 3 damage to each opponent and you gain 3 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 3,
+							"from": "this"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, discard any number of cards, then draw that many cards plus one.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": {
+								"count": {
+									"zones": [
+										"hand"
+									],
+									"controller": "you"
+								}
+							},
+							"upTo": true,
+							"as": "cards"
+						},
+						{
+							"do": "move",
+							"what": "bound:cards",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"sum": [
+									{
+										"bound": "discarded"
+									},
+									1
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

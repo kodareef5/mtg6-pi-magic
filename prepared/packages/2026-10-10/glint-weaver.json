@@ -1,0 +1,80 @@
+{
+	"card": "Glint Weaver",
+	"generated": "2026-10-10",
+	"source": "929668091f9c42d19bc83dc81e5c913e448272cf4d2915a15444a3e0cca9cdcc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Glint Weaver",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, distribute three +1/+1 counters among one, two, or three target creatures, then you gain life equal to the greatest toughness among creatures you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"count": 3,
+							"atLeast": 1,
+							"divide": 3
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": {
+								"divided": 0
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"aggregate": "max",
+								"of": {
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								},
+								"value": "toughness"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

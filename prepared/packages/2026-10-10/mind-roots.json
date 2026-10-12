@@ -1,0 +1,79 @@
+{
+	"card": "Mind Roots",
+	"generated": "2026-10-10",
+	"source": "7bde1416faebb1f497de14f6610bede5ab7e74816a7e5eb370cc1fdcef0db1c8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mind Roots",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Mind Roots",
+				"basis": "Target player discards two cards. Put up to one land card discarded this way onto the battlefield tapped under your control.",
+				"source": {
+					"card": "Mind Roots",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "target:0"
+						},
+						"count": 2,
+						"as": "discards"
+					},
+					{
+						"do": "move",
+						"what": "bound:discards",
+						"to": "graveyard",
+						"reason": "discard",
+						"as": "discarded"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard",
+								"exile"
+							],
+							"is": "bound:discarded",
+							"types": [
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

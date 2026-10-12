@@ -1,0 +1,66 @@
+{
+	"card": "Alien Invasion",
+	"generated": "2026-10-10",
+	"source": "270332a47ee4b5a131b2a208e429c7b4f3c38656743bf9f7dcfaf26f4928c201",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Alien Invasion",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "At the beginning of combat on your turn, create a 1/1 red Alien creature token with haste and \"This token attacks each combat if able.\" Put a +1/+1 counter on it for each invasion counter on this enchantment, then put an invasion counter on this enchantment.",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Alien Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Alien"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"haste",
+									"attacks each combat if able"
+								]
+							},
+							"as": "alien"
+						},
+						{
+							"do": "counters",
+							"on": "bound:alien",
+							"kind": "+1/+1",
+							"amount": {
+								"counters": "invasion",
+								"on": "this"
+							}
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "invasion",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

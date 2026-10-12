@@ -13,11 +13,11 @@
 				"affects": {
 					"is": "this",
 					"zones": [
-						"battlefield",
-						"stack",
-						"hand",
 						"library",
+						"hand",
+						"battlefield",
 						"graveyard",
+						"stack",
 						"exile",
 						"command",
 						"outside"
@@ -71,7 +71,7 @@
 								}
 							},
 							"spec": {
-								"name": "Spirit",
+								"name": "Spirit Token",
 								"types": [
 									"creature"
 								],

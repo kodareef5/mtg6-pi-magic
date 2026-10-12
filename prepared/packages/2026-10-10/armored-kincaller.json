@@ -1,0 +1,73 @@
+{
+	"card": "Armored Kincaller",
+	"generated": "2026-10-10",
+	"source": "24c27baf22c12ba7a12515a92037f9aebd0b91700c8b1a348cb29f6473325b3a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Armored Kincaller",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may reveal a Dinosaur card from your hand. If you do or if you control another Dinosaur, you gain 3 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you",
+								"subtypes": [
+									"Dinosaur"
+								]
+							},
+							"count": 1,
+							"reveal": true,
+							"may": true,
+							"as": "revealed-dinosaur"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3,
+							"if": {
+								"any": [
+									{
+										"bound": "revealed-dinosaur"
+									},
+									{
+										"amount": {
+											"count": {
+												"zones": [
+													"battlefield"
+												],
+												"controller": "you",
+												"subtypes": [
+													"Dinosaur"
+												],
+												"other": true
+											}
+										},
+										"atLeast": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

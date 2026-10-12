@@ -1,0 +1,112 @@
+{
+	"card": "Divining Duelist",
+	"generated": "2026-10-10",
+	"source": "e3db1c3feaebdcc81af4b805f95d9842df7fe2b2d89f0f1453f2f9bc06e07c3c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Divining Duelist",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield",
+						"library",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, choose one —\n• Tap target creature.\n• Untap target creature.\n• Draw a card, then discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "tap",
+									"what": "target:0"
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "untap",
+									"what": "target:0"
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "draw",
+									"who": "you",
+									"count": 1
+								},
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"hand"
+										],
+										"controller": "you"
+									},
+									"count": 1,
+									"as": "discard"
+								},
+								{
+									"do": "move",
+									"what": "bound:discard",
+									"to": "graveyard",
+									"reason": "discard"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

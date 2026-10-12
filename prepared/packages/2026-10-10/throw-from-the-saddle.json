@@ -1,0 +1,90 @@
+{
+	"card": "Throw from the Saddle",
+	"generated": "2026-10-10",
+	"source": "0f5677ab8235e6106d2ba0c321439bee040605bfda8ccc50e9218d05351aa33a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Throw from the Saddle",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Throw from the Saddle",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Throw from the Saddle",
+				"basis": "Target creature you control gets +1/+1 until end of turn. Put a +1/+1 counter on it instead if it's a Mount. Then it deals damage equal to its power to target creature you don't control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						},
+						"if": {
+							"not": {
+								"is": "target:0",
+								"matches": {
+									"subtypes": [
+										"Mount"
+									]
+								}
+							}
+						}
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"subtypes": [
+									"Mount"
+								]
+							}
+						}
+					},
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

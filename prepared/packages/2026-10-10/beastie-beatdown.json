@@ -1,0 +1,83 @@
+{
+	"card": "Beastie Beatdown",
+	"generated": "2026-10-10",
+	"source": "fc113d81993924ecce3d8dd3d43a3d7e0d9346ae9d01cbf07a6146d5a4d1c477",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beastie Beatdown",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Beastie Beatdown",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Beastie Beatdown",
+				"basis": "Choose target creature you control and target creature an opponent controls.\nDelirium — If there are four or more card types among cards in your graveyard, put two +1/+1 counters on the creature you control.\nThe creature you control deals damage equal to its power to the creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2,
+						"if": {
+							"amount": {
+								"distinct": "card-types",
+								"among": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"token": false
+								}
+							},
+							"atLeast": 4
+						}
+					},
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

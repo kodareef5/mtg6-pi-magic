@@ -1,0 +1,74 @@
+{
+	"card": "Undying Malice",
+	"generated": "2026-10-10",
+	"source": "01b892c0dc63e55523f584d4fc00136614831315678f52ece611c020e0ded497",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Undying Malice",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Undying Malice",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Undying Malice",
+				"basis": "Until end of turn, target creature gains \"When this creature dies, return it to the battlefield tapped under its owner's control with a +1/+1 counter on it.\"",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"registers": [
+								{
+									"kind": "watch",
+									"basis": "Until end of turn, target creature gains \"When this creature dies, return it to the battlefield tapped under its owner's control with a +1/+1 counter on it.\"",
+									"event": {
+										"on": "dies",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": "event:object",
+												"to": "battlefield",
+												"tapped": true,
+												"controller": "owner:event:object",
+												"counters": {
+													"+1/+1": 1
+												},
+												"reason": "resolve"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

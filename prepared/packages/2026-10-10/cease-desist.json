@@ -1,0 +1,139 @@
+{
+	"card": "Cease // Desist",
+	"generated": "2026-10-10",
+	"source": "4ce6a9240892fd82db03531eb3e4561c1755ec7f2e3e7ed74afb06d8117adfa1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cease // Desist",
+		"registers": [],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Cease // Desist",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cease selecting cards from your graveyard",
+				"basis": "Exile up to two target cards from a single graveyard. Target player gains 2 life and draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you"
+						},
+						"count": 2,
+						"upTo": true
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "life",
+						"who": "target:1",
+						"amount": 2
+					},
+					{
+						"do": "draw",
+						"who": "target:1",
+						"count": 1
+					}
+				]
+			},
+			{
+				"face": 0,
+				"source": {
+					"card": "Cease // Desist",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cease selecting cards from your opponent's graveyard",
+				"basis": "Exile up to two target cards from a single graveyard. Target player gains 2 life and draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "opponent"
+						},
+						"count": 2,
+						"upTo": true
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "life",
+						"who": "target:1",
+						"amount": 2
+					},
+					{
+						"do": "draw",
+						"who": "target:1",
+						"count": 1
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Cease // Desist",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Desist",
+				"basis": "Destroy all artifacts and enchantments.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

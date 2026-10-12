@@ -1,0 +1,53 @@
+{
+	"card": "Sheriff of Safe Passage",
+	"generated": "2026-10-10",
+	"source": "e3eb69f886a2ee3db8216fd4357e884826b9a2e8791b58a133f910ec8a208d68",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sheriff of Safe Passage",
+		"registers": [
+			{
+				"basis": "This creature enters with a +1/+1 counter on it plus an additional +1/+1 counter on it for each other creature you control.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": {
+						"sum": [
+							1,
+							{
+								"count": {
+									"types": [
+										"creature"
+									],
+									"controller": "you",
+									"other": true
+								}
+							}
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sheriff of Safe Passage",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Sheriff of Safe Passage",
+				"basis": "Plot {1}{W} (You may pay {1}{W} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{1}{W}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

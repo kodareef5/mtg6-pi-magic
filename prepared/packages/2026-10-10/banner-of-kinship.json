@@ -1,0 +1,66 @@
+{
+	"card": "Banner of Kinship",
+	"generated": "2026-10-10",
+	"source": "affbbb7c6735b5566f8a8173821907e742d19c5cb41e95c61af9a70e9011b675",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Banner of Kinship",
+		"registers": [
+			{
+				"basis": "As this artifact enters, choose a creature type. This artifact enters with a fellowship counter on it for each creature you control of the chosen type.",
+				"kind": "enters",
+				"choose": {
+					"as": "creatureType",
+					"from": "creature-type"
+				},
+				"counters": {
+					"fellowship": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"subtypes": {
+								"chosen": "creatureType"
+							}
+						}
+					}
+				}
+			},
+			{
+				"basis": "Creatures you control of the chosen type get +1/+1 for each fellowship counter on this artifact.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"subtypes": {
+						"chosen": "creatureType"
+					}
+				},
+				"change": {
+					"power": {
+						"counters": "fellowship",
+						"on": "this"
+					},
+					"toughness": {
+						"counters": "fellowship",
+						"on": "this"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

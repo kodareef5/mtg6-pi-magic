@@ -1,0 +1,60 @@
+{
+	"card": "Electro's Bolt",
+	"generated": "2026-10-10",
+	"source": "ac739441cdb3017b774fe95e740e55be0ba0d2bf49a8b90a4233e424ca890c55",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Electro's Bolt",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Mayhem {1}{R} (You may cast this card from your graveyard for {1}{R} if you discarded it this turn. Timing rules still apply.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{1}{R}",
+					"if": {
+						"discardedThisTurn": "this",
+						"by": "you"
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Electro's Bolt",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Electro's Bolt at its printed cost or through an earned casting permission, including conditional mayhem.",
+				"basis": "Electro's Bolt deals 4 damage to target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

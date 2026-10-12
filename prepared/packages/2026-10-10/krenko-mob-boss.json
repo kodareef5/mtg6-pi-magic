@@ -9,6 +9,8 @@
 		"registers": [],
 		"procedures": [
 			{
+				"claim": "Create Goblin tokens equal to the number of Goblins you control",
+				"basis": "{T}: Create X 1/1 red Goblin creature tokens, where X is the number of Goblins you control.",
 				"source": {
 					"card": "Krenko, Mob Boss",
 					"zones": [
@@ -16,8 +18,6 @@
 					],
 					"controller": "self"
 				},
-				"claim": "Create a Goblin token for each Goblin you control.",
-				"basis": "{T}: Create X 1/1 red Goblin creature tokens, where X is the number of Goblins you control.",
 				"timing": "stack",
 				"cost": {
 					"tap": true
@@ -27,14 +27,17 @@
 						"do": "token",
 						"count": {
 							"count": {
-								"controller": "you",
+								"zones": [
+									"battlefield"
+								],
 								"subtypes": [
 									"Goblin"
-								]
+								],
+								"controller": "you"
 							}
 						},
 						"spec": {
-							"name": "Goblin",
+							"name": "Goblin Token",
 							"types": [
 								"creature"
 							],

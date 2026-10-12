@@ -1,0 +1,69 @@
+{
+	"card": "Flourishing Grapple",
+	"generated": "2026-10-10",
+	"source": "3cc804efc7411bdcd095a23e36e02e6e4c3b1cc1d26d7fefbcc2f0675d1db204",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Flourishing Grapple",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Flourishing Grapple",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Flourishing Grapple",
+				"basis": "Target creature or planeswalker an opponent controls that's red or white loses all abilities until end of turn. Target creature you control deals damage equal to its power to that permanent.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"controller": "opponent",
+							"colors": [
+								"R",
+								"W"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"loseAbilities": true
+						}
+					},
+					{
+						"do": "damage",
+						"from": "target:1",
+						"to": "target:0",
+						"amount": {
+							"power": "target:1"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

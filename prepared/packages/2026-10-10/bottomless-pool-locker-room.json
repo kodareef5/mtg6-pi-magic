@@ -1,0 +1,75 @@
+{
+	"card": "Bottomless Pool // Locker Room",
+	"generated": "2026-10-10",
+	"source": "981fee3f92a83c6ba4c1c8b76c3bb2887c56f2b0796c174821c626af2db09446",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bottomless Pool // Locker Room",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When you unlock this door, return up to one target creature to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever one or more creatures you control deal combat damage to a player, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					},
+					"player": true,
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		]
+	}
+}

@@ -1,0 +1,66 @@
+{
+	"card": "Scales of Shale",
+	"generated": "2026-10-10",
+	"source": "977b31fe3f27bdf48bc6a6537d43cb749f227e489c110127dd39dd3020baa3cc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scales of Shale",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Scales of Shale",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Scales of Shale",
+				"basis": "Affinity for Lizards (This spell costs {1} less to cast for each Lizard you control.) ... Target creature gets +2/+0 and gains lifelink and indestructible until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Lizard"
+							]
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"words": [
+								"lifelink",
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

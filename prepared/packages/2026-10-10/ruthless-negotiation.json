@@ -1,0 +1,75 @@
+{
+	"card": "Ruthless Negotiation",
+	"generated": "2026-10-10",
+	"source": "a9005f31556ec844fb8a1efb974194ad6fe06971433b93ee401ddaf925709c30",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ruthless Negotiation",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {4}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{4}{B}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ruthless Negotiation",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ruthless Negotiation, including through its flashback permission",
+				"basis": "Target opponent exiles a card from their hand. If this spell was cast from a graveyard, draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "target:0"
+						},
+						"count": 1,
+						"as": "chosen-card"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen-card",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"cast": "this",
+							"from": "graveyard"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

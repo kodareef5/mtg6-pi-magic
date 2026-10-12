@@ -1,0 +1,83 @@
+{
+	"card": "Ancient Vendetta",
+	"generated": "2026-10-10",
+	"source": "e9a6879a858a3859f211780cdc13c3a696db7412a9979723e13c68e094a7a095",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ancient Vendetta",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ancient Vendetta",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ancient Vendetta",
+				"basis": "Choose a card name. Search target opponent's graveyard, hand, and library for up to four cards with that name and exile them. Then that player shuffles.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "name-card",
+						"who": "you",
+						"on": "this",
+						"key": "named"
+					},
+					{
+						"do": "look",
+						"who": "you",
+						"every": {
+							"zones": [
+								"hand",
+								"library"
+							],
+							"owner": "target:0"
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard",
+								"hand",
+								"library"
+							],
+							"owner": "target:0",
+							"name": {
+								"chosen": "named"
+							},
+							"token": false
+						},
+						"count": 4,
+						"upTo": true,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "shuffle",
+						"who": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

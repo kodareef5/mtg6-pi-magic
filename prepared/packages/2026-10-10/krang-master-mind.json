@@ -1,0 +1,103 @@
+{
+	"card": "Krang, Master Mind",
+	"generated": "2026-10-10",
+	"source": "186241a8926a1b84b7b77f085aa1f094096517829832f34bd6c33b0f6176a6c8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Krang, Master Mind",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Krang enters, if you have fewer than four cards in hand, draw cards equal to the difference.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						}
+					},
+					"atMost": 3
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"sum": [
+									4,
+									{
+										"negate": {
+											"count": {
+												"zones": [
+													"hand"
+												],
+												"controller": "you"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Krang gets +1/+0 for each other artifact you control.",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						}
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Krang, Master Mind",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Krang with affinity for artifacts",
+				"basis": "Affinity for artifacts (This spell costs {1} less to cast for each artifact you control.)",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

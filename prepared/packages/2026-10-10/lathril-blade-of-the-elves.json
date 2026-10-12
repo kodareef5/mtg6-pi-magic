@@ -1,0 +1,108 @@
+{
+	"card": "Lathril, Blade of the Elves",
+	"generated": "2026-10-10",
+	"source": "69d387c9e94ead65f12b94fbe9861abff92a3ca339a9f6dca2b9987d3f98b2af",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lathril, Blade of the Elves",
+		"registers": [
+			{
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Lathril deals combat damage to a player, create that many 1/1 green Elf Warrior creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"event": "amount"
+							},
+							"spec": {
+								"name": "Elf Warrior Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Elf",
+									"Warrior"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lathril, Blade of the Elves",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap Lathril and ten other untapped Elves to drain each opponent",
+				"basis": "{T}, Tap ten untapped Elves you control: Each opponent loses 10 life and you gain 10 life.",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"source": true,
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Elf"
+							],
+							"tapped": false
+						},
+						"count": 10
+					}
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -10
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 10
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

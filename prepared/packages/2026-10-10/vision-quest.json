@@ -1,0 +1,309 @@
+{
+	"card": "Vision Quest",
+	"generated": "2026-10-10",
+	"source": "b89cc7d07d74742483ba5664b83a866eb7e6f95e1b2a2a3df344df643a6adbbf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vision Quest",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vision Quest",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Vision Quest with X, choosing library, graveyard, or both during resolution",
+				"basis": "Search your library and/or graveyard for an artifact creature card with mana value X or less and put it onto the battlefield with X additional +1/+1 counters on it. If X is 4 or greater, it gains haste until end of turn. If you search your library this way, shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "searched-both",
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library",
+										"graveyard"
+									],
+									"owner": "you",
+									"token": false,
+									"all": [
+										{
+											"types": [
+												"artifact"
+											]
+										},
+										{
+											"types": [
+												"creature"
+											]
+										}
+									],
+									"manaValue": {
+										"atMost": {
+											"x": true
+										}
+									}
+								},
+								"count": 1,
+								"as": "found-both-required",
+								"if": {
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"all": [
+												{
+													"types": [
+														"artifact"
+													]
+												},
+												{
+													"types": [
+														"creature"
+													]
+												}
+											],
+											"manaValue": {
+												"atMost": {
+													"x": true
+												}
+											}
+										}
+									},
+									"atLeast": 1
+								}
+							},
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library",
+										"graveyard"
+									],
+									"owner": "you",
+									"token": false,
+									"all": [
+										{
+											"types": [
+												"artifact"
+											]
+										},
+										{
+											"types": [
+												"creature"
+											]
+										}
+									],
+									"manaValue": {
+										"atMost": {
+											"x": true
+										}
+									}
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "found-both-optional",
+								"if": {
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"token": false,
+											"all": [
+												{
+													"types": [
+														"artifact"
+													]
+												},
+												{
+													"types": [
+														"creature"
+													]
+												}
+											],
+											"manaValue": {
+												"atMost": {
+													"x": true
+												}
+											}
+										}
+									},
+									"atMost": 0
+								}
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"if": {
+							"not": {
+								"bound": "searched-both"
+							}
+						},
+						"as": "searched-library",
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "you",
+									"token": false,
+									"all": [
+										{
+											"types": [
+												"artifact"
+											]
+										},
+										{
+											"types": [
+												"creature"
+											]
+										}
+									],
+									"manaValue": {
+										"atMost": {
+											"x": true
+										}
+									}
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "found-library"
+							}
+						]
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"all": [
+								{
+									"types": [
+										"artifact"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									]
+								}
+							],
+							"manaValue": {
+								"atMost": {
+									"x": true
+								}
+							}
+						},
+						"count": 1,
+						"as": "found-graveyard",
+						"if": {
+							"not": {
+								"any": [
+									{
+										"bound": "searched-both"
+									},
+									{
+										"bound": "searched-library"
+									}
+								]
+							}
+						}
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library",
+								"graveyard"
+							],
+							"any": [
+								{
+									"is": "bound:found-both-required"
+								},
+								{
+									"is": "bound:found-both-optional"
+								},
+								{
+									"is": "bound:found-library"
+								},
+								{
+									"is": "bound:found-graveyard"
+								}
+							]
+						},
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"+1/+1": {
+								"x": true
+							}
+						},
+						"reason": "resolve",
+						"as": "creature"
+					},
+					{
+						"do": "modify",
+						"what": "bound:creature",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						},
+						"if": {
+							"amount": {
+								"x": true
+							},
+							"atLeast": 4
+						}
+					},
+					{
+						"do": "shuffle",
+						"who": "you",
+						"if": {
+							"any": [
+								{
+									"bound": "searched-both"
+								},
+								{
+									"bound": "searched-library"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

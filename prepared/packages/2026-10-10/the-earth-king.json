@@ -1,0 +1,101 @@
+{
+	"card": "The Earth King",
+	"generated": "2026-10-10",
+	"source": "030afc7950e18153b7c6cf4c5891a81917fc68a3a7312c18a913c700e451cea3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Earth King",
+		"registers": [
+			{
+				"basis": "When The Earth King enters, create a 4/4 green Bear creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Bear Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Bear"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 4,
+								"toughness": 4
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever one or more creatures you control with power 4 or greater attack, search your library for up to that many basic land cards, put them onto the battlefield tapped, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"power": {
+							"atLeast": 4
+						}
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": {
+								"event": "amount"
+							},
+							"upTo": true,
+							"as": "lands"
+						},
+						{
+							"do": "move",
+							"what": "bound:lands",
+							"to": "battlefield",
+							"controller": "you",
+							"tapped": true,
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,82 @@
+{
+	"card": "Reroute Systems",
+	"generated": "2026-10-10",
+	"source": "2a525a2dd97be5d961b9ca4de9fee929677f691f0392079555226fca4bd3565e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Reroute Systems",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Reroute Systems",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Reroute Systems: grant indestructible",
+				"basis": "Choose one — ... Target artifact or creature gains indestructible until end of turn. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Reroute Systems",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Reroute Systems: deal 2 damage",
+				"basis": "Choose one — ... Reroute Systems deals 2 damage to target tapped creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"tapped": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

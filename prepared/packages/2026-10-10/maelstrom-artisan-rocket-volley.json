@@ -1,0 +1,72 @@
+{
+	"card": "Maelstrom Artisan // Rocket Volley",
+	"generated": "2026-10-10",
+	"source": "08a4581f21f163d30a2917a44d661b6d89758be50d1ac2010166fd2296c4ac8a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Maelstrom Artisan // Rocket Volley",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Maelstrom Artisan // Rocket Volley",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Rocket Volley copy",
+				"basis": "Destroy target nonbasic land.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							],
+							"not": {
+								"supertypes": [
+									"basic"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

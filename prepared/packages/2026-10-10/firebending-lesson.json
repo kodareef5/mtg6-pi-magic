@@ -1,0 +1,82 @@
+{
+	"card": "Firebending Lesson",
+	"generated": "2026-10-10",
+	"source": "7f999d961d5eac141bb7ce564073666ec1d00662910f9b6dbaafd2f8e831b066",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Firebending Lesson",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Firebending Lesson",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Firebending Lesson without kicker",
+				"basis": "Firebending Lesson deals 2 damage to target creature. If this spell was kicked, it deals 5 damage to that creature instead.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Firebending Lesson",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Firebending Lesson kicked",
+				"basis": "Kicker {4} (You may pay an additional {4} as you cast this spell.) ... Firebending Lesson deals 2 damage to target creature. If this spell was kicked, it deals 5 damage to that creature instead.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "kicker",
+							"mana": "{4}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 5
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

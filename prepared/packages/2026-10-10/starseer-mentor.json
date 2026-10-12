@@ -1,0 +1,95 @@
+{
+	"card": "Starseer Mentor",
+	"generated": "2026-10-10",
+	"source": "c9c1944480fc98b0940a21f47ab5f316abbddf90f00b29aaedc36faebf604068",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Starseer Mentor",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your end step, if you gained or lost life this turn, target opponent loses 3 life unless they sacrifice a nonland permanent of their choice or discard a card.",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"any": [
+						{
+							"amount": {
+								"history": "life-gained",
+								"by": "you"
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"history": "life-lost",
+								"by": "you"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "target:0",
+							"count": 1,
+							"actions": [
+								{
+									"sacrifice": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "target:0",
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								},
+								{
+									"discard": true
+								},
+								{
+									"loseLife": 3
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

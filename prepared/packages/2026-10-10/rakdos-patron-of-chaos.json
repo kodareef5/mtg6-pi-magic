@@ -1,0 +1,84 @@
+{
+	"card": "Rakdos, Patron of Chaos",
+	"generated": "2026-10-10",
+	"source": "c15947d1cd07210ad9dbe984117d26519defb21b7728067c0d2d162988d31285",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rakdos, Patron of Chaos",
+		"registers": [
+			{
+				"basis": "Flying, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, target opponent may sacrifice two nonland, nontoken permanents of their choice. If they don't, you draw two cards.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "target:0",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "target:0",
+										"not": {
+											"types": [
+												"land"
+											]
+										},
+										"token": false
+									},
+									"count": 2
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"not": {
+									"bound": "sacrificed"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,84 @@
+{
+	"card": "Felonious Rage",
+	"generated": "2026-10-10",
+	"source": "58a59c6b2df3c4fc05ff7ae26ce66f68539b1036249ebd968c950a39b713b8d6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Felonious Rage",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Felonious Rage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Felonious Rage",
+				"basis": "Target creature you control gets +2/+0 and gains haste until end of turn. When that creature dies this turn, create a 2/2 white and blue Detective creature token.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "dies",
+							"of": {
+								"is": "target:0"
+							}
+						},
+						"until": "end-of-turn",
+						"effect": {
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Detective Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Detective"
+										],
+										"colors": [
+											"W",
+											"U"
+										],
+										"power": 2,
+										"toughness": 2
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

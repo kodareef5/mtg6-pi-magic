@@ -1,0 +1,67 @@
+{
+	"card": "Creakwood Safewright",
+	"generated": "2026-10-10",
+	"source": "5a07d7b4117c86bfc1ae8a28af52b81cc9e38c4d3885d0bf7dda5e41586db1ca",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Creakwood Safewright",
+		"registers": [
+			{
+				"basis": "This creature enters with three -1/-1 counters on it.",
+				"kind": "enters",
+				"counters": {
+					"-1/-1": 3
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, if there is an Elf card in your graveyard and this creature has a -1/-1 counter on it, remove a -1/-1 counter from this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"subtypes": [
+										"Elf"
+									],
+									"token": false
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"counters": "-1/-1",
+								"on": "this"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "-1/-1",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

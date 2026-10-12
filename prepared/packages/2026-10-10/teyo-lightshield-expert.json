@@ -1,0 +1,97 @@
+{
+	"card": "Teyo, Lightshield Expert",
+	"generated": "2026-10-10",
+	"source": "255c9f7e84940e9fca4a2ac2ce2e1975d1885b940fefe3d47bd60156fd98bbb2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Teyo, Lightshield Expert",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When Teyo enters, target permanent you control gains hexproof until end of turn. Put a +1/+1 counter on it if it's a creature. Put a loyalty counter on it if it's a planeswalker. (It can't be the target of spells or abilities your opponents control.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"hexproof"
+								]
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"is": "target:0",
+								"matches": {
+									"types": [
+										"creature"
+									]
+								}
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "loyalty",
+							"amount": 1,
+							"if": {
+								"is": "target:0",
+								"matches": {
+									"types": [
+										"planeswalker"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

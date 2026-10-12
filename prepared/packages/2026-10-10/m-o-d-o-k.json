@@ -1,0 +1,118 @@
+{
+	"card": "M.O.D.O.K.",
+	"generated": "2026-10-10",
+	"source": "3851d0976a0ab44d6f1ea30a1c398e5d432736a5d910786c5e684210ae1d2292",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "M.O.D.O.K.",
+		"registers": [
+			{
+				"basis": "Flying, lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "Designed Only for Killing — Creatures your opponents control get -1/-1.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "opponent"
+				},
+				"change": {
+					"power": -1,
+					"toughness": -1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "M.O.D.O.K.",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Pay 3 life for M.O.D.O.K. to connive during your turn",
+				"basis": "Mental Organism — Pay 3 life: M.O.D.O.K. connives. Activate only during your turn. (Draw a card, then discard a card. If you discarded a nonland card, put a +1/+1 counter on this creature.)",
+				"timing": "stack",
+				"cost": {
+					"life": 3
+				},
+				"if": {
+					"turn": "self"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "controller:this",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "controller:this",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "controller:this"
+						},
+						"count": 1,
+						"as": "card"
+					},
+					{
+						"do": "move",
+						"what": "bound:card",
+						"to": "graveyard",
+						"reason": "discard",
+						"as": "discarded"
+					},
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1,
+						"if": {
+							"all": [
+								{
+									"bound": "discarded"
+								},
+								{
+									"is": "bound:card",
+									"matches": {
+										"zones": [
+											"hand"
+										],
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									},
+									"lastKnown": true
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

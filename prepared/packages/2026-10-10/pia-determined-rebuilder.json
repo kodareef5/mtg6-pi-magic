@@ -1,0 +1,91 @@
+{
+	"card": "Pia, Determined Rebuilder",
+	"generated": "2026-10-10",
+	"source": "8e1c8caa5d82055e0b76b81e28683df47d56831a5d388900c0746fa72411f145",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pia, Determined Rebuilder",
+		"registers": [
+			{
+				"basis": "When Pia enters, create a 1/1 colorless Thopter artifact creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Thopter Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Thopter"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pia, Determined Rebuilder",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give target creature +X/+0 until end of turn, counting artifacts controlled on resolution.",
+				"basis": "{5}{R}: Target creature gets +X/+0 until end of turn, where X is the number of artifacts you control.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}{R}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"count": {
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

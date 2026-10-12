@@ -1,0 +1,169 @@
+{
+	"card": "Clay-Fired Bricks // Cosmium Kiln",
+	"generated": "2026-10-10",
+	"source": "10f4e09daa284ad507262426c5056a494d5abae7eaacfe7b7973695dd3c2b4da",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Clay-Fired Bricks // Cosmium Kiln",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When this artifact enters, search your library for a basic Plains card, reveal it, put it into your hand, then shuffle. You gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"subtypes": [
+									"Plains"
+								],
+								"token": false
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "plains"
+						},
+						{
+							"do": "move",
+							"what": "bound:plains",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When this artifact enters, create two 1/1 colorless Gnome artifact creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Gnome Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Gnome"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Creatures you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Clay-Fired Bricks // Cosmium Kiln",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Craft Clay-Fired Bricks with an artifact",
+				"basis": "Craft with artifact {5}{W}{W} ({5}{W}{W}, Exile this artifact, Exile another artifact you control or an artifact card from your graveyard: Return this card transformed under its owner's control. Craft only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{5}{W}{W}",
+					"exile": {
+						"source": true,
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"any": [
+								{
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"not": {
+										"is": "this"
+									}
+								},
+								{
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"token": false
+								}
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "bound:cost-source",
+						"to": "battlefield",
+						"face": 1,
+						"controller": "owner:bound:cost-source",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

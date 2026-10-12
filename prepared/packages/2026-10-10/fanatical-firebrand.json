@@ -1,0 +1,68 @@
+{
+	"card": "Fanatical Firebrand",
+	"generated": "2026-10-10",
+	"source": "2b9ffc7de6dad6a0d5b59123789fb5f06b550b0971176ff5dfca0a631acfb23d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fanatical Firebrand",
+		"registers": [
+			{
+				"basis": "Haste (This creature can attack and {T} as soon as it comes under your control.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fanatical Firebrand",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Fanatical Firebrand to deal 1 damage to any target.",
+				"basis": "{T}, Sacrifice this creature: It deals 1 damage to any target.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 1,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

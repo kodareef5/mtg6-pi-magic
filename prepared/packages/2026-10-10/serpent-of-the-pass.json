@@ -1,0 +1,95 @@
+{
+	"card": "Serpent of the Pass",
+	"generated": "2026-10-10",
+	"source": "f53f902984fb6a29f797766bd79b112baaff10b2c6b334843cfeb38d6cd22310",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Serpent of the Pass",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Serpent of the Pass",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Serpent of the Pass with its graveyard cost reduction",
+				"basis": "This spell costs {1} less to cast for each noncreature, nonland card in your graveyard.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"types": [
+									"creature",
+									"land"
+								]
+							}
+						}
+					}
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Serpent of the Pass",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Serpent of the Pass as though it had flash",
+				"basis": "If there are three or more Lesson cards in your graveyard, you may cast this spell as though it had flash. ... This spell costs {1} less to cast for each noncreature, nonland card in your graveyard.",
+				"timing": "spell",
+				"speed": "instant",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"subtypes": [
+								"Lesson"
+							]
+						}
+					},
+					"atLeast": 3
+				},
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"not": {
+								"types": [
+									"creature",
+									"land"
+								]
+							}
+						}
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

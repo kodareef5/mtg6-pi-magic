@@ -1,0 +1,72 @@
+{
+	"card": "Frostbite Pyromental",
+	"generated": "2026-10-10",
+	"source": "a285195c312fb1d141dc4387c496a98addba803ce1857e9ff345242c41ff1437",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Frostbite Pyromental",
+		"registers": [
+			{
+				"basis": "Trample, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature deals combat damage to a player, draw two cards.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of the end step, sacrifice this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "any"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

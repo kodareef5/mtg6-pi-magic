@@ -1,0 +1,84 @@
+{
+	"card": "Airbender's Reversal",
+	"generated": "2026-10-10",
+	"source": "c800a6065805498a03d1567b466875186f58c5f40458389068468d90641c0f52",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Airbender's Reversal",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Airbender's Reversal",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy an attacking creature",
+				"basis": "Choose one —\n• Destroy target attacking creature.\n• Airbend target creature you control. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"attacking": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Airbender's Reversal",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Airbend a creature you control",
+				"basis": "Choose one —\n• Destroy target attacking creature.\n• Airbend target creature you control. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile",
+						"as": "airbent"
+					},
+					{
+						"do": "permit",
+						"what": "bound:airbent",
+						"who": "owner:bound:airbent",
+						"mana": "{2}",
+						"until": "indefinite"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,117 @@
+{
+	"card": "Sonic Shrieker",
+	"generated": "2026-10-10",
+	"source": "a4a503db626ec2e85c41763b79464da1acf80f51a0f014c0887a8803dd937eb5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sonic Shrieker",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, it deals 2 damage to any target and you gain 2 life. If a player is dealt damage this way, they discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"from": "this",
+							"amount": 2,
+							"as": "damaged"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						},
+						{
+							"do": "perform",
+							"who": "bound:damaged",
+							"if": {
+								"all": [
+									{
+										"bound": "damaged"
+									},
+									{
+										"not": {
+											"is": "bound:damaged",
+											"matches": {
+												"zones": [
+													"battlefield"
+												],
+												"types": [
+													"creature",
+													"planeswalker",
+													"battle"
+												]
+											},
+											"lastKnown": true
+										}
+									}
+								]
+							},
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "bound:damaged",
+									"from": {
+										"zones": [
+											"hand"
+										],
+										"controller": "bound:damaged"
+									},
+									"count": 1,
+									"as": "discard"
+								},
+								{
+									"do": "move",
+									"what": "bound:discard",
+									"to": "graveyard",
+									"reason": "discard"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,53 @@
+{
+	"card": "Wildheart Invoker",
+	"generated": "2026-10-10",
+	"source": "7f63571df0d9ba929e9237eab353389c2c139129c36cfd574fa28b8c820aef0d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wildheart Invoker",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Wildheart Invoker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give target creature +5/+5 and trample until end of turn.",
+				"basis": "{8}: Target creature gets +5/+5 and gains trample until end of turn. (It can deal excess combat damage to the player or planeswalker it's attacking.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{8}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 5,
+							"toughness": 5,
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

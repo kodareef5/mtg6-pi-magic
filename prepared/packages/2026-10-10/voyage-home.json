@@ -1,0 +1,53 @@
+{
+	"card": "Voyage Home",
+	"generated": "2026-10-10",
+	"source": "b1a2307a9327ec7669003a1dc8028ce45372d9d245700bdf4a5a0422894e6b6a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Voyage Home",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Voyage Home",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Voyage Home with affinity for artifacts",
+				"basis": "Affinity for artifacts (This spell costs {1} less to cast for each artifact you control.) ... You draw three cards and gain 3 life.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

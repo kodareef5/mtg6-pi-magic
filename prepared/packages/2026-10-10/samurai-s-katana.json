@@ -1,0 +1,108 @@
+{
+	"card": "Samurai's Katana",
+	"generated": "2026-10-10",
+	"source": "74617ee9bd8fdfb0a52648bf891487a3f312970bf9edd3fb3c5251d108d00cd1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Samurai's Katana",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Job select (When this Equipment enters, create a 1/1 colorless Hero creature token, then attach this to it.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Hero Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							},
+							"as": "hero"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:hero"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +2/+2, has trample and haste, and is a Samurai in addition to its other types.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2,
+					"words": [
+						"trample",
+						"haste"
+					],
+					"subtypes": {
+						"add": [
+							"Samurai"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Equip Samurai's Katana",
+				"basis": "Murasame — Equip {5}",
+				"source": {
+					"card": "Samurai's Katana",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{5}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,70 @@
+{
+	"card": "Jidoor, Aristocratic Capital // Overture",
+	"generated": "2026-10-10",
+	"source": "a34950d4859d33bee840f703813c538fa63dd5d3db1c9e394b60510d10531ebd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jidoor, Aristocratic Capital // Overture",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"face": 0,
+				"basis": "{T}: Add {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Jidoor, Aristocratic Capital // Overture",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Overture",
+				"basis": "Target opponent mills half their library, rounded down. (Then exile this card. You may play the land later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "target:0",
+						"count": {
+							"half": {
+								"count": {
+									"zones": [
+										"library"
+									],
+									"owner": "target:0"
+								}
+							},
+							"round": "down"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

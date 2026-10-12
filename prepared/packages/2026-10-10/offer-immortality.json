@@ -1,0 +1,51 @@
+{
+	"card": "Offer Immortality",
+	"generated": "2026-10-10",
+	"source": "53df79cd695966689f9a2d7dc1895acaa580e87ea09c5b75c03dc548137da730",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Offer Immortality",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Offer Immortality",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Offer Immortality",
+				"basis": "Target creature gains deathtouch and indestructible until end of turn. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"deathtouch",
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

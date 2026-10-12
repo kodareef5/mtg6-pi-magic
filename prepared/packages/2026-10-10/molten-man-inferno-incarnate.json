@@ -1,0 +1,125 @@
+{
+	"card": "Molten Man, Inferno Incarnate",
+	"generated": "2026-10-10",
+	"source": "295c26769d69826568fc201862628a4a48329a5f6925e2ec530ab93b6d92374d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Molten Man, Inferno Incarnate",
+		"registers": [
+			{
+				"basis": "When Molten Man enters, search your library for a basic Mountain card, put it onto the battlefield tapped, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								],
+								"subtypes": [
+									"Mountain"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "mountain"
+						},
+						{
+							"do": "move",
+							"what": "bound:mountain",
+							"to": "battlefield",
+							"tapped": true,
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Molten Man gets +1/+1 for each Mountain you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Mountain"
+							],
+							"controller": "you"
+						}
+					},
+					"toughness": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Mountain"
+							],
+							"controller": "you"
+						}
+					}
+				}
+			},
+			{
+				"basis": "When Molten Man leaves the battlefield, sacrifice a land.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

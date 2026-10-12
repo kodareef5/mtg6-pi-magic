@@ -1,0 +1,157 @@
+{
+	"card": "Ice Magic",
+	"generated": "2026-10-10",
+	"source": "103140f40a08fea7475af97f222cbda29d8de16fd08d27ee996d1db5864f2969",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ice Magic",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ice Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ice Magic — Blizzard",
+				"basis": "Tiered (Choose one additional cost.) ... • Blizzard — {0} — Return target creature to its owner's hand.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "blizzard",
+							"mana": "{0}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ice Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ice Magic — Blizzara",
+				"basis": "Tiered (Choose one additional cost.) ... • Blizzara — {2} — Target creature's owner puts it on their choice of the top or bottom of their library.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "blizzara",
+							"mana": "{2}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "top-choice",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "top",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "top-choice"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ice Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ice Magic — Blizzaga",
+				"basis": "Tiered (Choose one additional cost.) ... • Blizzaga — {5}{U} — Target creature's owner shuffles it into their library.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "blizzaga",
+							"mana": "{5}{U}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "owner:target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

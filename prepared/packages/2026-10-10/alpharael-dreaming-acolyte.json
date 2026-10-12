@@ -1,0 +1,105 @@
+{
+	"card": "Alpharael, Dreaming Acolyte",
+	"generated": "2026-10-10",
+	"source": "31ae962e37c5946f82491e93110bf2b0a2e83236c4ffedcce7f6e105b32d33ee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Alpharael, Dreaming Acolyte",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Alpharael enters, draw two cards. Then discard two cards unless you discard an artifact card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you",
+								"types": [
+									"artifact"
+								]
+							},
+							"count": 1,
+							"may": true,
+							"as": "artifact"
+						},
+						{
+							"do": "move",
+							"what": "bound:artifact",
+							"to": "graveyard",
+							"reason": "discard",
+							"if": {
+								"bound": "artifact"
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 2,
+							"as": "cards",
+							"if": {
+								"not": {
+									"bound": "artifact"
+								}
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:cards",
+							"to": "graveyard",
+							"reason": "discard",
+							"if": {
+								"not": {
+									"bound": "artifact"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "During your turn, Alpharael has deathtouch.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"turn": "self"
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

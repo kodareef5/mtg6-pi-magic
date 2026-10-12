@@ -1,0 +1,46 @@
+{
+	"card": "Diresight",
+	"generated": "2026-10-10",
+	"source": "2117ea6f40c1ef01c5be565a2154bca8ce1045b72f5fbd37aeaa2947752ba746",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Diresight",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Diresight",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Diresight",
+				"basis": "Surveil 2, then draw two cards. You lose 2 life. (To surveil 2, look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

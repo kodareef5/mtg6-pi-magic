@@ -1,0 +1,241 @@
+{
+	"card": "Trystan, Callous Cultivator // Trystan, Penitent Culler",
+	"generated": "2026-10-10",
+	"source": "ecbd4b2ba8581128a229a4f8ebb21bfb0778fbfed9082231d0989380c4430aae",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Trystan, Callous Cultivator // Trystan, Penitent Culler",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever this creature enters or transforms into Trystan, Callous Cultivator, mill three cards. Then if there is an Elf card in your graveyard, you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"subtypes": [
+											"Elf"
+										],
+										"token": false
+									}
+								},
+								"atLeast": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever this creature enters or transforms into Trystan, Callous Cultivator, mill three cards. Then if there is an Elf card in your graveyard, you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "transforms",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"subtypes": [
+											"Elf"
+										],
+										"token": false
+									}
+								},
+								"atLeast": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "At the beginning of your first main phase, you may pay {B}. If you do, transform Trystan.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{B}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "transform",
+							"what": "this",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever this creature transforms into Trystan, Penitent Culler, mill three cards, then you may exile an Elf card from your graveyard. If you do, each opponent loses 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "transforms",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						},
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"exile": {
+									"choose": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"subtypes": [
+											"Elf"
+										],
+										"token": false
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "exiled"
+						},
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -2,
+							"if": {
+								"bound": "exiled"
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "At the beginning of your first main phase, you may pay {G}. If you do, transform Trystan.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{G}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "transform",
+							"what": "this",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

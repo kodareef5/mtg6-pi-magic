@@ -1,0 +1,78 @@
+{
+	"card": "Mystical Teachings",
+	"generated": "2026-10-10",
+	"source": "0fd2da9ad7bdad50550cec79add27a7cc7690748883a7e925ecd8c588f256850",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mystical Teachings",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {5}{B} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{5}{B}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mystical Teachings",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mystical Teachings, including through its flashback permission",
+				"basis": "Search your library for an instant card or a card with flash, reveal it, put it into your hand, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"any": [
+								{
+									"types": [
+										"instant"
+									]
+								},
+								{
+									"words": [
+										"flash"
+									]
+								}
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

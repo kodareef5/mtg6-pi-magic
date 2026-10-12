@@ -1,0 +1,87 @@
+{
+	"card": "Donatello's Technique",
+	"generated": "2026-10-10",
+	"source": "0d8a68fe9a923efa00926bf54ad006b8f756f085c72d6c5044ffcb703e5ad4a0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Donatello's Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Donatello's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Donatello's Technique normally",
+				"basis": "Draw two cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Donatello's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Donatello's Technique for sneak",
+				"basis": "Sneak {U} (You may cast this spell for {U} if you also return an unblocked attacker you control to hand during the declare blockers step.) ... Draw two cards.",
+				"timing": "spell",
+				"speed": "instant",
+				"if": {
+					"all": [
+						{
+							"turn": "self"
+						},
+						{
+							"step": "declare-blockers"
+						}
+					]
+				},
+				"cost": {
+					"alternative": "sneak",
+					"mana": "{U}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true,
+							"blocked": false
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

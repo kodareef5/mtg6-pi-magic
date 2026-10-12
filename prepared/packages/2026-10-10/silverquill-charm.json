@@ -1,0 +1,107 @@
+{
+	"card": "Silverquill Charm",
+	"generated": "2026-10-10",
+	"source": "75f4569f68c18d8664ff4c0beec5b0846aaba6e1dbb3ed50ecd57072219aa0af",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Silverquill Charm",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Silverquill Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Silverquill Charm: put two +1/+1 counters on target creature",
+				"basis": "Choose one —\n• Put two +1/+1 counters on target creature.\n• Exile target creature with power 2 or less.\n• Each opponent loses 3 life and you gain 3 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Silverquill Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Silverquill Charm: exile target creature with power 2 or less",
+				"basis": "Choose one —\n• Put two +1/+1 counters on target creature.\n• Exile target creature with power 2 or less.\n• Each opponent loses 3 life and you gain 3 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"power": {
+								"atMost": 2
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Silverquill Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Silverquill Charm: each opponent loses 3 life and you gain 3 life",
+				"basis": "Choose one —\n• Put two +1/+1 counters on target creature.\n• Exile target creature with power 2 or less.\n• Each opponent loses 3 life and you gain 3 life.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -3
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

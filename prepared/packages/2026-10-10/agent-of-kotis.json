@@ -1,0 +1,52 @@
+{
+	"card": "Agent of Kotis",
+	"generated": "2026-10-10",
+	"source": "9f18458ed25e80d91d3f1272588139a62f8c51ee8cf39964b74138bd13900fdf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Agent of Kotis",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self",
+					"card": "Agent of Kotis"
+				},
+				"claim": "Renew Agent of Kotis to put two +1/+1 counters on target creature",
+				"basis": "Renew — {3}{U}, Exile this card from your graveyard: Put two +1/+1 counters on target creature. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}{U}",
+					"exile": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

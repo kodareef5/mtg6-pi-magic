@@ -1,0 +1,158 @@
+{
+	"card": "Bristlebud Farmer",
+	"generated": "2026-10-10",
+	"source": "2a33abfdf52d6d2e54e1224ebe77cba36c2529c8940b0651e0b7d41d23681de6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bristlebud Farmer",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create two Food tokens. (They're artifacts with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Food Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"kind": "activated",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, you may sacrifice a Food. If you do, mill three cards. You may put a permanent card from among them into your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"controller": "you",
+										"subtypes": [
+											"Food"
+										]
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"bound": "paid"
+							},
+							"instructions": [
+								{
+									"do": "mill",
+									"who": "you",
+									"count": 3,
+									"as": "milled"
+								},
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"graveyard",
+											"exile",
+											"battlefield",
+											"stack",
+											"command"
+										],
+										"is": "bound:milled",
+										"token": false,
+										"types": [
+											"artifact",
+											"battle",
+											"creature",
+											"enchantment",
+											"land",
+											"planeswalker"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"as": "permanent"
+								},
+								{
+									"do": "move",
+									"what": "bound:permanent",
+									"to": "hand",
+									"reason": "resolve"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,60 @@
+{
+	"card": "Garna, Bloodfist of Keld",
+	"generated": "2026-10-10",
+	"source": "13952c937cdba080b06577a7b8c7a2d846c1ea8eebb843a7faecf2c02a1332a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Garna, Bloodfist of Keld",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever another creature you control dies, draw a card if it was attacking. Otherwise, Garna deals 1 damage to each opponent.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"is": "event:object",
+								"matches": {
+									"attacking": true
+								},
+								"lastKnown": true
+							}
+						},
+						{
+							"do": "damage",
+							"to": "opponent",
+							"from": "this",
+							"amount": 1,
+							"if": {
+								"not": {
+									"is": "event:object",
+									"matches": {
+										"attacking": true
+									},
+									"lastKnown": true
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

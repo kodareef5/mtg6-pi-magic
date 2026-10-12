@@ -8,8 +8,8 @@
 		"card": "Nimble Thopterist",
 		"registers": [
 			{
-				"kind": "watch",
 				"basis": "When this creature enters, create a 1/1 colorless Thopter artifact creature token with flying.",
+				"kind": "watch",
 				"event": {
 					"on": "enters",
 					"of": {
@@ -22,7 +22,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Thopter",
+								"name": "Thopter Token",
 								"types": [
 									"artifact",
 									"creature"

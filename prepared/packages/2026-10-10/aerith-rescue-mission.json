@@ -1,0 +1,105 @@
+{
+	"card": "Aerith Rescue Mission",
+	"generated": "2026-10-10",
+	"source": "321ccae7916b17b25fa91463bda158a1fbad5f98a691dcc9402d18dfd10cf7f9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aerith Rescue Mission",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Aerith Rescue Mission",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Take the Elevator",
+				"basis": "Choose one — ... • Take the Elevator — Create three 1/1 colorless Hero creature tokens.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 3,
+						"spec": {
+							"name": "Hero Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Hero"
+							],
+							"colors": [],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Aerith Rescue Mission",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Take 59 Flights of Stairs",
+				"basis": "Choose one — ... • Take 59 Flights of Stairs — Tap up to three target creatures. Put a stun counter on one of them. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 3,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"is": "target:0"
+						},
+						"count": 1,
+						"as": "stunned-creature",
+						"if": {
+							"amount": {
+								"count": {
+									"is": "target:0"
+								}
+							},
+							"atLeast": 1
+						}
+					},
+					{
+						"do": "counters",
+						"on": "bound:stunned-creature",
+						"kind": "stun",
+						"amount": 1,
+						"if": {
+							"bound": "stunned-creature"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

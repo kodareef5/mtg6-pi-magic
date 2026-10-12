@@ -1,0 +1,111 @@
+{
+	"card": "Auntie's Sentence",
+	"generated": "2026-10-10",
+	"source": "2b0546f87a691563d3864d93995bc9c34f2ff30e37c3171cde7e43d1ba2bda85",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Auntie's Sentence",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Auntie's Sentence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Auntie's Sentence: reveal hand and discard a nonland permanent card",
+				"basis": "Choose one — ... Target opponent reveals their hand. You choose a nonland permanent card from it. That player discards that card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "target:0"
+						},
+						"as": "hand"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"count": 1,
+						"as": "discard",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"is": "bound:hand",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"planeswalker"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Auntie's Sentence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Auntie's Sentence: target creature gets -2/-2",
+				"basis": "Choose one — ... Target creature gets -2/-2 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -2,
+							"toughness": -2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

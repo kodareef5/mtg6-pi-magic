@@ -1,0 +1,146 @@
+{
+	"card": "Shredder's Technique",
+	"generated": "2026-10-10",
+	"source": "61765de7ed33ed97a1e1c7556ece7dd75b6fc0626b3fc9bb09ce3fb150ed0f3c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shredder's Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Shredder's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Shredder's Technique normally",
+				"basis": "Destroy target creature or enchantment. If an enchantment was destroyed this way, you lose 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0",
+						"as": "destroyed"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2,
+						"if": {
+							"all": [
+								{
+									"bound": "destroyed"
+								},
+								{
+									"is": "target:0",
+									"matches": {
+										"types": [
+											"enchantment"
+										]
+									},
+									"lastKnown": true
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Shredder's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Shredder's Technique for sneak",
+				"basis": "Sneak {B} (You may cast this spell for {B} if you also return an unblocked attacker you control to hand during the declare blockers step.) ... Destroy target creature or enchantment. If an enchantment was destroyed this way, you lose 2 life.",
+				"timing": "spell",
+				"speed": "instant",
+				"if": {
+					"all": [
+						{
+							"turn": "self"
+						},
+						{
+							"step": "declare-blockers"
+						}
+					]
+				},
+				"cost": {
+					"alternative": "sneak",
+					"mana": "{B}",
+					"return": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true,
+							"blocked": false
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0",
+						"as": "destroyed"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2,
+						"if": {
+							"all": [
+								{
+									"bound": "destroyed"
+								},
+								{
+									"is": "target:0",
+									"matches": {
+										"types": [
+											"enchantment"
+										]
+									},
+									"lastKnown": true
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"card": "Undercover Skrull",
+	"generated": "2026-10-10",
+	"source": "293af159d640836fd39ef8c787b045d547b0c6c5c47607e1f057f4484041fea6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Undercover Skrull",
+		"registers": [
+			{
+				"basis": "As long as there are two or more creature cards in your graveyard, this creature gets +2/+2 and is all creature types.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						}
+					},
+					"atLeast": 2
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2,
+					"subtypes": {
+						"allCreatureTypes": true
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,229 @@
+{
+	"card": "Tezzeret, Cruel Captain",
+	"generated": "2026-10-10",
+	"source": "473769f9e82b321ab9511e3f6033d8b21cad9a8a30d56cbee85535cd567c0b48",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tezzeret, Cruel Captain",
+		"registers": [
+			{
+				"basis": "Whenever an artifact you control enters, put a loyalty counter on Tezzeret.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "loyalty",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tezzeret, Cruel Captain",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Untap target artifact or creature; add a counter if it is both",
+				"basis": "0: Untap target artifact or creature. If it's an artifact creature, put a +1/+1 counter on it.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": 0
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "untap",
+						"what": "target:0"
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"all": [
+									{
+										"types": [
+											"artifact"
+										]
+									},
+									{
+										"types": [
+											"creature"
+										]
+									}
+								]
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Tezzeret, Cruel Captain",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Search for an artifact card with mana value 1 or less",
+				"basis": "−3: Search your library for an artifact card with mana value 1 or less, reveal it, put it into your hand, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"loyalty": -3
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"artifact"
+							],
+							"manaValue": {
+								"atMost": 1
+							}
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "artifact"
+					},
+					{
+						"do": "move",
+						"what": "bound:artifact",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Tezzeret, Cruel Captain",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create the combat artifact emblem",
+				"basis": "−7: You get an emblem with \"At the beginning of combat on your turn, put three +1/+1 counters on target artifact you control. If it's not a creature, it becomes a 0/0 Robot artifact creature.\"",
+				"timing": "stack",
+				"cost": {
+					"loyalty": -7
+				},
+				"instructions": [
+					{
+						"do": "emblem",
+						"who": "you",
+						"registers": [
+							{
+								"kind": "watch",
+								"basis": "At the beginning of combat on your turn, put three +1/+1 counters on target artifact you control. If it's not a creature, it becomes a 0/0 Robot artifact creature.",
+								"zones": [
+									"command"
+								],
+								"event": {
+									"on": "step",
+									"step": "begin-combat",
+									"whose": "you"
+								},
+								"effect": {
+									"targets": [
+										{
+											"object": {
+												"types": [
+													"artifact"
+												],
+												"controller": "you"
+											}
+										}
+									],
+									"instructions": [
+										{
+											"do": "counters",
+											"on": "target:0",
+											"kind": "+1/+1",
+											"amount": 3
+										},
+										{
+											"do": "modify",
+											"what": "target:0",
+											"until": "indefinite",
+											"if": {
+												"not": {
+													"is": "target:0",
+													"matches": {
+														"types": [
+															"creature"
+														]
+													}
+												}
+											},
+											"change": {
+												"types": {
+													"add": [
+														"artifact",
+														"creature"
+													]
+												},
+												"subtypes": {
+													"set": [
+														"Robot"
+													],
+													"of": "creature"
+												},
+												"base": {
+													"power": 0,
+													"toughness": 0
+												}
+											}
+										}
+									]
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

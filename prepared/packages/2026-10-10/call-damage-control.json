@@ -1,0 +1,519 @@
+{
+	"card": "Call Damage Control",
+	"generated": "2026-10-10",
+	"source": "d732b4c1b01ee898822ed5e68a11131e0083ad0380d34db55ceba9cddb18a2f0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Call Damage Control",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose no modes",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand.\n• Target artifact card.\n• Target creature card.\n• Target enchantment card.\n• Target land card.",
+				"timing": "spell",
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return an artifact card",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand. ... • Target artifact card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return a creature card",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand. ... • Target creature card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return an enchantment card",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand. ... • Target enchantment card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return a land card",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand. ... • Target land card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose artifact and creature modes",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand. ... • Target artifact card. ... • Target creature card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact"
+							]
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"any": [
+								{
+									"is": "target:0"
+								},
+								{
+									"is": "target:1"
+								}
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose artifact and enchantment modes",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand. ... • Target artifact card. ... • Target enchantment card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact"
+							]
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"any": [
+								{
+									"is": "target:0"
+								},
+								{
+									"is": "target:1"
+								}
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose artifact and land modes",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand. ... • Target artifact card. ... • Target land card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact"
+							]
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"any": [
+								{
+									"is": "target:0"
+								},
+								{
+									"is": "target:1"
+								}
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose creature and enchantment modes",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand. ... • Target creature card. ... • Target enchantment card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"any": [
+								{
+									"is": "target:0"
+								},
+								{
+									"is": "target:1"
+								}
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose creature and land modes",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand. ... • Target creature card. ... • Target land card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"any": [
+								{
+									"is": "target:0"
+								},
+								{
+									"is": "target:1"
+								}
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Call Damage Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose enchantment and land modes",
+				"basis": "Choose up to two. Return those cards from your graveyard to your hand. ... • Target enchantment card. ... • Target land card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"enchantment"
+							]
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"any": [
+								{
+									"is": "target:0"
+								},
+								{
+									"is": "target:1"
+								}
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

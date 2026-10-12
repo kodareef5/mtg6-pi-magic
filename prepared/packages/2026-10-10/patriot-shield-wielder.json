@@ -1,0 +1,55 @@
+{
+	"card": "Patriot, Shield Wielder",
+	"generated": "2026-10-10",
+	"source": "6c7854cae779e5f5c0652c6fdaa60d66ab3651fcc4c8682c0c0732e9846b9a80",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Patriot, Shield Wielder",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Patriot, Shield Wielder",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give another controlled creature +2/+0 and hexproof until end of turn.",
+				"basis": "{2}, {T}: Another target creature you control gets +2/+0 and gains hexproof until end of turn. (It can't be the target of spells or abilities your opponents control.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"words": [
+								"hexproof"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,80 @@
+{
+	"card": "Prickly Pair",
+	"generated": "2026-10-10",
+	"source": "d2d65de211c81a296699892c687678e9606efebce04fe64643246642ada2d0d5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prickly Pair",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, create a 1/1 red Mercenary creature token with \"{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.\"",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Mercenary Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Mercenary"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1,
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{T}: Target creature you control gets +1/+0 until end of turn. Activate only as a sorcery.",
+										"cost": {
+											"tap": true
+										},
+										"speed": "sorcery",
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"types": [
+															"creature"
+														],
+														"controller": "you"
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "target:0",
+													"until": "end-of-turn",
+													"change": {
+														"power": 1
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,96 @@
+{
+	"card": "Bebop, Warthog Warrior",
+	"generated": "2026-10-10",
+	"source": "f916fc7e09b6200eb738f85972124aac50bc0a02dbc9f45b2f9d2235fd472a8d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bebop, Warthog Warrior",
+		"registers": [
+			{
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Rhinos you control have menace.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Rhino"
+					],
+					"controller": "you",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bebop, Warthog Warrior",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Swampcycle Bebop, Warthog Warrior",
+				"basis": "Swampcycling {2} ({2}, Discard this card: Search your library for a Swamp card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Swamp"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "swamp"
+					},
+					{
+						"do": "move",
+						"what": "bound:swamp",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

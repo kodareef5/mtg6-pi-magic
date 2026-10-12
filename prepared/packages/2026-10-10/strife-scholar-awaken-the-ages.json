@@ -1,0 +1,82 @@
+{
+	"card": "Strife Scholar // Awaken the Ages",
+	"generated": "2026-10-10",
+	"source": "af75ed1cfb298dc69ede8cc0f0dd7a54814ffdefea84a9ee048e4928809c9206",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Strife Scholar // Awaken the Ages",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Ward—Pay 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"life": 2
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "This creature enters prepared.",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Strife Scholar // Awaken the Ages",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Awaken the Ages",
+				"basis": "Create two 2/2 red and white Spirit creature tokens.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Spirit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Spirit"
+							],
+							"colors": [
+								"R",
+								"W"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,58 @@
+{
+	"card": "Another Chance",
+	"generated": "2026-10-10",
+	"source": "7da35da175724230517102128639d2e5c42ae927e5bce7c52e8c28a8677259a2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Another Chance",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Another Chance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Another Chance",
+				"basis": "You may mill two cards. Then return up to two creature cards from your graveyard to your hand. (To mill two cards, put the top two cards of your library into your graveyard.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 2,
+						"may": true
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"upTo": true,
+						"as": "creatures"
+					},
+					{
+						"do": "move",
+						"what": "bound:creatures",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

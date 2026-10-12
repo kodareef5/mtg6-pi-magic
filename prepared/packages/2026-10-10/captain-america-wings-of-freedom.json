@@ -1,0 +1,91 @@
+{
+	"card": "Captain America, Wings of Freedom",
+	"generated": "2026-10-10",
+	"source": "5b693b8b5b1a5f60cc511ff7b8be88fc9f77fa59ad877d3219010b16e6ff19cd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Captain America, Wings of Freedom",
+		"registers": [
+			{
+				"basis": "Flying, first strike, ward {1}",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"first strike"
+					]
+				}
+			},
+			{
+				"basis": "Flying, first strike, ward {1}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{1}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Captain America attacks, each other Hero you control gets +X/+X until end of turn, where X is Captain America's toughness.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"subtypes": [
+									"Hero"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"toughness": "this"
+								},
+								"toughness": {
+									"toughness": "this"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

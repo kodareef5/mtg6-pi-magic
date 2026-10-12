@@ -1,0 +1,82 @@
+{
+	"card": "Klaw, Sonic Subjugator",
+	"generated": "2026-10-10",
+	"source": "fe33c47c98b2e300c709946ff5aa11ce7bf0caa06971e1cb9ecf1fd442716caf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Klaw, Sonic Subjugator",
+		"registers": [
+			{
+				"basis": "Sonic Attack — When Klaw enters, target player reveals a number of cards from their hand equal to one plus the number of creature cards in your graveyard. You choose one of them. That player discards that card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "target:0",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"owner": "target:0",
+								"controller": "target:0"
+							},
+							"count": {
+								"sum": [
+									1,
+									{
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"creature"
+											],
+											"token": false
+										}
+									}
+								]
+							},
+							"reveal": true,
+							"as": "revealed"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"is": "bound:revealed"
+							},
+							"count": 1,
+							"as": "discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,110 @@
+{
+	"card": "Jadzi, Steward of Fate // Oracle's Gift",
+	"generated": "2026-10-10",
+	"source": "bd655cdd73a48de435cbafb39c4204e08854160f3c73005ae6d9c722e972fda7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jadzi, Steward of Fate // Oracle's Gift",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Jadzi enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			},
+			{
+				"face": 0,
+				"basis": "When Jadzi enters, draw two cards, then discard two cards.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 2,
+							"as": "discard-cards"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard-cards",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Jadzi, Steward of Fate // Oracle's Gift",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Oracle's Gift",
+				"basis": "Create X 0/0 green and blue Fractal creature tokens, then put X +1/+1 counters on each Fractal you control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"x": true
+						},
+						"spec": {
+							"name": "Fractal Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Fractal"
+							],
+							"colors": [
+								"G",
+								"U"
+							],
+							"power": 0,
+							"toughness": 0
+						}
+					},
+					{
+						"do": "counters",
+						"every": {
+							"subtypes": [
+								"Fractal"
+							],
+							"controller": "you"
+						},
+						"kind": "+1/+1",
+						"amount": {
+							"x": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

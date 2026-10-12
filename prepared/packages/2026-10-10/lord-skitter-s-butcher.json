@@ -1,0 +1,124 @@
+{
+	"card": "Lord Skitter's Butcher",
+	"generated": "2026-10-10",
+	"source": "87f4aa0a017bd22dd1ad397d527eefe9157b314691c5d97dfbfe7b5b5d6067cd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lord Skitter's Butcher",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, choose one —\n• Create a 1/1 black Rat creature token with \"This token can't block.\"\n• You may sacrifice another creature. If you do, scry 2, then draw a card.\n• Creatures you control gain menace until end of turn.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Rat Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Rat"
+										],
+										"colors": [
+											"B"
+										],
+										"power": 1,
+										"toughness": 1,
+										"registers": [
+											{
+												"kind": "continuous",
+												"basis": "This token can't block.",
+												"affects": {
+													"is": "this"
+												},
+												"change": {
+													"words": [
+														"can't block"
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "pay",
+									"who": "you",
+									"may": true,
+									"cost": {
+										"sacrifice": {
+											"choose": {
+												"types": [
+													"creature"
+												],
+												"controller": "you",
+												"other": true
+											},
+											"count": 1
+										}
+									},
+									"as": "sacrificed"
+								},
+								{
+									"do": "keyword",
+									"name": "scry",
+									"who": "you",
+									"count": 2,
+									"if": {
+										"bound": "sacrificed"
+									}
+								},
+								{
+									"do": "draw",
+									"who": "you",
+									"count": 1,
+									"if": {
+										"bound": "sacrificed"
+									}
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "modify",
+									"every": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									},
+									"until": "end-of-turn",
+									"change": {
+										"words": [
+											"menace"
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

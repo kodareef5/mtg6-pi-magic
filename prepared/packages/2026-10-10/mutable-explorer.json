@@ -1,0 +1,109 @@
+{
+	"card": "Mutable Explorer",
+	"generated": "2026-10-10",
+	"source": "4d8f33f100f5476693a1fabac5c62978463d54c7bc892fa23ed06655e5c3b955",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mutable Explorer",
+		"registers": [
+			{
+				"basis": "Changeling (This card is every creature type.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"changeling"
+					],
+					"subtypes": {
+						"allCreatureTypes": true
+					}
+				}
+			},
+			{
+				"basis": "When this creature enters, create a tapped Mutavault token. (It's a land with \"{T}: Add {C}\" and \"{1}: This token becomes a 2/2 creature with all creature types until end of turn. It's still a land.\")",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"tapped": true,
+							"spec": {
+								"name": "Mutavault",
+								"types": [
+									"land"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}: Add {C}",
+										"kind": "mana",
+										"cost": {
+											"tap": true
+										},
+										"colors": [
+											"C"
+										]
+									},
+									{
+										"basis": "{1}: This token becomes a 2/2 creature with all creature types until end of turn. It's still a land.",
+										"kind": "activated",
+										"cost": {
+											"mana": "{1}"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "this",
+													"until": "end-of-turn",
+													"change": {
+														"types": {
+															"add": [
+																"creature"
+															]
+														},
+														"base": {
+															"power": 2,
+															"toughness": 2
+														},
+														"subtypes": {
+															"allCreatureTypes": true
+														}
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

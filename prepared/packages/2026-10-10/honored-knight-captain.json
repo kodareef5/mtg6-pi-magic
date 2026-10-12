@@ -1,0 +1,95 @@
+{
+	"card": "Honored Knight-Captain",
+	"generated": "2026-10-10",
+	"source": "a2e635f07e3c101bf1272260bbde16c66204af0ab1688deb0ef1946f33490c71",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Honored Knight-Captain",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 1/1 white Human Soldier creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Honored Knight-Captain",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Honored Knight-Captain to search for an Equipment card",
+				"basis": "{4}{W}{W}, Sacrifice this creature: Search your library for an Equipment card, put it onto the battlefield, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{W}{W}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Equipment"
+							],
+							"token": false
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "equipment"
+					},
+					{
+						"do": "move",
+						"what": "bound:equipment",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

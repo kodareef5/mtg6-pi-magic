@@ -22,7 +22,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Ally",
+								"name": "Ally Token",
 								"types": [
 									"creature"
 								],
@@ -42,6 +42,7 @@
 		],
 		"procedures": [],
 		"assessed": true,
-		"printedCast": true
+		"printedCast": true,
+		"deferred": []
 	}
 }

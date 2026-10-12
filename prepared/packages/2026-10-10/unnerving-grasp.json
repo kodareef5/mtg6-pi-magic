@@ -1,0 +1,53 @@
+{
+	"card": "Unnerving Grasp",
+	"generated": "2026-10-10",
+	"source": "8bbd4cbce61fe0bd9a8ae23e3e13172ea043d2787ad975c78a618e2f75c52f32",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unnerving Grasp",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unnerving Grasp",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return up to one nonland permanent to its owner's hand, then manifest dread.",
+				"basis": "Return up to one target nonland permanent to its owner's hand. Manifest dread. (Look at the top two cards of your library. Put one onto the battlefield face down as a 2/2 creature and the other into your graveyard. Turn it face up any time for its mana cost if it's a creature card.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "keyword",
+						"name": "manifest-dread",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

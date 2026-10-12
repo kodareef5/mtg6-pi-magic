@@ -1,0 +1,71 @@
+{
+	"card": "Kishla Village",
+	"generated": "2026-10-10",
+	"source": "1ca4b495757db7a1b0bb8b2784fff378880f60cd926a52ea6b1b96cdcbb49dfc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kishla Village",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control an Island or a Swamp.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"subtypes": [
+									"Island",
+									"Swamp"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kishla Village",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate surveil 2",
+				"basis": "{3}{G}, {T}: Surveil 2. (Look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{G}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

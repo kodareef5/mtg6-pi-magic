@@ -1,0 +1,114 @@
+{
+	"card": "Titania, Rugged Rumbler",
+	"generated": "2026-10-10",
+	"source": "64816432b8364c9ceebed2fb2ea5a7395cca43c1df9572ac7394df4e5960eaf2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Titania, Rugged Rumbler",
+		"registers": [
+			{
+				"basis": "Ward—Discard a card or pay {2}. (Whenever this creature becomes the target of a spell or ability an opponent controls, counter it unless that player discards a card or pays {2}.)",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "event:player",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "ward-discard"
+						},
+						{
+							"do": "pay",
+							"who": "event:player",
+							"cost": {
+								"mana": "{2}"
+							},
+							"may": true,
+							"as": "ward-mana",
+							"if": {
+								"not": {
+									"bound": "ward-discard"
+								}
+							}
+						},
+						{
+							"do": "counter",
+							"what": "event:source",
+							"if": {
+								"all": [
+									{
+										"not": {
+											"bound": "ward-discard"
+										}
+									},
+									{
+										"not": {
+											"bound": "ward-mana"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Titania, Rugged Rumbler",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Titania by discarding a card as its additional cost",
+				"basis": "As an additional cost to cast this spell, discard a card or pay {2}.",
+				"timing": "spell",
+				"cost": {
+					"discard": 1
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Titania, Rugged Rumbler",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Titania by paying {2} as its additional cost",
+				"basis": "As an additional cost to cast this spell, discard a card or pay {2}.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "additional-cost",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,105 @@
+{
+	"card": "Stormshriek Feral // Flush Out",
+	"generated": "2026-10-10",
+	"source": "0eeb4f508a0685f12019b9813c71eca06a398387a5484c38448962f0655418f3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stormshriek Feral // Flush Out",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Stormshriek Feral // Flush Out",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Stormshriek Feral +1/+0 until end of turn",
+				"basis": "{1}{R}: This creature gets +1/+0 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						}
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Stormshriek Feral // Flush Out",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Flush Out",
+				"basis": "Discard a card. If you do, draw two cards. (Then shuffle this card into its owner's library.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard-card"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard-card",
+						"to": "graveyard",
+						"reason": "discard",
+						"as": "discarded"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"bound": "discarded"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

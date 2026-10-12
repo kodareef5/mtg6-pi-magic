@@ -1,0 +1,86 @@
+{
+	"card": "Cruel Administrator",
+	"generated": "2026-10-10",
+	"source": "7d6420a9b7d93fc799e24d57a8be8014df4a8022ce70227bd9336c67337d677c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cruel Administrator",
+		"registers": [
+			{
+				"basis": "Raid — This creature enters with a +1/+1 counter on it if you attacked this turn.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": 1
+				},
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"by": "you"
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, create a 2/2 red Soldier creature token with firebending 1. (Whenever it attacks, add {R}. This mana lasts until end of combat.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Soldier"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 2,
+								"toughness": 2,
+								"registers": [
+									{
+										"basis": "Whenever this creature attacks, create a 2/2 red Soldier creature token with firebending 1. (Whenever it attacks, add {R}. This mana lasts until end of combat.)",
+										"kind": "watch",
+										"event": {
+											"on": "attacks",
+											"of": {
+												"is": "this"
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "mana",
+													"who": "you",
+													"colors": [
+														"R"
+													],
+													"until": "end-of-combat"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

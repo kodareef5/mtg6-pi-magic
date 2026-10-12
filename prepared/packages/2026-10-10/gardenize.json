@@ -1,0 +1,62 @@
+{
+	"card": "Gardenize",
+	"generated": "2026-10-10",
+	"source": "787734e8aba153681abcd7ada8151c8a52a03041b58d45b0cc1970e7f0303d30",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gardenize",
+		"registers": [
+			{
+				"basis": "Whenever a creature you control dies, put a charge counter on this enchantment.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "charge",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your first main phase, add {G} for each charge counter on this enchantment.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"G"
+							],
+							"times": {
+								"counters": "charge",
+								"on": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

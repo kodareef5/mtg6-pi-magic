@@ -1,0 +1,93 @@
+{
+	"card": "Legion Extruder",
+	"generated": "2026-10-10",
+	"source": "712c752714673124067e18a2fb8cd26c1c76932f9eadb91731a11884334961e5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Legion Extruder",
+		"registers": [
+			{
+				"basis": "When this artifact enters, it deals 2 damage to any target.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 2,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Legion Extruder",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another artifact to create a Golem",
+				"basis": "{2}, {T}, Sacrifice another artifact: Create a 3/3 colorless Golem artifact creature token.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Golem Token",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"subtypes": [
+								"Golem"
+							],
+							"colors": [],
+							"power": 3,
+							"toughness": 3
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

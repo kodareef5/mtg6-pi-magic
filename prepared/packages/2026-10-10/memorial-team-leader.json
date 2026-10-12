@@ -1,0 +1,77 @@
+{
+	"card": "Memorial Team Leader",
+	"generated": "2026-10-10",
+	"source": "218ba2f674d26f3fb7ee08803a17052c0005f2e50277513717a22531ae7f57e4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Memorial Team Leader",
+		"registers": [
+			{
+				"basis": "During your turn, other creatures you control get +1/+0.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1
+				},
+				"if": {
+					"turn": "self"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Memorial Team Leader",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cast Memorial Team Leader for its warp cost",
+				"basis": "Warp {1}{R} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+				"timing": "spell",
+				"cost": {
+					"alternative": "warp",
+					"mana": "{1}{R}"
+				},
+				"instructions": [
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "this",
+									"to": "exile",
+									"reason": "exile",
+									"as": "warped"
+								},
+								{
+									"do": "permit",
+									"what": "bound:warped",
+									"who": "owner",
+									"from": "next-turn",
+									"until": "indefinite"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

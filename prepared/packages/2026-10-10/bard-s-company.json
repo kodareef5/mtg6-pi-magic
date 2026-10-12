@@ -1,0 +1,230 @@
+{
+	"card": "Bard's Company",
+	"generated": "2026-10-10",
+	"source": "131dc9acc9bda578a8f393147a6e9d4b989788c0ee5d9fd263440d45b7b9aea7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bard's Company",
+		"registers": [
+			{
+				"basis": "Other creatures you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, recruit. (Draw a card, then discard a card. If you discarded a nonland card, create a 1/1 white Human Soldier creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard-choice"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard-choice",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"all": [
+									{
+										"bound": "discarded"
+									},
+									{
+										"is": "bound:discard-choice",
+										"matches": {
+											"zones": [
+												"hand"
+											],
+											"not": {
+												"types": [
+													"land"
+												]
+											}
+										},
+										"lastKnown": true
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, recruit. (Draw a card, then discard a card. If you discarded a nonland card, create a 1/1 white Human Soldier creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard-choice"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard-choice",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"all": [
+									{
+										"bound": "discarded"
+									},
+									{
+										"is": "bound:discard-choice",
+										"matches": {
+											"zones": [
+												"hand"
+											],
+											"not": {
+												"types": [
+													"land"
+												]
+											}
+										},
+										"lastKnown": true
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Bard's Company at normal timing",
+				"basis": "You may cast this spell as though it had flash if you control a Human.",
+				"source": {
+					"card": "Bard's Company",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": []
+			},
+			{
+				"claim": "Cast Bard's Company as though it had flash while controlling a Human",
+				"basis": "You may cast this spell as though it had flash if you control a Human.",
+				"source": {
+					"card": "Bard's Company",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"speed": "instant",
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Human"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,51 @@
+{
+	"card": "Cerebral Download",
+	"generated": "2026-10-10",
+	"source": "94f8da8d531f13654c48c2c1e7417c8be04a4c8772a91f86d3ae4bacdb88bdc1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cerebral Download",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Cerebral Download",
+				"basis": "Surveil X, where X is the number of artifacts you control. Then draw three cards. (To surveil X, look at the top X cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"source": {
+					"card": "Cerebral Download",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"artifact"
+								],
+								"controller": "you"
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

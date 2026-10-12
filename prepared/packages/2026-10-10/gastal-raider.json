@@ -1,0 +1,99 @@
+{
+	"card": "Gastal Raider",
+	"generated": "2026-10-10",
+	"source": "08480838fd174a6bb7690a14488d56f11bac8f058cd4a29df31c9eb2e3b90798",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gastal Raider",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines!",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, target opponent reveals their hand. You choose an instant or sorcery card from it. That player discards that card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "reveal",
+							"every": {
+								"zones": [
+									"hand"
+								],
+								"owner": "target:0"
+							},
+							"as": "hand"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"count": 1,
+							"as": "discard",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"is": "bound:hand",
+								"types": [
+									"instant",
+									"sorcery"
+								]
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — This creature gets +1/+1 and has menace.",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1,
+					"words": [
+						"menace"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

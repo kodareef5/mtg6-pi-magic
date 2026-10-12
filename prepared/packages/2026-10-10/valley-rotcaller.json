@@ -1,0 +1,80 @@
+{
+	"card": "Valley Rotcaller",
+	"generated": "2026-10-10",
+	"source": "8b3abf2471a56cac0359fcfbefc128b30df11dfcfb36a33f8ae99d47f049f516",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Valley Rotcaller",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, each opponent loses X life and you gain X life, where X is the number of other Squirrels, Bats, Lizards, and Rats you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": {
+								"negate": {
+									"count": {
+										"controller": "you",
+										"other": true,
+										"subtypes": [
+											"Squirrel",
+											"Bat",
+											"Lizard",
+											"Rat"
+										]
+									}
+								}
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"count": {
+									"controller": "you",
+									"other": true,
+									"subtypes": [
+										"Squirrel",
+										"Bat",
+										"Lizard",
+										"Rat"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

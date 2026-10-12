@@ -1,0 +1,48 @@
+{
+	"card": "Blazing Firesinger // Seething Song",
+	"generated": "2026-10-10",
+	"source": "0021770dfb8e423b341ea439f1355095d010e73a128578f18b3ffc5f49135054",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blazing Firesinger // Seething Song",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Blazing Firesinger // Seething Song",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Seething Song",
+				"basis": "Add {R}{R}{R}{R}{R}.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mana",
+						"who": "you",
+						"colors": [
+							"R",
+							"R",
+							"R",
+							"R",
+							"R"
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

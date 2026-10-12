@@ -1,0 +1,92 @@
+{
+	"card": "Picnic Ruiner // Stolen Goodies",
+	"generated": "2026-10-10",
+	"source": "a7711397004311b93789fb7ea08c1359fde749cd1367b373eee4f5151ce24f50",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Picnic Ruiner // Stolen Goodies",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever this creature attacks while you control a creature with power 4 or greater, this creature gains double strike until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"power": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"double strike"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Picnic Ruiner // Stolen Goodies",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Stolen Goodies",
+				"basis": "Distribute three +1/+1 counters among any number of target creatures you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": "any",
+						"divide": 3
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": {
+							"divided": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

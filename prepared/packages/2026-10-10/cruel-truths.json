@@ -1,0 +1,47 @@
+{
+	"card": "Cruel Truths",
+	"generated": "2026-10-10",
+	"source": "01945e442b3aca12e1ed221d4f8359498bd3ed01cf0190cd301150d2251315b3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cruel Truths",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Cruel Truths",
+				"basis": "Surveil 2, then draw two cards. You lose 2 life. (To surveil 2, look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"source": {
+					"card": "Cruel Truths",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

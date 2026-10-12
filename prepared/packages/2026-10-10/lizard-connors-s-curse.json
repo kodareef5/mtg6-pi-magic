@@ -1,0 +1,85 @@
+{
+	"card": "Lizard, Connors's Curse",
+	"generated": "2026-10-10",
+	"source": "a183e612fb5348e94e6109055bbb5957eb57af345d5cb8c9144ba254d77205c5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lizard, Connors's Curse",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Lizard Formula — When Lizard, Connors's Curse enters, up to one other target creature loses all abilities and becomes a green Lizard creature with base power and toughness 4/4.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"other": true
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"loseAbilities": true,
+								"colors": {
+									"set": [
+										"G"
+									]
+								},
+								"types": {
+									"set": [
+										"creature"
+									]
+								},
+								"subtypes": {
+									"set": [
+										"Lizard"
+									],
+									"of": "creature"
+								},
+								"base": {
+									"power": 4,
+									"toughness": 4
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

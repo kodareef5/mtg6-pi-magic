@@ -1,0 +1,96 @@
+{
+	"card": "Summon: Knights of Round",
+	"generated": "2026-10-10",
+	"source": "b05ccd9c9ffdadf581f2f73339f4608699ae48d4e2d76701507e51af678caf9d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summon: Knights of Round",
+		"registers": [
+			{
+				"basis": "I, II, III, IV — Create three 2/2 white Knight creature tokens.",
+				"kind": "chapter",
+				"numbers": [
+					1,
+					2,
+					3,
+					4
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 3,
+							"spec": {
+								"name": "Knight Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Knight"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "V — Ultimate End — Other creatures you control get +2/+2 until end of turn. Put an indestructible counter on each of them.",
+				"kind": "chapter",
+				"numbers": [
+					5
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 2
+							},
+							"as": "creatures"
+						},
+						{
+							"do": "counters",
+							"on": "bound:creatures",
+							"kind": "indestructible",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Indestructible",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"indestructible"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

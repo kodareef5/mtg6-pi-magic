@@ -1,0 +1,62 @@
+{
+	"card": "Jump Scare",
+	"generated": "2026-10-10",
+	"source": "f60ed8c4876e7aa20e18522470023fda8f3107ee8e6d5e2ac08afa9a3c2be8b4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jump Scare",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Jump Scare",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +2/+2 and flying and add Horror, enchantment, and creature until end of turn.",
+				"basis": "Until end of turn, target creature gets +2/+2, gains flying, and becomes a Horror enchantment creature in addition to its other types.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"flying"
+							],
+							"types": {
+								"add": [
+									"enchantment",
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Horror"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

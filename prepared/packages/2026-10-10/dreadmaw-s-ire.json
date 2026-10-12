@@ -1,0 +1,85 @@
+{
+	"card": "Dreadmaw's Ire",
+	"generated": "2026-10-10",
+	"source": "7c4f59c34d6008f8d4a0c333b79a9909ea0b71316f43af80ba7983c83fe0d2f3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dreadmaw's Ire",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dreadmaw's Ire",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dreadmaw's Ire",
+				"basis": "Until end of turn, target attacking creature gets +2/+2 and gains trample and \"Whenever this creature deals combat damage to a player, destroy target artifact that player controls.\"",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"attacking": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"trample"
+							],
+							"registers": [
+								{
+									"basis": "Until end of turn, target attacking creature gets +2/+2 and gains trample and \"Whenever this creature deals combat damage to a player, destroy target artifact that player controls.\"",
+									"kind": "watch",
+									"event": {
+										"on": "combat-damage",
+										"of": {
+											"is": "this"
+										},
+										"player": true
+									},
+									"effect": {
+										"targets": [
+											{
+												"object": {
+													"types": [
+														"artifact"
+													],
+													"controller": "event:player"
+												}
+											}
+										],
+										"instructions": [
+											{
+												"do": "destroy",
+												"what": "target:0"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

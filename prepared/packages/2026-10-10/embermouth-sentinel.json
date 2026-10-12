@@ -1,0 +1,110 @@
+{
+	"card": "Embermouth Sentinel",
+	"generated": "2026-10-10",
+	"source": "ee29fad165d370ad235dc5579a1184b43d3290f9616fb9b38da4a0b0b6873ba3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Embermouth Sentinel",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may search your library for a basic land card, reveal it, then shuffle and put that card on top. If you control a Dragon, put that card onto the battlefield tapped instead.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"supertypes": [
+											"basic"
+										],
+										"types": [
+											"land"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "land"
+								},
+								{
+									"do": "order",
+									"who": "you",
+									"every": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"not": {
+											"is": "bound:land"
+										}
+									},
+									"position": "top",
+									"random": true
+								},
+								{
+									"do": "move",
+									"what": "bound:land",
+									"to": "library",
+									"position": "top",
+									"reason": "resolve",
+									"if": {
+										"not": {
+											"amount": {
+												"count": {
+													"controller": "you",
+													"subtypes": [
+														"Dragon"
+													]
+												}
+											},
+											"atLeast": 1
+										}
+									}
+								},
+								{
+									"do": "move",
+									"what": "bound:land",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve",
+									"if": {
+										"amount": {
+											"count": {
+												"controller": "you",
+												"subtypes": [
+													"Dragon"
+												]
+											}
+										},
+										"atLeast": 1
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

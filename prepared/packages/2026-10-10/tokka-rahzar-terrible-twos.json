@@ -1,0 +1,97 @@
+{
+	"card": "Tokka & Rahzar, Terrible Twos",
+	"generated": "2026-10-10",
+	"source": "bf63653cd0db12a090fc6385ee4d0ca00ab4e03678ad91f6275759dfa63fcb34",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tokka & Rahzar, Terrible Twos",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever a player casts a spell, if the amount of mana spent to cast it was less than its mana value, Tokka & Rahzar deal 3 damage to that player.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "any",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"land",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "event:object"
+					},
+					"atMost": {
+						"sum": [
+							{
+								"manaValue": "event:object"
+							},
+							-1
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "event:player",
+							"amount": 3,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tokka & Rahzar, Terrible Twos",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Tokka & Rahzar, Terrible Twos",
+				"basis": "This spell can't be countered.",
+				"timing": "spell",
+				"words": [
+					"can't be countered"
+				],
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

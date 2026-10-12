@@ -1,0 +1,54 @@
+{
+	"card": "Dictate of Kruphix",
+	"generated": "2026-10-10",
+	"source": "aa3ca9204f7e7e4fb111aa4736f0ef698485ce01c5d5ce893dfa93073a75308a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dictate of Kruphix",
+		"registers": [
+			{
+				"basis": "Flash (You may cast this spell any time you could cast an instant.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield",
+						"library",
+						"command"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of each player's draw step, that player draws an additional card.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "draw",
+					"whose": "any"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "event:player",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

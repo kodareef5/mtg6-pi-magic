@@ -1,0 +1,179 @@
+{
+	"card": "Tony Stark // The Invincible Iron Man",
+	"generated": "2026-10-10",
+	"source": "a2bcbe66939eade7d7d3da771160af75750ab569e1fea4f5ed8bd9ddc10a6d0f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tony Stark // The Invincible Iron Man",
+		"registers": [
+			{
+				"face": 1,
+				"basis": "Flying, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"haste"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "At the beginning of combat on your turn, you may put an artifact card from your hand onto the battlefield. If it's an Equipment, attach it to The Invincible Iron Man.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you",
+								"types": [
+									"artifact"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "chosen"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"as": "put"
+						},
+						{
+							"do": "attach",
+							"what": "bound:put",
+							"to": "this",
+							"if": {
+								"is": "bound:put",
+								"matches": {
+									"zones": [
+										"battlefield"
+									],
+									"subtypes": [
+										"Equipment"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Tony Stark // The Invincible Iron Man",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Inspect four cards and optionally take an artifact",
+				"basis": "{1}, {T}: Look at the top four cards of your library. You may reveal an artifact card from among them and put it into your hand. Put the rest on the bottom of your library in a random order.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 4,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"types": [
+								"artifact"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
+			},
+			{
+				"face": 0,
+				"source": {
+					"card": "Tony Stark // The Invincible Iron Man",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Transform Tony Stark",
+				"basis": "{4}{U}{R}: Transform Tony Stark. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}{U}{R}"
+				},
+				"instructions": [
+					{
+						"do": "transform",
+						"what": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		]
+	}
+}

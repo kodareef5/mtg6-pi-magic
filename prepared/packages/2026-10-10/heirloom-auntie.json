@@ -1,0 +1,52 @@
+{
+	"card": "Heirloom Auntie",
+	"generated": "2026-10-10",
+	"source": "cf702caf3e15a5fa8169408f050124b8b9d1c9d136ee780678deb2c68097fefc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Heirloom Auntie",
+		"registers": [
+			{
+				"basis": "This creature enters with two -1/-1 counters on it.",
+				"kind": "enters",
+				"counters": {
+					"-1/-1": 2
+				}
+			},
+			{
+				"basis": "Whenever another creature you control dies, surveil 1, then remove a -1/-1 counter from this creature. (To surveil 1, look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "-1/-1",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

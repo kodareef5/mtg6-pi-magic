@@ -1,0 +1,86 @@
+{
+	"card": "Restorative Technique",
+	"generated": "2026-10-10",
+	"source": "9805271ff67613711c783e651336422fa4791a29c9bdf9dbab38070c6202e142",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Restorative Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Restorative Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Restorative Technique",
+				"basis": "Target player gains 2 life, then searches their library for a basic land card, puts it onto the battlefield tapped, then shuffles. Put a +1/+1 counter on up to one target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": 2
+					},
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "target:0",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "battlefield",
+						"controller": "target:0",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "target:0"
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

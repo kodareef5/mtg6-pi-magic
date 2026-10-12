@@ -1,0 +1,110 @@
+{
+	"card": "Vito, Fanatic of Aclazotz",
+	"generated": "2026-10-10",
+	"source": "9d55a2fa426726d3b208d0f279a2d0c2bcdfe17bacffdba96917574434d8fafd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vito, Fanatic of Aclazotz",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you sacrifice another permanent, you gain 2 life if this is the first time this ability has resolved this turn. If it's the second time, each opponent loses 2 life. If it's the third time, create a 4/3 white and black Vampire Demon creature token with flying.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 1,
+								"atMost": 1
+							}
+						},
+						{
+							"do": "each",
+							"players": "opponent",
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 2,
+								"atMost": 2
+							},
+							"instructions": [
+								{
+									"do": "life",
+									"who": "bound:player",
+									"amount": -2
+								}
+							]
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 3,
+								"atMost": 3
+							},
+							"spec": {
+								"name": "Vampire Demon Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Vampire",
+									"Demon"
+								],
+								"colors": [
+									"W",
+									"B"
+								],
+								"power": 4,
+								"toughness": 3,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

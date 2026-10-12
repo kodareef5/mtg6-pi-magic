@@ -1,0 +1,52 @@
+{
+	"card": "Uncle Iroh",
+	"generated": "2026-10-10",
+	"source": "7bb891fee13c8b9c16e9eec16fa33e846f689f86430c78c58319d301e9a97171",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Uncle Iroh",
+		"registers": [
+			{
+				"basis": "Firebending 1 (Whenever this creature attacks, add {R}. This mana lasts until end of combat.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R"
+							],
+							"until": "end-of-combat"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Lesson spells you cast cost {1} less to cast.",
+				"kind": "cost",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"subtypes": [
+						"Lesson"
+					]
+				},
+				"reduce": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

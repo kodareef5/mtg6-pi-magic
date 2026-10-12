@@ -1,0 +1,94 @@
+{
+	"card": "Prishe's Wanderings",
+	"generated": "2026-10-10",
+	"source": "670842a89eea809a8f63720ec6fba0e97395593f67eca12074ec2c0a069618cb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prishe's Wanderings",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Prishe's Wanderings",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Prishe's Wanderings; search for a basic land card or Town card and create its reflexive counter trigger",
+				"basis": "Search your library for a basic land card or Town card, put it onto the battlefield tapped, then shuffle. When you search your library this way, put a +1/+1 counter on target creature you control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"any": [
+								{
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									]
+								},
+								{
+									"subtypes": [
+										"Town"
+									]
+								}
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "reflect",
+						"effect": {
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "target:0",
+									"kind": "+1/+1",
+									"amount": 1
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

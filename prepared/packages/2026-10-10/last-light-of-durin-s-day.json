@@ -1,0 +1,191 @@
+{
+	"card": "Last Light of Durin's Day",
+	"generated": "2026-10-10",
+	"source": "e0cd7c813292c7804780df9807d14d1b36809320bd79efc2101386607904b7bd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Last Light of Durin's Day",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever a Mountain you control enters, put a quest counter on this enchantment. If it has six or more quest counters on it, sacrifice it. If you do, search your hand and/or library for a Dragon card and put it onto the battlefield. If you search your library this way, shuffle.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Mountain"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "quest",
+							"amount": 1
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice",
+							"as": "sacrificed",
+							"if": {
+								"all": [
+									{
+										"amount": {
+											"counters": "quest",
+											"on": "this"
+										},
+										"atLeast": 6
+									},
+									{
+										"is": "this",
+										"matches": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you"
+										}
+									}
+								]
+							}
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"instructions": [
+								{
+									"do": "perform",
+									"who": "you",
+									"may": true,
+									"as": "library-search",
+									"instructions": [
+										{
+											"do": "choose",
+											"who": "you",
+											"from": {
+												"zones": [
+													"hand",
+													"library"
+												],
+												"owner": "you",
+												"subtypes": [
+													"Dragon"
+												]
+											},
+											"count": 1,
+											"upTo": true,
+											"as": "dragon"
+										},
+										{
+											"do": "move",
+											"what": "bound:dragon",
+											"to": "battlefield",
+											"controller": "you",
+											"reason": "resolve"
+										},
+										{
+											"do": "shuffle",
+											"who": "you"
+										}
+									]
+								},
+								{
+									"do": "perform",
+									"who": "you",
+									"if": {
+										"not": {
+											"bound": "library-search"
+										}
+									},
+									"instructions": [
+										{
+											"do": "choose",
+											"who": "you",
+											"from": {
+												"zones": [
+													"hand"
+												],
+												"controller": "you",
+												"subtypes": [
+													"Dragon"
+												]
+											},
+											"count": 1,
+											"upTo": true,
+											"as": "hand-dragon"
+										},
+										{
+											"do": "move",
+											"what": "bound:hand-dragon",
+											"to": "battlefield",
+											"controller": "you",
+											"reason": "resolve"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Mountaincycle Last Light of Durin's Day",
+				"basis": "Mountaincycling {2} ({2}, Discard this card: Search your library for a Mountain card, reveal it, put it into your hand, then shuffle.)",
+				"source": {
+					"card": "Last Light of Durin's Day",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Mountain"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "mountain"
+					},
+					{
+						"do": "move",
+						"what": "bound:mountain",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

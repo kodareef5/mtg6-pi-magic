@@ -1,0 +1,85 @@
+{
+	"card": "Rakdos Joins Up",
+	"generated": "2026-10-10",
+	"source": "fff75200030894e4ddab2e4aa9e7f7298c8b123e3d87872f271ca79b6a6bd946",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rakdos Joins Up",
+		"registers": [
+			{
+				"basis": "When Rakdos Joins Up enters, return target creature card from your graveyard to the battlefield with two additional +1/+1 counters on it.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"counters": {
+								"+1/+1": 2
+							},
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a legendary creature you control dies, Rakdos Joins Up deals damage equal to that creature's power to target opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"supertypes": [
+							"legendary"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"from": "this",
+							"amount": {
+								"power": "event:object"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

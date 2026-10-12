@@ -1,0 +1,79 @@
+{
+	"card": "Gastal Blockbuster",
+	"generated": "2026-10-10",
+	"source": "59134330a694a137eb5645c43cc18951fd7c70f5e8805b9d244a77af47e28048",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gastal Blockbuster",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may sacrifice a creature or Vehicle. When you do, destroy target artifact an opponent controls.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"may": true,
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"controller": "you",
+										"any": [
+											{
+												"types": [
+													"creature"
+												]
+											},
+											{
+												"subtypes": [
+													"Vehicle"
+												]
+											}
+										]
+									},
+									"count": 1
+								}
+							},
+							"as": "sacrificed"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"artifact"
+											],
+											"controller": "opponent"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "destroy",
+										"what": "target:0"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

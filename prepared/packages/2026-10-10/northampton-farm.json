@@ -1,0 +1,122 @@
+{
+	"card": "Northampton Farm",
+	"generated": "2026-10-10",
+	"source": "c61498f9e0f477ed2c001030f721b27bbb89331b4ec9852174ef90fd2668cf16",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Northampton Farm",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Northampton Farm",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile target creature you own",
+				"basis": "{1}, {T}: Exile target creature you own.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"owner": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile",
+						"link": true
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Northampton Farm",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Return one linked creature card under your control, then return all other linked cards to their owners' hands",
+				"basis": "{2}, {T}, Sacrifice this land: Return a creature card exiled with this land to the battlefield under your control. Return each other card exiled with this land to its owner's hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"exile"
+							],
+							"linked": true,
+							"types": [
+								"creature"
+							],
+							"token": false
+						},
+						"count": 1,
+						"as": "creature"
+					},
+					{
+						"do": "move",
+						"what": "bound:creature",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"exile"
+							],
+							"linked": true,
+							"token": false,
+							"not": {
+								"is": "bound:creature"
+							}
+						},
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

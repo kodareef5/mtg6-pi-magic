@@ -1,0 +1,101 @@
+{
+	"card": "Kyoshi Battle Fan",
+	"generated": "2026-10-10",
+	"source": "7f1f41451775c3b3761ae16215f2e51e8928ce26b7ef17d53d74efe5f3e5a758",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kyoshi Battle Fan",
+		"registers": [
+			{
+				"basis": "When this Equipment enters, create a 1/1 white Ally creature token, then attach this Equipment to it.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Ally Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Ally"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"as": "ally"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:ally"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +1/+0.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kyoshi Battle Fan",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Kyoshi Battle Fan",
+				"basis": "Equip {2} ({2}: Attach to target creature you control. Equip only as a sorcery.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

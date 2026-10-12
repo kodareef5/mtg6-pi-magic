@@ -1,0 +1,95 @@
+{
+	"card": "Trip Up",
+	"generated": "2026-10-10",
+	"source": "3d9a3f060125b24c42ed6ec632d998f8f9ae1efaa4b32c43978d9853f170d492",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Trip Up",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Trip Up",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Trip Up; the permanent's owner chooses bottom or top during resolution",
+				"basis": "Target nonland permanent's owner puts it on their choice of the top or bottom of their library.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "bottom-choice",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "bottom",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "top",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "bottom-choice"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trip Up",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Trip Up",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

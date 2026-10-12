@@ -1,0 +1,137 @@
+{
+	"card": "Swordsman, Sharp Scoundrel",
+	"generated": "2026-10-10",
+	"source": "57d4fd75d0256435f5755cff8c39c2234cbe05a42cf09a45203ae8c4700b80a0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Swordsman, Sharp Scoundrel",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever another Villain you control enters, attach up to one target Equipment you control to target creature you control.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Villain"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"subtypes": [
+									"Equipment"
+								],
+								"controller": "you"
+							},
+							"upTo": true
+						},
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "attach",
+							"what": "target:0",
+							"to": "target:1"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever an equipped creature you control attacks, it connives. (Draw a card, then discard a card. If you discarded a nonland card, put a +1/+1 counter on that creature.)",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"subtypes": [
+								"Equipment"
+							],
+							"attachedTo": "event:object"
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "controller:event:object",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "controller:event:object",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "controller:event:object"
+							},
+							"count": 1,
+							"as": "discard-choice"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard-choice",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "counters",
+							"on": "event:object",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"all": [
+									{
+										"bound": "discarded"
+									},
+									{
+										"is": "bound:discard-choice",
+										"matches": {
+											"zones": [
+												"hand"
+											],
+											"not": {
+												"types": [
+													"land"
+												]
+											}
+										},
+										"lastKnown": true
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

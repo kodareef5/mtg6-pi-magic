@@ -1,0 +1,95 @@
+{
+	"card": "Gaius van Baelsar",
+	"generated": "2026-10-10",
+	"source": "c12b9d6ebd40d33ca74f6ddfb0dd3fc6a5e1d0f01802b88c35352c545eae7572",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gaius van Baelsar",
+		"registers": [
+			{
+				"basis": "When Gaius van Baelsar enters, choose one —\n• Each player sacrifices a creature token of their choice.\n• Each player sacrifices a nontoken creature of their choice.\n• Each player sacrifices an enchantment of their choice.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "choose-actions",
+									"who": "each-player",
+									"count": 1,
+									"actions": [
+										{
+											"sacrifice": {
+												"zones": [
+													"battlefield"
+												],
+												"types": [
+													"creature"
+												],
+												"token": true
+											}
+										}
+									]
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "choose-actions",
+									"who": "each-player",
+									"count": 1,
+									"actions": [
+										{
+											"sacrifice": {
+												"zones": [
+													"battlefield"
+												],
+												"types": [
+													"creature"
+												],
+												"token": false
+											}
+										}
+									]
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "choose-actions",
+									"who": "each-player",
+									"count": 1,
+									"actions": [
+										{
+											"sacrifice": {
+												"zones": [
+													"battlefield"
+												],
+												"types": [
+													"enchantment"
+												]
+											}
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,93 @@
+{
+	"card": "Moldering Gym // Weight Room",
+	"generated": "2026-10-10",
+	"source": "9835dd190aad8cb60e613f69e3c8369dfd02a865021054ebdadfa1abdd574e0f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Moldering Gym // Weight Room",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When you unlock this door, search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "battlefield",
+							"tapped": true,
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When you unlock this door, manifest dread, then put three +1/+1 counters on that creature.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "manifest-dread",
+							"who": "you",
+							"as": "manifested"
+						},
+						{
+							"do": "counters",
+							"on": "bound:manifested",
+							"kind": "+1/+1",
+							"amount": 3
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		],
+		"deferred": []
+	}
+}

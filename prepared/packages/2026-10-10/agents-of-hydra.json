@@ -1,0 +1,50 @@
+{
+	"card": "Agents of HYDRA",
+	"generated": "2026-10-10",
+	"source": "2f6ba753add8b469ef9ca84a20560e4355f2dad587a7bc41f2383174130f9744",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Agents of HYDRA",
+		"registers": [
+			{
+				"basis": "When this creature dies, create a 2/1 black Villain creature token with menace. (It can't be blocked except by two or more creatures.)",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Villain Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Villain"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 2,
+								"toughness": 1,
+								"words": [
+									"menace"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

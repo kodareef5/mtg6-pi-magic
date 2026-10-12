@@ -1,0 +1,114 @@
+{
+	"card": "Hour of Victory",
+	"generated": "2026-10-10",
+	"source": "65c8db31da0da1a4e2860967b26e9e2e61d8c9ca7ce8a4a9ecdccb6fd7579f52",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hour of Victory",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines!",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this enchantment enters, create a 2/2 black Zombie creature token.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Zombie Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Zombie"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — {1}{B}, Sacrifice this enchantment: Search your library for a card, put it into your hand, then shuffle. Activate only as a sorcery.",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Max speed — {1}{B}, Sacrifice this enchantment: Search your library for a card, put it into your hand, then shuffle. Activate only as a sorcery.",
+							"cost": {
+								"mana": "{1}{B}",
+								"sacrifice": "this"
+							},
+							"speed": "sorcery",
+							"effect": {
+								"instructions": [
+									{
+										"do": "choose",
+										"who": "you",
+										"from": {
+											"zones": [
+												"library"
+											],
+											"owner": "you",
+											"token": false
+										},
+										"count": 1,
+										"as": "card"
+									},
+									{
+										"do": "move",
+										"what": "bound:card",
+										"to": "hand",
+										"reason": "resolve"
+									},
+									{
+										"do": "shuffle",
+										"who": "you"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

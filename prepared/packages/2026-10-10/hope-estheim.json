@@ -1,0 +1,53 @@
+{
+	"card": "Hope Estheim",
+	"generated": "2026-10-10",
+	"source": "1f8cf42c554785a003ad606b28813cd70b8150e9e613f068e41d872e45528860",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hope Estheim",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, each opponent mills X cards, where X is the amount of life you gained this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "opponent",
+							"count": {
+								"history": "life-gained",
+								"by": "you"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

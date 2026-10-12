@@ -1,0 +1,127 @@
+{
+	"card": "Feral Deathgorger // Dusk Sight",
+	"generated": "2026-10-10",
+	"source": "22769fd4ba775a14c6521b80057e446cf9b6bd5bb81652dd4504c7765a53beb0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Feral Deathgorger // Dusk Sight",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying, deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "When this creature enters, exile up to two target cards from a single graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								]
+							},
+							"upTo": true
+						},
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "owner:target:0",
+								"not": {
+									"is": "target:0"
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"graveyard"
+								],
+								"any": [
+									{
+										"is": "target:0"
+									},
+									{
+										"is": "target:1"
+									}
+								]
+							},
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Feral Deathgorger // Dusk Sight",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dusk Sight",
+				"basis": "Put a +1/+1 counter on up to one target creature. Draw a card. (Then shuffle this card into its owner's library.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

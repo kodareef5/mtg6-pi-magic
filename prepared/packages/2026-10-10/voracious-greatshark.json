@@ -1,0 +1,67 @@
+{
+	"card": "Voracious Greatshark",
+	"generated": "2026-10-10",
+	"source": "562638e887ff94de5f5a45148a75ace8d99a691ff11b9fffe72e26d6d6644483",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Voracious Greatshark",
+		"registers": [
+			{
+				"basis": "Flash (You may cast this spell any time you could cast an instant.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield",
+						"library",
+						"command"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, counter target artifact or creature spell.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"stack"
+								],
+								"types": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

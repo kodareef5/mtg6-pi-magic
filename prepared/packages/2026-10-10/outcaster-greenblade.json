@@ -1,0 +1,93 @@
+{
+	"card": "Outcaster Greenblade",
+	"generated": "2026-10-10",
+	"source": "1a7f74400db94304abaf70336104d8b79706ec29a73fd2b1c01d76b5e6e9f738",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Outcaster Greenblade",
+		"registers": [
+			{
+				"basis": "When this creature enters, search your library for a basic land card or a Desert card, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"any": [
+									{
+										"types": [
+											"land"
+										],
+										"supertypes": [
+											"basic"
+										]
+									},
+									{
+										"subtypes": [
+											"Desert"
+										]
+									}
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"basis": "This creature gets +1/+1 for each Desert you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"count": {
+							"subtypes": [
+								"Desert"
+							],
+							"controller": "you"
+						}
+					},
+					"toughness": {
+						"count": {
+							"subtypes": [
+								"Desert"
+							],
+							"controller": "you"
+						}
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

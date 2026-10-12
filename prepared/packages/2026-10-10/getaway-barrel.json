@@ -1,0 +1,81 @@
+{
+	"card": "Getaway Barrel",
+	"generated": "2026-10-10",
+	"source": "6375ed85cdf88cbbe19e94af23393ad468cc000010b880fa23305f4a4d5fa447",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Getaway Barrel",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this artifact is put into a graveyard from the battlefield, reveal the top thirteen cards of your library. Put a random creature card from among them onto the battlefield. Put the rest on the bottom of your library in a random order.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "reveal",
+							"what": {
+								"top": 13,
+								"of": "you"
+							},
+							"as": "revealed"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:revealed",
+								"types": [
+									"creature"
+								]
+							},
+							"count": 1,
+							"random": true,
+							"as": "creature"
+						},
+						{
+							"do": "move",
+							"what": "bound:creature",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:revealed"
+							},
+							"position": "bottom",
+							"random": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

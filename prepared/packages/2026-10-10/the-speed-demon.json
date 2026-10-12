@@ -1,0 +1,74 @@
+{
+	"card": "The Speed Demon",
+	"generated": "2026-10-10",
+	"source": "0105ad013f44651ff30f4ac55da979f8368ebe4a8e3f189351f8efcf3642aa88",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Speed Demon",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your end step, you draw X cards and lose X life, where X is your speed.",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"speed": "you"
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"negate": {
+									"speed": "you"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

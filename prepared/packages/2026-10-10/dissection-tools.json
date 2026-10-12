@@ -1,0 +1,100 @@
+{
+	"card": "Dissection Tools",
+	"generated": "2026-10-10",
+	"source": "e4ecc35c7a8fd086f627ae6fc7f8862b43b5cffc6465579b5f7c15072b74fbca",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dissection Tools",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this Equipment enters, manifest dread, then attach this Equipment to that creature.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "manifest-dread",
+							"who": "you",
+							"as": "manifested"
+						},
+						{
+							"do": "attach",
+							"what": "this",
+							"to": "bound:manifested"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +2/+2 and has deathtouch and lifelink.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2,
+					"words": [
+						"deathtouch",
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dissection Tools",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip by sacrificing a creature",
+				"basis": "Equip—Sacrifice a creature.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

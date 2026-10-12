@@ -13,11 +13,14 @@
 				"affects": {
 					"is": "this",
 					"zones": [
+						"library",
 						"hand",
+						"battlefield",
 						"graveyard",
-						"exile",
 						"stack",
-						"battlefield"
+						"exile",
+						"command",
+						"outside"
 					]
 				},
 				"change": {
@@ -41,7 +44,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Ally",
+								"name": "Ally Token",
 								"types": [
 									"creature"
 								],

@@ -1,0 +1,120 @@
+{
+	"card": "Alquist Proft, Master Sleuth",
+	"generated": "2026-10-10",
+	"source": "a40dfef2059fc8bb48e0b18780cd8008549ad6d5f958b81602a92e95e1acac29",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Alquist Proft, Master Sleuth",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Alquist Proft enters, investigate. (Create a Clue token. It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Clue Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Clue"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, Sacrifice this token: Draw a card.",
+										"cost": {
+											"mana": "{2}",
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Draw X cards and gain X life",
+				"basis": "{X}{W}{U}{U}, {T}, Sacrifice a Clue: You draw X cards and gain X life.",
+				"source": {
+					"card": "Alquist Proft, Master Sleuth",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{X}{W}{U}{U}",
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"subtypes": [
+								"Clue"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"x": true
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"x": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

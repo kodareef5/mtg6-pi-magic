@@ -1,0 +1,78 @@
+{
+	"card": "Scuzzback Scrounger",
+	"generated": "2026-10-10",
+	"source": "ad9ac9838425e95e77548eae45b954f2fed3d859b0db0c250b5a45b423fefa06",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scuzzback Scrounger",
+		"registers": [
+			{
+				"basis": "At the beginning of your first main phase, you may blight 1. If you do, create a Treasure token. (To blight 1, put a -1/-1 counter on a creature you control. A Treasure token is an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"may": true,
+							"cost": {
+								"counters": {
+									"kind": "-1/-1",
+									"count": 1,
+									"put": true,
+									"on": {
+										"choose": {
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										},
+										"count": 1
+									}
+								}
+							},
+							"as": "blighted"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"bound": "blighted"
+							},
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

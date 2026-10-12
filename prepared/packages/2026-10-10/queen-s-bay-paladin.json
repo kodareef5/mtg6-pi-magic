@@ -1,0 +1,145 @@
+{
+	"card": "Queen's Bay Paladin",
+	"generated": "2026-10-10",
+	"source": "15f035dc592f63b0d96a387cd276b351ed2a63add91f78559772c73fc07ac79d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Queen's Bay Paladin",
+		"registers": [
+			{
+				"basis": "Whenever this creature enters or attacks, return up to one target Vampire card from your graveyard to the battlefield with a finality counter on it. You lose life equal to its mana value. (If a creature with a finality counter on it would die, exile it instead.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"subtypes": [
+									"Vampire"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"counters": {
+								"finality": 1
+							},
+							"reason": "resolve",
+							"as": "returned"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"negate": {
+									"manaValue": "bound:returned"
+								}
+							},
+							"if": {
+								"bound": "returned"
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"negate": {
+									"manaValue": "target:0"
+								}
+							},
+							"if": {
+								"not": {
+									"bound": "returned"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, return up to one target Vampire card from your graveyard to the battlefield with a finality counter on it. You lose life equal to its mana value. (If a creature with a finality counter on it would die, exile it instead.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"subtypes": [
+									"Vampire"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"counters": {
+								"finality": 1
+							},
+							"reason": "resolve",
+							"as": "returned"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"negate": {
+									"manaValue": "bound:returned"
+								}
+							},
+							"if": {
+								"bound": "returned"
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"negate": {
+									"manaValue": "target:0"
+								}
+							},
+							"if": {
+								"not": {
+									"bound": "returned"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

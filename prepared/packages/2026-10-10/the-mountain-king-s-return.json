@@ -1,0 +1,166 @@
+{
+	"card": "The Mountain-king's Return",
+	"generated": "2026-10-10",
+	"source": "5be2adc3d0beda7cf01e918d6b5843b415e9d3e91d4f0d064eff8725eb66d1a9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Mountain-king's Return",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Recruit. (Draw a card, then discard a card. If you discarded a nonland card, create a 1/1 white Human Soldier creature token.)",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard-card",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Human Soldier Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Human",
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"all": [
+									{
+										"bound": "discarded"
+									},
+									{
+										"is": "bound:discarded",
+										"matches": {
+											"zones": [
+												"battlefield",
+												"graveyard",
+												"exile",
+												"command",
+												"stack",
+												"outside"
+											],
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"instant",
+												"kindred",
+												"planeswalker",
+												"sorcery"
+											],
+											"not": {
+												"types": [
+													"land"
+												]
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"basis": "II — Return target creature card with mana value 3 or less from your graveyard to the battlefield.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"token": false,
+								"manaValue": {
+									"atMost": 3
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"basis": "III — Put a +1/+1 counter on up to one target creature.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

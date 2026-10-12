@@ -1,0 +1,63 @@
+{
+	"card": "Burnished Hart",
+	"generated": "2026-10-10",
+	"source": "cb107a2dc87df7b5a9ca7bebeb324d02019f32973965bdaed2d4b048d97e60ef",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Burnished Hart",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Burnished Hart",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Burnished Hart to search for up to two basic lands",
+				"basis": "{3}, Sacrifice this creature: Search your library for up to two basic land cards, put them onto the battlefield tapped, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"supertypes": [
+								"basic"
+							],
+							"types": [
+								"land"
+							]
+						},
+						"count": 2,
+						"upTo": true,
+						"as": "lands"
+					},
+					{
+						"do": "move",
+						"what": "bound:lands",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

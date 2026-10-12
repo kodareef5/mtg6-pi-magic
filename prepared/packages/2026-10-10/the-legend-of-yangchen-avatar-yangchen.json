@@ -1,0 +1,215 @@
+{
+	"card": "The Legend of Yangchen // Avatar Yangchen",
+	"generated": "2026-10-10",
+	"source": "9093b0e9a4d5f60f2ab26c6e97d678382a3b7e47c2854594418772e3fe645e4c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Legend of Yangchen // Avatar Yangchen",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "I — Starting with you, each player chooses up to one permanent with mana value 3 or greater from among permanents your opponents control. Exile those permanents.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "opponent",
+								"manaValue": {
+									"atLeast": 3
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "your-choice"
+						},
+						{
+							"do": "choose",
+							"who": "opponent",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "opponent",
+								"manaValue": {
+									"atLeast": 3
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "opponent-choice"
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"any": [
+									{
+										"is": "bound:your-choice"
+									},
+									{
+										"is": "bound:opponent-choice"
+									}
+								]
+							},
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "II — You may have target opponent draw three cards. If you do, draw three cards.",
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "draw",
+									"who": "target:0",
+									"count": 3
+								},
+								{
+									"do": "draw",
+									"who": "you",
+									"count": 3
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "III — Exile this Saga, then return it to the battlefield transformed under your control.",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled-saga"
+						},
+						{
+							"do": "move",
+							"what": "bound:exiled-saga",
+							"to": "battlefield",
+							"face": 1,
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Whenever you cast your second spell each turn, airbend up to one other target nonland permanent. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"ordinal": 2,
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"other": true,
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"as": "airbent"
+						},
+						{
+							"do": "permit",
+							"what": "bound:airbent",
+							"who": "owner",
+							"mana": "{2}",
+							"until": "indefinite"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

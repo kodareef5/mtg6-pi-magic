@@ -1,0 +1,86 @@
+{
+	"card": "Bone-Cairn Butcher",
+	"generated": "2026-10-10",
+	"source": "eae55d7fe9b497191fe185be4bbfe41fd1fe4a597144236a93a28a3526de0697",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bone-Cairn Butcher",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Mobilize 2 (Whenever this creature attacks, create two tapped and attacking 1/1 red Warrior creature tokens. Sacrifice them at the beginning of the next end step.)",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"tapped": true,
+							"attacking": true,
+							"as": "mobilized",
+							"spec": {
+								"name": "Warrior Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Warrior"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:mobilized",
+										"to": "graveyard",
+										"reason": "sacrifice"
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Attacking tokens you control have deathtouch.",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"token": true,
+					"attacking": true,
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

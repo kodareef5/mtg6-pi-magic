@@ -1,0 +1,482 @@
+{
+	"card": "Trash the Town",
+	"generated": "2026-10-10",
+	"source": "b560081660061d3ae91a32085f2e805d5da0c6e4ea43d5bbd4f273abd945d043",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Trash the Town",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Trash the Town",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Trash the Town: counters only",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2} — Put two +1/+1 counters on target creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-counters",
+							"mana": "{2}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trash the Town",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Trash the Town: trample only",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Target creature gains trample until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-trample",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trash the Town",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Trash the Town: combat-damage draw ability only",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Until end of turn, target creature gains \"Whenever this creature deals combat damage to a player, draw two cards.\"",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-draw",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"registers": [
+								{
+									"basis": "+ {1} — Until end of turn, target creature gains \"Whenever this creature deals combat damage to a player, draw two cards.\"",
+									"kind": "watch",
+									"event": {
+										"on": "combat-damage",
+										"of": {
+											"is": "this"
+										},
+										"player": true
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 2
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trash the Town",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Trash the Town: counters and trample",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2} — Put two +1/+1 counters on target creature. ... + {1} — Target creature gains trample until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-counters",
+							"mana": "{2}"
+						},
+						{
+							"name": "spree-trample",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trash the Town",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Trash the Town: counters and combat-damage draw ability",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2} — Put two +1/+1 counters on target creature. ... + {1} — Until end of turn, target creature gains \"Whenever this creature deals combat damage to a player, draw two cards.\"",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-counters",
+							"mana": "{2}"
+						},
+						{
+							"name": "spree-draw",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"registers": [
+								{
+									"basis": "+ {1} — Until end of turn, target creature gains \"Whenever this creature deals combat damage to a player, draw two cards.\"",
+									"kind": "watch",
+									"event": {
+										"on": "combat-damage",
+										"of": {
+											"is": "this"
+										},
+										"player": true
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 2
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trash the Town",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Trash the Town: trample and combat-damage draw ability",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Target creature gains trample until end of turn. ... + {1} — Until end of turn, target creature gains \"Whenever this creature deals combat damage to a player, draw two cards.\"",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-trample",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-draw",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"registers": [
+								{
+									"basis": "+ {1} — Until end of turn, target creature gains \"Whenever this creature deals combat damage to a player, draw two cards.\"",
+									"kind": "watch",
+									"event": {
+										"on": "combat-damage",
+										"of": {
+											"is": "this"
+										},
+										"player": true
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 2
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trash the Town",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Trash the Town: all three modes",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2} — Put two +1/+1 counters on target creature. ... + {1} — Target creature gains trample until end of turn. ... + {1} — Until end of turn, target creature gains \"Whenever this creature deals combat damage to a player, draw two cards.\"",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-counters",
+							"mana": "{2}"
+						},
+						{
+							"name": "spree-trample",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-draw",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 2
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:2",
+						"until": "end-of-turn",
+						"change": {
+							"registers": [
+								{
+									"basis": "+ {1} — Until end of turn, target creature gains \"Whenever this creature deals combat damage to a player, draw two cards.\"",
+									"kind": "watch",
+									"event": {
+										"on": "combat-damage",
+										"of": {
+											"is": "this"
+										},
+										"player": true
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 2
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

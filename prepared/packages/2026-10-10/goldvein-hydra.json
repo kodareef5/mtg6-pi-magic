@@ -1,0 +1,101 @@
+{
+	"card": "Goldvein Hydra",
+	"generated": "2026-10-10",
+	"source": "94b38ba3ed3354ab92b2cc1fd832e1dd71960583e2c15c00817be379fad49ef0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goldvein Hydra",
+		"registers": [
+			{
+				"basis": "Vigilance, trample, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance",
+						"trample",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "This creature enters with X +1/+1 counters on it.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": {
+						"x": true
+					}
+				}
+			},
+			{
+				"basis": "When this creature dies, create a number of tapped Treasure tokens equal to its power.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"power": "this"
+							},
+							"tapped": true,
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Goldvein Hydra",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Goldvein Hydra with chosen X",
+				"basis": "This creature enters with X +1/+1 counters on it.",
+				"timing": "spell",
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

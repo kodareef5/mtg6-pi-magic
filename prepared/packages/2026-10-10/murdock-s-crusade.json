@@ -1,0 +1,161 @@
+{
+	"card": "Murdock's Crusade",
+	"generated": "2026-10-10",
+	"source": "93d518110e0c92f66896bd8bcd1d2d6adf294d4440eedd769120617026fae15a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Murdock's Crusade",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Murdock's Crusade",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Murdock's Crusade choosing Street Justice without teamwork",
+				"basis": "Teamwork 4 (As an additional cost to cast this spell, you may tap any number of creatures you control with total power 4 or more.) ... Choose one. If this spell was cast using teamwork, choose both instead. ... • Street Justice — Exile target creature with toughness 4 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"toughness": {
+								"atLeast": 4
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Murdock's Crusade",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Murdock's Crusade choosing Legal Justice without teamwork",
+				"basis": "Teamwork 4 (As an additional cost to cast this spell, you may tap any number of creatures you control with total power 4 or more.) ... Choose one. If this spell was cast using teamwork, choose both instead. ... • Legal Justice — Exile target enchantment with mana value 4 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"enchantment"
+							],
+							"manaValue": {
+								"atLeast": 4
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Murdock's Crusade",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Murdock's Crusade using teamwork and choosing both modes",
+				"basis": "Teamwork 4 (As an additional cost to cast this spell, you may tap any number of creatures you control with total power 4 or more.) ... Choose one. If this spell was cast using teamwork, choose both instead. ... • Street Justice — Exile target creature with toughness 4 or greater. ... • Legal Justice — Exile target enchantment with mana value 4 or greater.",
+				"timing": "spell",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": false
+						},
+						"totalPower": 4
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"toughness": {
+								"atLeast": 4
+							}
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"enchantment"
+							],
+							"manaValue": {
+								"atLeast": 4
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "move",
+						"what": "target:1",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

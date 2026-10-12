@@ -1,0 +1,76 @@
+{
+	"card": "Saheeli, Jewel of Avishkar",
+	"generated": "2026-10-10",
+	"source": "72809d2c98246ffd8bed6b0161a926b3370520b6fd581bac7c90f4c25bbefb34",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Saheeli, Jewel of Avishkar",
+		"registers": [
+			{
+				"basis": "Thopters you control have haste.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Thopter"
+					],
+					"controller": "you",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a noncreature spell, create a 1/1 colorless Thopter artifact creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Thopter Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Thopter"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

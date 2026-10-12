@@ -1,0 +1,93 @@
+{
+	"card": "Greenhouse // Rickety Gazebo",
+	"generated": "2026-10-10",
+	"source": "773a8fe097bb3e8475321901c763dff7dc288ecf4eba14264234b953f162aa58",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Greenhouse // Rickety Gazebo",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Lands you control have \"{T}: Add one mana of any color.\"",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"land"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Lands you control have \"{T}: Add one mana of any color.\"",
+							"kind": "mana",
+							"cost": {
+								"tap": true
+							},
+							"any": 1
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When you unlock this door, mill four cards, then return up to two permanent cards from among them to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 4,
+							"as": "milled"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"is": "bound:milled",
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"land",
+									"planeswalker"
+								]
+							},
+							"count": 2,
+							"upTo": true,
+							"as": "returned"
+						},
+						{
+							"do": "move",
+							"what": "bound:returned",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		]
+	}
+}

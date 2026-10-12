@@ -1,0 +1,88 @@
+{
+	"card": "Sidisi, Regent of the Mire",
+	"generated": "2026-10-10",
+	"source": "7b7862b8839169026c64491fcaf053e9fa977dfa56d183f0ed8e1c7eadfe69e4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sidisi, Regent of the Mire",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sidisi, Regent of the Mire",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature to return a creature card with mana value one greater",
+				"basis": "{T}, Sacrifice a creature you control with mana value X other than Sidisi: Return target creature card with mana value X plus 1 from your graveyard to the battlefield. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"other": true,
+							"manaValue": {
+								"atLeast": {
+									"sum": [
+										{
+											"manaValue": "target:0"
+										},
+										-1
+									]
+								},
+								"atMost": {
+									"sum": [
+										{
+											"manaValue": "target:0"
+										},
+										-1
+									]
+								}
+							}
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atLeast": 1
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

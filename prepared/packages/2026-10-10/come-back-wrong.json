@@ -1,0 +1,91 @@
+{
+	"card": "Come Back Wrong",
+	"generated": "2026-10-10",
+	"source": "0bf4fff4464a74b26390f1a766586f40ef1b41e7eeae792d5df302787d49c7f6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Come Back Wrong",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Come Back Wrong",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy a creature, return its creature card if it reaches a graveyard, and sacrifice the returned permanent at your next end step.",
+				"basis": "Destroy target creature. If a creature card is put into a graveyard this way, return it to the battlefield under your control. Sacrifice it at the beginning of your next end step.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0",
+						"as": "destroyed"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"is": "bound:destroyed",
+							"matches": {
+								"zones": [
+									"graveyard"
+								],
+								"types": [
+									"creature"
+								],
+								"token": false
+							}
+						},
+						"instructions": [
+							{
+								"do": "move",
+								"what": "bound:destroyed",
+								"to": "battlefield",
+								"controller": "you",
+								"reason": "resolve",
+								"as": "returned"
+							},
+							{
+								"do": "delay",
+								"if": {
+									"bound": "returned"
+								},
+								"event": {
+									"on": "step",
+									"step": "end",
+									"whose": "you"
+								},
+								"effect": {
+									"instructions": [
+										{
+											"do": "move",
+											"what": "bound:returned",
+											"to": "graveyard",
+											"reason": "sacrifice"
+										}
+									]
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

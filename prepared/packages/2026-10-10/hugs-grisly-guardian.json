@@ -1,0 +1,87 @@
+{
+	"card": "Hugs, Grisly Guardian",
+	"generated": "2026-10-10",
+	"source": "e76eead98cc3004ff36efb4f464b3abc2fb3310993e6e46a0065b9d5626624a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hugs, Grisly Guardian",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When Hugs enters, exile the top X cards of your library. Until the end of your next turn, you may play those cards.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": {
+									"x": true
+								},
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "You may play an additional land on each of your turns.",
+				"kind": "permit",
+				"lands": 1
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Hugs, Grisly Guardian with X",
+				"basis": "When Hugs enters, exile the top X cards of your library. Until the end of your next turn, you may play those cards.",
+				"source": {
+					"card": "Hugs, Grisly Guardian",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,92 @@
+{
+	"card": "Spiders-Man, Heroic Horde",
+	"generated": "2026-10-10",
+	"source": "631749c5d1d68ef44faf730c447f0f2966ca7bc9e17f27205d4ea7a3560b9613",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spiders-Man, Heroic Horde",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Spiders-Man enters, if they were cast using web-slinging, you gain 3 life and create two 2/1 green Spider creature tokens with reach.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"alternative": "web-slinging"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3
+						},
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Spider Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spider"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 2,
+								"toughness": 1,
+								"words": [
+									"reach"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spiders-Man, Heroic Horde",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast using web-slinging",
+				"basis": "Web-slinging {4}{G}{G} (You may cast this spell for {4}{G}{G} if you also return a tapped creature you control to its owner's hand.)",
+				"timing": "spell",
+				"cost": {
+					"alternative": "web-slinging",
+					"mana": "{4}{G}{G}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

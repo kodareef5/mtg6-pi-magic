@@ -1,0 +1,54 @@
+{
+	"card": "Beluna's Gatekeeper // Entry Denied",
+	"generated": "2026-10-10",
+	"source": "0fbcad4d88e73c9914bd0ed246db6e464111dd420c96dd419b8b5b5673da9d6c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beluna's Gatekeeper // Entry Denied",
+		"registers": [],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Beluna's Gatekeeper // Entry Denied",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Entry Denied",
+				"basis": "Return target creature you don't control with mana value 3 or less to its owner's hand. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent",
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

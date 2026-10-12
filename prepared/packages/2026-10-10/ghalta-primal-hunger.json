@@ -1,0 +1,62 @@
+{
+	"card": "Ghalta, Primal Hunger",
+	"generated": "2026-10-10",
+	"source": "545c69c0da018f43ec7dc57cc67efce9f4735d20d4e257e806457fb7f0bae0e8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ghalta, Primal Hunger",
+		"registers": [
+			{
+				"basis": "Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ghalta, Primal Hunger",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ghalta with a generic reduction equal to the total power of creatures you control",
+				"basis": "This spell costs {X} less to cast, where X is the total power of creatures you control.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"aggregate": "sum",
+						"of": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"value": "power"
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

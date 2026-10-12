@@ -28,7 +28,7 @@
 						"do": "token",
 						"count": 1,
 						"spec": {
-							"name": "Treasure",
+							"name": "Treasure Token",
 							"types": [
 								"artifact"
 							],

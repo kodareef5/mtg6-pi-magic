@@ -1,0 +1,51 @@
+{
+	"card": "Adamant Will",
+	"generated": "2026-10-10",
+	"source": "877b4e1098930b6d11e48f5e2202cf8fd514610a6fcd530ba00e3c418b85f61e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Adamant Will",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Adamant Will",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +2/+2 and indestructible until end of turn.",
+				"basis": "Target creature gets +2/+2 and gains indestructible until end of turn. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

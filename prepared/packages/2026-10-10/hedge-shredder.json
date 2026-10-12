@@ -1,0 +1,115 @@
+{
+	"card": "Hedge Shredder",
+	"generated": "2026-10-10",
+	"source": "a825ed0af1643cf8a4b68c0db7c81c4dec03dc5d2a6faf751b614c0b4879bec8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hedge Shredder",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever this Vehicle attacks, you may mill two cards.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 2,
+							"may": true
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more land cards are put into your graveyard from your library, put them onto the battlefield tapped.",
+				"event": {
+					"on": "enters",
+					"from": [
+						"library"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"types": [
+							"land"
+						],
+						"token": false
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:objects",
+							"to": "battlefield",
+							"controller": "you",
+							"tapped": true,
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hedge Shredder",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Hedge Shredder",
+				"basis": "Crew 1 (Tap any number of creatures you control with total power 1 or more: This Vehicle becomes an artifact creature until end of turn.)",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

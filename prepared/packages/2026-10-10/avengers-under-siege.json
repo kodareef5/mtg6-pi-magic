@@ -1,0 +1,118 @@
+{
+	"card": "Avengers: Under Siege",
+	"generated": "2026-10-10",
+	"source": "79044bd13d2cade7df82f678249298016d4d541f45bdcb203d2c0ca747775134",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Avengers: Under Siege",
+		"registers": [
+			{
+				"basis": "I — Create two 2/1 black Villain creature tokens with menace.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Villain Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Villain"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 2,
+								"toughness": 1,
+								"words": [
+									"menace"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "II — This Saga deals 2 damage to each non-Villain creature and each opponent.",
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"from": "this",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"not": {
+									"subtypes": [
+										"Villain"
+									]
+								}
+							},
+							"to": "opponent",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"basis": "III — Create a Treasure token for each Villain you control.",
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"count": {
+									"subtypes": [
+										"Villain"
+									],
+									"controller": "you"
+								}
+							},
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,67 @@
+{
+	"card": "Rhino, Barreling Brute",
+	"generated": "2026-10-10",
+	"source": "8640638d492a03b170993435e6dd514bd87edfc59cba326805b012f4e9bbcffd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rhino, Barreling Brute",
+		"registers": [
+			{
+				"basis": "Vigilance, trample, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance",
+						"trample",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Rhino attacks, if you've cast a spell with mana value 4 or greater this turn, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"manaValue": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

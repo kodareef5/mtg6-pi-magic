@@ -1,0 +1,49 @@
+{
+	"card": "Make a Stand",
+	"generated": "2026-10-10",
+	"source": "022d737d3d9fc1c102a548636bbf58c8e74e62a48d38afb55ffd6eddab42f519",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Make a Stand",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Make a Stand",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Make a Stand",
+				"basis": "Creatures you control get +1/+0 and gain indestructible until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

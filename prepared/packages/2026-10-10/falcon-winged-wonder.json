@@ -1,0 +1,93 @@
+{
+	"card": "Falcon, Winged Wonder",
+	"generated": "2026-10-10",
+	"source": "fe4b659e85275d4ad8984786ca3fa762eaaea6a7862c8eefbef7b778b17da3b0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Falcon, Winged Wonder",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Avian Telepathy — When Falcon enters, create Redwing, a legendary 1/1 blue Bird Scout creature token with flying and \"Whenever Redwing attacks, surveil 1.\" (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Redwing",
+								"types": [
+									"creature"
+								],
+								"supertypes": [
+									"legendary"
+								],
+								"subtypes": [
+									"Bird",
+									"Scout"
+								],
+								"colors": [
+									"U"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								],
+								"registers": [
+									{
+										"kind": "watch",
+										"basis": "Whenever Redwing attacks, surveil 1.",
+										"event": {
+											"on": "attacks",
+											"of": {
+												"is": "this"
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "keyword",
+													"name": "surveil",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,84 @@
+{
+	"card": "Run Behind",
+	"generated": "2026-10-10",
+	"source": "da13ff05b39fae83642577774ca12bc4dca3bbc5177fc04f04be1e2eaced62e8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Run Behind",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Run Behind",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Run Behind; the creature's owner chooses top or bottom on resolution",
+				"basis": "This spell costs {1} less to cast if it targets an attacking creature. ... Target creature's owner puts it on their choice of the top or bottom of their library.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"is": "target:0",
+							"types": [
+								"creature"
+							],
+							"attacking": true
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "chose-top",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "top",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "chose-top"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

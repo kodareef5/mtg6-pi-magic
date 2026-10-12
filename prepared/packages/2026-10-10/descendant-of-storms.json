@@ -1,0 +1,92 @@
+{
+	"card": "Descendant of Storms",
+	"generated": "2026-10-10",
+	"source": "5e4d7248483c886a635cc6918de6c00950b8afd9e65afa3a4c2cad6f7e1f8fcf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Descendant of Storms",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, you may pay {1}{W}. If you do, it endures 1. (Put a +1/+1 counter on it or create a 1/1 white Spirit creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{1}{W}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"bound": "paid"
+							},
+							"instructions": [
+								{
+									"do": "perform",
+									"who": "you",
+									"may": true,
+									"as": "counter-choice",
+									"if": {
+										"is": "this",
+										"matches": {
+											"zones": [
+												"battlefield"
+											]
+										}
+									},
+									"instructions": [
+										{
+											"do": "counters",
+											"on": "this",
+											"kind": "+1/+1",
+											"amount": 1
+										}
+									]
+								},
+								{
+									"do": "token",
+									"count": 1,
+									"if": {
+										"not": {
+											"bound": "counter-choice"
+										}
+									},
+									"spec": {
+										"name": "Spirit Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Spirit"
+										],
+										"colors": [
+											"W"
+										],
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

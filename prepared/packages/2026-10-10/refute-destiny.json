@@ -1,0 +1,60 @@
+{
+	"card": "Refute Destiny",
+	"generated": "2026-10-10",
+	"source": "a149db78c49d35f27f2332ed843a4db1905caf7ae71ed1899641c1126eb784bb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Refute Destiny",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Refute Destiny",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Refute Destiny",
+				"basis": "Exile target creature or planeswalker that's green or blue. Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"colors": [
+								"G",
+								"U"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

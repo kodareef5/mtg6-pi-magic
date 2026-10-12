@@ -1,0 +1,189 @@
+{
+	"card": "Victor, Valgavoth's Seneschal",
+	"generated": "2026-10-10",
+	"source": "ae8e06db86838cc117443cf558f008efecf12efe5f4ce6888e6981e20f8d284a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Victor, Valgavoth's Seneschal",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Eerie — Whenever an enchantment you control enters and whenever you fully unlock a Room, surveil 2 if this is the first time this ability has resolved this turn. If it's the second time, each opponent discards a card. If it's the third time, put a creature card from a graveyard onto the battlefield under your control.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 1,
+								"atMost": 1
+							}
+						},
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": 1,
+							"actions": [
+								{
+									"discard": true
+								}
+							],
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 2,
+								"atMost": 2
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"types": [
+									"creature"
+								],
+								"token": false
+							},
+							"count": 1,
+							"as": "creature",
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 3,
+								"atMost": 3
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:creature",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 3,
+								"atMost": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Eerie — Whenever an enchantment you control enters and whenever you fully unlock a Room, surveil 2 if this is the first time this ability has resolved this turn. If it's the second time, each opponent discards a card. If it's the third time, put a creature card from a graveyard onto the battlefield under your control.",
+				"event": {
+					"on": "unlocks",
+					"by": "you",
+					"fully": true,
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"subtypes": [
+							"Room"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 1,
+								"atMost": 1
+							}
+						},
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": 1,
+							"actions": [
+								{
+									"discard": true
+								}
+							],
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 2,
+								"atMost": 2
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"types": [
+									"creature"
+								],
+								"token": false
+							},
+							"count": 1,
+							"as": "creature",
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 3,
+								"atMost": 3
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:creature",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 3,
+								"atMost": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

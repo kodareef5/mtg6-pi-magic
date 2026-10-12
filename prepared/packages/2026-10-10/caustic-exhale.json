@@ -1,0 +1,106 @@
+{
+	"card": "Caustic Exhale",
+	"generated": "2026-10-10",
+	"source": "881733f8916d13b2c446d8c96eded53377e1748955efa7b7d9e6f78e646d38da",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Caustic Exhale",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Caustic Exhale",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Caustic Exhale, beholding a Dragon",
+				"basis": "As an additional cost to cast this spell, behold a Dragon or pay {1}. (To behold a Dragon, choose a Dragon you control or reveal a Dragon card from your hand.)\nTarget creature gets -3/-3 until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"show": {
+						"choose": {
+							"zones": [
+								"battlefield",
+								"hand"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Dragon"
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -3,
+							"toughness": -3
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Caustic Exhale",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Caustic Exhale, paying the additional {1}",
+				"basis": "As an additional cost to cast this spell, behold a Dragon or pay {1}. (To behold a Dragon, choose a Dragon you control or reveal a Dragon card from your hand.)\nTarget creature gets -3/-3 until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "dragon-payment",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -3,
+							"toughness": -3
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

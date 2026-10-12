@@ -1,0 +1,95 @@
+{
+	"card": "Monoist Circuit-Feeder",
+	"generated": "2026-10-10",
+	"source": "dbc051e01669b7b0eb4ad2ba7640e6f5a5fc89b1390b40c956b60ce63350f681",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Monoist Circuit-Feeder",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, until end of turn, target creature you control gets +X/+0 and target creature an opponent controls gets -0/-X, where X is the number of artifacts you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						},
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"count": {
+										"types": [
+											"artifact"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						},
+						{
+							"do": "modify",
+							"what": "target:1",
+							"until": "end-of-turn",
+							"change": {
+								"toughness": {
+									"negate": {
+										"count": {
+											"types": [
+												"artifact"
+											],
+											"controller": "you"
+										}
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,136 @@
+{
+	"card": "Inspirited Vanguard",
+	"generated": "2026-10-10",
+	"source": "6dca2a0d3a233072ec263fd1bb73c8d414a90a42e2ea0592d1c9ba2d3fdbbd8d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Inspirited Vanguard",
+		"registers": [
+			{
+				"basis": "Whenever this creature enters or attacks, it endures 2. (Put two +1/+1 counters on it or create a 2/2 white Spirit creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "controller:this",
+							"may": true,
+							"if": {
+								"is": "this",
+								"matches": {
+									"zones": [
+										"battlefield"
+									]
+								}
+							},
+							"as": "endure-counters",
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "this",
+									"kind": "+1/+1",
+									"amount": 2
+								}
+							]
+						},
+						{
+							"do": "token",
+							"controller": "controller:this",
+							"count": 1,
+							"if": {
+								"not": {
+									"bound": "endure-counters"
+								}
+							},
+							"spec": {
+								"name": "Spirit Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spirit"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, it endures 2. (Put two +1/+1 counters on it or create a 2/2 white Spirit creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "controller:this",
+							"may": true,
+							"if": {
+								"is": "this",
+								"matches": {
+									"zones": [
+										"battlefield"
+									]
+								}
+							},
+							"as": "endure-counters",
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "this",
+									"kind": "+1/+1",
+									"amount": 2
+								}
+							]
+						},
+						{
+							"do": "token",
+							"controller": "controller:this",
+							"count": 1,
+							"if": {
+								"not": {
+									"bound": "endure-counters"
+								}
+							},
+							"spec": {
+								"name": "Spirit Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spirit"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

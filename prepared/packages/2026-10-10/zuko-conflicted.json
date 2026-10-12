@@ -1,0 +1,98 @@
+{
+	"card": "Zuko, Conflicted",
+	"generated": "2026-10-10",
+	"source": "43a30448bc33e6c7cb3ed1b936e8399ba54f37655744451d2b0f274758ddbece",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zuko, Conflicted",
+		"registers": [
+			{
+				"basis": "At the beginning of your first main phase, choose one that hasn't been chosen and you lose 2 life —\n• Draw a card.\n• Put a +1/+1 counter on Zuko.\n• Add {R}.\n• Exile Zuko, then return him to the battlefield under an opponent's control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"unchosen": true,
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "life",
+									"who": "you",
+									"amount": -2
+								},
+								{
+									"do": "draw",
+									"who": "you",
+									"count": 1
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "life",
+									"who": "you",
+									"amount": -2
+								},
+								{
+									"do": "counters",
+									"on": "this",
+									"kind": "+1/+1",
+									"amount": 1
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "life",
+									"who": "you",
+									"amount": -2
+								},
+								{
+									"do": "mana",
+									"who": "you",
+									"colors": [
+										"R"
+									]
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "life",
+									"who": "you",
+									"amount": -2
+								},
+								{
+									"do": "move",
+									"what": "this",
+									"to": "exile",
+									"reason": "exile",
+									"as": "exiled-zuko"
+								},
+								{
+									"do": "move",
+									"what": "bound:exiled-zuko",
+									"to": "battlefield",
+									"controller": "opponent",
+									"reason": "resolve"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

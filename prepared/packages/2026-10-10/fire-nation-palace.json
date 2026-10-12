@@ -1,0 +1,110 @@
+{
+	"card": "Fire Nation Palace",
+	"generated": "2026-10-10",
+	"source": "147a2bbf35b96037287702986e3bd9963c299fc4ee61fac683f9d7eaa4f24039",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fire Nation Palace",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a basic land.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"supertypes": [
+									"basic"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fire Nation Palace",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant firebending 4 until end of turn",
+				"basis": "{1}{R}, {T}: Target creature you control gains firebending 4 until end of turn. (Whenever it attacks, add {R}{R}{R}{R}. This mana lasts until end of combat.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"registers": [
+								{
+									"basis": "{1}{R}, {T}: Target creature you control gains firebending 4 until end of turn. (Whenever it attacks, add {R}{R}{R}{R}. This mana lasts until end of combat.)",
+									"kind": "watch",
+									"event": {
+										"on": "attacks",
+										"of": {
+											"is": "this"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "mana",
+												"who": "you",
+												"colors": [
+													"R",
+													"R",
+													"R",
+													"R"
+												],
+												"until": "end-of-combat"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

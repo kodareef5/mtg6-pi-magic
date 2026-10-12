@@ -1,0 +1,139 @@
+{
+	"card": "Demolition Field",
+	"generated": "2026-10-10",
+	"source": "60d678d74fb1aa5979cb592cdc17f607a3c3642963a937c0fa7918b107e50690",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Demolition Field",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Destroy an opponent's nonbasic land, then offer both optional basic land searches",
+				"basis": "{2}, {T}, Sacrifice this land: Destroy target nonbasic land an opponent controls. That land's controller may search their library for a basic land card, put it onto the battlefield, then shuffle. You may search your library for a basic land card, put it onto the battlefield, then shuffle.",
+				"source": {
+					"card": "Demolition Field",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"land"
+							],
+							"not": {
+								"supertypes": [
+									"basic"
+								]
+							},
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "perform",
+						"who": "controller:target:0",
+						"may": true,
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "controller:target:0",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "controller:target:0",
+									"supertypes": [
+										"basic"
+									],
+									"types": [
+										"land"
+									]
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "opponent-land"
+							},
+							{
+								"do": "move",
+								"what": "bound:opponent-land",
+								"to": "battlefield",
+								"controller": "controller:target:0",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "controller:target:0"
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "you",
+									"supertypes": [
+										"basic"
+									],
+									"types": [
+										"land"
+									]
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "your-land"
+							},
+							{
+								"do": "move",
+								"what": "bound:your-land",
+								"to": "battlefield",
+								"controller": "you",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "you"
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,84 @@
+{
+	"card": "Entrust the Spark",
+	"generated": "2026-10-10",
+	"source": "4923a9fa9bfd3bd057f5d0a1d46ebf11558f4476d9149c71e0e9843482eedf6f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Entrust the Spark",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Entrust the Spark",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Entrust the Spark",
+				"basis": "You may sacrifice a planeswalker. If you do, search your library for a planeswalker card, put it onto the battlefield, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"sacrifice": {
+								"choose": {
+									"types": [
+										"planeswalker"
+									],
+									"controller": "you"
+								},
+								"count": 1
+							}
+						},
+						"may": true,
+						"as": "sacrificed"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"bound": "sacrificed"
+						},
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "you",
+									"types": [
+										"planeswalker"
+									]
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "planeswalker"
+							},
+							{
+								"do": "move",
+								"what": "bound:planeswalker",
+								"to": "battlefield",
+								"controller": "you",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "you"
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

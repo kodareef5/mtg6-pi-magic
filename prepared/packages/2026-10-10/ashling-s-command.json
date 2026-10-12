@@ -1,0 +1,313 @@
+{
+	"card": "Ashling's Command",
+	"generated": "2026-10-10",
+	"source": "c21892571953171e3e2b0586d2f2a8ea444af6c1f1ddcbdb7d2b087d30da81d5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ashling's Command",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ashling's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and draw",
+				"basis": "Choose two — ... Create a token that's a copy of target Elemental you control. ... Target player draws two cards.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Elemental"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "draw",
+						"who": "target:1",
+						"count": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ashling's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and damage",
+				"basis": "Choose two — ... Create a token that's a copy of target Elemental you control. ... Ashling's Command deals 2 damage to each creature target player controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Elemental"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "damage",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:1"
+						},
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ashling's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose copy and Treasures",
+				"basis": "Choose two — ... Create a token that's a copy of target Elemental you control. ... Target player creates two Treasure tokens.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Elemental"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 2,
+						"controller": "target:1",
+						"spec": {
+							"name": "Treasure Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ashling's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose draw and damage",
+				"basis": "Choose two — ... Target player draws two cards. ... Ashling's Command deals 2 damage to each creature target player controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 2
+					},
+					{
+						"do": "damage",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:1"
+						},
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ashling's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose draw and Treasures",
+				"basis": "Choose two — ... Target player draws two cards. ... Target player creates two Treasure tokens.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 2
+					},
+					{
+						"do": "token",
+						"count": 2,
+						"controller": "target:1",
+						"spec": {
+							"name": "Treasure Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ashling's Command",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Choose damage and Treasures",
+				"basis": "Choose two — ... Ashling's Command deals 2 damage to each creature target player controls. ... Target player creates two Treasure tokens.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						},
+						"amount": 2
+					},
+					{
+						"do": "token",
+						"count": 2,
+						"controller": "target:1",
+						"spec": {
+							"name": "Treasure Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

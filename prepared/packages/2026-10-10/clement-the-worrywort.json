@@ -1,0 +1,134 @@
+{
+	"card": "Clement, the Worrywort",
+	"generated": "2026-10-10",
+	"source": "20a8a223e1b2aa41819fe0bc6cbdee25b0b82764bd898ce918279ef8487161b9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Clement, the Worrywort",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Clement or another creature you control enters, return up to one target creature you control with lesser mana value to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"manaValue": {
+									"atMost": {
+										"sum": [
+											{
+												"manaValue": "event:object"
+											},
+											-1
+										]
+									}
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Frogs you control have \"{T}: Add {G} or {U}. Spend this mana only to cast a creature spell.\"",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Frog"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Frogs you control have \"{T}: Add {G} or {U}. Spend this mana only to cast a creature spell.\"",
+							"kind": "mana",
+							"cost": {
+								"tap": true
+							},
+							"colors": [
+								"G"
+							],
+							"spendOnly": {
+								"zones": [
+									"stack"
+								],
+								"types": [
+									"creature"
+								]
+							}
+						},
+						{
+							"basis": "Frogs you control have \"{T}: Add {G} or {U}. Spend this mana only to cast a creature spell.\"",
+							"kind": "mana",
+							"cost": {
+								"tap": true
+							},
+							"colors": [
+								"U"
+							],
+							"spendOnly": {
+								"zones": [
+									"stack"
+								],
+								"types": [
+									"creature"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

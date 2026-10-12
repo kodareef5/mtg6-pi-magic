@@ -1,0 +1,103 @@
+{
+	"card": "Vincent Valentine // Galian Beast",
+	"generated": "2026-10-10",
+	"source": "65615a34cec15f4712d6db2419db969ebab2a026fec126bc49415b73cc7b68f8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vincent Valentine // Galian Beast",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever a creature an opponent controls dies, put a number of +1/+1 counters on Vincent Valentine equal to that creature's power.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "opponent"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": {
+								"power": "event:object"
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever Vincent Valentine attacks, you may transform it.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "transform",
+							"what": "this",
+							"may": true
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Trample, lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"trample",
+						"lifelink"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When Galian Beast dies, return it to the battlefield tapped (front face up).",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "you",
+							"tapped": true,
+							"face": 0,
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,130 @@
+{
+	"card": "Thunder Magic",
+	"generated": "2026-10-10",
+	"source": "d94b0f9b59c4f4b73bba4262eb3d7a7824d41049c480c72e8576c17248298a37",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thunder Magic",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thunder Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Thunder Magic — Thunder",
+				"basis": "Tiered (Choose one additional cost.) ... • Thunder — {0} — Thunder Magic deals 2 damage to target creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "thunder",
+							"mana": "{0}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Thunder Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Thunder Magic — Thundara",
+				"basis": "Tiered (Choose one additional cost.) ... • Thundara — {3} — Thunder Magic deals 4 damage to target creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "thundara",
+							"mana": "{3}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Thunder Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Thunder Magic — Thundaga",
+				"basis": "Tiered (Choose one additional cost.) ... • Thundaga — {5}{R} — Thunder Magic deals 8 damage to target creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "thundaga",
+							"mana": "{5}{R}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 8
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

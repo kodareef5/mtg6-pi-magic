@@ -1,0 +1,88 @@
+{
+	"card": "Genesis Wave",
+	"generated": "2026-10-10",
+	"source": "18142a6ff7d7fc7141e3c5920aea5dab761f2217e8cf5a2e6375b87dd37baac6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Genesis Wave",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Genesis Wave",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Genesis Wave",
+				"basis": "Reveal the top X cards of your library. You may put any number of permanent cards with mana value X or less from among them onto the battlefield. Then put all cards revealed this way that weren't put onto the battlefield into your graveyard.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "reveal",
+						"what": {
+							"top": {
+								"x": true
+							},
+							"of": "you"
+						},
+						"as": "revealed"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:revealed",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atMost": {
+									"x": true
+								}
+							}
+						},
+						"count": {
+							"x": true
+						},
+						"upTo": true,
+						"as": "selected"
+					},
+					{
+						"do": "move",
+						"what": "bound:selected",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:revealed"
+						},
+						"to": "graveyard",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

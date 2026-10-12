@@ -1,0 +1,69 @@
+{
+	"card": "Heated Argument",
+	"generated": "2026-10-10",
+	"source": "01087a1e08655a8b7c6cb89647ecbab5292fafb14b0fc94030c2c61d5797cb5b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Heated Argument",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Heated Argument",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Deal 6 damage, optionally exile a graveyard card to deal 2 damage to the creature's controller",
+				"basis": "Heated Argument deals 6 damage to target creature. You may exile a card from your graveyard. If you do, Heated Argument also deals 2 damage to that creature's controller.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 6
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"exile": {
+								"choose": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you"
+								},
+								"count": 1
+							}
+						},
+						"may": true,
+						"as": "exiled"
+					},
+					{
+						"do": "damage",
+						"to": "controller:target:0",
+						"amount": 2,
+						"if": {
+							"bound": "exiled"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

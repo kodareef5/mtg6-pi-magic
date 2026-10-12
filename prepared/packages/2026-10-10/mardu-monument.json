@@ -1,0 +1,114 @@
+{
+	"card": "Mardu Monument",
+	"generated": "2026-10-10",
+	"source": "b0f3ca0f4eedd1b86cd6061558ecedce475b9cc958b656edb053bb6bb17f1196",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mardu Monument",
+		"registers": [
+			{
+				"basis": "When this artifact enters, search your library for a basic Mountain, Plains, or Swamp card, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"token": false,
+								"supertypes": [
+									"basic"
+								],
+								"subtypes": [
+									"Mountain",
+									"Plains",
+									"Swamp"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mardu Monument",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Mardu Monument to create three Warriors with menace and haste this turn",
+				"basis": "{2}{R}{W}{B}, {T}, Sacrifice this artifact: Create three 1/1 red Warrior creature tokens. They gain menace and haste until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}{R}{W}{B}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 3,
+						"spec": {
+							"name": "Warrior Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Warrior"
+							],
+							"colors": [
+								"R"
+							],
+							"power": 1,
+							"toughness": 1
+						},
+						"as": "warriors"
+					},
+					{
+						"do": "modify",
+						"what": "bound:warriors",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"menace",
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

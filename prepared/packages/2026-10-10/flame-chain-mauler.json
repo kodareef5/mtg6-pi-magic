@@ -1,0 +1,43 @@
+{
+	"card": "Flame-Chain Mauler",
+	"generated": "2026-10-10",
+	"source": "ac4b6126ea709ccb25cab819e3373edd3f9bc5771247deed4cc0871fddd73c6c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Flame-Chain Mauler",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Flame-Chain Mauler",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Flame-Chain Mauler +1/+0 and menace until end of turn",
+				"basis": "{1}{R}: This creature gets +1/+0 and gains menace until end of turn. (It can't be blocked except by two or more creatures.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"words": [
+								"menace"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

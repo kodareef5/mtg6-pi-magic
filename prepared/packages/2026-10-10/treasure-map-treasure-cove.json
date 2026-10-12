@@ -1,0 +1,150 @@
+{
+	"card": "Treasure Map // Treasure Cove",
+	"generated": "2026-10-10",
+	"source": "e0e1a760cbc39826117e1f053ae72c3b197c79b565317659b74a9a14e1b4ce35",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Treasure Map // Treasure Cove",
+		"registers": [
+			{
+				"face": 1,
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Treasure Map // Treasure Cove",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Scry 1, add a landmark counter, then at three or more remove all landmark counters, transform, and create three Treasure tokens",
+				"basis": "{1}, {T}: Scry 1. Put a landmark counter on this artifact. Then if there are three or more landmark counters on it, remove those counters, transform this artifact, and create three Treasure tokens. (They're artifacts with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "scry",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "landmark",
+						"amount": 1
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"amount": {
+								"counters": "landmark",
+								"on": "this"
+							},
+							"atLeast": 3
+						},
+						"instructions": [
+							{
+								"do": "counters",
+								"on": "this",
+								"kind": "landmark",
+								"amount": {
+									"negate": {
+										"counters": "landmark",
+										"on": "this"
+									}
+								}
+							},
+							{
+								"do": "transform",
+								"what": "this"
+							},
+							{
+								"do": "token",
+								"count": 3,
+								"spec": {
+									"name": "Treasure Token",
+									"types": [
+										"artifact"
+									],
+									"subtypes": [
+										"Treasure"
+									],
+									"colors": [],
+									"registers": [
+										{
+											"face": 0,
+											"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+											"kind": "mana",
+											"cost": {
+												"tap": true,
+												"sacrifice": "this"
+											},
+											"any": 1
+										}
+									]
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Treasure Map // Treasure Cove",
+					"face": 1,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap Treasure Cove and sacrifice a Treasure to draw a card",
+				"basis": "{T}, Sacrifice a Treasure: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

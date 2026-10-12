@@ -1,0 +1,65 @@
+{
+	"card": "Slumbering Trudge",
+	"generated": "2026-10-10",
+	"source": "6596aa3c8cb8aee7814a1936a8e3df63048e4db6624d804aa746ed4cd3e60578",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Slumbering Trudge",
+		"registers": [
+			{
+				"basis": "This creature enters with a number of stun counters on it equal to three minus X. If X is 2 or less, it enters tapped. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"kind": "enters",
+				"counters": {
+					"stun": {
+						"sum": [
+							3,
+							{
+								"negate": {
+									"x": true
+								}
+							}
+						]
+					}
+				},
+				"if": {
+					"amount": {
+						"x": true
+					},
+					"atMost": 2
+				}
+			},
+			{
+				"basis": "This creature enters with a number of stun counters on it equal to three minus X. If X is 2 or less, it enters tapped. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"amount": {
+						"x": true
+					},
+					"atMost": 2
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Slumbering Trudge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Slumbering Trudge with chosen X",
+				"basis": "This creature enters with a number of stun counters on it equal to three minus X. If X is 2 or less, it enters tapped. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"timing": "spell",
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

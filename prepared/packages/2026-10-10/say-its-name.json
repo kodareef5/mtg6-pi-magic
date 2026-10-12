@@ -1,0 +1,580 @@
+{
+	"card": "Say Its Name",
+	"generated": "2026-10-10",
+	"source": "2d37af6fe2d938f2073ea359375721ca715019100d98c937364abc681ce9925b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Say Its Name",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Say Its Name",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Say Its Name",
+				"basis": "Mill three cards. Then you may return a creature or land card from your graveyard to your hand.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature",
+								"land"
+							],
+							"token": false
+						},
+						"count": 1,
+						"may": true,
+						"as": "returned"
+					},
+					{
+						"do": "move",
+						"what": "bound:returned",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Say Its Name",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile three Say Its Name cards and choose which zones to search for Altanak during resolution",
+				"basis": "Exile this card and two other cards named Say Its Name from your graveyard: Search your graveyard, hand, and/or library for a card named Altanak, the Thrice-Called and put it onto the battlefield. If you search your library this way, shuffle. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"exile": {
+						"source": true,
+						"choose": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"name": "Say Its Name",
+							"token": false,
+							"not": {
+								"is": "this"
+							}
+						},
+						"count": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "search-g",
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"name": "Altanak, the Thrice-Called",
+									"token": false
+								},
+								"count": 1,
+								"as": "found-g"
+							},
+							{
+								"do": "move",
+								"what": "bound:found-g",
+								"to": "battlefield",
+								"controller": "you",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "search-h",
+						"if": {
+							"not": {
+								"bound": "search-g"
+							}
+						},
+						"instructions": [
+							{
+								"do": "look",
+								"who": "you",
+								"every": {
+									"zones": [
+										"hand"
+									],
+									"owner": "you"
+								}
+							},
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"hand"
+									],
+									"owner": "you",
+									"controller": "you",
+									"name": "Altanak, the Thrice-Called",
+									"token": false
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "found-h"
+							},
+							{
+								"do": "move",
+								"what": "bound:found-h",
+								"to": "battlefield",
+								"controller": "you",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "search-l",
+						"if": {
+							"not": {
+								"any": [
+									{
+										"bound": "search-g"
+									},
+									{
+										"bound": "search-h"
+									}
+								]
+							}
+						},
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"library"
+									],
+									"owner": "you",
+									"name": "Altanak, the Thrice-Called",
+									"token": false
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "found-l"
+							},
+							{
+								"do": "move",
+								"what": "bound:found-l",
+								"to": "battlefield",
+								"controller": "you",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "you"
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "search-gh",
+						"if": {
+							"not": {
+								"any": [
+									{
+										"bound": "search-g"
+									},
+									{
+										"bound": "search-h"
+									},
+									{
+										"bound": "search-l"
+									}
+								]
+							}
+						},
+						"instructions": [
+							{
+								"do": "look",
+								"who": "you",
+								"every": {
+									"zones": [
+										"hand"
+									],
+									"owner": "you"
+								}
+							},
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"graveyard",
+										"hand"
+									],
+									"owner": "you",
+									"name": "Altanak, the Thrice-Called",
+									"token": false
+								},
+								"count": 1,
+								"as": "found-gh",
+								"if": {
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"name": "Altanak, the Thrice-Called",
+											"token": false
+										}
+									},
+									"atLeast": 1
+								}
+							},
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"graveyard",
+										"hand"
+									],
+									"owner": "you",
+									"name": "Altanak, the Thrice-Called",
+									"token": false
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "found-gh",
+								"if": {
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"name": "Altanak, the Thrice-Called",
+											"token": false
+										}
+									},
+									"atMost": 0
+								}
+							},
+							{
+								"do": "move",
+								"what": "bound:found-gh",
+								"to": "battlefield",
+								"controller": "you",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "search-gl",
+						"if": {
+							"not": {
+								"any": [
+									{
+										"bound": "search-g"
+									},
+									{
+										"bound": "search-h"
+									},
+									{
+										"bound": "search-l"
+									},
+									{
+										"bound": "search-gh"
+									}
+								]
+							}
+						},
+						"instructions": [
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"graveyard",
+										"library"
+									],
+									"owner": "you",
+									"name": "Altanak, the Thrice-Called",
+									"token": false
+								},
+								"count": 1,
+								"as": "found-gl",
+								"if": {
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"name": "Altanak, the Thrice-Called",
+											"token": false
+										}
+									},
+									"atLeast": 1
+								}
+							},
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"graveyard",
+										"library"
+									],
+									"owner": "you",
+									"name": "Altanak, the Thrice-Called",
+									"token": false
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "found-gl",
+								"if": {
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"name": "Altanak, the Thrice-Called",
+											"token": false
+										}
+									},
+									"atMost": 0
+								}
+							},
+							{
+								"do": "move",
+								"what": "bound:found-gl",
+								"to": "battlefield",
+								"controller": "you",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "you"
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "search-hl",
+						"if": {
+							"not": {
+								"any": [
+									{
+										"bound": "search-g"
+									},
+									{
+										"bound": "search-h"
+									},
+									{
+										"bound": "search-l"
+									},
+									{
+										"bound": "search-gh"
+									},
+									{
+										"bound": "search-gl"
+									}
+								]
+							}
+						},
+						"instructions": [
+							{
+								"do": "look",
+								"who": "you",
+								"every": {
+									"zones": [
+										"hand"
+									],
+									"owner": "you"
+								}
+							},
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"hand",
+										"library"
+									],
+									"owner": "you",
+									"name": "Altanak, the Thrice-Called",
+									"token": false
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "found-hl"
+							},
+							{
+								"do": "move",
+								"what": "bound:found-hl",
+								"to": "battlefield",
+								"controller": "you",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "you"
+							}
+						]
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"not": {
+								"any": [
+									{
+										"bound": "search-g"
+									},
+									{
+										"bound": "search-h"
+									},
+									{
+										"bound": "search-l"
+									},
+									{
+										"bound": "search-gh"
+									},
+									{
+										"bound": "search-gl"
+									},
+									{
+										"bound": "search-hl"
+									}
+								]
+							}
+						},
+						"instructions": [
+							{
+								"do": "look",
+								"who": "you",
+								"every": {
+									"zones": [
+										"hand"
+									],
+									"owner": "you"
+								}
+							},
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"graveyard",
+										"hand",
+										"library"
+									],
+									"owner": "you",
+									"name": "Altanak, the Thrice-Called",
+									"token": false
+								},
+								"count": 1,
+								"as": "found-ghl",
+								"if": {
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"name": "Altanak, the Thrice-Called",
+											"token": false
+										}
+									},
+									"atLeast": 1
+								}
+							},
+							{
+								"do": "choose",
+								"who": "you",
+								"from": {
+									"zones": [
+										"graveyard",
+										"hand",
+										"library"
+									],
+									"owner": "you",
+									"name": "Altanak, the Thrice-Called",
+									"token": false
+								},
+								"count": 1,
+								"upTo": true,
+								"as": "found-ghl",
+								"if": {
+									"amount": {
+										"count": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"name": "Altanak, the Thrice-Called",
+											"token": false
+										}
+									},
+									"atMost": 0
+								}
+							},
+							{
+								"do": "move",
+								"what": "bound:found-ghl",
+								"to": "battlefield",
+								"controller": "you",
+								"reason": "resolve"
+							},
+							{
+								"do": "shuffle",
+								"who": "you"
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

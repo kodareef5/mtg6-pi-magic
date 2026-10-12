@@ -1,0 +1,87 @@
+{
+	"card": "Rotisserie Elemental",
+	"generated": "2026-10-10",
+	"source": "b008c5bb6613d1de47b71f49c80bea2d2e4fc7857475b4865e4e5fc63faab8e7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rotisserie Elemental",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature deals combat damage to a player, put a skewer counter on this creature. Then you may sacrifice it. If you do, exile the top X cards of your library, where X is the number of skewer counters on this creature. You may play those cards this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "skewer",
+							"amount": 1
+						},
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": "this"
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "move",
+							"what": {
+								"top": {
+									"counters": "skewer",
+									"on": "this"
+								},
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": "end-of-turn",
+							"if": {
+								"bound": "sacrificed"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

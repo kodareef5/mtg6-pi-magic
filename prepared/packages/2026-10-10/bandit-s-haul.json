@@ -1,0 +1,70 @@
+{
+	"card": "Bandit's Haul",
+	"generated": "2026-10-10",
+	"source": "a345596dc589375437976de4e68d8cf32b2ffaa4f150232e1d5148ab4afd1174",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bandit's Haul",
+		"registers": [
+			{
+				"basis": "Whenever you commit a crime, put a loot counter on this artifact. This ability triggers only once each turn. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.)",
+				"kind": "watch",
+				"event": {
+					"on": "crime",
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "loot",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bandit's Haul",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Remove two loot counters to draw a card",
+				"basis": "{2}, {T}, Remove two loot counters from this artifact: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"counters": {
+						"kind": "loot",
+						"count": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,73 @@
+{
+	"card": "Zuko, Exiled Prince",
+	"generated": "2026-10-10",
+	"source": "6af2555f3cea6e1e94c8ffd26c18c0894a8d9425228c6148b5047a8cf9e08aea",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zuko, Exiled Prince",
+		"registers": [
+			{
+				"basis": "Firebending 3 (Whenever this creature attacks, add {R}{R}{R}. This mana lasts until end of combat.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R",
+								"R",
+								"R"
+							],
+							"until": "end-of-combat"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Zuko, Exiled Prince",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile the top card and allow playing it this turn",
+				"basis": "{3}: Exile the top card of your library. You may play that card this turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": {
+							"top": 1,
+							"of": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled"
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": "end-of-turn"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

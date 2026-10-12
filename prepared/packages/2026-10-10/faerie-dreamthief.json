@@ -1,0 +1,80 @@
+{
+	"card": "Faerie Dreamthief",
+	"generated": "2026-10-10",
+	"source": "f2acd3ccb6340cbc0693661bb5903043f8aea0054b2b78564f722979f2322f04",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Faerie Dreamthief",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Faerie Dreamthief",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Faerie Dreamthief from your graveyard to draw a card and lose 1 life.",
+				"basis": "{2}{B}, Exile this card from your graveyard: You draw a card and you lose 1 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{B}",
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

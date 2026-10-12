@@ -1,0 +1,82 @@
+{
+	"card": "Unending Whisper",
+	"generated": "2026-10-10",
+	"source": "08bbaaacf1685f25e3051f61a533ecf3a5326732a5ea370ce715eba7d5bcbf6e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unending Whisper",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Harmonize {5}{U} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{5}{U}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Unending Whisper to draw a card",
+				"source": {
+					"card": "Unending Whisper",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"basis": "Draw a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"claim": "Harmonize Unending Whisper with an optional creature tap",
+				"source": {
+					"card": "Unending Whisper",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "any"
+				},
+				"basis": "Draw a card. ... Harmonize {5}{U} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"timing": "spell",
+				"cost": {
+					"mana": "{5}{U}",
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"upTo": true,
+						"reduce": "power"
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

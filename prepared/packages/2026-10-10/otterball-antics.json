@@ -1,0 +1,116 @@
+{
+	"card": "Otterball Antics",
+	"generated": "2026-10-10",
+	"source": "aa8281cc729cf064445a932d592bf4a9cf97ae4a74e6fa4d29da9c2a4928683e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Otterball Antics",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {3}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{3}{U}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Otterball Antics, including through its flashback permission",
+				"basis": "Create a 1/1 blue and red Otter creature token with prowess. If this spell was cast from anywhere other than your hand, put a +1/+1 counter on that creature. (Whenever you cast a noncreature spell, a creature with prowess gets +1/+1 until end of turn.)",
+				"source": {
+					"card": "Otterball Antics",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"as": "otter",
+						"spec": {
+							"name": "Otter Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Otter"
+							],
+							"colors": [
+								"U",
+								"R"
+							],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"kind": "watch",
+									"basis": "Create a 1/1 blue and red Otter creature token with prowess. If this spell was cast from anywhere other than your hand, put a +1/+1 counter on that creature. (Whenever you cast a noncreature spell, a creature with prowess gets +1/+1 until end of turn.)",
+									"event": {
+										"on": "cast",
+										"by": "you",
+										"of": {
+											"zones": [
+												"stack"
+											],
+											"not": {
+												"types": [
+													"creature"
+												]
+											}
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "this",
+												"until": "end-of-turn",
+												"change": {
+													"power": 1,
+													"toughness": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "counters",
+						"on": "bound:otter",
+						"kind": "+1/+1",
+						"amount": 1,
+						"if": {
+							"all": [
+								{
+									"cast": "this"
+								},
+								{
+									"not": {
+										"cast": "this",
+										"from": "hand"
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

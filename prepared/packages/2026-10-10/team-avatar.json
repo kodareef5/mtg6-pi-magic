@@ -1,0 +1,109 @@
+{
+	"card": "Team Avatar",
+	"generated": "2026-10-10",
+	"source": "0cc7d552530ee1d32b09e29dfea9d1ac899859b6004e5a0e78e2fe740c74e572",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Team Avatar",
+		"registers": [
+			{
+				"basis": "Whenever a creature you control attacks alone, it gets +X/+X until end of turn, where X is the number of creatures you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"attacking": true
+						}
+					},
+					"atLeast": 1,
+					"atMost": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "event:object",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								},
+								"toughness": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Discard Team Avatar to deal damage to a creature",
+				"basis": "{2}{W}, Discard this card: It deals damage equal to the number of creatures you control to target creature.",
+				"source": {
+					"card": "Team Avatar",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}",
+					"discard": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"from": "this",
+						"amount": {
+							"count": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

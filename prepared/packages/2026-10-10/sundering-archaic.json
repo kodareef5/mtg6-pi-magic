@@ -1,0 +1,89 @@
+{
+	"card": "Sundering Archaic",
+	"generated": "2026-10-10",
+	"source": "253a76b8affbb9f69726f7b24c5d69c27bffa17664de65baed3603f4e70531b5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sundering Archaic",
+		"registers": [
+			{
+				"basis": "Converge — When this creature enters, exile target nonland permanent an opponent controls with mana value less than or equal to the number of colors of mana spent to cast this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "opponent",
+								"not": {
+									"types": [
+										"land"
+									]
+								},
+								"manaValue": {
+									"atMost": {
+										"colorsSpent": "this"
+									}
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sundering Archaic",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a graveyard card on the bottom of its owner's library",
+				"basis": "{2}: Put target card from a graveyard on the bottom of its owner's library.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

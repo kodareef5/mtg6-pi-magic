@@ -1,0 +1,74 @@
+{
+	"card": "Three Tree Scribe",
+	"generated": "2026-10-10",
+	"source": "2ad821e40c71ddb7ec9d24a574b8b62a0f7bbc859eaab3ab8020c7e403ee021a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Three Tree Scribe",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature or another creature you control leaves the battlefield without dying, put a +1/+1 counter on target creature you control.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"hand",
+						"library",
+						"exile",
+						"command",
+						"stack",
+						"outside"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

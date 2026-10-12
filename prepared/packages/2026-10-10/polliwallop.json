@@ -1,0 +1,78 @@
+{
+	"card": "Polliwallop",
+	"generated": "2026-10-10",
+	"source": "b82087e99032ba668f1b7743808a02fdd60bc747304855b0c47ed76113759b1d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Polliwallop",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Polliwallop",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Polliwallop",
+				"basis": "Affinity for Frogs (This spell costs {1} less to cast for each Frog you control.) ... Target creature you control deals damage equal to twice its power to target creature you don't control.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Frog"
+							]
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"sum": [
+								{
+									"power": "target:0"
+								},
+								{
+									"power": "target:0"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

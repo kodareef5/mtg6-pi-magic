@@ -1,0 +1,128 @@
+{
+	"card": "Saved by the Shell",
+	"generated": "2026-10-10",
+	"source": "edd9a99a2c27a79e43bfe20fe30a0722e58d46ed3da9c5e40ed4831a720aeeaf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Saved by the Shell",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Saved by the Shell",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Saved by the Shell with its Turtle discount",
+				"basis": "This spell costs {1} less to cast if you control a Turtle. ... Put a +1/+1 counter on target creature you control. It gains trample, hexproof, and indestructible until end of turn.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Turtle"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 1
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample",
+								"hexproof",
+								"indestructible"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Saved by the Shell",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Saved by the Shell without a controlled Turtle",
+				"basis": "This spell costs {1} less to cast if you control a Turtle. ... Put a +1/+1 counter on target creature you control. It gains trample, hexproof, and indestructible until end of turn.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Turtle"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample",
+								"hexproof",
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

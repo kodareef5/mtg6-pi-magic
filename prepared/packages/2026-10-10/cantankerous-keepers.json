@@ -1,0 +1,88 @@
+{
+	"card": "Cantankerous Keepers",
+	"generated": "2026-10-10",
+	"source": "b121f166d479ec1a4c12e6d0f7d9c40056ff7321bbeead1d4eb927d8df4649d4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cantankerous Keepers",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, mill four cards, then put all Elf cards from among them into your hand.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 4,
+							"as": "milled"
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"library",
+									"hand",
+									"battlefield",
+									"graveyard",
+									"stack",
+									"exile",
+									"command",
+									"outside"
+								],
+								"is": "bound:milled",
+								"subtypes": [
+									"Elf"
+								]
+							},
+							"to": "hand",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cantankerous Keepers",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cantankerous Keepers with affinity for Elves",
+				"basis": "Affinity for Elves (This spell costs {1} less to cast for each Elf you control.)",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Elf"
+							]
+						}
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,70 @@
+{
+	"card": "Heartflame Duelist // Heartflame Slash",
+	"generated": "2026-10-10",
+	"source": "282870d402f8a9a6df113db317a23ac2fee1d0459a14b1eaa88c4e5e0a8b9822",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Heartflame Duelist // Heartflame Slash",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Instant and sorcery spells you control have lifelink.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"instant",
+						"sorcery"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Heartflame Duelist // Heartflame Slash",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Heartflame Slash",
+				"basis": "Heartflame Slash deals 3 damage to any target. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

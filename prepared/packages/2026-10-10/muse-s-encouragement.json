@@ -1,0 +1,59 @@
+{
+	"card": "Muse's Encouragement",
+	"generated": "2026-10-10",
+	"source": "82bb2cf44c87911d2a6ed2a433ff4dad934b972af8ab68e1452e444fdb4403bc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Muse's Encouragement",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Muse's Encouragement",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Create an Elemental token with flying, then surveil 2",
+				"basis": "Create a 3/3 blue and red Elemental creature token with flying. ... Surveil 2. (Look at the top two cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Elemental Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elemental"
+							],
+							"colors": [
+								"U",
+								"R"
+							],
+							"power": 3,
+							"toughness": 3,
+							"words": [
+								"flying"
+							]
+						}
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

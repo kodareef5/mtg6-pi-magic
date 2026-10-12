@@ -1,0 +1,83 @@
+{
+	"card": "Melded Moxite",
+	"generated": "2026-10-10",
+	"source": "b2eb326b9110478e4de4c6e312d78b55c42304cdf388b4a2da36223991350c5e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Melded Moxite",
+		"registers": [
+			{
+				"basis": "When this artifact enters, you may discard a card. If you do, draw two cards.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Melded Moxite",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Melded Moxite to create a tapped Robot token",
+				"basis": "{3}, Sacrifice this artifact: Create a tapped 2/2 colorless Robot artifact creature token.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"tapped": true,
+						"spec": {
+							"name": "Robot Token",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"subtypes": [
+								"Robot"
+							],
+							"colors": [],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,138 @@
+{
+	"card": "Overwrite the Multiverse",
+	"generated": "2026-10-10",
+	"source": "77c8d89ba173e077bd31253ed18d5f37604664898987e8cb731acb6b897aa974",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overwrite the Multiverse",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Overwrite the Multiverse",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Exile all creatures, then empower Jace for the number exiled",
+				"basis": "Exile all creatures. Empower Jace X, where X is the number of creatures exiled this way. (Put that many loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled",
+						"countFrom": "battlefield"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"amount": {
+								"count": {
+									"controller": "you",
+									"types": [
+										"planeswalker"
+									],
+									"subtypes": [
+										"Jace"
+									],
+									"token": true
+								}
+							},
+							"atMost": 0
+						},
+						"spec": {
+							"name": "Jace Token",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"colors": [
+								"U"
+							],
+							"loyalty": 0,
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "[−1]: Surveil 1",
+									"cost": {
+										"loyalty": -1
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "keyword",
+												"name": "surveil",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								},
+								{
+									"kind": "activated",
+									"basis": "[−3]: Draw a card",
+									"cost": {
+										"loyalty": -3
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"controller": "you",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"token": true
+						},
+						"count": 1,
+						"as": "jace"
+					},
+					{
+						"do": "counters",
+						"on": "bound:jace",
+						"kind": "loyalty",
+						"amount": {
+							"bound": "exiled"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

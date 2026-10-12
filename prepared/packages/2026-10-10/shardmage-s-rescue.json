@@ -1,0 +1,96 @@
+{
+	"card": "Shardmage's Rescue",
+	"generated": "2026-10-10",
+	"source": "f055b53ca35397a8812144104f182512b2a917ea545edd8b54842a312dbe5bdb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shardmage's Rescue",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "As long as this Aura entered this turn, enchanted creature has hexproof.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"if": {
+					"enteredThisTurn": "this"
+				},
+				"change": {
+					"words": [
+						"hexproof"
+					]
+				}
+			},
+			{
+				"basis": "Enchanted creature gets +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Shardmage's Rescue",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Shardmage's Rescue enchanting a creature you control",
+				"basis": "Flash ... Enchant creature you control",
+				"timing": "spell",
+				"speed": "instant",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

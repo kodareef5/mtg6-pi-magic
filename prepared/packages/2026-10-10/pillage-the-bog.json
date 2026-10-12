@@ -1,0 +1,112 @@
+{
+	"card": "Pillage the Bog",
+	"generated": "2026-10-10",
+	"source": "164dde5d755a62c19e2bc9007ce259f27cffa767b0f20707e2c7ffad6ae9e16f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pillage the Bog",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pillage the Bog",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pillage the Bog",
+				"basis": "Look at the top X cards of your library, where X is twice the number of lands you control. Put one of them into your hand and the rest on the bottom of your library in a random order.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": {
+								"sum": [
+									{
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"types": [
+												"land"
+											],
+											"controller": "you"
+										}
+									},
+									{
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"types": [
+												"land"
+											],
+											"controller": "you"
+										}
+									}
+								]
+							},
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"count": 1,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Pillage the Bog",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Pillage the Bog",
+				"basis": "Plot {1}{B}{G} (You may pay {1}{B}{G} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{1}{B}{G}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

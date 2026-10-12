@@ -1,0 +1,62 @@
+{
+	"card": "Scalestorm Summoner",
+	"generated": "2026-10-10",
+	"source": "306bcc165e21de01304d3f9796c33f8a536ba76a722a9ae2fe671be3f66450d5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scalestorm Summoner",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, create a 3/1 red Dinosaur creature token if you control a creature with power 4 or greater.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Dinosaur Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dinosaur"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 3,
+								"toughness": 1
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"power": {
+											"atLeast": 4
+										}
+									}
+								},
+								"atLeast": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

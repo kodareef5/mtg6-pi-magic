@@ -1,0 +1,84 @@
+{
+	"card": "Morcant's Eyes",
+	"generated": "2026-10-10",
+	"source": "5e544921f37f28b85033f01ed8cf38f286ba8f6fdf9f78cdb7e3ba3d6a73ca55",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Morcant's Eyes",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Morcant's Eyes",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Morcant's Eyes to create Elf tokens",
+				"basis": "{4}{G}{G}, Sacrifice this enchantment: Create X 2/2 black and green Elf creature tokens, where X is the number of Elf cards in your graveyard. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}{G}{G}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"count": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"subtypes": [
+									"Elf"
+								],
+								"token": false
+							}
+						},
+						"spec": {
+							"name": "Elf Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elf"
+							],
+							"colors": [
+								"B",
+								"G"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

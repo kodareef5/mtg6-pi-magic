@@ -1,0 +1,71 @@
+{
+	"card": "Run Over",
+	"generated": "2026-10-10",
+	"source": "03558c4da8b0e5fc1227fcfe6486cfa660cf9068391eb83673e8a27ae0b4c7fe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Run Over",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Run Over",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Run Over",
+				"basis": "This spell costs {1} less to cast if it targets a Mount or Vehicle you control. ... Target creature you control deals damage equal to its power to target creature an opponent controls.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"is": "target:0",
+							"controller": "you",
+							"subtypes": [
+								"Mount",
+								"Vehicle"
+							]
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

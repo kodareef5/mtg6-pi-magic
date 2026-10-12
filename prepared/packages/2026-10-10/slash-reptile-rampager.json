@@ -1,0 +1,71 @@
+{
+	"card": "Slash, Reptile Rampager",
+	"generated": "2026-10-10",
+	"source": "edbe6a207fdc8b3138c87e4abf59795d2f743bb851e0a608a6a1cb9070962c5c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Slash, Reptile Rampager",
+		"registers": [
+			{
+				"basis": "Alliance — Whenever another creature you control enters, Slash deals 2 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 2,
+							"from": "this"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Slash attacks, create a 2/2 red Mutant creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Mutant Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Mutant"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

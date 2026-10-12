@@ -1,0 +1,73 @@
+{
+	"card": "Violent Urge",
+	"generated": "2026-10-10",
+	"source": "30ada1cd9b66f9f210e524b68a168ae03462909b8a9ffba825dd923dc44fa312",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Violent Urge",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Violent Urge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Violent Urge",
+				"basis": "Target creature gets +1/+0 and gains first strike until end of turn. ... Delirium — If there are four or more card types among cards in your graveyard, that creature gains double strike until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"words": [
+								"first strike"
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"double strike"
+							]
+						},
+						"if": {
+							"amount": {
+								"distinct": "card-types",
+								"among": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"token": false
+								}
+							},
+							"atLeast": 4
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

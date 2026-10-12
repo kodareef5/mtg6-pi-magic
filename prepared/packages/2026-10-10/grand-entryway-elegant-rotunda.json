@@ -1,0 +1,86 @@
+{
+	"card": "Grand Entryway // Elegant Rotunda",
+	"generated": "2026-10-10",
+	"source": "7eb7aa74184812b9be1b034d1eabbd0f3a031fba360800830811d94de30c751d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Grand Entryway // Elegant Rotunda",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When you unlock this door, create a 1/1 white Glimmer enchantment creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 0,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Glimmer Token",
+								"types": [
+									"enchantment",
+									"creature"
+								],
+								"subtypes": [
+									"Glimmer"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When you unlock this door, put a +1/+1 counter on each of up to two target creatures.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"count": 2,
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		]
+	}
+}

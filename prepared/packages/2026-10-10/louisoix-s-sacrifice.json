@@ -1,0 +1,143 @@
+{
+	"card": "Louisoix's Sacrifice",
+	"generated": "2026-10-10",
+	"source": "f5c8f16256f2dd27bc7add5c36774759d0c0c5ce8a419ea5dc146f88dc1fbc80",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Louisoix's Sacrifice",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Louisoix's Sacrifice",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast by sacrificing a legendary creature",
+				"basis": "As an additional cost to cast this spell, sacrifice a legendary creature or pay {2}. ... Counter target activated ability, triggered ability, or noncreature spell.",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"supertypes": [
+								"legendary"
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"any": [
+								{
+									"ability": "any"
+								},
+								{
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"instant",
+										"kindred",
+										"planeswalker",
+										"sorcery"
+									],
+									"not": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Louisoix's Sacrifice",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast by paying the additional {2}",
+				"basis": "As an additional cost to cast this spell, sacrifice a legendary creature or pay {2}. ... Counter target activated ability, triggered ability, or noncreature spell.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "additional-mana",
+							"mana": "{2}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"any": [
+								{
+									"ability": "any"
+								},
+								{
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"instant",
+										"kindred",
+										"planeswalker",
+										"sorcery"
+									],
+									"not": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

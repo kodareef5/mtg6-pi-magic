@@ -1,0 +1,59 @@
+{
+	"card": "Tinybones, Pocket Nuisance",
+	"generated": "2026-10-10",
+	"source": "3f11035af41556067d23dd9953e7a9259ad48f3bd6a19bb065df96d6e894f194",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tinybones, Pocket Nuisance",
+		"registers": [
+			{
+				"basis": "When Tinybones enters, each opponent discards a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": 1,
+							"actions": [
+								{
+									"discard": true
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a player discards one or more cards, Tinybones deals 1 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "discarded",
+					"by": "any",
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

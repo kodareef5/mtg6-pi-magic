@@ -1,0 +1,103 @@
+{
+	"card": "Riling Dawnbreaker // Signaling Roar",
+	"generated": "2026-10-10",
+	"source": "f1695599fd0aa150eb8c6295bb11be62544bd0c14c347c08ae6fb2ff6ada6546",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Riling Dawnbreaker // Signaling Roar",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "At the beginning of combat on your turn, another target creature you control gets +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Riling Dawnbreaker // Signaling Roar",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Signaling Roar",
+				"basis": "Create a 2/2 white Soldier creature token. (Then shuffle this card into its owner's library.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Soldier Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Soldier"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

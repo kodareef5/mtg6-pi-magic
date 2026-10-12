@@ -1,0 +1,60 @@
+{
+	"card": "Procrastinate",
+	"generated": "2026-10-10",
+	"source": "4ec08cf90d1309c00d1f27eb4c82bfa956b3bc9bac844a03d6bc3ebe61281038",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Procrastinate",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Procrastinate",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Procrastinate",
+				"basis": "Tap target creature. Put twice X stun counters on it. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "stun",
+						"amount": {
+							"sum": [
+								{
+									"x": true
+								},
+								{
+									"x": true
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

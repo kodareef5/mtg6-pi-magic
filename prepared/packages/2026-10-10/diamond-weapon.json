@@ -1,0 +1,78 @@
+{
+	"card": "Diamond Weapon",
+	"generated": "2026-10-10",
+	"source": "bf0046da4e3e8327372d32576d9135782cf3133516f21a23b317334fadf848f2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Diamond Weapon",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "Immune — Prevent all combat damage that would be dealt to Diamond Weapon.",
+				"kind": "damage-rule",
+				"mode": "prevent",
+				"combat": true,
+				"to": {
+					"object": {
+						"is": "this"
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Diamond Weapon",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Diamond Weapon with its graveyard-based generic cost reduction",
+				"basis": "This spell costs {1} less to cast for each permanent card in your graveyard.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						}
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

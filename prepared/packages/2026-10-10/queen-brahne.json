@@ -1,0 +1,109 @@
+{
+	"card": "Queen Brahne",
+	"generated": "2026-10-10",
+	"source": "39856c72b27cdc88c4bf1f224e720c95f58de77de7c3ee16b4759584c8715cef",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Queen Brahne",
+		"registers": [
+			{
+				"basis": "Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Queen Brahne attacks, create a 0/1 black Wizard creature token with \"Whenever you cast a noncreature spell, this token deals 1 damage to each opponent.\"",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Wizard Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Wizard"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 0,
+								"toughness": 1,
+								"registers": [
+									{
+										"basis": "Whenever Queen Brahne attacks, create a 0/1 black Wizard creature token with \"Whenever you cast a noncreature spell, this token deals 1 damage to each opponent.\"",
+										"kind": "watch",
+										"event": {
+											"on": "cast",
+											"by": "you",
+											"of": {
+												"zones": [
+													"stack"
+												],
+												"not": {
+													"types": [
+														"creature"
+													]
+												}
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "damage",
+													"to": "opponent",
+													"amount": 1,
+													"from": "this"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,102 @@
+{
+	"card": "Desculpting Blast",
+	"generated": "2026-10-10",
+	"source": "016cdfc114906071f674648ca66ad626d66bc7472bf470eb6f0f39f99dc026e3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Desculpting Blast",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Desculpting Blast",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return a nonland permanent and create a Drone if it was attacking",
+				"basis": "Return target nonland permanent to its owner's hand. If it was attacking, create a 1/1 colorless Drone artifact creature token with flying and \"This token can block only creatures with flying.\"",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"zones": [
+									"battlefield"
+								],
+								"attacking": true
+							},
+							"lastKnown": true
+						},
+						"spec": {
+							"name": "Drone Token",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"subtypes": [
+								"Drone"
+							],
+							"colors": [],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"flying"
+							],
+							"registers": [
+								{
+									"kind": "prohibit",
+									"basis": "This token can block only creatures with flying.",
+									"block": {
+										"attacker": {
+											"types": [
+												"creature"
+											],
+											"not": {
+												"words": [
+													"flying"
+												]
+											}
+										},
+										"blocker": {
+											"is": "this"
+										}
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

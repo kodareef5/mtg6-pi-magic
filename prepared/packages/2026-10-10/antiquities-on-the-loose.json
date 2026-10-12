@@ -1,0 +1,88 @@
+{
+	"card": "Antiquities on the Loose",
+	"generated": "2026-10-10",
+	"source": "8dda007e0c2b58b8e609d69574d33c0a6c8cad4205956dc4afdf8bb30815ad1c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Antiquities on the Loose",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {4}{W}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{4}{W}{W}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Antiquities on the Loose",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Create two Spirits, then reinforce each controlled Spirit if this spell was cast outside hand, including casting with native flashback permission",
+				"basis": "Create two 2/2 red and white Spirit creature tokens. Then if this spell was cast from anywhere other than your hand, put a +1/+1 counter on each Spirit you control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Spirit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Spirit"
+							],
+							"colors": [
+								"R",
+								"W"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					},
+					{
+						"do": "counters",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Spirit"
+							]
+						},
+						"kind": "+1/+1",
+						"amount": 1,
+						"if": {
+							"all": [
+								{
+									"cast": "this"
+								},
+								{
+									"not": {
+										"cast": "this",
+										"from": "hand"
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

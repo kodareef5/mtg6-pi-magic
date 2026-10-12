@@ -1,0 +1,86 @@
+{
+	"card": "Illusion Spinners",
+	"generated": "2026-10-10",
+	"source": "2727f67fa9579568312b36e5b0732521baaf757a2ff5294df5ad1d15930b5bdb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Illusion Spinners",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "This creature has hexproof as long as it's untapped. (It can't be the target of spells or abilities your opponents control.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"is": "this",
+					"matches": {
+						"zones": [
+							"battlefield"
+						],
+						"tapped": false
+					}
+				},
+				"change": {
+					"words": [
+						"hexproof"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Illusion Spinners",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Illusion Spinners as though it had flash while controlling a Faerie",
+				"basis": "You may cast this spell as though it had flash if you control a Faerie.",
+				"timing": "spell",
+				"speed": "instant",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Faerie"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

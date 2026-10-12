@@ -1,0 +1,79 @@
+{
+	"card": "Depower",
+	"generated": "2026-10-10",
+	"source": "6319d15b469a6bb4e2105fc7cb4faa8f71eb3ad014f385f55d1e885df884d78f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Depower",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Depower",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Depower",
+				"basis": "This spell costs {2} less to cast if it targets an attacking creature. ... Target creature gets -4/-0 until end of turn. ... Draw a card.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"sum": [
+							{
+								"count": {
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"attacking": true
+								}
+							},
+							{
+								"count": {
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"attacking": true
+								}
+							}
+						]
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -4,
+							"toughness": 0
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

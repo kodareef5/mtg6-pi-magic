@@ -1,0 +1,116 @@
+{
+	"card": "Crib Swap",
+	"generated": "2026-10-10",
+	"source": "a8f2a81f7ff554a3e2257ef0d28034936701a55f86ec02ad460f233a8d6e2f0c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Crib Swap",
+		"registers": [
+			{
+				"basis": "Changeling (This card is every creature type.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"subtypes": {
+						"allCreatureTypes": true
+					},
+					"words": [
+						"changeling"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Crib Swap",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Crib Swap",
+				"basis": "Exile target creature. Its controller creates a 1/1 colorless Shapeshifter creature token with changeling.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "token",
+						"controller": "controller:target:0",
+						"count": 1,
+						"spec": {
+							"name": "Shapeshifter Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Shapeshifter"
+							],
+							"colors": [],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"basis": "Exile target creature. Its controller creates a 1/1 colorless Shapeshifter creature token with changeling.",
+									"kind": "continuous",
+									"affects": {
+										"is": "this",
+										"zones": [
+											"library",
+											"hand",
+											"battlefield",
+											"graveyard",
+											"stack",
+											"exile",
+											"command",
+											"outside"
+										]
+									},
+									"change": {
+										"subtypes": {
+											"allCreatureTypes": true
+										},
+										"words": [
+											"changeling"
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

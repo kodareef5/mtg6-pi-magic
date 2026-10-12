@@ -1,0 +1,150 @@
+{
+	"card": "Waterbending Lesson",
+	"generated": "2026-10-10",
+	"source": "11c7f2f43f067c23fce105f195732e45888846d138efa51b716276680e66cbb4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Waterbending Lesson",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Waterbending Lesson",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Waterbending Lesson; draw three, then waterbend {2} or discard a card",
+				"basis": "Draw three cards. Then discard a card unless you waterbend {2}. (While paying a waterbend cost, you can tap your artifacts and creatures to help. Each one pays for {1}.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"mana": "{2}"
+						},
+						"may": true,
+						"as": "paid-mana"
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"mana": "{1}",
+							"tap": {
+								"choose": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"types": [
+										"artifact",
+										"creature"
+									],
+									"tapped": false
+								},
+								"count": 1
+							}
+						},
+						"may": true,
+						"as": "paid-mixed",
+						"if": {
+							"not": {
+								"bound": "paid-mana"
+							}
+						}
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"tap": {
+								"choose": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"types": [
+										"artifact",
+										"creature"
+									],
+									"tapped": false
+								},
+								"count": 2
+							}
+						},
+						"may": true,
+						"as": "paid-taps",
+						"if": {
+							"all": [
+								{
+									"not": {
+										"bound": "paid-mana"
+									}
+								},
+								{
+									"not": {
+										"bound": "paid-mixed"
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard-card",
+						"if": {
+							"all": [
+								{
+									"not": {
+										"bound": "paid-mana"
+									}
+								},
+								{
+									"not": {
+										"bound": "paid-mixed"
+									}
+								},
+								{
+									"not": {
+										"bound": "paid-taps"
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:discard-card",
+						"to": "graveyard",
+						"reason": "discard",
+						"if": {
+							"bound": "discard-card"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

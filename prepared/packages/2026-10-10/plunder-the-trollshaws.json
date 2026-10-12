@@ -1,0 +1,63 @@
+{
+	"card": "Plunder the Trollshaws",
+	"generated": "2026-10-10",
+	"source": "5b67dc05796b228c340779a75bd9f551c03e8f0be9023073e5f05eb0f66fdd30",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Plunder the Trollshaws",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {3}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{3}{U}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Plunder the Trollshaws",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Plunder the Trollshaws, including through its flashback permission",
+				"basis": "Draw a card. If this spell was cast from a graveyard, draw two cards instead.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"not": {
+								"cast": "this",
+								"from": "graveyard"
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"cast": "this",
+							"from": "graveyard"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

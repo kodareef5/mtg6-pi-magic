@@ -1,0 +1,112 @@
+{
+	"card": "Kickoff Celebrations",
+	"generated": "2026-10-10",
+	"source": "7aad36ea15c7d547bae6462d4aed069a1f67f78dcd7fa53cd9f5ee1c34ffa8eb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kickoff Celebrations",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this enchantment enters, you may discard a card. If you do, draw two cards.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — Sacrifice this enchantment: Creatures and Vehicles you control gain haste until end of turn.",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Max speed — Sacrifice this enchantment: Creatures and Vehicles you control gain haste until end of turn.",
+							"cost": {
+								"sacrifice": "this"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "modify",
+										"every": {
+											"controller": "you",
+											"any": [
+												{
+													"types": [
+														"creature"
+													]
+												},
+												{
+													"subtypes": [
+														"Vehicle"
+													]
+												}
+											]
+										},
+										"until": "end-of-turn",
+										"change": {
+											"words": [
+												"haste"
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

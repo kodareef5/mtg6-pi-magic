@@ -1,0 +1,66 @@
+{
+	"card": "Fierce Empath",
+	"generated": "2026-10-10",
+	"source": "edc838a2a355c353b34dfc50f159f808d524ed5e72e6b9ae0b26ee0de570c082",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fierce Empath",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may search your library for a creature card with mana value 6 or greater, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"types": [
+											"creature"
+										],
+										"manaValue": {
+											"atLeast": 6
+										}
+									},
+									"count": 1,
+									"upTo": true,
+									"reveal": true,
+									"as": "creature"
+								},
+								{
+									"do": "move",
+									"what": "bound:creature",
+									"to": "hand",
+									"reason": "resolve"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

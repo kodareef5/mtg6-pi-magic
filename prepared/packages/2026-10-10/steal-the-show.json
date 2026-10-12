@@ -1,0 +1,194 @@
+{
+	"card": "Steal the Show",
+	"generated": "2026-10-10",
+	"source": "bde102a1ca09142869cdf654ab9c5cb24ee49f333fa7e1b67a4c734b9658ea9e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Steal the Show",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Steal the Show",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Steal the Show choosing only discard and draw",
+				"basis": "Choose one or both — ... Target player discards any number of cards, then draws that many cards.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "target:0"
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"hand"
+								],
+								"controller": "target:0"
+							}
+						},
+						"upTo": true,
+						"as": "selected"
+					},
+					{
+						"do": "move",
+						"what": "bound:selected",
+						"to": "graveyard",
+						"reason": "discard",
+						"as": "discarded"
+					},
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": {
+							"bound": "discarded"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Steal the Show",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Steal the Show choosing only damage",
+				"basis": "Choose one or both — ... Steal the Show deals damage equal to the number of instant and sorcery cards in your graveyard to target creature or planeswalker.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"count": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"instant",
+									"sorcery"
+								],
+								"token": false
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Steal the Show",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Steal the Show choosing both modes",
+				"basis": "Choose one or both — ... Target player discards any number of cards, then draws that many cards. ... Steal the Show deals damage equal to the number of instant and sorcery cards in your graveyard to target creature or planeswalker.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "target:0"
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"hand"
+								],
+								"controller": "target:0"
+							}
+						},
+						"upTo": true,
+						"as": "selected"
+					},
+					{
+						"do": "move",
+						"what": "bound:selected",
+						"to": "graveyard",
+						"reason": "discard",
+						"as": "discarded"
+					},
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": {
+							"bound": "discarded"
+						}
+					},
+					{
+						"do": "damage",
+						"to": "target:1",
+						"amount": {
+							"count": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"instant",
+									"sorcery"
+								],
+								"token": false
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

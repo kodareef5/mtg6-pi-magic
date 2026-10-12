@@ -1,0 +1,63 @@
+{
+	"card": "Cephalid Inkmage",
+	"generated": "2026-10-10",
+	"source": "63a04699791bbf8cef40d8d9420c26fb4c3ff80394ffbc140a939cf1e76bf603",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cephalid Inkmage",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, surveil 3. (Look at the top three cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 3
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Threshold — This creature can't be blocked as long as there are seven or more cards in your graveyard.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 7
+				},
+				"change": {
+					"words": [
+						"can't be blocked"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

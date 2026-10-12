@@ -1,0 +1,55 @@
+{
+	"card": "Freestrider Commando",
+	"generated": "2026-10-10",
+	"source": "4245e4421198212bf17ba26fdeb77ae6eeec8586135be474bd465c74ec2648a8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Freestrider Commando",
+		"registers": [
+			{
+				"basis": "This creature enters with two +1/+1 counters on it if it wasn't cast or no mana was spent to cast it.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": 2
+				},
+				"if": {
+					"any": [
+						{
+							"not": {
+								"cast": "this"
+							}
+						},
+						{
+							"amount": {
+								"manaSpent": "this"
+							},
+							"atMost": 0
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Freestrider Commando",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Freestrider Commando",
+				"basis": "Plot {3}{G} (You may pay {3}{G} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{3}{G}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,86 @@
+{
+	"card": "Garnet, Princess of Alexandria",
+	"generated": "2026-10-10",
+	"source": "932940fa986b3e429643ee3b4de711791c5dc493f3e4937aa03cd5951e5a154b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Garnet, Princess of Alexandria",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Garnet attacks, you may remove a lore counter from each of any number of Sagas you control. Put a +1/+1 counter on Garnet for each lore counter removed this way.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you",
+								"subtypes": [
+									"Saga"
+								]
+							},
+							"count": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"subtypes": [
+										"Saga"
+									]
+								}
+							},
+							"upTo": true,
+							"as": "sagas"
+						},
+						{
+							"do": "counters",
+							"on": "bound:sagas",
+							"kind": "lore",
+							"amount": -1,
+							"as": "removed"
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": {
+								"bound": "removed"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

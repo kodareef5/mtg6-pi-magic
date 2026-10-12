@@ -1,0 +1,116 @@
+{
+	"card": "Hardlight Containment",
+	"generated": "2026-10-10",
+	"source": "632bf70a20c749c08766b958ee0c3a6816c3e86dfd0531ed5df766f7622ae4c7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hardlight Containment",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this Aura enters, exile target creature an opponent controls until this Aura leaves the battlefield.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Enchanted permanent has ward {1}.",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "Enchanted permanent has ward {1}.",
+							"event": {
+								"on": "targeted",
+								"of": {
+									"is": "this"
+								},
+								"by": "opponent"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "counter",
+										"what": "event:source",
+										"unless": {
+											"who": "event:player",
+											"pays": {
+												"mana": "{1}"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hardlight Containment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Hardlight Containment enchanting an artifact you control",
+				"basis": "Enchant artifact you control",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

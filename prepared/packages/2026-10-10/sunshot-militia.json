@@ -1,0 +1,52 @@
+{
+	"card": "Sunshot Militia",
+	"generated": "2026-10-10",
+	"source": "d9bbfaeab5758babf1b5ffa00fb92b085ddf6359433f343f21c1aeeef9e773aa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sunshot Militia",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sunshot Militia",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap two artifacts and/or creatures to deal 1 damage to each opponent",
+				"basis": "Tap two untapped artifacts and/or creatures you control: This creature deals 1 damage to each opponent. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"tapped": false
+						},
+						"count": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "opponent",
+						"amount": 1,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

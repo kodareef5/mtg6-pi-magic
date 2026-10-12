@@ -1,0 +1,85 @@
+{
+	"card": "Brightglass Gearhulk",
+	"generated": "2026-10-10",
+	"source": "f9f2e047d72caa247d1628212818b24943a1c6c8e3ecde6522b0e3117a5dfeb4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brightglass Gearhulk",
+		"registers": [
+			{
+				"basis": "First strike, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike",
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, you may search your library for up to two artifact, creature, and/or enchantment cards with mana value 1 or less, reveal them, put them into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"types": [
+											"artifact",
+											"creature",
+											"enchantment"
+										],
+										"manaValue": {
+											"atMost": 1
+										}
+									},
+									"count": 2,
+									"upTo": true,
+									"reveal": true,
+									"as": "found"
+								},
+								{
+									"do": "move",
+									"what": "bound:found",
+									"to": "hand",
+									"reason": "resolve"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

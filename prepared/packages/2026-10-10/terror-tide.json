@@ -1,0 +1,82 @@
+{
+	"card": "Terror Tide",
+	"generated": "2026-10-10",
+	"source": "bf6fd0b0058de1d109d93b9ae8cb4fe43d50e1033ce9b6ba0a837edb90f38b64",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Terror Tide",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Terror Tide",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Terror Tide",
+				"basis": "Fathomless descent — All creatures get -X/-X until end of turn, where X is the number of permanent cards in your graveyard.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"negate": {
+									"count": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"types": [
+											"artifact",
+											"battle",
+											"creature",
+											"enchantment",
+											"land",
+											"planeswalker"
+										],
+										"token": false
+									}
+								}
+							},
+							"toughness": {
+								"negate": {
+									"count": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"types": [
+											"artifact",
+											"battle",
+											"creature",
+											"enchantment",
+											"land",
+											"planeswalker"
+										],
+										"token": false
+									}
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

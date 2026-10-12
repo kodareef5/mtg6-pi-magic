@@ -1,0 +1,158 @@
+{
+	"card": "The Huntsman's Redemption",
+	"generated": "2026-10-10",
+	"source": "442430d4513b86d60ecf1b47ec4a7d30af44fa1bc0bb184b9e39bb4e89cfe665",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Huntsman's Redemption",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Create a 3/3 green Beast creature token.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Beast Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Beast"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"basis": "II — You may sacrifice a creature. If you do, search your library for a creature or basic land card, reveal it, put it into your hand, then shuffle.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"may": true,
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									},
+									"count": 1
+								}
+							},
+							"as": "sacrificed"
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"any": [
+											{
+												"types": [
+													"creature"
+												]
+											},
+											{
+												"types": [
+													"land"
+												],
+												"supertypes": [
+													"basic"
+												]
+											}
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"as": "searched"
+								},
+								{
+									"do": "reveal",
+									"what": "bound:searched"
+								},
+								{
+									"do": "move",
+									"what": "bound:searched",
+									"to": "hand",
+									"reason": "resolve"
+								},
+								{
+									"do": "shuffle",
+									"who": "you"
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"basis": "III — Up to two target creatures each get +2/+2 and gain trample until end of turn.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"count": 2,
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 2,
+								"words": [
+									"trample"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

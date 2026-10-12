@@ -1,0 +1,109 @@
+{
+	"card": "Seismic Monstrosaur",
+	"generated": "2026-10-10",
+	"source": "899831d3b7ab91d153d0526583315bd070e4a746b368fe14a258339b9d237fe7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seismic Monstrosaur",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Seismic Monstrosaur",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice a land to draw a card",
+				"basis": "{2}{R}, Sacrifice a land: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{R}",
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Seismic Monstrosaur",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Mountaincycle Seismic Monstrosaur",
+				"basis": "Mountaincycling {2} ({2}, Discard this card: Search your library for a Mountain card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Mountain"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "mountain"
+					},
+					{
+						"do": "move",
+						"what": "bound:mountain",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

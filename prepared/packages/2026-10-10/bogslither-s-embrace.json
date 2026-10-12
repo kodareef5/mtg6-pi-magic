@@ -1,0 +1,104 @@
+{
+	"card": "Bogslither's Embrace",
+	"generated": "2026-10-10",
+	"source": "e1cef375b63942d91a49f411977bc118bed7147da76b61a6b24faac3c87ba1db",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bogslither's Embrace",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bogslither's Embrace",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bogslither's Embrace with blight 1",
+				"basis": "As an additional cost to cast this spell, blight 1 or pay {3}. (To blight 1, put a -1/-1 counter on a creature you control.)\nExile target creature.",
+				"timing": "spell",
+				"cost": {
+					"counters": {
+						"kind": "-1/-1",
+						"count": 1,
+						"put": true,
+						"on": {
+							"choose": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"count": 1
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Bogslither's Embrace",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bogslither's Embrace paying an additional {3}",
+				"basis": "As an additional cost to cast this spell, blight 1 or pay {3}. (To blight 1, put a -1/-1 counter on a creature you control.)\nExile target creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "additional-payment",
+							"mana": "{3}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

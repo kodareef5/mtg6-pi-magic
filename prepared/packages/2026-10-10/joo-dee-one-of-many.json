@@ -1,0 +1,68 @@
+{
+	"card": "Joo Dee, One of Many",
+	"generated": "2026-10-10",
+	"source": "8056678b5d5986dc282a3b300127cce9090eac38b62feaa6faaf49a82797d8b0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Joo Dee, One of Many",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Joo Dee, One of Many",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Surveil 1, create a copy of this creature, then sacrifice an artifact or creature",
+				"basis": "{B}, {T}: Surveil 1. Create a token that's a copy of this creature, then sacrifice an artifact or creature. Activate only as a sorcery. (To surveil 1, look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{B}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "this"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							]
+						},
+						"count": 1,
+						"as": "sacrificed"
+					},
+					{
+						"do": "move",
+						"what": "bound:sacrificed",
+						"to": "graveyard",
+						"reason": "sacrifice"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

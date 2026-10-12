@@ -1,0 +1,134 @@
+{
+	"card": "Everything Pizza",
+	"generated": "2026-10-10",
+	"source": "10ebe410ff99e99eeb0988ef69660121f5842f5c26d3179fd8b45676ae768775",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Everything Pizza",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters, search your library for a basic land card, reveal it, put it into your hand, then shuffle.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Everything Pizza",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Everything Pizza",
+				"basis": "{2}{W}{U}{B}{R}{G}, {T}, Sacrifice this artifact: Target player gains 3 life and draws a card. Each of your opponents discards a card. This artifact deals 3 damage to any target. Put three +1/+1 counters on up to one target creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}{U}{B}{R}{G}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": 3
+					},
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 1
+					},
+					{
+						"do": "choose-actions",
+						"who": "opponent",
+						"count": 1,
+						"actions": [
+							{
+								"discard": true
+							}
+						]
+					},
+					{
+						"do": "damage",
+						"from": "this",
+						"to": "target:1",
+						"amount": 3
+					},
+					{
+						"do": "counters",
+						"on": "target:2",
+						"kind": "+1/+1",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

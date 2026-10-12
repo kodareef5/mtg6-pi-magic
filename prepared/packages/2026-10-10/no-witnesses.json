@@ -1,0 +1,233 @@
+{
+	"card": "No Witnesses",
+	"generated": "2026-10-10",
+	"source": "a532f8cb151a96190bc0660e531a07ae547ecf0fc91e2ac0d639fc12a8f51879",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "No Witnesses",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "No Witnesses",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Each player tied for the most creatures investigates, then destroy all creatures",
+				"basis": "Each player who controls the most creatures investigates. Then destroy all creatures. (To investigate, create a Clue token. It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						},
+						"as": "your-creatures"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						},
+						"as": "opponent-creatures"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "each-player",
+						"if": {
+							"all": [
+								{
+									"amount": {
+										"bound": "your-creatures"
+									},
+									"atLeast": {
+										"bound": "opponent-creatures"
+									}
+								},
+								{
+									"amount": {
+										"bound": "opponent-creatures"
+									},
+									"atLeast": {
+										"bound": "your-creatures"
+									}
+								}
+							]
+						},
+						"spec": {
+							"name": "Clue Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Clue"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, Sacrifice this token: Draw a card.",
+									"cost": {
+										"mana": "{2}",
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "you",
+						"if": {
+							"not": {
+								"amount": {
+									"bound": "opponent-creatures"
+								},
+								"atLeast": {
+									"bound": "your-creatures"
+								}
+							}
+						},
+						"spec": {
+							"name": "Clue Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Clue"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, Sacrifice this token: Draw a card.",
+									"cost": {
+										"mana": "{2}",
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "opponent",
+						"if": {
+							"not": {
+								"amount": {
+									"bound": "your-creatures"
+								},
+								"atLeast": {
+									"bound": "opponent-creatures"
+								}
+							}
+						},
+						"spec": {
+							"name": "Clue Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Clue"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, Sacrifice this token: Draw a card.",
+									"cost": {
+										"mana": "{2}",
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,103 @@
+{
+	"card": "Felidar Retreat",
+	"generated": "2026-10-10",
+	"source": "0ef8e1b7cb3fb14853b3bb9b6aecdb4f71f83659c2b413f5d039a11103eb03e0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Felidar Retreat",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, choose one —\n• Create a 2/2 white Cat Beast creature token.\n• Put a +1/+1 counter on each creature you control. Those creatures gain vigilance until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Cat Beast Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Cat",
+											"Beast"
+										],
+										"colors": [
+											"W"
+										],
+										"power": 2,
+										"toughness": 2
+									}
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									},
+									"count": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"types": [
+												"creature"
+											],
+											"controller": "you"
+										}
+									},
+									"as": "creatures"
+								},
+								{
+									"do": "counters",
+									"on": "bound:creatures",
+									"kind": "+1/+1",
+									"amount": 1
+								},
+								{
+									"do": "modify",
+									"what": "bound:creatures",
+									"until": "end-of-turn",
+									"change": {
+										"words": [
+											"vigilance"
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"card": "Infirmary Healer // Stream of Life",
+	"generated": "2026-10-10",
+	"source": "f79fd82d53487d11673d63179de8fcc292340e4a62a01cecd3b4c7f3440c54f6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Infirmary Healer // Stream of Life",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Infirmary Healer // Stream of Life",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Stream of Life",
+				"basis": "Target player gains X life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": {
+							"x": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

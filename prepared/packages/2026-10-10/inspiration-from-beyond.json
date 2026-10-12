@@ -1,0 +1,71 @@
+{
+	"card": "Inspiration from Beyond",
+	"generated": "2026-10-10",
+	"source": "1eb2c3c15d03f93a533af967b5d6a3abf50aab7ec12021d5a5182c00ba69165b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Inspiration from Beyond",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {5}{U}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{5}{U}{U}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Inspiration from Beyond",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Inspiration from Beyond using the printed cost or an earned casting permission, including flashback",
+				"basis": "Mill three cards, then return an instant or sorcery card from your graveyard to your hand. ... Flashback {5}{U}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"instant",
+								"sorcery"
+							]
+						},
+						"count": 1,
+						"as": "return-card"
+					},
+					{
+						"do": "move",
+						"what": "bound:return-card",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

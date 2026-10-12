@@ -1,0 +1,93 @@
+{
+	"card": "Mind Meanderer",
+	"generated": "2026-10-10",
+	"source": "b927de8c111dd9fa3166603c88514b1f68131b11d556805b4006afea8e1f1e46",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mind Meanderer",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "This creature has vigilance as long as you control a Jace planeswalker.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"controller": "you",
+							"zones": [
+								"battlefield"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "When this creature enters, it fights up to one target creature an opponent controls. (Each deals damage equal to its power to the other.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "fight",
+							"a": "this",
+							"b": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

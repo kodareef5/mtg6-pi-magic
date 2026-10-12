@@ -22,7 +22,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Insect",
+								"name": "Insect Token",
 								"types": [
 									"creature"
 								],
@@ -35,22 +35,8 @@
 								],
 								"power": 1,
 								"toughness": 1,
-								"registers": [
-									{
-										"basis": "When this creature dies, create a 1/1 black and green Insect creature token with flying.",
-										"kind": "continuous",
-										"affects": {
-											"is": "this",
-											"zones": [
-												"battlefield"
-											]
-										},
-										"change": {
-											"words": [
-												"flying"
-											]
-										}
-									}
+								"words": [
+									"flying"
 								]
 							}
 						}
@@ -60,7 +46,6 @@
 		],
 		"procedures": [],
 		"assessed": true,
-		"printedCast": true,
-		"deferred": []
+		"printedCast": true
 	}
 }

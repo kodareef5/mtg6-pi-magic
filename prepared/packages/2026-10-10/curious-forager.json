@@ -1,0 +1,112 @@
+{
+	"card": "Curious Forager",
+	"generated": "2026-10-10",
+	"source": "a26c0cbd738510e7e273c7b4eca21421305d2fc79782d49a85fe53aa14216d6c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Curious Forager",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may forage. When you do, return target permanent card from your graveyard to your hand. (To forage, exile three cards from your graveyard or sacrifice a Food.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"exile": {
+									"choose": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you"
+									},
+									"count": 3
+								}
+							},
+							"may": true,
+							"as": "foraged-exile"
+						},
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"subtypes": [
+											"Food"
+										]
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "foraged-food",
+							"if": {
+								"not": {
+									"bound": "foraged-exile"
+								}
+							}
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"any": [
+									{
+										"bound": "foraged-exile"
+									},
+									{
+										"bound": "foraged-food"
+									}
+								]
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"land",
+												"planeswalker"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "hand",
+										"reason": "bounce"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

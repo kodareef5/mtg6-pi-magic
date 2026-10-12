@@ -1,0 +1,212 @@
+{
+	"card": "Glacial Dragonhunt",
+	"generated": "2026-10-10",
+	"source": "97d3f5e573fd47d50cab68cdcddb12dad64bf5a02918ea7fc50097878c03bb62",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Glacial Dragonhunt",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Harmonize {4}{U}{R} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{4}{U}{R}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Glacial Dragonhunt",
+				"basis": "Draw a card, then you may discard a card. When you discard a nonland card this way, Glacial Dragonhunt deals 3 damage to target creature.",
+				"source": {
+					"card": "Glacial Dragonhunt",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"may": true,
+						"as": "card"
+					},
+					{
+						"do": "move",
+						"what": "bound:card",
+						"to": "graveyard",
+						"reason": "discard",
+						"if": {
+							"bound": "card"
+						},
+						"as": "discarded"
+					},
+					{
+						"do": "reflect",
+						"if": {
+							"all": [
+								{
+									"bound": "discarded"
+								},
+								{
+									"is": "bound:card",
+									"matches": {
+										"zones": [
+											"hand"
+										],
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									},
+									"lastKnown": true
+								}
+							]
+						},
+						"effect": {
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "damage",
+									"to": "target:0",
+									"amount": 3,
+									"from": "this"
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"claim": "Harmonize Glacial Dragonhunt with an optional creature tap",
+				"basis": "Draw a card, then you may discard a card. When you discard a nonland card this way, Glacial Dragonhunt deals 3 damage to target creature. ... Harmonize {4}{U}{R} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"source": {
+					"card": "Glacial Dragonhunt",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"cost": {
+					"mana": "{4}{U}{R}",
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"upTo": true,
+						"reduce": "power"
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"may": true,
+						"as": "card"
+					},
+					{
+						"do": "move",
+						"what": "bound:card",
+						"to": "graveyard",
+						"reason": "discard",
+						"if": {
+							"bound": "card"
+						},
+						"as": "discarded"
+					},
+					{
+						"do": "reflect",
+						"if": {
+							"all": [
+								{
+									"bound": "discarded"
+								},
+								{
+									"is": "bound:card",
+									"matches": {
+										"zones": [
+											"hand"
+										],
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									},
+									"lastKnown": true
+								}
+							]
+						},
+						"effect": {
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "damage",
+									"to": "target:0",
+									"amount": 3,
+									"from": "this"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

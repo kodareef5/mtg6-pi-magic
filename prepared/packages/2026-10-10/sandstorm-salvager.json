@@ -1,0 +1,108 @@
+{
+	"card": "Sandstorm Salvager",
+	"generated": "2026-10-10",
+	"source": "e12076fbe5b425ae870343b73794b95325c063e3585be9571cb645aba19ae134",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sandstorm Salvager",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 3/3 colorless Golem artifact creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Golem Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Golem"
+								],
+								"colors": [],
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Put counters on all controlled creature tokens, then grant those tokens trample",
+				"basis": "{2}, {T}: Put a +1/+1 counter on each creature token you control. They gain trample until end of turn.",
+				"source": {
+					"card": "Sandstorm Salvager",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"token": true,
+							"controller": "you"
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"token": true,
+								"controller": "you"
+							}
+						},
+						"as": "tokens"
+					},
+					{
+						"do": "counters",
+						"on": "bound:tokens",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "bound:tokens",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

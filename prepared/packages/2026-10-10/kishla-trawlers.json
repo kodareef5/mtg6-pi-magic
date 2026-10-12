@@ -1,0 +1,82 @@
+{
+	"card": "Kishla Trawlers",
+	"generated": "2026-10-10",
+	"source": "c3f8758f9883f43647faaf844b86c139442f7fb1f2d2b540c1ab4a8ba998c0a4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kishla Trawlers",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, you may exile a creature card from your graveyard. When you do, return target instant or sorcery card from your graveyard to your hand.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "creature"
+						},
+						{
+							"do": "move",
+							"what": "bound:creature",
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "exiled"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"instant",
+												"sorcery"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "hand",
+										"reason": "bounce"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

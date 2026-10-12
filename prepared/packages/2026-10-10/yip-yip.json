@@ -1,0 +1,68 @@
+{
+	"card": "Yip Yip!",
+	"generated": "2026-10-10",
+	"source": "83dc065944f3b14d2e247a9736fecf5e44ce6611c774d0db7b666565900c354e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Yip Yip!",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Yip Yip!",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Yip Yip!",
+				"basis": "Target creature you control gets +2/+2 until end of turn. If that creature is an Ally, it also gains flying until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"flying"
+							]
+						},
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"subtypes": [
+									"Ally"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

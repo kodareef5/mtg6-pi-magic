@@ -1,0 +1,64 @@
+{
+	"card": "Shambling Cie'th",
+	"generated": "2026-10-10",
+	"source": "2bedf04124b9f249c616880d6efaab9a759076c948b97408a9fb75e6f3fd8c08",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shambling Cie'th",
+		"registers": [
+			{
+				"basis": "This creature enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "Whenever you cast a noncreature spell, you may pay {B}. If you do, return this card from your graveyard to your hand.",
+				"kind": "watch",
+				"zones": [
+					"graveyard"
+				],
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{B}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "resolve",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,166 @@
+{
+	"card": "Rhovanion Rampager",
+	"generated": "2026-10-10",
+	"source": "3424abe574987fe394b0a9be8104840edb1804ae87dec05783da4b0674a2bb00",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rhovanion Rampager",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, you may sacrifice another creature. If you do, put a number of +1/+1 counters on this creature equal to the sacrificed creature's power.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"other": true
+									},
+									"count": 1,
+									"as": "victim"
+								},
+								{
+									"do": "move",
+									"what": "bound:victim",
+									"to": "graveyard",
+									"reason": "sacrifice",
+									"as": "sacrificed"
+								},
+								{
+									"do": "counters",
+									"on": "this",
+									"kind": "+1/+1",
+									"amount": {
+										"power": "bound:victim"
+									},
+									"if": {
+										"all": [
+											{
+												"bound": "sacrificed"
+											},
+											{
+												"amount": {
+													"power": "bound:victim"
+												},
+												"atLeast": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, amass Goblins X, where X is this creature's power. (Put X +1/+1 counters on an Army you control. It's also a Goblin. If you don't control an Army, create a 0/0 black Goblin Army creature token first.)",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Goblin Army Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Goblin",
+									"Army"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 0,
+								"toughness": 0
+							},
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Army"
+										],
+										"controller": "you"
+									}
+								},
+								"atMost": 0
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Army"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "army"
+						},
+						{
+							"do": "counters",
+							"on": "bound:army",
+							"kind": "+1/+1",
+							"amount": {
+								"power": "this"
+							},
+							"if": {
+								"amount": {
+									"power": "this"
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "modify",
+							"what": "bound:army",
+							"until": "indefinite",
+							"change": {
+								"subtypes": {
+									"add": [
+										"Goblin"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

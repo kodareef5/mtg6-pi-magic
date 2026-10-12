@@ -1,0 +1,69 @@
+{
+	"card": "Call a Surprise Witness",
+	"generated": "2026-10-10",
+	"source": "571bbf1d68f86cffb10cb65c93067d83d6e09df818f9fd8a66fa0c92396a0790",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Call a Surprise Witness",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Call a Surprise Witness",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Call a Surprise Witness",
+				"basis": "Return target creature card with mana value 3 or less from your graveyard to the battlefield. Put a flying counter on it. It's a Spirit in addition to its other types.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"change": {
+							"subtypes": {
+								"add": [
+									"Spirit"
+								],
+								"of": "creature"
+							}
+						},
+						"as": "returned"
+					},
+					{
+						"do": "counters",
+						"on": "bound:returned",
+						"kind": "flying",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

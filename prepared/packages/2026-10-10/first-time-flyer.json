@@ -8,8 +8,8 @@
 		"card": "First-Time Flyer",
 		"registers": [
 			{
-				"kind": "continuous",
 				"basis": "Flying",
+				"kind": "continuous",
 				"affects": {
 					"is": "this",
 					"zones": [
@@ -24,13 +24,10 @@
 				}
 			},
 			{
-				"kind": "continuous",
 				"basis": "This creature gets +1/+1 as long as there's a Lesson card in your graveyard.",
+				"kind": "continuous",
 				"affects": {
-					"is": "this",
-					"zones": [
-						"battlefield"
-					]
+					"is": "this"
 				},
 				"change": {
 					"power": 1,
@@ -45,7 +42,8 @@
 							"owner": "you",
 							"subtypes": [
 								"Lesson"
-							]
+							],
+							"token": false
 						}
 					},
 					"atLeast": 1
@@ -54,7 +52,6 @@
 		],
 		"procedures": [],
 		"assessed": true,
-		"printedCast": true,
-		"deferred": []
+		"printedCast": true
 	}
 }

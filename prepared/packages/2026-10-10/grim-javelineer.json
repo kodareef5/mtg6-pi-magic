@@ -1,0 +1,65 @@
+{
+	"card": "Grim Javelineer",
+	"generated": "2026-10-10",
+	"source": "1985c1bebf63b41ba10374d7189b81eceb050ca4fb536ae553b0a346c6c59392",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Grim Javelineer",
+		"registers": [
+			{
+				"basis": "Whenever you attack, target attacking creature gets +1/+0 until end of turn. When that creature dies this turn, surveil 1. (Look at the top card of your library. You may put that card into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"attacking": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "dies",
+								"of": {
+									"is": "target:0"
+								}
+							},
+							"until": "end-of-turn",
+							"effect": {
+								"instructions": [
+									{
+										"do": "keyword",
+										"name": "surveil",
+										"who": "you",
+										"count": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

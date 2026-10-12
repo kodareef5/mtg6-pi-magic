@@ -1,0 +1,95 @@
+{
+	"card": "Jennika, Bad Apple Big Sister",
+	"generated": "2026-10-10",
+	"source": "69dc4c5761a4e264e4fb33a5e86a9e5d9e40100b757e9bab57204ab70c4d4047",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jennika, Bad Apple Big Sister",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Jennika enters, create a 2/2 red Mutant creature token.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Mutant Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Mutant"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Jennika, Bad Apple Big Sister",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plainscycle Jennika",
+				"basis": "Plainscycling {2} ({2}, Discard this card: Search your library for a Plains card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Plains"
+							],
+							"token": false
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "plains"
+					},
+					{
+						"do": "move",
+						"what": "bound:plains",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

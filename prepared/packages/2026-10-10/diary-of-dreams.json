@@ -1,0 +1,70 @@
+{
+	"card": "Diary of Dreams",
+	"generated": "2026-10-10",
+	"source": "e458035d34973a9e603dfbe9bdb1fce26002c9d2395098d6b84a56519abd1717",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Diary of Dreams",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast an instant or sorcery spell, put a page counter on this artifact.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "page",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Diary of Dreams",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card with the page-counter activation discount",
+				"basis": "{5}, {T}: Draw a card. This ability costs {1} less to activate for each page counter on this artifact.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}",
+					"tap": true,
+					"reduce": {
+						"counters": "page",
+						"on": "this"
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

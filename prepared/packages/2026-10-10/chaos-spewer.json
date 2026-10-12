@@ -1,0 +1,71 @@
+{
+	"card": "Chaos Spewer",
+	"generated": "2026-10-10",
+	"source": "8e327ac5b4fff68eaf2b653b8458abb447d3ff734510f24ed03e0446e9a03042",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chaos Spewer",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, you may pay {2}. If you don't, blight 2. (To blight 2, put two -1/-1 counters on a creature you control.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{2}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"not": {
+									"bound": "paid"
+								}
+							},
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									},
+									"count": 1,
+									"as": "blighted"
+								},
+								{
+									"do": "counters",
+									"on": "bound:blighted",
+									"kind": "-1/-1",
+									"amount": 2
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

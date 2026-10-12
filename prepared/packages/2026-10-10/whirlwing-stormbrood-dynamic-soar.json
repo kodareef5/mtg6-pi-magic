@@ -1,0 +1,118 @@
+{
+	"card": "Whirlwing Stormbrood // Dynamic Soar",
+	"generated": "2026-10-10",
+	"source": "1a427174ce4769104812b06fc7ccd507d5a3f8a58c5153c7e143a69286b4db02",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Whirlwing Stormbrood // Dynamic Soar",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "You may cast sorcery spells and Dragon spells as though they had flash.",
+				"kind": "permit",
+				"flash": {
+					"zones": [
+						"stack"
+					],
+					"any": [
+						{
+							"types": [
+								"sorcery"
+							]
+						},
+						{
+							"subtypes": [
+								"Dragon"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Whirlwing Stormbrood // Dynamic Soar",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dynamic Soar",
+				"basis": "Put three +1/+1 counters on target creature you control. (Then shuffle this card into its owner's library.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

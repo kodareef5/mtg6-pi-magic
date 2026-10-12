@@ -1,0 +1,84 @@
+{
+	"card": "Sun Warriors",
+	"generated": "2026-10-10",
+	"source": "41c55facf3db762bd1243c8537a8d998c7f72f156cdd318fd66917e9bdf48ba1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sun Warriors",
+		"registers": [
+			{
+				"basis": "Firebending X, where X is the number of creatures you control. (Whenever this creature attacks, add X {R}. This mana lasts until end of combat.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R"
+							],
+							"times": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							"until": "end-of-combat"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sun Warriors",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a white Ally token",
+				"basis": "{5}: Create a 1/1 white Ally creature token.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Ally Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Ally"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

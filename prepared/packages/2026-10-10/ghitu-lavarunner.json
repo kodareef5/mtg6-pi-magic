@@ -1,0 +1,47 @@
+{
+	"card": "Ghitu Lavarunner",
+	"generated": "2026-10-10",
+	"source": "86e2aa21edb1a9f91ed24de84ea87a0aa243fd141708057429fbd3b634ec67f8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ghitu Lavarunner",
+		"registers": [
+			{
+				"basis": "As long as there are two or more instant and/or sorcery cards in your graveyard, this creature gets +1/+0 and has haste. (It can attack and {T} as soon as it comes under your control.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"instant",
+								"sorcery"
+							],
+							"token": false
+						}
+					},
+					"atLeast": 2
+				},
+				"change": {
+					"power": 1,
+					"words": [
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

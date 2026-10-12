@@ -1,0 +1,95 @@
+{
+	"card": "Gnawing Crescendo",
+	"generated": "2026-10-10",
+	"source": "ca50aa2445afcce3461c6d8279f5ddf651675d23ecf784e1846362805cab585d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gnawing Crescendo",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gnawing Crescendo",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gnawing Crescendo",
+				"basis": "Creatures you control get +2/+0 until end of turn. Whenever a nontoken creature you control dies this turn, create a 1/1 black Rat creature token with \"This token can't block.\"",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2
+						}
+					},
+					{
+						"do": "delay",
+						"until": "end-of-turn",
+						"event": {
+							"on": "dies",
+							"of": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"token": false
+							}
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Rat Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Rat"
+										],
+										"colors": [
+											"B"
+										],
+										"power": 1,
+										"toughness": 1,
+										"registers": [
+											{
+												"kind": "continuous",
+												"basis": "This token can't block.",
+												"affects": {
+													"is": "this"
+												},
+												"change": {
+													"words": [
+														"can't block"
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

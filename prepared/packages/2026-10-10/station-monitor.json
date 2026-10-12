@@ -1,0 +1,70 @@
+{
+	"card": "Station Monitor",
+	"generated": "2026-10-10",
+	"source": "2c9f7c33dada192ad29a58a898c5af7a509c62766fef2f923dfc7c2da1f8dafe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Station Monitor",
+		"registers": [
+			{
+				"basis": "Whenever you cast your second spell each turn, create a 1/1 colorless Drone artifact creature token with flying and \"This token can block only creatures with flying.\"",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"ordinal": 2
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Drone Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Drone"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								],
+								"registers": [
+									{
+										"basis": "This token can block only creatures with flying.",
+										"kind": "prohibit",
+										"block": {
+											"attacker": {
+												"types": [
+													"creature"
+												],
+												"not": {
+													"words": [
+														"flying"
+													]
+												}
+											},
+											"blocker": {
+												"is": "this"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

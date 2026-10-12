@@ -1,0 +1,112 @@
+{
+	"card": "Beorn's Hospitality",
+	"generated": "2026-10-10",
+	"source": "9307e7e11cd08f33c12242773cc56c31444b53fb6f0f135f7aa323bbdea6180f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beorn's Hospitality",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, put a +1/+1 counter on target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Beorn's Hospitality",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Become a Bear creature and gain land-count power and toughness",
+				"basis": "{5}{G}{G}: This enchantment becomes a Bear creature in addition to its other types and gains \"This creature's power and toughness are each equal to the number of lands you control.\" (This effect doesn't end.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}{G}{G}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "indefinite",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Bear"
+								]
+							},
+							"registers": [
+								{
+									"basis": "{5}{G}{G}: This enchantment becomes a Bear creature in addition to its other types and gains \"This creature's power and toughness are each equal to the number of lands you control.\" (This effect doesn't end.)",
+									"kind": "continuous",
+									"affects": {
+										"is": "this"
+									},
+									"change": {
+										"base": {
+											"power": {
+												"count": {
+													"types": [
+														"land"
+													],
+													"controller": "you"
+												}
+											},
+											"toughness": {
+												"count": {
+													"types": [
+														"land"
+													],
+													"controller": "you"
+												}
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

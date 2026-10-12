@@ -1,0 +1,67 @@
+{
+	"card": "Blood Hustler",
+	"generated": "2026-10-10",
+	"source": "d1f4a50d404feb74059c1016407638dc51aa6a8cb88fe3204e02f71e11ccfe23",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blood Hustler",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you commit a crime, put a +1/+1 counter on this creature. This ability triggers only once each turn. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.)",
+				"event": {
+					"on": "crime",
+					"by": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Blood Hustler",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Target opponent loses 1 life and you gain 1 life",
+				"basis": "{3}{B}: Target opponent loses 1 life and you gain 1 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{B}"
+				},
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": -1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

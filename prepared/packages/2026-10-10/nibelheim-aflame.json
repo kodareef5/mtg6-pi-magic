@@ -1,0 +1,100 @@
+{
+	"card": "Nibelheim Aflame",
+	"generated": "2026-10-10",
+	"source": "0462befc8bcd9ac7e6d442c1d8804034e04a887e78c8951ff08982d8bde48884",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nibelheim Aflame",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {5}{R}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{5}{R}{R}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Nibelheim Aflame at its printed cost or through its flashback permission",
+				"basis": "Choose target creature you control. It deals damage equal to its power to each other creature. If this spell was cast from a graveyard, discard your hand and draw four cards.",
+				"source": {
+					"card": "Nibelheim Aflame",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "target:0",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"not": {
+								"is": "target:0"
+							}
+						},
+						"amount": {
+							"power": "target:0"
+						}
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"cast": "this",
+							"from": "graveyard"
+						},
+						"instructions": [
+							{
+								"do": "move",
+								"every": {
+									"zones": [
+										"hand"
+									],
+									"controller": "you"
+								},
+								"to": "graveyard",
+								"reason": "discard"
+							},
+							{
+								"do": "draw",
+								"who": "you",
+								"count": 4
+							}
+						]
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

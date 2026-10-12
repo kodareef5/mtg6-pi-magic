@@ -1,0 +1,100 @@
+{
+	"card": "Winter, Tormented Loner",
+	"generated": "2026-10-10",
+	"source": "50c3955f12a1402a028f78f685fcdda4d1fc7da6ab5564ab1b88dd2d7899eac8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Winter, Tormented Loner",
+		"registers": [
+			{
+				"basis": "When Winter enters, you may sacrifice a creature or planeswalker. When you do, each opponent sacrifices a creature of their choice.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature",
+											"planeswalker"
+										],
+										"controller": "you"
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "choose-actions",
+										"who": "opponent",
+										"count": 1,
+										"actions": [
+											{
+												"sacrifice": {
+													"zones": [
+														"battlefield"
+													],
+													"types": [
+														"creature"
+													]
+												}
+											}
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Winter gets +1/+0 for each creature and planeswalker card in your graveyard.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"token": false
+						}
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

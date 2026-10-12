@@ -1,0 +1,91 @@
+{
+	"card": "Vraska, Soul of Stone",
+	"generated": "2026-10-10",
+	"source": "d30281ceb09b279acc2892a4b825052e87e36356bec7d5292199d1c69690e432",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vraska, Soul of Stone",
+		"registers": [
+			{
+				"basis": "Artifact creatures you control have vigilance.",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"all": [
+						{
+							"types": [
+								"artifact"
+							]
+						},
+						{
+							"types": [
+								"creature"
+							]
+						}
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a noncreature spell, create a 1/1 colorless Sculpture Treasure artifact creature token with \"{T}, Sacrifice this token: Add one mana of any color.\"",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Sculpture Treasure Token",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Sculpture",
+									"Treasure"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1,
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

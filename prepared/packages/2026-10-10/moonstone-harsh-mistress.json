@@ -1,0 +1,71 @@
+{
+	"card": "Moonstone, Harsh Mistress",
+	"generated": "2026-10-10",
+	"source": "6368d169de3e6b2bf6dbdb568338aab7dd7d4d77f76a13f352910fddc4a56b40",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Moonstone, Harsh Mistress",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you discard a card, you may exile that card from your graveyard. If you do, until the end of your next turn, you may play that card.",
+				"event": {
+					"on": "discarded",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "exile",
+							"reason": "exile",
+							"may": true,
+							"if": {
+								"is": "event:object",
+								"matches": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you"
+								}
+							},
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							},
+							"if": {
+								"bound": "exiled"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

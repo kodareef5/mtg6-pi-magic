@@ -1,0 +1,62 @@
+{
+	"card": "Biosynthic Burst",
+	"generated": "2026-10-10",
+	"source": "9f369d6d3307365f563b6e7b2e12b3d909947b942e1b6a5e3840efcdb467d1e1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Biosynthic Burst",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Biosynthic Burst",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Biosynthic Burst",
+				"basis": "Put a +1/+1 counter on target creature you control. It gains reach, trample, and indestructible until end of turn. Untap it. (Damage and effects that say \"destroy\" don't destroy it.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"reach",
+								"trample",
+								"indestructible"
+							]
+						}
+					},
+					{
+						"do": "untap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

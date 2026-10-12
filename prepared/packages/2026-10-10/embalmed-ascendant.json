@@ -1,0 +1,104 @@
+{
+	"card": "Embalmed Ascendant",
+	"generated": "2026-10-10",
+	"source": "578b2ebbf882d2b5ec334e05d3786e4e650bd5e34b1d8b92e2fd1f85c846e421",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Embalmed Ascendant",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, create a 2/2 black Zombie creature token.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Zombie Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Zombie"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — Whenever a creature you control dies, each opponent loses 1 life and you gain 1 life.",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "Max speed — Whenever a creature you control dies, each opponent loses 1 life and you gain 1 life.",
+							"event": {
+								"on": "dies",
+								"of": {
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "life",
+										"who": "opponent",
+										"amount": -1
+									},
+									{
+										"do": "life",
+										"who": "you",
+										"amount": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

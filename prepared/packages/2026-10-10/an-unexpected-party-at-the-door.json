@@ -1,0 +1,81 @@
+{
+	"card": "An Unexpected Party // At the Door",
+	"generated": "2026-10-10",
+	"source": "bd32a007fdf93628225d4f6627cff04a8cfa39b9bc45d385a6dff1f2b3568360",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "An Unexpected Party // At the Door",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "As this enchantment enters, choose a creature type.",
+				"kind": "enters",
+				"choose": {
+					"as": "creatureType",
+					"from": "creature-type"
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Creatures you control of the chosen type get +2/+2.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"subtypes": {
+						"chosen": "creatureType"
+					}
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "An Unexpected Party // At the Door",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast At the Door",
+				"basis": "Create X 2/2 red Dwarf creature tokens. (Then exile this card. You may cast the enchantment later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"x": true
+						},
+						"spec": {
+							"name": "Dwarf Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Dwarf"
+							],
+							"colors": [
+								"R"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

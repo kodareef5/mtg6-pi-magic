@@ -1,0 +1,1068 @@
+{
+	"card": "Season of the Burrow",
+	"generated": "2026-10-10",
+	"source": "37219204e49d0ea579e0e61e34af40ccfdda89c7a1f15f8d98604c57262d3021",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Season of the Burrow",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast choosing no modes (0 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once.",
+				"timing": "spell",
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode once (1 pawprint)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode twice (2 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode three times (3 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode four times (4 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode five times (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with exile mode once (2 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P} — Exile target nonland permanent. Its controller draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode once and exile mode once (3 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token. ... {P}{P} — Exile target nonland permanent. Its controller draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode twice and exile mode once (4 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token. ... {P}{P} — Exile target nonland permanent. Its controller draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode three times and exile mode once (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token. ... {P}{P} — Exile target nonland permanent. Its controller draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with exile mode twice (4 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P} — Exile target nonland permanent. Its controller draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": 1
+					},
+					{
+						"do": "move",
+						"what": "target:1",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:1",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode once and exile mode twice (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token. ... {P}{P} — Exile target nonland permanent. Its controller draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": 1
+					},
+					{
+						"do": "move",
+						"what": "target:1",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:1",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with return mode once (3 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P}{P} — Return target permanent card with mana value 3 or less from your graveyard to the battlefield with an indestructible counter on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"indestructible": 1
+						},
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode once and return mode once (4 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token. ... {P}{P}{P} — Return target permanent card with mana value 3 or less from your graveyard to the battlefield with an indestructible counter on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"indestructible": 1
+						},
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with Rabbit mode twice and return mode once (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P} — Create a 1/1 white Rabbit creature token. ... {P}{P}{P} — Return target permanent card with mana value 3 or less from your graveyard to the battlefield with an indestructible counter on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rabbit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rabbit"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"indestructible": 1
+						},
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Season of the Burrow",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with exile mode once and return mode once (5 pawprints)",
+				"basis": "Choose up to five {P} worth of modes. You may choose the same mode more than once. ... {P}{P} — Exile target nonland permanent. Its controller draws a card. ... {P}{P}{P} — Return target permanent card with mana value 3 or less from your graveyard to the battlefield with an indestructible counter on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": 1
+					},
+					{
+						"do": "move",
+						"what": "target:1",
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"indestructible": 1
+						},
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

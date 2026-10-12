@@ -1,0 +1,109 @@
+{
+	"card": "Diviner of Victory // Unwind History",
+	"generated": "2026-10-10",
+	"source": "02fbf36974a47311033e5a3bfe46250872ebaf2df5a1164f769b84b70237f8af",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Diviner of Victory // Unwind History",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			},
+			{
+				"face": 0,
+				"basis": "Whenever you scry or surveil, this creature gets +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "keyword",
+					"keyword": "scry",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "Whenever you scry or surveil, this creature gets +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "keyword",
+					"keyword": "surveil",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Diviner of Victory // Unwind History",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared copy of Unwind History",
+				"basis": "Return target creature an opponent controls with mana value 3 or less to its owner's hand. Surveil 1.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent",
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

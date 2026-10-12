@@ -1,0 +1,101 @@
+{
+	"card": "Malevolent Witchkite",
+	"generated": "2026-10-10",
+	"source": "f12b0b5f29c014ad6bd3282a5adb641566ad50ab0430c6cb55a1bd5e593dd961",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Malevolent Witchkite",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, sacrifice any number of artifacts, enchantments, and/or tokens, then draw that many cards.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you",
+								"any": [
+									{
+										"types": [
+											"artifact",
+											"enchantment"
+										]
+									},
+									{
+										"token": true
+									}
+								]
+							},
+							"count": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"any": [
+										{
+											"types": [
+												"artifact",
+												"enchantment"
+											]
+										},
+										{
+											"token": true
+										}
+									]
+								}
+							},
+							"upTo": true,
+							"as": "chosen"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen",
+							"to": "graveyard",
+							"reason": "sacrifice",
+							"as": "sacrificed"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"bound": "sacrificed"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

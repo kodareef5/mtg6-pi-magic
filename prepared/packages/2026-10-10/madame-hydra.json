@@ -1,0 +1,57 @@
+{
+	"card": "Madame Hydra",
+	"generated": "2026-10-10",
+	"source": "c23e62355d52099ba657e38f5b92fb0a862f317f046a6963a4c7ac6e1e8a82c4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Madame Hydra",
+		"registers": [
+			{
+				"basis": "Whenever you cast a Villain spell, create a 2/1 black Villain creature token with menace. (It can't be blocked except by two or more creatures.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"subtypes": [
+							"Villain"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Villain Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Villain"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 2,
+								"toughness": 1,
+								"words": [
+									"menace"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

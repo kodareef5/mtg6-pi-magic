@@ -1,0 +1,117 @@
+{
+	"card": "Riverwalk Technique",
+	"generated": "2026-10-10",
+	"source": "19d68bd573465d7c0dd2e3e03c5094d2f3fd588d248f5dde87fbd5f479afd73d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Riverwalk Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Riverwalk Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Riverwalk Technique — owner chooses top or bottom",
+				"basis": "Choose one — ... • The owner of target nonland permanent puts it on their choice of the top or bottom of their library.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "bottom-chosen",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "bottom",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "top",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "bottom-chosen"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Riverwalk Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Riverwalk Technique — counter noncreature spell",
+				"basis": "Choose one — ... • Counter target noncreature spell.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							],
+							"not": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

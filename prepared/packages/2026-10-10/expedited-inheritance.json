@@ -1,0 +1,72 @@
+{
+	"card": "Expedited Inheritance",
+	"generated": "2026-10-10",
+	"source": "0ebe0ab2ff9d44459ec650bef3b2dc25f24ef47a583d3f9befe30065d3df6534",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Expedited Inheritance",
+		"registers": [
+			{
+				"basis": "Whenever a creature is dealt damage, its controller may exile that many cards from the top of their library. They may play those cards until the end of their next turn.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"received": true,
+					"of": {
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "each",
+							"players": "each-player",
+							"instructions": [
+								{
+									"do": "perform",
+									"who": "bound:player",
+									"may": true,
+									"if": {
+										"is": "event:object",
+										"matches": {
+											"controller": "bound:player"
+										},
+										"lastKnown": true
+									},
+									"instructions": [
+										{
+											"do": "move",
+											"what": {
+												"top": {
+													"event": "amount"
+												},
+												"of": "bound:player"
+											},
+											"to": "exile",
+											"reason": "exile",
+											"as": "exiled"
+										},
+										{
+											"do": "permit",
+											"what": "bound:exiled",
+											"who": "bound:player",
+											"until": {
+												"endOfNextTurn": "bound:player"
+											}
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

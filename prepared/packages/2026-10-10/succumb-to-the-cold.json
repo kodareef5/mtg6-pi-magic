@@ -1,0 +1,57 @@
+{
+	"card": "Succumb to the Cold",
+	"generated": "2026-10-10",
+	"source": "262ac7f338fb7721d6aa1c39a08623725dd0a26d55104e969ec167c4cdf85207",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Succumb to the Cold",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Succumb to the Cold",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Tap one or two opposing creatures and put a stun counter on each.",
+				"basis": "Tap one or two target creatures an opponent controls. Put a stun counter on each of them. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"count": 2,
+						"atLeast": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "stun",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

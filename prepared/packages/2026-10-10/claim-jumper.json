@@ -1,0 +1,176 @@
+{
+	"card": "Claim Jumper",
+	"generated": "2026-10-10",
+	"source": "2a4f273cfdf347d897e7230b8d2d60e1bbf43dc8419957dc55ce5759476b7830",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Claim Jumper",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, if an opponent controls more lands than you, you may search your library for a Plains card and put it onto the battlefield tapped. Then if an opponent controls more lands than you, repeat this process once. If you search your library this way, shuffle.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"controller": "opponent"
+						}
+					},
+					"atLeast": {
+						"sum": [
+							{
+								"count": {
+									"types": [
+										"land"
+									],
+									"controller": "you"
+								}
+							},
+							1
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "first-search",
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"subtypes": [
+											"Plains"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"as": "first-plains"
+								},
+								{
+									"do": "move",
+									"what": "bound:first-plains",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								}
+							]
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "second-search",
+							"if": {
+								"amount": {
+									"count": {
+										"types": [
+											"land"
+										],
+										"controller": "opponent"
+									}
+								},
+								"atLeast": {
+									"sum": [
+										{
+											"count": {
+												"types": [
+													"land"
+												],
+												"controller": "you"
+											}
+										},
+										1
+									]
+								}
+							},
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"subtypes": [
+											"Plains"
+										]
+									},
+									"count": 1,
+									"upTo": true,
+									"as": "second-plains"
+								},
+								{
+									"do": "move",
+									"what": "bound:second-plains",
+									"to": "battlefield",
+									"tapped": true,
+									"controller": "you",
+									"reason": "resolve"
+								}
+							]
+						},
+						{
+							"do": "shuffle",
+							"who": "you",
+							"if": {
+								"any": [
+									{
+										"bound": "first-search"
+									},
+									{
+										"bound": "second-search"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -18,7 +18,7 @@
 					],
 					"controller": "any"
 				},
-				"claim": "Discard your hand, then draw for the card types in your graveyard.",
+				"claim": "Cast Peer Past the Veil",
 				"basis": "Discard your hand. Then draw X cards, where X is the number of card types among cards in your graveyard.",
 				"timing": "spell",
 				"instructions": [
@@ -28,7 +28,6 @@
 							"zones": [
 								"hand"
 							],
-							"owner": "you",
 							"controller": "you"
 						},
 						"to": "graveyard",
@@ -43,14 +42,14 @@
 								"zones": [
 									"graveyard"
 								],
-								"owner": "you"
+								"owner": "you",
+								"token": false
 							}
 						}
 					}
 				]
 			}
 		],
-		"assessed": true,
-		"printedCast": false
+		"assessed": true
 	}
 }

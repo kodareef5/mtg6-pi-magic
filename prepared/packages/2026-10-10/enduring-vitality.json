@@ -1,0 +1,94 @@
+{
+	"card": "Enduring Vitality",
+	"generated": "2026-10-10",
+	"source": "2cb5b7fc7e0dcc3835d11ef559f8634f8f86d51c777f962ecbfcd047b6bc9d2f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Enduring Vitality",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Creatures you control have \"{T}: Add one mana of any color.\"",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "mana",
+							"basis": "Creatures you control have \"{T}: Add one mana of any color.\"",
+							"cost": {
+								"tap": true
+							},
+							"any": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Enduring Vitality dies, if it was a creature, return it to the battlefield under its owner's control. It's an enchantment. (It's not a creature.)",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this",
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "owner:event:object",
+							"reason": "resolve",
+							"change": {
+								"types": {
+									"set": [
+										"enchantment"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

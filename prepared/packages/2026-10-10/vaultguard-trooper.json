@@ -1,0 +1,60 @@
+{
+	"card": "Vaultguard Trooper",
+	"generated": "2026-10-10",
+	"source": "826b705368389df1bfe44f269614f539b9025163171b19e5bb381ebfb20d7b7a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vaultguard Trooper",
+		"registers": [
+			{
+				"basis": "At the beginning of your end step, if you control two or more tapped creatures, you may discard your hand. If you do, draw two cards.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": true
+						}
+					},
+					"atLeast": 2
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"to": "graveyard",
+							"reason": "discard"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

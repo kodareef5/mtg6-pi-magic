@@ -1,0 +1,168 @@
+{
+	"card": "Gathering Stone",
+	"generated": "2026-10-10",
+	"source": "d91917aca9c9b22a3f43aeae9cd88e5694039dd389d8ef8734e9466f592d3b01",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gathering Stone",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "As this artifact enters, choose a creature type.",
+				"choose": {
+					"as": "creatureType",
+					"from": "creature-type"
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Spells you cast of the chosen type cost {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"subtypes": {
+						"chosen": "creatureType"
+					}
+				},
+				"reduce": 1
+			},
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters and at the beginning of your upkeep, look at the top card of your library. If it's a card of the chosen type, you may reveal it and put it into your hand. If you don't put the card into your hand, you may put it into your graveyard.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"if": {
+								"is": "bound:looked",
+								"matches": {
+									"zones": [
+										"library"
+									],
+									"subtypes": {
+										"chosen": "creatureType"
+									}
+								}
+							},
+							"instructions": [
+								{
+									"do": "reveal",
+									"what": "bound:looked"
+								},
+								{
+									"do": "move",
+									"what": "bound:looked",
+									"to": "hand",
+									"reason": "resolve"
+								}
+							]
+						},
+						{
+							"do": "move",
+							"what": "bound:looked",
+							"to": "graveyard",
+							"reason": "resolve",
+							"may": true,
+							"if": {
+								"is": "bound:looked",
+								"matches": {
+									"zones": [
+										"library"
+									]
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters and at the beginning of your upkeep, look at the top card of your library. If it's a card of the chosen type, you may reveal it and put it into your hand. If you don't put the card into your hand, you may put it into your graveyard.",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"if": {
+								"is": "bound:looked",
+								"matches": {
+									"zones": [
+										"library"
+									],
+									"subtypes": {
+										"chosen": "creatureType"
+									}
+								}
+							},
+							"instructions": [
+								{
+									"do": "reveal",
+									"what": "bound:looked"
+								},
+								{
+									"do": "move",
+									"what": "bound:looked",
+									"to": "hand",
+									"reason": "resolve"
+								}
+							]
+						},
+						{
+							"do": "move",
+							"what": "bound:looked",
+							"to": "graveyard",
+							"reason": "resolve",
+							"may": true,
+							"if": {
+								"is": "bound:looked",
+								"matches": {
+									"zones": [
+										"library"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,86 @@
+{
+	"card": "Uneasy Partings",
+	"generated": "2026-10-10",
+	"source": "fe8f6e7413a068ee3a80b2ec1e6925e5c363489fbc17a51e8f31fae92ad230da",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Uneasy Partings",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Uneasy Partings",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Uneasy Partings; the creature's owner chooses top or bottom on resolution",
+				"basis": "This spell costs {1} less to cast if it targets an attacking nontoken creature. ... Target creature's owner puts it on their choice of the top or bottom of their library.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"is": "target:0",
+							"types": [
+								"creature"
+							],
+							"attacking": true,
+							"token": false
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "bottom-chosen",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "bottom",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "top",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "bottom-chosen"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

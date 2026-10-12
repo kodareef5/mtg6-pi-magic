@@ -1,0 +1,114 @@
+{
+	"card": "Salvation Engine",
+	"generated": "2026-10-10",
+	"source": "236d2c23e76a547aadafb507b74375a5d916e5d867d6d5617ee58331b4d478be",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Salvation Engine",
+		"registers": [
+			{
+				"basis": "Other artifact creatures you control get +2/+2.",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"other": true,
+					"all": [
+						{
+							"types": [
+								"artifact"
+							]
+						},
+						{
+							"types": [
+								"creature"
+							]
+						}
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2
+				}
+			},
+			{
+				"basis": "Whenever this Vehicle attacks, return up to one target artifact card from your graveyard to the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"artifact"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Salvation Engine",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Salvation Engine",
+				"basis": "Crew 6",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 6
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,78 @@
+{
+	"card": "Break Under Pressure",
+	"generated": "2026-10-10",
+	"source": "bb34c72de5af07ac591eadf685ee0574b5cd5eeb0a8243b6af0fe427d01b9d52",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Break Under Pressure",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Break Under Pressure",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Break Under Pressure",
+				"basis": "Target opponent sacrifices a creature or planeswalker with the greatest mana value among creatures and planeswalkers they control. You gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "target:0",
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atLeast": {
+									"aggregate": "max",
+									"of": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "target:0",
+										"types": [
+											"creature",
+											"planeswalker"
+										]
+									},
+									"value": "manaValue"
+								}
+							}
+						},
+						"count": 1,
+						"as": "sacrifice"
+					},
+					{
+						"do": "move",
+						"what": "bound:sacrifice",
+						"to": "graveyard",
+						"reason": "sacrifice"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

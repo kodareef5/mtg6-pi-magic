@@ -1,0 +1,79 @@
+{
+	"card": "Green Goblin, Revenant",
+	"generated": "2026-10-10",
+	"source": "5daa622c2d0ffb83d7862fc7541ad16edc9ee4db9b4895bea25684d264a233d5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Green Goblin, Revenant",
+		"registers": [
+			{
+				"basis": "Flying, deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Green Goblin attacks, discard a card. Then draw a card for each card you've discarded this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"history": "discarded",
+								"by": "you"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

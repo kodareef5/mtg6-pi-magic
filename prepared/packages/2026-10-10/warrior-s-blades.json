@@ -1,0 +1,107 @@
+{
+	"card": "Warrior's Blades",
+	"generated": "2026-10-10",
+	"source": "5d8f663ee1e25b9759dfc8374c81897f40de9217808e47e0f6e27817a2855dc8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Warrior's Blades",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this Equipment enters, it deals 3 damage to any target and you gain 3 life.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 3,
+							"from": "this"
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Equipped creature gets +2/+1.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Equip Warrior's Blades",
+				"basis": "Equip {3}. This ability costs {1} less to activate for each +1/+1 counter on the creature it targets.",
+				"source": {
+					"card": "Warrior's Blades",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}",
+					"reduce": {
+						"counters": "+1/+1",
+						"on": "target:0"
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

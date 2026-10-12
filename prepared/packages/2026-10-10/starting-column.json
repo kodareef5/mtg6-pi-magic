@@ -1,0 +1,88 @@
+{
+	"card": "Starting Column",
+	"generated": "2026-10-10",
+	"source": "91bdf5ca9f2b9759cc2e4aa6438017d2c6ace8b99a80b41fa8ef64ca8066d3e8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Starting Column",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "mana",
+				"basis": "{T}: Add one mana of any color.",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — {T}, Sacrifice this artifact: Draw two cards, then discard a card.",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Max speed — {T}, Sacrifice this artifact: Draw two cards, then discard a card.",
+							"cost": {
+								"tap": true,
+								"sacrifice": "this"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "draw",
+										"who": "you",
+										"count": 2
+									},
+									{
+										"do": "choose",
+										"who": "you",
+										"from": {
+											"zones": [
+												"hand"
+											],
+											"controller": "you"
+										},
+										"count": 1,
+										"as": "discard"
+									},
+									{
+										"do": "move",
+										"what": "bound:discard",
+										"to": "graveyard",
+										"reason": "discard"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

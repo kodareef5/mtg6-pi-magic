@@ -1,0 +1,67 @@
+{
+	"card": "Hire a Crew",
+	"generated": "2026-10-10",
+	"source": "84f5907bf231238e4932bec99ce7acbd2ba83fb39d279f30b4d01190faf93030",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hire a Crew",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hire a Crew",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Hire a Crew",
+				"basis": "Create a 2/1 black Villain creature token with menace, then creatures you control get +1/+0 until end of turn. (A creature with menace can't be blocked except by two or more creatures.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Villain Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Villain"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 2,
+							"toughness": 1,
+							"words": [
+								"menace"
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

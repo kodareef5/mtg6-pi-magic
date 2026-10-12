@@ -1,0 +1,60 @@
+{
+	"card": "Tome Blast",
+	"generated": "2026-10-10",
+	"source": "f10bfaa483836fa4ae1cdf1deb48ec4e6cfad9929c622b0d5bed9da071261257",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tome Blast",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {4}{R} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{4}{R}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tome Blast",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Tome Blast using the printed cost or an earned casting permission",
+				"basis": "Tome Blast deals 2 damage to any target.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

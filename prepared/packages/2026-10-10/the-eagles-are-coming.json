@@ -1,0 +1,169 @@
+{
+	"card": "The Eagles Are Coming!",
+	"generated": "2026-10-10",
+	"source": "e5eb2edbed3b1e979059cfd38d9b449c9bf6424476f08126c7ecae9f4e61ce83",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Eagles Are Coming!",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "The Eagles Are Coming!",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast The Eagles Are Coming! without kicker",
+				"basis": "Kicker {2}{W}{W} (You may pay an additional {2}{W}{W} as you cast this spell.) ... Choose target creature you own. If this spell was kicked, instead choose any number of target creatures you own. Return each chosen creature to your hand. At the beginning of the next upkeep, create a 4/4 white Bird Soldier creature token with flying for each creature returned to your hand this way.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"owner": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce",
+						"as": "returned"
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "upkeep",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "token",
+									"count": {
+										"bound": "returned"
+									},
+									"spec": {
+										"name": "Bird Soldier Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Bird",
+											"Soldier"
+										],
+										"colors": [
+											"W"
+										],
+										"power": 4,
+										"toughness": 4,
+										"words": [
+											"flying"
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "The Eagles Are Coming!",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast The Eagles Are Coming! with kicker",
+				"basis": "Kicker {2}{W}{W} (You may pay an additional {2}{W}{W} as you cast this spell.) ... Choose target creature you own. If this spell was kicked, instead choose any number of target creatures you own. Return each chosen creature to your hand. At the beginning of the next upkeep, create a 4/4 white Bird Soldier creature token with flying for each creature returned to your hand this way.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "kicker",
+							"mana": "{2}{W}{W}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"owner": "you"
+						},
+						"count": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce",
+						"as": "returned"
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "upkeep",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "token",
+									"count": {
+										"bound": "returned"
+									},
+									"spec": {
+										"name": "Bird Soldier Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Bird",
+											"Soldier"
+										],
+										"colors": [
+											"W"
+										],
+										"power": 4,
+										"toughness": 4,
+										"words": [
+											"flying"
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

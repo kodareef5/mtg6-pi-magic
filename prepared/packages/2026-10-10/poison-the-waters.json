@@ -1,0 +1,100 @@
+{
+	"card": "Poison the Waters",
+	"generated": "2026-10-10",
+	"source": "83502b750e162e34148591534111e0ef1592e95bc1e4a06b0399a3bac83b74a1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Poison the Waters",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Poison the Waters",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "All creatures get -1/-1 until end of turn",
+				"basis": "Choose one — ... All creatures get -1/-1 until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Poison the Waters",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Reveal target player's hand and choose an artifact or creature card to discard",
+				"basis": "Choose one — ... Target player reveals their hand. You choose an artifact or creature card from it. That player discards that card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "target:0"
+						},
+						"as": "hand"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"count": 1,
+						"as": "discard",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"is": "bound:hand",
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

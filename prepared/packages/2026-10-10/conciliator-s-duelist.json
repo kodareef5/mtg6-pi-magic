@@ -1,0 +1,105 @@
+{
+	"card": "Conciliator's Duelist",
+	"generated": "2026-10-10",
+	"source": "f7002e5e79b286f033772cafc56313fc5a26f85d76f1f46f42624a8776fd2a77",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Conciliator's Duelist",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, draw a card. Each player loses 1 life.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "each-player",
+							"amount": -1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Repartee — Whenever you cast an instant or sorcery spell that targets a creature, exile up to one target creature. Return that card to the battlefield under its owner's control at the beginning of the next end step.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						],
+						"targeting": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "delay",
+							"if": {
+								"bound": "exiled"
+							},
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "bound:exiled",
+										"to": "battlefield",
+										"controller": "owner:bound:exiled",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

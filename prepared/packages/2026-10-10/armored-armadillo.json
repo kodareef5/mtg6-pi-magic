@@ -1,0 +1,68 @@
+{
+	"card": "Armored Armadillo",
+	"generated": "2026-10-10",
+	"source": "d3ca57d6b11282f65c0c2016ab57868914ba241c2dfbb681e6f967456e1de915",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Armored Armadillo",
+		"registers": [
+			{
+				"basis": "Ward {1} (Whenever this creature becomes the target of a spell or ability an opponent controls, counter it unless that player pays {1}.)",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{1}"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Armored Armadillo",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give this creature +X/+0, with X equal to its toughness at resolution",
+				"basis": "{3}{W}: This creature gets +X/+0 until end of turn, where X is its toughness.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"toughness": "this"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

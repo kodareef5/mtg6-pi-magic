@@ -1,0 +1,92 @@
+{
+	"card": "Balustrade Wurm",
+	"generated": "2026-10-10",
+	"source": "50e3fe2e520889377b4b784744bdc26b009ab141c7a57ab37444e4d59a69c47a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Balustrade Wurm",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample, haste",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample",
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Balustrade Wurm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Balustrade Wurm",
+				"basis": "This spell can't be countered.",
+				"timing": "spell",
+				"words": [
+					"can't be countered"
+				],
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Balustrade Wurm",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Balustrade Wurm with a finality counter",
+				"basis": "Delirium — {2}{G}{G}: Return this card from your graveyard to the battlefield with a finality counter on it. Activate only if there are four or more card types among cards in your graveyard and only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}{G}{G}"
+				},
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 4
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"finality": 1
+						},
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,122 @@
+{
+	"card": "Warren Warleader",
+	"generated": "2026-10-10",
+	"source": "7626a23653c77cf71c8273cab836b66255851aeb9d7b412dabab504222c6fa2f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Warren Warleader",
+		"registers": [
+			{
+				"basis": "Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"paid": "offspring"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"copy": "this",
+							"except": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you attack, choose one —\n• Create a 1/1 white Rabbit creature token that's tapped and attacking.\n• Attacking creatures you control get +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you"
+				},
+				"effect": {
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"tapped": true,
+									"attacking": true,
+									"spec": {
+										"name": "Rabbit Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Rabbit"
+										],
+										"colors": [
+											"W"
+										],
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "modify",
+									"every": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"attacking": true
+									},
+									"until": "end-of-turn",
+									"change": {
+										"power": 1,
+										"toughness": 1
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Warren Warleader",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Warren Warleader with offspring",
+				"basis": "Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "offspring",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

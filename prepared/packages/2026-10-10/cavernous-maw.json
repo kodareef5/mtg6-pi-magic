@@ -1,0 +1,95 @@
+{
+	"card": "Cavernous Maw",
+	"generated": "2026-10-10",
+	"source": "caad808ab1b309b970db1f86625a8d927dd5794cd4c91324f602de4626e590f5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cavernous Maw",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cavernous Maw",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Animate Cavernous Maw",
+				"basis": "{2}: This land becomes a 3/3 Elemental creature until end of turn. It's still a Cave land. Activate only if the number of other Caves you control plus the number of Cave cards in your graveyard is three or greater.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}"
+				},
+				"if": {
+					"amount": {
+						"sum": [
+							{
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"subtypes": [
+										"Cave"
+									],
+									"controller": "you",
+									"other": true
+								}
+							},
+							{
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"subtypes": [
+										"Cave"
+									],
+									"owner": "you",
+									"token": false
+								}
+							}
+						]
+					},
+					"atLeast": 3
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Elemental"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

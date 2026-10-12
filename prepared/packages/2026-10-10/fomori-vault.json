@@ -1,0 +1,93 @@
+{
+	"card": "Fomori Vault",
+	"generated": "2026-10-10",
+	"source": "f50c8a09a6fd784d5ff60762d033295efe56a4debf63a50199f7ab3ea9efe4a2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fomori Vault",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fomori Vault",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Look at cards equal to artifacts controlled, put one into hand, and randomly bottom the rest",
+				"basis": "{3}, {T}, Discard a card: Look at the top X cards of your library, where X is the number of artifacts you control. Put one of those cards into your hand and the rest on the bottom of your library in a random order.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"tap": true,
+					"discard": 1
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								}
+							},
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"count": 1,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

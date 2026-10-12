@@ -1,0 +1,82 @@
+{
+	"card": "Semester Foreseer // Peer Review",
+	"generated": "2026-10-10",
+	"source": "46eed0c4972832b24a4bbe0f51b0f7e1bcaf864c949388b906b782011cf2e95a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Semester Foreseer // Peer Review",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "This creature enters prepared. (While it's prepared, you may cast a copy of its spell. Doing so unprepares it.)",
+				"kind": "enters",
+				"prepared": true
+			},
+			{
+				"face": 0,
+				"basis": "When this creature enters, surveil 1.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Semester Foreseer // Peer Review",
+					"zones": [
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast the prepared Peer Review copy",
+				"basis": "Create a 2/2 colorless Wizard Soldier creature token named Cadet. Surveil 1.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Cadet",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Wizard",
+								"Soldier"
+							],
+							"colors": [],
+							"power": 2,
+							"toughness": 2
+						}
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

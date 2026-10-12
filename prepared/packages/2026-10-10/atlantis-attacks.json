@@ -1,0 +1,175 @@
+{
+	"card": "Atlantis Attacks",
+	"generated": "2026-10-10",
+	"source": "f2144a01404298012bcb03d877609cf704ce4d077ddb09139cf1fa5cbc6bf078",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Atlantis Attacks",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Atlantis Attacks",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Atlantis Attacks without teamwork, choosing the Leviathan mode",
+				"basis": "Teamwork 4 (As an additional cost to cast this spell, you may tap any number of creatures you control with total power 4 or more.)\nChoose one. If this spell was cast using teamwork, choose both instead.\n• Target player creates a 6/5 blue Leviathan creature token with hexproof.\n• Return one or two target nonland permanents to their owners' hands.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "target:0",
+						"spec": {
+							"name": "Leviathan Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Leviathan"
+							],
+							"colors": [
+								"U"
+							],
+							"power": 6,
+							"toughness": 5,
+							"words": [
+								"hexproof"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Atlantis Attacks",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Atlantis Attacks without teamwork, choosing the return mode",
+				"basis": "Teamwork 4 (As an additional cost to cast this spell, you may tap any number of creatures you control with total power 4 or more.)\nChoose one. If this spell was cast using teamwork, choose both instead.\n• Target player creates a 6/5 blue Leviathan creature token with hexproof.\n• Return one or two target nonland permanents to their owners' hands.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"count": 2,
+						"atLeast": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Atlantis Attacks",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Atlantis Attacks using teamwork, choosing both modes",
+				"basis": "Teamwork 4 (As an additional cost to cast this spell, you may tap any number of creatures you control with total power 4 or more.)\nChoose one. If this spell was cast using teamwork, choose both instead.\n• Target player creates a 6/5 blue Leviathan creature token with hexproof.\n• Return one or two target nonland permanents to their owners' hands.",
+				"timing": "spell",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": false
+						},
+						"totalPower": 4
+					}
+				},
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"count": 2,
+						"atLeast": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "target:0",
+						"spec": {
+							"name": "Leviathan Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Leviathan"
+							],
+							"colors": [
+								"U"
+							],
+							"power": 6,
+							"toughness": 5,
+							"words": [
+								"hexproof"
+							]
+						}
+					},
+					{
+						"do": "move",
+						"what": "target:1",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

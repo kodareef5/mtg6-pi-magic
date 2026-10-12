@@ -1,0 +1,67 @@
+{
+	"card": "Elfsworn Giant",
+	"generated": "2026-10-10",
+	"source": "120889059c47e24d37b3d84e21eaa74c472bd5dfbeeb2bed1ffb935b74f057ac",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elfsworn Giant",
+		"registers": [
+			{
+				"basis": "Reach (This creature can block creatures with flying.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, create a 1/1 green Elf Warrior creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Elf Warrior Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Elf",
+									"Warrior"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,92 @@
+{
+	"card": "Mosswood Dreadknight // Dread Whispers",
+	"generated": "2026-10-10",
+	"source": "24f0f8d7311be4ed80390cd2db9bbb79a990f31c0bd819a412ab96d530a09838",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mosswood Dreadknight // Dread Whispers",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "When this creature dies, you may cast it from your graveyard as an Adventure until the end of your next turn.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "permit",
+							"what": "this",
+							"who": "you",
+							"mana": "printed",
+							"of": {
+								"zones": [
+									"stack"
+								],
+								"subtypes": [
+									"Adventure"
+								]
+							},
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Mosswood Dreadknight // Dread Whispers",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dread Whispers",
+				"basis": "You draw a card and you lose 1 life. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

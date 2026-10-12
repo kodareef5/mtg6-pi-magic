@@ -1,0 +1,172 @@
+{
+	"card": "Caught in the Crossfire",
+	"generated": "2026-10-10",
+	"source": "2f194db52e4557c8b3827a9d6a0bfe02cc6e38ae98da90d17ffd455c6fc3e63a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Caught in the Crossfire",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Caught in the Crossfire",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with only the outlaw damage mode",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Caught in the Crossfire deals 2 damage to each outlaw creature. (Assassins, Mercenaries, Pirates, Rogues, and Warlocks are outlaws.)",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-outlaws",
+							"mana": "{1}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Assassin",
+								"Mercenary",
+								"Pirate",
+								"Rogue",
+								"Warlock"
+							]
+						},
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Caught in the Crossfire",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with only the non-outlaw damage mode",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Caught in the Crossfire deals 2 damage to each non-outlaw creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-non-outlaws",
+							"mana": "{1}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"not": {
+								"subtypes": [
+									"Assassin",
+									"Mercenary",
+									"Pirate",
+									"Rogue",
+									"Warlock"
+								]
+							}
+						},
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Caught in the Crossfire",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast with both damage modes",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Caught in the Crossfire deals 2 damage to each outlaw creature. (Assassins, Mercenaries, Pirates, Rogues, and Warlocks are outlaws.) ... + {1} — Caught in the Crossfire deals 2 damage to each non-outlaw creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-outlaws",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-non-outlaws",
+							"mana": "{1}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Assassin",
+								"Mercenary",
+								"Pirate",
+								"Rogue",
+								"Warlock"
+							]
+						},
+						"amount": 2
+					},
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"not": {
+								"subtypes": [
+									"Assassin",
+									"Mercenary",
+									"Pirate",
+									"Rogue",
+									"Warlock"
+								]
+							}
+						},
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

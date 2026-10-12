@@ -1,0 +1,180 @@
+{
+	"card": "Overlord of the Mistmoors",
+	"generated": "2026-10-10",
+	"source": "4578c8225be29ddf2ef2c9bfea47267490e9f29dfa00aa54c11b3912304d1a2f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overlord of the Mistmoors",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "Impending 4—{2}{W}{W} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"if": {
+					"cast": "this",
+					"alternative": "impending"
+				},
+				"counters": {
+					"time": 4
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Impending 4—{2}{W}{W} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"all": [
+						{
+							"cast": "this",
+							"alternative": "impending"
+						},
+						{
+							"amount": {
+								"counters": "time",
+								"on": "this"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"change": {
+					"types": {
+						"remove": [
+							"creature"
+						]
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Impending 4—{2}{W}{W} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"all": [
+						{
+							"cast": "this",
+							"alternative": "impending"
+						},
+						{
+							"amount": {
+								"counters": "time",
+								"on": "this"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "time",
+							"amount": -1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this permanent enters or attacks, create two 2/1 white Insect creature tokens with flying.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Insect Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Insect"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this permanent enters or attacks, create two 2/1 white Insect creature tokens with flying.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Insect Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Insect"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 2,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Overlord of the Mistmoors for impending",
+				"source": {
+					"card": "Overlord of the Mistmoors",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"basis": "Impending 4—{2}{W}{W} (If you cast this spell for its impending cost, it enters with four time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"timing": "spell",
+				"cost": {
+					"mana": "{2}{W}{W}",
+					"alternative": "impending"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

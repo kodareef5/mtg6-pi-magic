@@ -1,0 +1,107 @@
+{
+	"card": "Mechanical Mobster",
+	"generated": "2026-10-10",
+	"source": "038ca6c29b7264693a4225b1708a8cf8bf07d9e3dbf31d760c8f0fa4baf6adfa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mechanical Mobster",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, exile up to one target card from a graveyard. Target creature you control connives. (Draw a card, then discard a card. If you discarded a nonland card, put a +1/+1 counter on that creature.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								]
+							},
+							"upTo": true
+						},
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						},
+						{
+							"do": "perform",
+							"who": "controller:target:1",
+							"instructions": [
+								{
+									"do": "draw",
+									"who": "controller:target:1",
+									"count": 1
+								},
+								{
+									"do": "choose",
+									"who": "controller:target:1",
+									"from": {
+										"zones": [
+											"hand"
+										],
+										"controller": "controller:target:1"
+									},
+									"count": 1,
+									"as": "connive-card"
+								},
+								{
+									"do": "move",
+									"what": "bound:connive-card",
+									"to": "graveyard",
+									"reason": "discard",
+									"as": "discarded"
+								},
+								{
+									"do": "counters",
+									"on": "target:1",
+									"kind": "+1/+1",
+									"amount": 1,
+									"if": {
+										"is": "bound:discarded",
+										"matches": {
+											"zones": [
+												"graveyard",
+												"exile",
+												"battlefield",
+												"stack",
+												"command"
+											],
+											"not": {
+												"types": [
+													"land"
+												]
+											}
+										},
+										"lastKnown": true
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

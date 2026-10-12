@@ -1,0 +1,83 @@
+{
+	"card": "The Swarmweaver",
+	"generated": "2026-10-10",
+	"source": "35f3c596426b29bc8b743a01528fb6672376050d535099e6965bf8b7d873041a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Swarmweaver",
+		"registers": [
+			{
+				"basis": "When The Swarmweaver enters, create two 1/1 black and green Insect creature tokens with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Insect Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Insect"
+								],
+								"colors": [
+									"B",
+									"G"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Delirium — As long as there are four or more card types among cards in your graveyard, Insects and Spiders you control get +1/+1 and have deathtouch.",
+				"kind": "continuous",
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 4
+				},
+				"affects": {
+					"subtypes": [
+						"Insect",
+						"Spider"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1,
+					"words": [
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

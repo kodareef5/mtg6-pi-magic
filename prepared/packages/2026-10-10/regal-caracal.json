@@ -1,0 +1,71 @@
+{
+	"card": "Regal Caracal",
+	"generated": "2026-10-10",
+	"source": "909a87bcad181c823ba5185aa195190d1104f41397e227f6758c382a223b975f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Regal Caracal",
+		"registers": [
+			{
+				"basis": "Other Cats you control get +1/+1 and have lifelink. (Damage dealt by those creatures also causes you to gain that much life.)",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"subtypes": [
+						"Cat"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1,
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create two 1/1 white Cat creature tokens with lifelink.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Cat Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Cat"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"lifelink"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

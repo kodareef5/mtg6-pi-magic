@@ -1,0 +1,84 @@
+{
+	"card": "HYDRA Troopers",
+	"generated": "2026-10-10",
+	"source": "d362d88d38fb5d67c888084642de01e30bdfbf71783333381d7c3a59a1a9f06b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "HYDRA Troopers",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a tapped 2/1 black Villain creature token with menace if there are two or more creature cards in your graveyard. Otherwise, mill two cards. (Put the top two cards of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you",
+										"types": [
+											"creature"
+										],
+										"token": false
+									}
+								},
+								"atLeast": 2
+							},
+							"as": "token-branch",
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"tapped": true,
+									"spec": {
+										"name": "Villain Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Villain"
+										],
+										"colors": [
+											"B"
+										],
+										"power": 2,
+										"toughness": 1,
+										"words": [
+											"menace"
+										]
+									}
+								}
+							]
+						},
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 2,
+							"if": {
+								"not": {
+									"bound": "token-branch"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

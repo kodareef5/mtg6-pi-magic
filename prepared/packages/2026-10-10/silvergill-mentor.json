@@ -1,0 +1,102 @@
+{
+	"card": "Silvergill Mentor",
+	"generated": "2026-10-10",
+	"source": "8149142a1e9851a1474d785037fc573141b4e38c349763e70618fdb85c74d25b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Silvergill Mentor",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 1/1 white and blue Merfolk creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Merfolk Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Merfolk"
+								],
+								"colors": [
+									"W",
+									"U"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Silvergill Mentor",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Silvergill Mentor by beholding a Merfolk",
+				"basis": "As an additional cost to cast this spell, behold a Merfolk or pay {2}. (To behold a Merfolk, choose a Merfolk you control or reveal a Merfolk card from your hand.)",
+				"timing": "spell",
+				"cost": {
+					"show": {
+						"choose": {
+							"zones": [
+								"hand",
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Merfolk"
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Silvergill Mentor",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Silvergill Mentor paying the additional {2}",
+				"basis": "As an additional cost to cast this spell, behold a Merfolk or pay {2}. (To behold a Merfolk, choose a Merfolk you control or reveal a Merfolk card from your hand.)",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "merfolk-payment",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

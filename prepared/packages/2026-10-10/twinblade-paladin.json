@@ -1,0 +1,55 @@
+{
+	"card": "Twinblade Paladin",
+	"generated": "2026-10-10",
+	"source": "4604fa92420355f2c022194b0286897c850a3286e6c5e74f0caff5d789d87075",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Twinblade Paladin",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "As long as you have 25 or more life, this creature has double strike. (It deals both first-strike and regular combat damage.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"life": "you"
+					},
+					"atLeast": 25
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

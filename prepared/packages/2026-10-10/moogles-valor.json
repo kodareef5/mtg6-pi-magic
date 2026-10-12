@@ -1,0 +1,79 @@
+{
+	"card": "Moogles' Valor",
+	"generated": "2026-10-10",
+	"source": "759692ffb2f8ac60f1da6c14f6ac0ee01a2de0c427db326001711335409fa5b5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Moogles' Valor",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Moogles' Valor",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Moogles' Valor",
+				"basis": "For each creature you control, create a 1/2 white Moogle creature token with lifelink. Then creatures you control gain indestructible until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						},
+						"spec": {
+							"name": "Moogle Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Moogle"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 2,
+							"words": [
+								"lifelink"
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

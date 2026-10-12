@@ -1,0 +1,61 @@
+{
+	"card": "Mind Drill Assailant",
+	"generated": "2026-10-10",
+	"source": "fdd72988affe3d365489a5e79a85e881f00ba5feebaed36b8b30433be7bf7e14",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mind Drill Assailant",
+		"registers": [
+			{
+				"basis": "Threshold — As long as there are seven or more cards in your graveyard, this creature gets +3/+0.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 7
+				},
+				"change": {
+					"power": 3
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mind Drill Assailant",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Surveil 1",
+				"basis": "{2}{U/B}: Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{U/B}"
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

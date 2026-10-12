@@ -1,0 +1,69 @@
+{
+	"card": "Heroic Reinforcements",
+	"generated": "2026-10-10",
+	"source": "13e9758d00c3fa361c6fdf463deca331cb1ba8545a985369bb938435b3da9170",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Heroic Reinforcements",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Heroic Reinforcements",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Heroic Reinforcements",
+				"basis": "Create two 1/1 white Soldier creature tokens. Until end of turn, creatures you control get +1/+1 and gain haste. (They can attack and {T} this turn.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Soldier Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Soldier"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

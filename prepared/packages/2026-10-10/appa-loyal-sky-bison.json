@@ -1,0 +1,170 @@
+{
+	"card": "Appa, Loyal Sky Bison",
+	"generated": "2026-10-10",
+	"source": "4ee966b4c23ffe769c1255e07e9ce01940991955b2caaac12830e748ace8f63d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Appa, Loyal Sky Bison",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Appa enters or attacks, choose one —\n• Target creature you control gains flying until end of turn.\n• Airbend another target nonland permanent you control. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"words": [
+											"flying"
+										]
+									}
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"controller": "you",
+										"other": true,
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "move",
+									"what": "target:0",
+									"to": "exile",
+									"reason": "exile",
+									"as": "airbent"
+								},
+								{
+									"do": "permit",
+									"what": "bound:airbent",
+									"who": "owner",
+									"mana": "{2}",
+									"until": "indefinite"
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Appa enters or attacks, choose one —\n• Target creature you control gains flying until end of turn.\n• Airbend another target nonland permanent you control. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "you"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "modify",
+									"what": "target:0",
+									"until": "end-of-turn",
+									"change": {
+										"words": [
+											"flying"
+										]
+									}
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"controller": "you",
+										"other": true,
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "move",
+									"what": "target:0",
+									"to": "exile",
+									"reason": "exile",
+									"as": "airbent"
+								},
+								{
+									"do": "permit",
+									"what": "bound:airbent",
+									"who": "owner",
+									"mana": "{2}",
+									"until": "indefinite"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

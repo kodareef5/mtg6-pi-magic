@@ -1,0 +1,202 @@
+{
+	"card": "Push // Pull",
+	"generated": "2026-10-10",
+	"source": "404835399b5776ee463a757d99e442acb5c2d7274bcf63bdb14fb8fa04aefa73",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Push // Pull",
+		"registers": [],
+		"procedures": [
+			{
+				"face": 0,
+				"source": {
+					"card": "Push // Pull",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Push",
+				"basis": "Destroy target tapped creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"tapped": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Push // Pull",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pull with zero or one target",
+				"basis": "Put up to two target creature cards from a single graveyard onto the battlefield under your control. They gain haste until end of turn. Sacrifice them at the beginning of the next end step.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"as": "returned"
+					},
+					{
+						"do": "modify",
+						"what": "bound:returned",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:returned",
+									"to": "graveyard",
+									"reason": "sacrifice"
+								}
+							]
+						}
+					}
+				]
+			},
+			{
+				"face": 1,
+				"source": {
+					"card": "Push // Pull",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pull with two distinct targets from one graveyard",
+				"basis": "Put up to two target creature cards from a single graveyard onto the battlefield under your control. They gain haste until end of turn. Sacrifice them at the beginning of the next end step.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"types": [
+								"creature"
+							],
+							"owner": "owner:target:0",
+							"not": {
+								"is": "target:0"
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"any": [
+								{
+									"is": "target:0"
+								},
+								{
+									"is": "target:1"
+								}
+							]
+						},
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"as": "returned"
+					},
+					{
+						"do": "modify",
+						"what": "bound:returned",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end",
+							"whose": "any"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "bound:returned",
+									"to": "graveyard",
+									"reason": "sacrifice"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

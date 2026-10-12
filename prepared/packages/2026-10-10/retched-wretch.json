@@ -1,0 +1,52 @@
+{
+	"card": "Retched Wretch",
+	"generated": "2026-10-10",
+	"source": "4346045b85a87c430f0e3ddcaa0f27ba0b427cea6c49ce90ff8a05e8dae20740",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Retched Wretch",
+		"registers": [
+			{
+				"basis": "When this creature dies, if it had a -1/-1 counter on it, return it to the battlefield under its owner's control and it loses all abilities.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"counters": "-1/-1",
+						"on": "this"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "owner:event:object",
+							"reason": "resolve",
+							"as": "returned"
+						},
+						{
+							"do": "modify",
+							"what": "bound:returned",
+							"until": "indefinite",
+							"change": {
+								"loseAbilities": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

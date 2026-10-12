@@ -1,0 +1,70 @@
+{
+	"card": "I Am Iron Man",
+	"generated": "2026-10-10",
+	"source": "7f93594f2f44aef6985f699b006ec7dd7d2c3f651839d59c158b06361cfa5ac4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "I Am Iron Man",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "I Am Iron Man",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Animate target artifact or creature and draw a card",
+				"basis": "Until end of turn, target artifact or creature becomes an artifact creature with base power and toughness 4/4 and gains flying. ... Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							},
+							"base": {
+								"power": 4,
+								"toughness": 4
+							},
+							"words": [
+								"flying"
+							]
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,180 @@
+{
+	"card": "Sidequest: Raise a Chocobo // Black Chocobo",
+	"generated": "2026-10-10",
+	"source": "1472616e592471a86b10308834ad1f3da0b0bd48afe1d8f36ed76775e7e0e0de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sidequest: Raise a Chocobo // Black Chocobo",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When this enchantment enters, create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Bird Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Bird"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 2,
+								"toughness": 2,
+								"registers": [
+									{
+										"basis": "Whenever a land you control enters, this token gets +1/+0 until end of turn.",
+										"kind": "watch",
+										"event": {
+											"on": "enters",
+											"of": {
+												"types": [
+													"land"
+												],
+												"controller": "you"
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "modify",
+													"what": "this",
+													"until": "end-of-turn",
+													"change": {
+														"power": 1
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "At the beginning of your first main phase, if you control four or more Birds, transform this enchantment.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"subtypes": [
+								"Bird"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 4
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "transform",
+							"what": "this"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When this permanent transforms into Black Chocobo, search your library for a land card, put it onto the battlefield tapped, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "transforms",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"types": [
+									"land"
+								],
+								"token": false
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "battlefield",
+							"controller": "you",
+							"tapped": true,
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Landfall — Whenever a land you control enters, Birds you control get +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"subtypes": [
+									"Bird"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

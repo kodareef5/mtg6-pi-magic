@@ -1,0 +1,440 @@
+{
+	"card": "Prismatic Undercurrents",
+	"generated": "2026-10-10",
+	"source": "8c263121743fe158f7cca0ce200d09e92cef979e41d310783664363314139325",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prismatic Undercurrents",
+		"registers": [
+			{
+				"basis": "Vivid — When this enchantment enters, search your library for up to X basic land cards, where X is the number of colors among permanents you control. Reveal those cards, put them into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "white-land",
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"colors": [
+											"W"
+										]
+									}
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 0,
+							"as": "white-land",
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"colors": [
+											"W"
+										]
+									}
+								},
+								"atMost": 0
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								],
+								"not": {
+									"is": "bound:white-land"
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "blue-land",
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"colors": [
+											"U"
+										]
+									}
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 0,
+							"as": "blue-land",
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"colors": [
+											"U"
+										]
+									}
+								},
+								"atMost": 0
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								],
+								"all": [
+									{
+										"not": {
+											"is": "bound:white-land"
+										}
+									},
+									{
+										"not": {
+											"is": "bound:blue-land"
+										}
+									}
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "black-land",
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"colors": [
+											"B"
+										]
+									}
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 0,
+							"as": "black-land",
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"colors": [
+											"B"
+										]
+									}
+								},
+								"atMost": 0
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								],
+								"all": [
+									{
+										"not": {
+											"is": "bound:white-land"
+										}
+									},
+									{
+										"not": {
+											"is": "bound:blue-land"
+										}
+									},
+									{
+										"not": {
+											"is": "bound:black-land"
+										}
+									}
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "red-land",
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"colors": [
+											"R"
+										]
+									}
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 0,
+							"as": "red-land",
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"colors": [
+											"R"
+										]
+									}
+								},
+								"atMost": 0
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								],
+								"all": [
+									{
+										"not": {
+											"is": "bound:white-land"
+										}
+									},
+									{
+										"not": {
+											"is": "bound:blue-land"
+										}
+									},
+									{
+										"not": {
+											"is": "bound:black-land"
+										}
+									},
+									{
+										"not": {
+											"is": "bound:red-land"
+										}
+									}
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "green-land",
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"colors": [
+											"G"
+										]
+									}
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 0,
+							"as": "green-land",
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"colors": [
+											"G"
+										]
+									}
+								},
+								"atMost": 0
+							}
+						},
+						{
+							"do": "reveal",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"any": [
+									{
+										"is": "bound:white-land"
+									},
+									{
+										"is": "bound:blue-land"
+									},
+									{
+										"is": "bound:black-land"
+									},
+									{
+										"is": "bound:red-land"
+									},
+									{
+										"is": "bound:green-land"
+									}
+								]
+							}
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"any": [
+									{
+										"is": "bound:white-land"
+									},
+									{
+										"is": "bound:blue-land"
+									},
+									{
+										"is": "bound:black-land"
+									},
+									{
+										"is": "bound:red-land"
+									},
+									{
+										"is": "bound:green-land"
+									}
+								]
+							},
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"basis": "You may play an additional land on each of your turns.",
+				"kind": "permit",
+				"lands": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

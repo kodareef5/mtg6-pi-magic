@@ -1,0 +1,132 @@
+{
+	"card": "Trostani, Three Whispers",
+	"generated": "2026-10-10",
+	"source": "abf78e59779e6fc3edc626b3d6eb7d8bf6dfd85a385796b135ef4642f21cc7ae",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Trostani, Three Whispers",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Trostani, Three Whispers",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant deathtouch",
+				"basis": "{1}{G}: Target creature gains deathtouch until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{G}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"deathtouch"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trostani, Three Whispers",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant vigilance",
+				"basis": "{G/W}: Target creature gains vigilance until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{G/W}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"vigilance"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Trostani, Three Whispers",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant double strike",
+				"basis": "{2}{W}: Target creature gains double strike until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"double strike"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

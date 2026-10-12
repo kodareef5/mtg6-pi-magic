@@ -1,0 +1,55 @@
+{
+	"card": "Poisoner's Apprentice",
+	"generated": "2026-10-10",
+	"source": "95ae59ca9201c437740b0e0ff2106879606028252abf9f5a70b202d368d2a944",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Poisoner's Apprentice",
+		"registers": [
+			{
+				"basis": "Infusion — When this creature enters, target creature an opponent controls gets -4/-4 until end of turn if you gained life this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": -4,
+								"toughness": -4
+							},
+							"if": {
+								"amount": {
+									"history": "life-gained",
+									"by": "you"
+								},
+								"atLeast": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

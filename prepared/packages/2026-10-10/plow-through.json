@@ -1,0 +1,83 @@
+{
+	"card": "Plow Through",
+	"generated": "2026-10-10",
+	"source": "c075c457ca3891bdf3d6295ac08ba650bf29c195ec30f2a881a0dbb6435a394f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Plow Through",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Plow Through",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Plow Through: fight",
+				"basis": "Choose one — ... Target creature you control fights target creature an opponent controls. (Each deals damage equal to its power to the other.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "fight",
+						"a": "target:0",
+						"b": "target:1"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Plow Through",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Plow Through: destroy a Vehicle",
+				"basis": "Choose one — ... Destroy target Vehicle.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Vehicle"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

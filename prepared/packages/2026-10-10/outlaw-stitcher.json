@@ -1,0 +1,138 @@
+{
+	"card": "Outlaw Stitcher",
+	"generated": "2026-10-10",
+	"source": "87f0d973dc1e416e910bff9b463f7ac5d0de918c6c7ef00fa63cc8fb964a0082",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Outlaw Stitcher",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 2/2 blue and black Zombie Rogue creature token, then put two +1/+1 counters on that token for each spell you've cast this turn other than the first.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Zombie Rogue Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Zombie",
+									"Rogue"
+								],
+								"colors": [
+									"U",
+									"B"
+								],
+								"power": 2,
+								"toughness": 2
+							},
+							"as": "zombie"
+						},
+						{
+							"do": "counters",
+							"on": "bound:zombie",
+							"kind": "+1/+1",
+							"amount": {
+								"sum": [
+									{
+										"history": "cast",
+										"by": "you",
+										"of": {
+											"zones": [
+												"stack"
+											],
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"instant",
+												"kindred",
+												"planeswalker",
+												"sorcery"
+											]
+										}
+									},
+									{
+										"history": "cast",
+										"by": "you",
+										"of": {
+											"zones": [
+												"stack"
+											],
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"instant",
+												"kindred",
+												"planeswalker",
+												"sorcery"
+											]
+										}
+									},
+									-2
+								]
+							},
+							"if": {
+								"amount": {
+									"history": "cast",
+									"by": "you",
+									"of": {
+										"zones": [
+											"stack"
+										],
+										"types": [
+											"artifact",
+											"battle",
+											"creature",
+											"enchantment",
+											"instant",
+											"kindred",
+											"planeswalker",
+											"sorcery"
+										]
+									}
+								},
+								"atLeast": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Outlaw Stitcher",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Outlaw Stitcher",
+				"basis": "Plot {4}{U} (You may pay {4}{U} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{4}{U}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

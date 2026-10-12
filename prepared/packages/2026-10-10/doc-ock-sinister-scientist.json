@@ -1,0 +1,73 @@
+{
+	"card": "Doc Ock, Sinister Scientist",
+	"generated": "2026-10-10",
+	"source": "55ab00bfe6407e82cba5fb2b10bff4d0bff708e6ec1334a89cb8a9fa261257ab",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Doc Ock, Sinister Scientist",
+		"registers": [
+			{
+				"basis": "As long as there are eight or more cards in your graveyard, Doc Ock has base power and toughness 8/8.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atLeast": 8
+				},
+				"change": {
+					"base": {
+						"power": 8,
+						"toughness": 8
+					}
+				}
+			},
+			{
+				"basis": "As long as you control another Villain, Doc Ock has hexproof. (He can't be the target of spells or abilities your opponents control.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Villain"
+							],
+							"other": true
+						}
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"words": [
+						"hexproof"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

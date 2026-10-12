@@ -1,0 +1,43 @@
+{
+	"card": "Double Down",
+	"generated": "2026-10-10",
+	"source": "af365b886b6d4a3fcdeea2a8b16e78389052cbf2c1d164be679baee17237ad60",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Double Down",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast an outlaw spell, copy that spell. (Assassins, Mercenaries, Pirates, Rogues, and Warlocks are outlaws. Copies of permanent spells become tokens.)",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"subtypes": [
+							"Assassin",
+							"Mercenary",
+							"Pirate",
+							"Rogue",
+							"Warlock"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "copy-spell",
+							"what": "event:object"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

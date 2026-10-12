@@ -1,0 +1,87 @@
+{
+	"card": "Gysahl Greens",
+	"generated": "2026-10-10",
+	"source": "6a656370f48fb9deea850f2d528ace72004b2a6d993ac3af381f0331bac3b533",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gysahl Greens",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {6}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{6}{G}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gysahl Greens",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gysahl Greens, including through its flashback permission",
+				"basis": "Create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Bird Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Bird"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 2,
+							"toughness": 2,
+							"registers": [
+								{
+									"kind": "watch",
+									"basis": "Create a 2/2 green Bird creature token with \"Whenever a land you control enters, this token gets +1/+0 until end of turn.\"",
+									"event": {
+										"on": "enters",
+										"of": {
+											"types": [
+												"land"
+											],
+											"controller": "you"
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "this",
+												"until": "end-of-turn",
+												"change": {
+													"power": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

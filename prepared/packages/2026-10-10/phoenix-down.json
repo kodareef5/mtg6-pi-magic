@@ -1,0 +1,97 @@
+{
+	"card": "Phoenix Down",
+	"generated": "2026-10-10",
+	"source": "dd1af0ac043823f23cc923d832a75dfa04f48579ecb0a4be05f2343d75333488",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Phoenix Down",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Phoenix Down",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Phoenix Down: return a creature card tapped",
+				"basis": "{1}{W}, {T}, Exile this artifact: Choose one —\n• Return target creature card with mana value 4 or less from your graveyard to the battlefield tapped.\n• Exile target Skeleton, Spirit, or Zombie.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{W}",
+					"tap": true,
+					"exile": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atMost": 4
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Phoenix Down",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Phoenix Down: exile a Skeleton, Spirit, or Zombie",
+				"basis": "{1}{W}, {T}, Exile this artifact: Choose one —\n• Return target creature card with mana value 4 or less from your graveyard to the battlefield tapped.\n• Exile target Skeleton, Spirit, or Zombie.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{W}",
+					"tap": true,
+					"exile": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Skeleton",
+								"Spirit",
+								"Zombie"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

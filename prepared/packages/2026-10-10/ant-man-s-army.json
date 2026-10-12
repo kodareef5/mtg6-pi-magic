@@ -1,0 +1,102 @@
+{
+	"card": "Ant-Man's Army",
+	"generated": "2026-10-10",
+	"source": "c47e940ed963192cb33d6cb5c6a1d4e48fb2b3cc9f626a8d454f7253db3066aa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ant-Man's Army",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, create a Food token or a Treasure token. (A Food token is an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\" A Treasure token is an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "food-choice",
+							"instructions": [
+								{
+									"do": "token",
+									"count": 1,
+									"spec": {
+										"name": "Food Token",
+										"types": [
+											"artifact"
+										],
+										"subtypes": [
+											"Food"
+										],
+										"colors": [],
+										"registers": [
+											{
+												"kind": "activated",
+												"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+												"cost": {
+													"mana": "{2}",
+													"tap": true,
+													"sacrifice": "this"
+												},
+												"effect": {
+													"instructions": [
+														{
+															"do": "life",
+															"who": "you",
+															"amount": 3
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"not": {
+									"bound": "food-choice"
+								}
+							},
+							"spec": {
+								"name": "Treasure Token",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "mana",
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

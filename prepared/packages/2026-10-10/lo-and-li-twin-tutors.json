@@ -1,0 +1,102 @@
+{
+	"card": "Lo and Li, Twin Tutors",
+	"generated": "2026-10-10",
+	"source": "1e9d770b00e8d87196aef2a13417c8eb6a59dd983449dc6fa0a1892cf8eddef8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lo and Li, Twin Tutors",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Lo and Li enter, search your library for a Lesson or Noble card, reveal it, put it into your hand, then shuffle.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"subtypes": [
+									"Lesson",
+									"Noble"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "tutored"
+						},
+						{
+							"do": "move",
+							"what": "bound:tutored",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Noble creatures you control and Lesson spells you control have lifelink.",
+				"affects": {
+					"controller": "you",
+					"any": [
+						{
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Noble"
+							]
+						},
+						{
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"land",
+								"planeswalker",
+								"sorcery"
+							],
+							"subtypes": [
+								"Lesson"
+							]
+						}
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

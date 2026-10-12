@@ -1,0 +1,55 @@
+{
+	"card": "Visage Bandit",
+	"generated": "2026-10-10",
+	"source": "3aaf6319c67ab3d70296e20a26eef2c474bdb05326b0a361347feb73906509b8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Visage Bandit",
+		"registers": [
+			{
+				"basis": "You may have this creature enter as a copy of a creature you control, except it's a Shapeshifter Rogue in addition to its other types.",
+				"kind": "enters",
+				"copy": {
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					},
+					"may": true,
+					"add": {
+						"creatureTypes": [
+							"Shapeshifter",
+							"Rogue"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Visage Bandit",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Visage Bandit",
+				"basis": "Plot {2}{U} (You may pay {2}{U} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{2}{U}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,74 @@
+{
+	"card": "Illvoi Infiltrator",
+	"generated": "2026-10-10",
+	"source": "8e367a86f6ae32eec583e2e81b741a54b1b6d26675b2f81a8a35d1546c486857",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Illvoi Infiltrator",
+		"registers": [
+			{
+				"basis": "This creature can't be blocked if you've cast two or more spells this turn.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"land",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					},
+					"atLeast": 2
+				},
+				"change": {
+					"words": [
+						"can't be blocked"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature deals combat damage to a player, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

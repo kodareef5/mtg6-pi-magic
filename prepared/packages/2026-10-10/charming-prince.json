@@ -1,0 +1,93 @@
+{
+	"card": "Charming Prince",
+	"generated": "2026-10-10",
+	"source": "b188676ebeeebf246cd914844c5cbbbb59f737cfa0c649a3afedbee3f46db181",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Charming Prince",
+		"registers": [
+			{
+				"basis": "When this creature enters, choose one —\n• Scry 2.\n• You gain 3 life.\n• Exile another target creature you own. Return it to the battlefield under your control at the beginning of the next end step.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "keyword",
+									"name": "scry",
+									"who": "you",
+									"count": 2
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "life",
+									"who": "you",
+									"amount": 3
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"owner": "you",
+										"other": true
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "move",
+									"what": "target:0",
+									"to": "exile",
+									"reason": "exile",
+									"as": "exiled"
+								},
+								{
+									"do": "delay",
+									"event": {
+										"on": "step",
+										"step": "end",
+										"whose": "any"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": "bound:exiled",
+												"to": "battlefield",
+												"controller": "you",
+												"reason": "resolve"
+											}
+										]
+									},
+									"if": {
+										"bound": "exiled"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

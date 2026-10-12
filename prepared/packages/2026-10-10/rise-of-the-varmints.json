@@ -1,0 +1,76 @@
+{
+	"card": "Rise of the Varmints",
+	"generated": "2026-10-10",
+	"source": "84df1522c83c6bee213607c949d4c532805cc34d4d1182fbce9365f1e4a59410",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rise of the Varmints",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rise of the Varmints",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rise of the Varmints",
+				"basis": "Create X 2/1 green Varmint creature tokens, where X is the number of creature cards in your graveyard.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"count": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"token": false
+							}
+						},
+						"spec": {
+							"name": "Varmint Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Varmint"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 2,
+							"toughness": 1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rise of the Varmints",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Rise of the Varmints",
+				"basis": "Plot {2}{G} (You may pay {2}{G} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{2}{G}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,119 @@
+{
+	"card": "Return to the Sewers",
+	"generated": "2026-10-10",
+	"source": "fc970980aac90f61e79dc96547c6903f65ef48066879bd9aa4a7f553278c4df5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Return to the Sewers",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Return to the Sewers",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Return to the Sewers; the creature's owner chooses top by accepting, or bottom by declining",
+				"basis": "Target creature's owner puts it on their choice of the top or bottom of their library. You create a Mutagen token. (It's an artifact with \"{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.\")",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "top-chosen",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "top",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "top-chosen"
+							}
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Mutagen Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Mutagen"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.",
+									"speed": "sorcery",
+									"cost": {
+										"mana": "{1}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"effect": {
+										"targets": [
+											{
+												"object": {
+													"zones": [
+														"battlefield"
+													],
+													"types": [
+														"creature"
+													]
+												}
+											}
+										],
+										"instructions": [
+											{
+												"do": "counters",
+												"on": "target:0",
+												"kind": "+1/+1",
+												"amount": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

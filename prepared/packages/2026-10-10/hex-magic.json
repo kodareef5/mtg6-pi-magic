@@ -1,0 +1,58 @@
+{
+	"card": "Hex Magic",
+	"generated": "2026-10-10",
+	"source": "aa388df403dc4223bf0e5cc4dbedfb29267e826458982a9806d738892ecc1bdd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hex Magic",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hex Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Exile your hand, draw that many cards, and permit playing the exiled cards through your next turn",
+				"basis": "Exile all the cards from your hand, then draw that many cards. Until the end of your next turn, you may play cards exiled this way.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"to": "exile",
+						"reason": "exile",
+						"as": "exiled",
+						"countFrom": "hand"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"bound": "exiled"
+						}
+					},
+					{
+						"do": "permit",
+						"what": "bound:exiled",
+						"who": "you",
+						"until": {
+							"endOfNextTurn": "you"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,87 @@
+{
+	"card": "Worldsoul's Rage",
+	"generated": "2026-10-10",
+	"source": "0cae5f2e7e9f26ef93612d35467f6f046a8dd9f25be6ff68babcb8b5e8af338b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Worldsoul's Rage",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Worldsoul's Rage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Worldsoul's Rage",
+				"basis": "Worldsoul's Rage deals X damage to any target. Put up to X land cards from your hand and/or graveyard onto the battlefield tapped.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"x": true
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"land"
+							],
+							"any": [
+								{
+									"zones": [
+										"hand"
+									],
+									"controller": "you"
+								},
+								{
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you"
+								}
+							]
+						},
+						"count": {
+							"x": true
+						},
+						"upTo": true,
+						"as": "lands"
+					},
+					{
+						"do": "move",
+						"what": "bound:lands",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

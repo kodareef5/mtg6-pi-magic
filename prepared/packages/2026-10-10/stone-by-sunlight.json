@@ -1,0 +1,87 @@
+{
+	"card": "Stone by Sunlight",
+	"generated": "2026-10-10",
+	"source": "11e4bf7f53e43956fb670b24e258d560a6bb3cea4b0b63f3d7d2b8e0aacb99c8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stone by Sunlight",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stone by Sunlight",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy a creature with power 4 or greater",
+				"basis": "Choose one — ... Destroy target creature with power 4 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"power": {
+								"atLeast": 4
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Stone by Sunlight",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Make a creature an artifact and grant indestructible until end of turn",
+				"basis": "Choose one — ... Until end of turn, target creature becomes an artifact in addition to its other types and gains indestructible.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact"
+								]
+							},
+							"words": [
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

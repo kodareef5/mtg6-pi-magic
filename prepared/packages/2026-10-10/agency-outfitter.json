@@ -1,0 +1,175 @@
+{
+	"card": "Agency Outfitter",
+	"generated": "2026-10-10",
+	"source": "ed7e36c32bcc0586312699e563f8180018399ff2d053ad11bf31f5742afeb766",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Agency Outfitter",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, you may search your graveyard, hand and/or library for a card named Magnifying Glass and/or a card named Thinking Cap and put them onto the battlefield. If you search your library this way, shuffle.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "library-search",
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"name": "Magnifying Glass"
+									},
+									"count": 0
+								},
+								{
+									"do": "look",
+									"who": "you",
+									"every": {
+										"zones": [
+											"library"
+										],
+										"owner": "you"
+									},
+									"as": "searched-library"
+								}
+							]
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"name": "Magnifying Glass",
+								"token": false,
+								"any": [
+									{
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you"
+									},
+									{
+										"zones": [
+											"hand"
+										],
+										"controller": "you"
+									},
+									{
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"is": "bound:searched-library"
+									}
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "glass"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"name": "Thinking Cap",
+								"token": false,
+								"any": [
+									{
+										"zones": [
+											"graveyard"
+										],
+										"owner": "you"
+									},
+									{
+										"zones": [
+											"hand"
+										],
+										"controller": "you"
+									},
+									{
+										"zones": [
+											"library"
+										],
+										"owner": "you",
+										"is": "bound:searched-library"
+									}
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "cap"
+						},
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"graveyard",
+									"hand",
+									"library"
+								],
+								"any": [
+									{
+										"is": "bound:glass"
+									},
+									{
+										"is": "bound:cap"
+									}
+								]
+							},
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you",
+							"if": {
+								"bound": "library-search"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

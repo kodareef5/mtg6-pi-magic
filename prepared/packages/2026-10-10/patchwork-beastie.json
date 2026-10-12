@@ -1,0 +1,63 @@
+{
+	"card": "Patchwork Beastie",
+	"generated": "2026-10-10",
+	"source": "7cb29c1eff626cdbc7fcab06b82be864b6be4ea1ab17415ad41ed7227757a215",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Patchwork Beastie",
+		"registers": [
+			{
+				"basis": "Delirium — This creature can't attack or block unless there are four or more card types among cards in your graveyard.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"can't attack",
+						"can't block"
+					]
+				},
+				"if": {
+					"amount": {
+						"distinct": "card-types",
+						"among": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false
+						}
+					},
+					"atMost": 3
+				}
+			},
+			{
+				"basis": "At the beginning of your upkeep, you may mill a card. (You may put the top card of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

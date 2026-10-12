@@ -1,0 +1,126 @@
+{
+	"card": "Artistic Process",
+	"generated": "2026-10-10",
+	"source": "e58176ef3fe652be82dba774a834414ac42b6c59fb5ffd8695e3d338af400bdf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Artistic Process",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Artistic Process",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Deal 6 damage to target creature",
+				"basis": "Choose one —\n• Artistic Process deals 6 damage to target creature.\n• Artistic Process deals 2 damage to each creature you don't control.\n• Create a 3/3 blue and red Elemental creature token with flying. It gains haste until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 6
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Artistic Process",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Deal 2 damage to each creature you don't control",
+				"basis": "Choose one —\n• Artistic Process deals 6 damage to target creature.\n• Artistic Process deals 2 damage to each creature you don't control.\n• Create a 3/3 blue and red Elemental creature token with flying. It gains haste until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Artistic Process",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Create a flying Elemental with haste until end of turn",
+				"basis": "Choose one —\n• Artistic Process deals 6 damage to target creature.\n• Artistic Process deals 2 damage to each creature you don't control.\n• Create a 3/3 blue and red Elemental creature token with flying. It gains haste until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Elemental Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elemental"
+							],
+							"colors": [
+								"U",
+								"R"
+							],
+							"power": 3,
+							"toughness": 3,
+							"words": [
+								"flying"
+							]
+						},
+						"as": "elemental"
+					},
+					{
+						"do": "modify",
+						"what": "bound:elemental",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

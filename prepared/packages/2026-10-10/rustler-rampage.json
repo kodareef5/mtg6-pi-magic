@@ -1,0 +1,156 @@
+{
+	"card": "Rustler Rampage",
+	"generated": "2026-10-10",
+	"source": "d7d01bdf2c7fd7536f6cadacc86e8f5e02a7373acfc6e4def43922998984f5fe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rustler Rampage",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rustler Rampage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rustler Rampage with the untap mode only",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Untap all creatures target player controls.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-untap",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "untap",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rustler Rampage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rustler Rampage with the double strike mode only",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Target creature gains double strike until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-double-strike",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"double strike"
+							]
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Rustler Rampage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rustler Rampage with both modes",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Untap all creatures target player controls. ... + {1} — Target creature gains double strike until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "spree-untap",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-double-strike",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "untap",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"double strike"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

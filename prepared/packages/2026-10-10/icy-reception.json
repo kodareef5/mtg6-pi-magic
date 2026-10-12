@@ -1,0 +1,105 @@
+{
+	"card": "Icy Reception",
+	"generated": "2026-10-10",
+	"source": "385e77452fce869f83d27a9056a5f0d704c27ab8543971e895db57edaf2bbdd6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Icy Reception",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Icy Reception",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter a creature or legendary spell unless its controller pays {3}",
+				"basis": "Choose one — ... Counter target creature or legendary spell unless its controller pays {3}.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							],
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"supertypes": [
+										"legendary"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{3}"
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Icy Reception",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature -5/-0 until end of turn",
+				"basis": "Choose one — ... Target creature gets -5/-0 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -5
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

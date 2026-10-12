@@ -1,0 +1,94 @@
+{
+	"card": "Nurturing Bristleback",
+	"generated": "2026-10-10",
+	"source": "eaed859796bff8110167eb5c4450c7ab7f1401bfbf996aa8b7f673b2da1008a5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nurturing Bristleback",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, create a 3/3 green Dinosaur creature token.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Dinosaur Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dinosaur"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 3,
+								"toughness": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Nurturing Bristleback",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Forestcycle Nurturing Bristleback",
+				"basis": "Forestcycling {2} ({2}, Discard this card: Search your library for a Forest card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Forest"
+							],
+							"token": false
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "forest"
+					},
+					{
+						"do": "move",
+						"what": "bound:forest",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

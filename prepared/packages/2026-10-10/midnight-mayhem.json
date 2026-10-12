@@ -1,0 +1,65 @@
+{
+	"card": "Midnight Mayhem",
+	"generated": "2026-10-10",
+	"source": "fb6889a4f11f6990663a76de2189772bdfd848059de7b4d4f822abdbff980148",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Midnight Mayhem",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Midnight Mayhem",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Midnight Mayhem",
+				"basis": "Create three 1/1 red Gremlin creature tokens. Gremlins you control gain menace, lifelink, and haste until end of turn. (A creature with menace can't be blocked except by two or more creatures.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 3,
+						"spec": {
+							"name": "Gremlin Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Gremlin"
+							],
+							"colors": [
+								"R"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "modify",
+						"every": {
+							"subtypes": [
+								"Gremlin"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"menace",
+								"lifelink",
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

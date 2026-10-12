@@ -8,8 +8,8 @@
 		"card": "Mintstrosity",
 		"registers": [
 			{
-				"basis": "When this creature dies, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
 				"kind": "watch",
+				"basis": "When this creature dies, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
 				"event": {
 					"on": "dies",
 					"of": {
@@ -22,7 +22,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Food",
+								"name": "Food Token",
 								"types": [
 									"artifact"
 								],
@@ -32,8 +32,8 @@
 								"colors": [],
 								"registers": [
 									{
-										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
 										"kind": "activated",
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
 										"cost": {
 											"mana": "{2}",
 											"tap": true,
@@ -58,7 +58,6 @@
 		],
 		"procedures": [],
 		"assessed": true,
-		"printedCast": true,
-		"deferred": []
+		"printedCast": true
 	}
 }

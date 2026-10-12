@@ -1,0 +1,63 @@
+{
+	"card": "Festerleech",
+	"generated": "2026-10-10",
+	"source": "6c5c1c9efcb548d098af01bad20df955b9ca680193d9598fbc5bcf2a8de93779",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Festerleech",
+		"registers": [
+			{
+				"basis": "Whenever this creature deals combat damage to a player, you mill two cards.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Festerleech",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Festerleech +2/+2 until end of turn, once each turn.",
+				"basis": "{1}{B}: This creature gets +2/+2 until end of turn. Activate only once each turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}"
+				},
+				"limit": "once-per-turn",
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

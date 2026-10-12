@@ -1,0 +1,87 @@
+{
+	"card": "Sanctuary Wall",
+	"generated": "2026-10-10",
+	"source": "49aa23e9119c7d1449d2bfaf25a349c9011858d3f4d827b637cc256174411b0f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sanctuary Wall",
+		"registers": [
+			{
+				"basis": "Defender",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"defender"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sanctuary Wall",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap target creature, then optionally put a stun counter on it and, if that option is chosen, on Sanctuary Wall.",
+				"basis": "{2}{W}, {T}: Tap target creature. You may put a stun counter on it. If you do, put a stun counter on this creature. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"as": "stunned",
+						"instructions": [
+							{
+								"do": "counters",
+								"on": "target:0",
+								"kind": "stun",
+								"amount": 1
+							}
+						]
+					},
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "stun",
+						"amount": 1,
+						"if": {
+							"bound": "stunned"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

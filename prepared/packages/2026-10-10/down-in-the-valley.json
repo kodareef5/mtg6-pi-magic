@@ -1,0 +1,134 @@
+{
+	"card": "Down in the Valley",
+	"generated": "2026-10-10",
+	"source": "67e04def047baa9bd73113db3d7d0d4b2a4f71245267dfe2467f76206f24fdf9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Down in the Valley",
+		"registers": [
+			{
+				"basis": "I — Search your library for a basic land card, reveal it, put it into your hand, then shuffle.",
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "hand",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			},
+			{
+				"basis": "II — This Saga gains \"Landfall — Whenever a land you control enters, create a 1/1 green Elf creature token.\"",
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "register",
+							"on": "this",
+							"registration": {
+								"basis": "II — This Saga gains \"Landfall — Whenever a land you control enters, create a 1/1 green Elf creature token.\"",
+								"kind": "watch",
+								"event": {
+									"on": "enters",
+									"of": {
+										"types": [
+											"land"
+										],
+										"controller": "you"
+									}
+								},
+								"effect": {
+									"instructions": [
+										{
+											"do": "token",
+											"count": 1,
+											"spec": {
+												"name": "Elf Token",
+												"types": [
+													"creature"
+												],
+												"subtypes": [
+													"Elf"
+												],
+												"colors": [
+													"G"
+												],
+												"power": 1,
+												"toughness": 1
+											}
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "III, IV — Elves you control get +1/+0 and gain vigilance until end of turn.",
+				"kind": "chapter",
+				"numbers": [
+					3,
+					4
+				],
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"subtypes": [
+									"Elf"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"words": [
+									"vigilance"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

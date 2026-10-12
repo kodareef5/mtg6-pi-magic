@@ -1,0 +1,67 @@
+{
+	"card": "Midnight Tilling",
+	"generated": "2026-10-10",
+	"source": "c25d754972e24752f3fdc4cf3e869ce686dfa2f4d9a43225f4394fec09a2987d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Midnight Tilling",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Midnight Tilling",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Midnight Tilling",
+				"basis": "Mill four cards, then you may return a permanent card from among them to your hand. (To mill four cards, put the top four cards of your library into your graveyard.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 4,
+						"as": "milled"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard",
+								"exile",
+								"battlefield",
+								"command",
+								"stack"
+							],
+							"is": "bound:milled",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "permanent"
+					},
+					{
+						"do": "move",
+						"what": "bound:permanent",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,88 @@
+{
+	"card": "From Father to Son",
+	"generated": "2026-10-10",
+	"source": "686a5948c1398572fc86b5d1d9c1d3e5766387e4f3db9f0cca5e252e8334cd51",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "From Father to Son",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {4}{W}{W}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{4}{W}{W}{W}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "From Father to Son",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Search for a Vehicle and reveal it; put it into hand, or directly onto the battlefield if this spell was cast from a graveyard, then shuffle. Flashback supplies its registered alternative price and stack-departure replacement.",
+				"basis": "Search your library for a Vehicle card, reveal it, and put it into your hand. If this spell was cast from a graveyard, put that card onto the battlefield instead. Then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Vehicle"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "vehicle"
+					},
+					{
+						"do": "move",
+						"what": "bound:vehicle",
+						"to": "hand",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"cast": "this",
+								"from": "graveyard"
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:vehicle",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"if": {
+							"cast": "this",
+							"from": "graveyard"
+						}
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

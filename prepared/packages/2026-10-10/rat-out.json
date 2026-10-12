@@ -1,0 +1,86 @@
+{
+	"card": "Rat Out",
+	"generated": "2026-10-10",
+	"source": "10a9dc837f96e35e6b43e5b4b031052555c32f4d86c52ef3d97246aace2c781b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rat Out",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rat Out",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rat Out",
+				"basis": "Up to one target creature gets -1/-1 until end of turn. You create a 1/1 black Rat creature token with \"This token can't block.\"",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Rat Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rat"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"kind": "continuous",
+									"basis": "You create a 1/1 black Rat creature token with \"This token can't block.\"",
+									"affects": {
+										"is": "this",
+										"zones": [
+											"battlefield"
+										]
+									},
+									"change": {
+										"words": [
+											"can't block"
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,78 @@
+{
+	"card": "Mysidian Elder",
+	"generated": "2026-10-10",
+	"source": "5df38995e73d65630d705627f3e474fd3dc70d6867708faeb05e3b3474ffc7f3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mysidian Elder",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, create a 0/1 black Wizard creature token with \"Whenever you cast a noncreature spell, this token deals 1 damage to each opponent.\"",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Wizard Token",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Wizard"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 0,
+								"toughness": 1,
+								"registers": [
+									{
+										"kind": "watch",
+										"basis": "When this creature enters, create a 0/1 black Wizard creature token with \"Whenever you cast a noncreature spell, this token deals 1 damage to each opponent.\"",
+										"event": {
+											"on": "cast",
+											"by": "you",
+											"of": {
+												"zones": [
+													"stack"
+												],
+												"not": {
+													"types": [
+														"creature"
+													]
+												}
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "damage",
+													"to": "opponent",
+													"amount": 1,
+													"from": "this"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

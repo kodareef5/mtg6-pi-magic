@@ -1,0 +1,63 @@
+{
+	"card": "Salt Road Packbeast",
+	"generated": "2026-10-10",
+	"source": "50d308846f4f403951695fb87f9fc0ab01bde81753c18d8c2b4cc08d30d60cfc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Salt Road Packbeast",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, draw a card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Salt Road Packbeast",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Salt Road Packbeast with affinity for creatures",
+				"basis": "Affinity for creatures (This spell costs {1} less to cast for each creature you control.)",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

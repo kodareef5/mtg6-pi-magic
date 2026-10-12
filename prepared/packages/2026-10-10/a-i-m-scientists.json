@@ -1,0 +1,128 @@
+{
+	"card": "A.I.M. Scientists",
+	"generated": "2026-10-10",
+	"source": "95991ea26ebc85fa9e3f761a12f7a87b823d0b7f08a361ff0d98b1c0837e4b3a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "A.I.M. Scientists",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, it connives. (Draw a card, then discard a card. If you discarded a nonland card, put a +1/+1 counter on this creature.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "controller:this",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "controller:this",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "controller:this"
+							},
+							"count": 1,
+							"as": "card"
+						},
+						{
+							"do": "move",
+							"what": "bound:card",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"is": "bound:discarded",
+								"matches": {
+									"zones": [
+										"library",
+										"hand",
+										"battlefield",
+										"graveyard",
+										"stack",
+										"exile",
+										"command",
+										"outside"
+									],
+									"not": {
+										"types": [
+											"land"
+										]
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "A.I.M. Scientists",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Basic landcycle A.I.M. Scientists",
+				"basis": "Basic landcycling {2} ({2}, Discard this card: Search your library for a basic land card, reveal it, put it into your hand, then shuffle.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"supertypes": [
+								"basic"
+							],
+							"types": [
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

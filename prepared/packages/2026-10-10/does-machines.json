@@ -1,0 +1,238 @@
+{
+	"card": "Does Machines",
+	"generated": "2026-10-10",
+	"source": "4f4b120bb29fee0a9f17419fd1dbe57c65caec186ecd559bf3a8dfc0b64c69df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Does Machines",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this Class enters, mill two cards, draw two cards, then discard two cards.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 2,
+							"as": "discarded"
+						},
+						{
+							"do": "move",
+							"what": "bound:discarded",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{1}{U}: Level 2",
+				"cost": {
+					"mana": "{1}{U}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 1,
+							"atMost": 1
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "When this Class becomes level 2, return up to two target artifact cards from your graveyard to your hand.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 2
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "When this Class becomes level 2, return up to two target artifact cards from your graveyard to your hand.",
+							"event": {
+								"on": "level",
+								"of": {
+									"is": "this"
+								},
+								"level": 2
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"artifact"
+											]
+										},
+										"count": 2,
+										"upTo": true
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "hand",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{4}{U}: Level 3",
+				"cost": {
+					"mana": "{4}{U}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 2,
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "At the beginning of combat on your turn, put three +1/+1 counters on target artifact you control. If it isn't a creature, it becomes a 0/0 Robot creature in addition to its other types.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 3
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "At the beginning of combat on your turn, put three +1/+1 counters on target artifact you control. If it isn't a creature, it becomes a 0/0 Robot creature in addition to its other types.",
+							"event": {
+								"on": "step",
+								"step": "begin-combat",
+								"whose": "you"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"artifact"
+											],
+											"controller": "you"
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "counters",
+										"on": "target:0",
+										"kind": "+1/+1",
+										"amount": 3
+									},
+									{
+										"do": "modify",
+										"what": "target:0",
+										"until": "indefinite",
+										"if": {
+											"is": "target:0",
+											"matches": {
+												"not": {
+													"types": [
+														"creature"
+													]
+												}
+											}
+										},
+										"change": {
+											"types": {
+												"add": [
+													"creature"
+												]
+											},
+											"subtypes": {
+												"add": [
+													"Robot"
+												]
+											},
+											"base": {
+												"power": 0,
+												"toughness": 0
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

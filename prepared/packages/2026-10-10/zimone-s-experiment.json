@@ -1,0 +1,116 @@
+{
+	"card": "Zimone's Experiment",
+	"generated": "2026-10-10",
+	"source": "1bb2e6e4f2e000a7291eb5dd748bebca3cfb4ac86e6eec3108a37c9ecc940588",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zimone's Experiment",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Zimone's Experiment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Zimone's Experiment",
+				"basis": "Look at the top five cards of your library. You may reveal up to two creature and/or land cards from among them, then put the rest on the bottom of your library in a random order. Put all land cards revealed this way onto the battlefield tapped and put all creature cards revealed this way into your hand.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 5,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"types": [
+								"creature",
+								"land"
+							]
+						},
+						"count": 2,
+						"upTo": true,
+						"reveal": true,
+						"as": "revealed"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked",
+							"not": {
+								"is": "bound:revealed"
+							}
+						},
+						"position": "bottom",
+						"random": true
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:revealed",
+							"types": [
+								"land"
+							]
+						},
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve",
+						"as": "landed"
+					},
+					{
+						"do": "move",
+						"every": {
+							"any": [
+								{
+									"zones": [
+										"library"
+									],
+									"is": "bound:revealed",
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"zones": [
+										"battlefield"
+									],
+									"is": "bound:landed",
+									"types": [
+										"creature"
+									]
+								}
+							]
+						},
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

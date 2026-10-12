@@ -1,0 +1,71 @@
+{
+	"card": "Ingenious Leonin",
+	"generated": "2026-10-10",
+	"source": "6e848d857c21e5bac69bd6fbd1d1d2debe9e238b4798b447a2e55f2e91cce28a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ingenious Leonin",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ingenious Leonin",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a +1/+1 counter on another target attacking creature you control; if it is a Cat, grant it first strike until end of turn.",
+				"basis": "{3}{W}: Put a +1/+1 counter on another target attacking creature you control. If that creature is a Cat, it gains first strike until end of turn. (It deals combat damage before creatures without first strike.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{W}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true,
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"first strike"
+							]
+						},
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Cat"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}
