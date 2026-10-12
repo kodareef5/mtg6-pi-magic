@@ -46,8 +46,8 @@ main-deck assessments. Adding a legal list is not proof that it plays.
 | Preparation across the whole legal snapshot | Cards |
 | --- | ---: |
 | Shared printed handling, without rules text needing assessment | 22 |
-| Accepted assessment with all identified uses prepared | 3,308 |
-| Accepted assessment with deferred uses | 151 |
+| Accepted assessment with all identified uses prepared | 3,311 |
+| Accepted assessment with deferred uses | 148 |
 | Recorded refusals without an accepted replacement | 1,667 |
 | Not assessed | 16 |
 
@@ -58,10 +58,10 @@ or deferred. The seventeen shared printed cards and one older complete package
 in that scope were already covered.
 
 Across the pinned pool, complete preparation plus shared printed handling covers
-3,330 cards, or 64.5%. The remaining sixteen unassessed cards are Dwarves'
+3,333 cards, or 64.5%. The remaining sixteen unassessed cards are Dwarves'
 thirteen main-deck cards and three sideboard-only cards.
 
-The 151 deferred cards contain 218 deferred uses. Even a complete assessment
+The 148 deferred cards contain 214 deferred uses. Even a complete assessment
 means accepted structured terms, not verified play. Unassessed cards are unknown,
 not proven engine gaps. A refusal records the operation an assessment could
 not express. Check that claim against existing helpers before making it an
@@ -109,8 +109,8 @@ cover these interactions; a counted finish does not establish an unused branch.
 
 | Order | Work | Completion evidence |
 | --- | --- | --- |
-| 1 | Finish the original nineteen lists' reviewed coverage, including queued continuations and replacements for withdrawn results. Use direct Typesafe Jev and CLI Haiku, two games at a time. | Ordinary setup, source-reviewed outcomes, no missing-machinery gaps, replay and clone parity. Preserve failed branches and reuse their preparation. |
-| 2 | After the original nineteen lists finish, exercise representative newly qualified families. Revisit refusals only with a concrete existing representation or shared operation. | The wider pass already has 3,172 new complete packages and 1,646 refusals from 4,818 candidates. Each new family still needs game evidence. |
+| 1 | Exercise unplayed modes in the original nineteen lists and repair collective combat intent from the saved Tokens position. Keep direct Typesafe Jev and CLI Haiku, two games at a time. | All nineteen now have a first source-reviewed finish, and both funding-stopped games have completed corrected continuations. Further games retain ordinary setup, source review, no missing-machinery gaps, replay and clone parity. Preserve failed branches and reuse preparation. |
+| 2 | Exercise representative newly qualified families. Revisit refusals only with a concrete existing representation or shared operation. | The wider pass already has 3,172 new complete packages and 1,646 refusals from 4,818 candidates. Each new family still needs game evidence. |
 | 3 | Assess Dwarves' thirteen new main-deck cards, implement genuine gaps, generate its guide and prepare a matchup. | Standing terms and use inventory admit the twentieth list; real games determine runtime work. |
 | 4 | Reassess sideboard refusals and the additional unassessed sideboard cards. Keep this separate from the sideboardless alpha. | Source-reviewed terms and relevant interactions; then a match lifecycle with legal sideboarding and per-game deck registration. |
 | 5 | Implement the shared missing operations identified by the wider assessment, then reassess affected cards and add representative legal lists. | Each expansion earns the same game evidence as the first pool. Do not implement thousands of isolated exceptions. |

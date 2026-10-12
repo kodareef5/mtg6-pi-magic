@@ -23,39 +23,38 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Nineteen imported main decks have complete standing coverage. [Status](STATUS.md)
-tracks source-reviewed finishes and withdrawn evidence. The wider qualification
-pass is complete: 3,172 new
-complete meanings from existing mechanics, with source-backed refusals for the
-rest. Dwarves and sideboards remain later work. [Coverage](COVERAGE.md) defines
-the preparation states, known source issues and resumable worklists. [Status](STATUS.md) holds
-the current game evidence. Direct Jev and CLI Haiku have cleared the provider
-funding blocker.
+Each of the original nineteen imported main decks has a source-reviewed finish.
+[Status](STATUS.md) tracks retained games and withdrawn evidence. Both
+funding-stopped games have completed source-correct continuations. The wider
+qualification pass added 3,172 complete meanings from existing mechanics,
+with source-backed refusals for the rest. Dwarves and
+sideboards remain later work. [Coverage](COVERAGE.md) defines preparation states
+and reproducible worklists. Direct Jev and CLI Haiku supply the current routes.
 
-1. Finish the queued continuations and fill the remaining gaps in reviewed deck
-   coverage, including replacements for withdrawn results. Use direct Jev and CLI Haiku,
-   two games at a time, carrying each journal's accepted meanings and briefs.
-   A stopped game supplies the next concrete runtime or interpretation fix.
-2. Review every completed game's new procedures, exercised standing terms and
-   casting opportunities against the pinned source. Repair before the first
-   affected action, preserve rejected branches, and check replay and continuation
-   from saved prefixes. Only then count a finish. Retain reviewed runtime uses
-   in the reusable store, preserving target scope, order and additional costs.
-3. Repair the imported source issues identified in Coverage before their affected
-   interactions. Complete the original nineteen lists' first reviewed games
-   before widening the pool. Repeat imported pairings in both seat orders using
-   compatible saved briefs; exercise Grove's Bounty's announced division and
-   the newer graveyard, discard, mayhem and returned-creature grants in play.
-4. After those finishes, exercise representative newly prepared families through
-   registered real decks. Revisit refusals with a concrete existing expression
-   or a shared operation. Keep inference failures separate from unsupported
-   meanings. Dwarves and sideboards remain later work.
+1. Use the saved Tokens declaration to repair collective combat intent. Its
+   writer asked all three Rats to attack in one ordered step; one pick completed that step and the
+   pilot missed lethal. Every attacker was offered. The benchmark must preserve
+   individual seat choices and record completion of the intended group.
+2. Repeat imported pairings in both seat orders with compatible saved briefs.
+   Exercise Grove's Bounty's announced division and the newer graveyard,
+   discard, mayhem and returned-creature grants in play. A first reviewed
+   finish does not cover each unused mode or interaction.
+3. Review each finished game's new procedures, exercised standing terms,
+   casting opportunities and actual mana output against the pinned source.
+   Repair before the first affected action, preserve rejected branches, and
+   check replay and continuation from saved prefixes before counting the game.
+   Historical journals retain their old meanings even after the shipped store
+   is corrected; review those carried terms explicitly when resuming.
+4. Exercise representative newly qualified families through registered real
+   decks. Revisit refusals with a concrete existing expression or shared
+   operation. Keep inference failures separate from unsupported meanings.
+   Dwarves and sideboards remain later work.
 
 Staged announcements are live. Priority chooses a use; X, targets, additional
 costs and complete mana payments follow as recorded decisions, with individual
 source selection available when needed. Large historical menus
-use ordered hashes and counts in the journal. The Control versus Azorius
-continuation finished and matched replay and three clone continuations.
+use ordered hashes and counts in the journal. Counted continuations
+match replay and three clone continuations; rejected branches remain separate.
 Pregame requests have a fifteen-minute timeout independent of effort scaling.
 
 One assessed imported list can play an established opponent; it need not wait
