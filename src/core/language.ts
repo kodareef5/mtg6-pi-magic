@@ -351,6 +351,8 @@ export const Defs = {
 		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("cost"), cast: Type.Ref("Selector"), reduce: Type.Optional(positive), life: Type.Optional(positive), action: Type.Optional(one("cast", "plot")),
 			from: Type.Optional(Type.Array(Zone, { minItems: 1, uniqueItems: true })), if: Type.Optional(Type.Ref("Condition")) },
 			{ additionalProperties: false, anyOf: [{ required: ["reduce"] }, { required: ["life"] }] }),
+		/** A fixed increase to an entire draw instruction, before individual draws (121.2a). */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("draw-rule"), who: PlayerRef, additional: positive, if: Type.Optional(Type.Ref("Condition")) }),
 		/** Prevent matching damage, forbid prevention or add a fixed positive amount. */
 		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("damage-rule"), mode: Type.Union([DamageMode, Type.Literal("add")]), amount: Type.Optional(positive),
 			combat: Type.Optional(Type.Boolean()), from: Type.Optional(Type.Ref("Selector")),

@@ -35,7 +35,7 @@ assessments. Saved live continuations currently wait on strategy-provider credit
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Azorius Momo needs draw replacement and spell copies.
+   stopped games. Azorius Momo needs Sage of the Skies' spell copy.
    Combined tap payments now cover Drum and Gene Pollinator; life-gain events and
    emblems are among Lifegain's blockers. Mardu's remaining source mechanics stay
    in the refusal ledger until their shared operations are implemented.

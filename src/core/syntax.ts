@@ -66,6 +66,9 @@ export type Change =
 	| { do: "payment"; payment?: import("./cost-selection.ts").Payment }
 	| { do: "entry"; entry?: import("./entry-payments.ts").Entry }
 	| { do: "damage-order"; pending?: import("./damage-order.ts").DamageOrder }
+	| { do: "draw-order"; pending?: import("./draw-order.ts").DrawOrder }
+	/** A whole draw instruction before replacement and physical library motion. */
+	| { do: "draw"; who: SeatId; count: number; replacements?: string[]; as?: string }
 	/** Control transitions are recorded too: a pass changes who can answer next. */
 	| { do: "turn"; action: "pass" | "act"; who: SeatId; land?: boolean }
 	| { do: "turn"; action: "complete" | "priority" | "end" }

@@ -11,6 +11,7 @@
 import { amount, damageSource, holds, objects, players, select, tableWorld, targetKey, type Bound, type Chosen, type Scope, type Seen } from "./selectors.ts";
 import { assignedAmount } from "./targeting.ts";
 import { damageResult } from "./damage.ts";
+import { orderedDraw } from "./draw.ts";
 import { characteristics, has } from "./characteristics.ts";
 import { doubleFaced, room, transformable } from "./faces.ts";
 import { paymentChoices } from "./costs.ts";
@@ -218,8 +219,20 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		}
 		case "shuffle": return one("Shuffle", players(scope, instruction.who).map((whose) => ({ do: "shuffle" as const, whose })));
 		case "draw": case "mill": {
-			const count = amount(scope, instruction.count), moved: ObjectRef[] = [];
-			const changes = players(scope, instruction.who).flatMap((who): Change[] => {
+			const count = Math.max(0, amount(scope, instruction.count)), moved: ObjectRef[] = [];
+			const recipients = players(scope, instruction.who);
+			if (instruction.do === "draw" && (recipients.length > 1 && scope.world.objects.some(one => one.zone === "battlefield" && scope.world.read(one)?.registrations.some(rule => rule.kind === "draw-rule")) || recipients.some(who => {
+				const result = orderedDraw(scope.world, { do: "draw", who, count }); return result.applied.length || result.choices.length;
+			}))) {
+				const seats = table.seats.map(one => one.id), at = seats.indexOf(table.cursor.active), order = [...seats.slice(at), ...seats.slice(0, at)];
+				const label = recipients.length > 1 ? `Draw ${count} per player, applying replacements to each batch in turn order` : recipients.map(who => {
+					const result = orderedDraw(scope.world, { do: "draw", who, count });
+					return `${seat(table, who).name}: draw ${result.count}${result.choices.length ? "; choose replacement order first" : result.applied.length ? " after replacement" : ""}`;
+				}).join("; ");
+				return one(label, recipients.slice().sort((a, b) => order.indexOf(a) - order.indexOf(b)).map(who => ({ do: "draw", who, count, ...(instruction.as ? { as: instruction.as } : {}) })),
+					bind(instruction, { objects: [], players: [] }));
+			}
+			const changes = recipients.flatMap((who): Change[] => {
 				const top = cardsIn(table, "library", who).slice(0, count);
 				moved.push(...top.map((object) => ({ id: object.id, incarnation: object.incarnation + 1 })));
 				return [...top.map((object) => ({ do: "move" as const, what: object.id, to: (instruction.do === "draw" ? "hand" : "graveyard") as Zone, reason: instruction.do })),

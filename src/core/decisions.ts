@@ -23,6 +23,7 @@ import { begin as beginResolving, resolving } from "./resolution.ts";
 import { attach } from "./entry.ts";
 import { beforeEntry, entryPayment } from "./entry-payments.ts";
 import { beforeDamage, orderingDamage } from "./damage-order.ts";
+import { beforeDraw, orderingDraw } from "./draw-order.ts";
 import type { Registration } from "./language.ts";
 import { activate } from "./procedures.ts";
 import { characteristics, has } from "./characteristics.ts";
@@ -53,6 +54,7 @@ function pending(table: Table): Pending | null {
 	if (table.announcement) return announcing(table);
 	if (table.entry) return entryPayment(table);
 	if (table.damageOrder) return orderingDamage(table);
+	if (table.drawOrder) return orderingDraw(table);
 
 	// 2. Pregame: mulligan, then the opening actions a card permits. Situation 7.
 	//    Null before the hands are dealt and between rounds: advance deals and
@@ -70,9 +72,6 @@ function pending(table: Table): Pending | null {
 	const cleanup = table.cursor.steps[0] === "cleanup";
 	const automatic = cleanup && !table.cursor.stepDone ? null : stateBased(table);
 	if (automatic) return automatic;
-
-	// 4. A replacement applies to a pending event: which applies first. Only one
-	//    replacement exists yet, dies to exile, so there is never a choice.
 
 	// 7. A turn based action is due: untap, draw, declare, discard to hand size.
 	const due = turnBased(table);
@@ -182,7 +181,7 @@ function take(
 		why,
 		...(Object.keys(entered).length ? { registered: entered } : {}),
 	});
-	commit(table, beforeDamage(table, table.entry ? changes : beforeEntry(table, changes, move.reason), move.reason), move.reason);
+	commit(table, beforeDraw(table, beforeDamage(table, table.entry ? changes : beforeEntry(table, changes, move.reason), move.reason), move.reason), move.reason);
 }
 
 /** A listed action and its bookkeeping are one committed event. */

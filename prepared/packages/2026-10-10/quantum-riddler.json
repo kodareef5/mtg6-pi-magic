@@ -1,0 +1,81 @@
+{
+	"card": "Quantum Riddler",
+	"generated": "2026-10-10",
+	"source": "60369a219dbf6a3e2f6156102d14ce6def3225a9cf50f0fa0025ef498debc45e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Quantum Riddler",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, draw a card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "draw-rule",
+				"basis": "As long as you have one or fewer cards in hand, if you would draw one or more cards, you draw that many cards plus one instead.",
+				"who": "you",
+				"additional": 1,
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						}
+					},
+					"atMost": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Cast Quantum Riddler for its warp cost",
+				"basis": "Warp {1}{U}",
+				"source": {
+					"card": "Quantum Riddler",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

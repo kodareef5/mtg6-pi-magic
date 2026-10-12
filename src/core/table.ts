@@ -408,6 +408,7 @@ export type Table = {
 	/** A proposed group awaiting optional entry payments. */
 	entry?: import("./entry-payments.ts").Entry;
 	damageOrder?: import("./damage-order.ts").DamageOrder;
+	drawOrder?: import("./draw-order.ts").DrawOrder;
 	payment?: import("./cost-selection.ts").Payment;
 	announcement?: import("./announcement-options.ts").Announcement;
 	/** Journal decision version at which staged announcements replace flat menus. */

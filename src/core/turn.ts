@@ -7,6 +7,8 @@ import { commit } from "./commit.ts";
 import { combatDamage, declareAttackers, declareBlockers } from "./combat.ts";
 import { cardsIn, playing, seat, type Table } from "./table.ts";
 import { chapters } from "./sagas.ts";
+import { orderedDraw } from "./draw.ts";
+import { tableWorld } from "./selectors.ts";
 
 /**
  * Situation 2. Untap, draw for the turn, declare attackers and blockers
@@ -50,18 +52,17 @@ export function turnBased(table: Table): Pending | null {
 
 	if (step === "draw") {
 		const top = cardsIn(table, "library", active.id)[0];
+		const draw = { do: "draw" as const, who: active.id, count: 1 }, result = orderedDraw(tableWorld(table), draw);
 		return {
 			situation: "turn-based",
 			seat: active.id,
 			question: "Draw for the turn.",
 			moves: [
 				{
-					option: { id: "draw", label: top ? "Draw a card" : "Draw from an empty library" },
+					option: { id: "draw", label: result.choices.length ? "Draw for the turn; choose replacement order first" : top ? result.count === 1 ? "Draw a card" : `Draw ${result.count} cards` : "Draw from an empty library" },
 					// 704.5b: the attempt is what loses the game, so it is
 					// recorded even though nothing moves.
-					changes: top
-						? [{ do: "move" as const, what: top.id, to: "hand" as const, reason: "draw" as const }]
-						: [{ do: "mark-player" as const, who: active.id, key: "drew-from-empty", add: 1 }],
+					changes: [draw],
 					reason: "draw",
 				},
 			],

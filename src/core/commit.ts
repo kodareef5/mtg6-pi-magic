@@ -30,6 +30,7 @@ import { listed, register, type Deck } from "./decks.ts";
 import { claim } from "./names.ts";
 import { damageSource, tableWorld, targetKey } from "./selectors.ts";
 import { orderedDamage } from "./damage.ts";
+import { expandDraw } from "./draw.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import {
 	type Ability,
@@ -149,6 +150,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
  * cards watch for. Two creatures dying together is not two deaths.
  */
 export function commit(table: Table, changes: Change[], reason: Reason): Receipt {
+	changes = expandDraw(table, changes);
 	// 708.9: record the departure or game-end reveal without shifting mana ids assigned by payment.
 	const reveal = [...table.things.values()].filter(object => object.faceDown && object.zone === "battlefield" && changes.some(change =>
 		change.do === "move" && change.what === object.id && change.to !== "battlefield" || change.do === "end-game"));
@@ -403,6 +405,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (change.pending) table.damageOrder = structuredClone(change.pending);
 				else delete table.damageOrder;
 				break;
+			case "draw-order":
+				if (change.pending) table.drawOrder = structuredClone(change.pending);
+				else delete table.drawOrder;
+				break;
 			case "payment":
 				if (change.payment) table.payment = structuredClone(change.payment);
 				else delete table.payment;
@@ -590,7 +596,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	table.cursor.clock += 1;
 	if (control(changes)) return receipt;
 	table.log.push(receipt);
-	if (!table.entry && !table.damageOrder) {
+	if (!table.entry && !table.damageOrder && !table.drawOrder) {
 		const returning = returns(table);
 		if (returning.length) {
 			attach(table, returning);

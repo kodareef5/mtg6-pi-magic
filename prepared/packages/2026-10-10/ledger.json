@@ -167,14 +167,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Quantum Riddler": {
-		"reason": "Quantum Riddler is not ready: As long as you have one or fewer cards in hand, if you would draw one or more cards, you draw that many cards plus one instead. — Conditional draw-event replacement increasing the number of cards drawn by one is not expressible by the supported registrations; a draw instruction or triggered watch cannot substitute for it.",
-		"decks": [
-			"Azorius Momo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Ral, Crackling Wit": {
 		"reason": "Ral, Crackling Wit is not ready: −10: Draw three cards. You get an emblem with \"Instant and sorcery spells you cast have storm.\" (Whenever you cast an instant or sorcery spell, copy it for each spell cast before it this turn.) — Creating an emblem and copying spells through storm are not expressible in the supplied syntax.",
 		"decks": [

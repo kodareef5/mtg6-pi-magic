@@ -69,6 +69,7 @@ schemas, and every `basis` is checked against the card's text.
 | `library-searches.md` | recorded search starts, private inspection, repeated searches and Wan Shi Tong's own-library watch |
 | `optional-search.md` | another player's optional search after destruction; declining versus searching and finding nothing |
 | `warp.md` | an alternative cost with a delayed exile and a permission to cast again |
+| `draw-replacements.md` | conditional increases to a whole draw instruction and recorded replacement order |
 | `animation.md` | crew, a land becoming a creature, layer 5 color changes, earthbend, changing creature types and granting a trigger |
 | `x-costs.md` | X in a cost, a permanent remembering X, counted X, `sum`, damage to each |
 | `stack-and-replacements.md` | countering, ward, a replacement placed by a spell, rules words, `each`, suppression |

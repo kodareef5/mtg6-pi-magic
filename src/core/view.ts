@@ -191,7 +191,8 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	const listed = table.format.decksRegistered ? table.seats.flatMap(({ deck }) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]) : [];
 	const names = [...new Set([...objects.flatMap((object) => "card" in object && object.card ? [object.card] : []), ...listed])].sort();
 	const draw = viewer !== "spectator" ? table.ledger.findLast((row) => row.seat === viewer && row.situation === "turn-based" && row.picked === "draw" && (row.clock ?? 0) > (table.cursor.began[viewer] ?? 0)) : undefined;
-	const drawn = draw && table.log.find((receipt) => receipt.clock === draw.clock);
+	const drawn = draw && table.log.find((receipt) => (receipt.clock ?? 0) >= (draw.clock ?? 0) && receipt.reason === "draw" &&
+		!receipt.changes.some(change => change.do === "draw-order" && change.pending));
 	const turnDraw = drawn?.changes.flatMap((change) => {
 		const object = change.do === "move" && change.to === "hand" && drawn.after[change.what];
 		return object && object.owner === viewer ? [{ id: object.id, incarnation: object.incarnation,
@@ -206,7 +207,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		const paid = !object.faceDown && casting(table, object);
 		return paid ? [[`${object.id}@${object.incarnation}`, structuredClone(paid)]] : [];
 	}));
-	const view: SeatView = { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw.clock, turnDraw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
+	const view: SeatView = { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(drawn === undefined ? {} : { drawnAt: drawn.clock, turnDraw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
 		starting: table.seats[0]!.id,
 		...(table.announcementsFrom !== undefined && table.ledger.length >= table.announcementsFrom ? { stagedAnnouncements: true as const } : {}),
 		...(table.excessManaFrom !== undefined && table.ledger.length >= table.excessManaFrom ? { excessMana: true as const } : {}),

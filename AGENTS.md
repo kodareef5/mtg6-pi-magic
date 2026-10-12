@@ -476,6 +476,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   decks.ts           a deck, its registration for a game, and the kept collection
   entry.ts           what a permanent registers as it enters, and how it enters
   damage.ts, damage-order.ts  damage modifiers and affected-player ordering before simultaneous results
+  draw.ts, draw-order.ts  batch draw replacements, affected-player choices and sequential player draws
   copies.ts          copiable base terms, public-card copies and required activation preparation
   entry-copies.ts     targetless entry copy choices and copiable exceptions
   durations.ts       immediate returns when an exile-until duration ends
@@ -495,7 +496,6 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   speed.ts            player speed, its state-based start and source-less inherent trigger
   triggers.ts        events read from each group, watches matched, the trigger window
   combat.ts          declaring attackers and blockers, dividing and dealing combat damage
-  damage.ts          all-damage prevention and prohibition before damage results
   permits.ts         extra land plays, lands from other zones, flash, "you may play that card"
   funding.ts         paying a cost: floating mana and mana abilities while paying
   tap-costs.ts, subsets.ts  shared tap-cost selections and bounded-size object subsets

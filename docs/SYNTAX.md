@@ -776,6 +776,15 @@ event; departed damage sources use their last known characteristics. Source
 selectors default to any zone. See [prevention](examples/prevention.md) for
 limits and a spell that prohibits prevention before dealing its damage.
 
+Standing `draw-rule` registrations name `who`, a positive integer `additional`,
+and an optional `if`. They add to the whole draw instruction before individual
+draws, checking the condition once per batch. Multiple replacements require the
+affected player's recorded order. Several players draw in active-player order;
+later batches read the updated hands. A replaced draw does not bind its cards for
+an additional instruction on them. [Draw replacements](examples/draw-replacements.md)
+covers Quantum Riddler. Individual draw replacements, limits and multipliers
+remain unsupported.
+
 Private selections are checked against the actor's earned view before card
 identities can enter a choice. A selector that can reach another unseen hand
 stays pending, including when a name or type filter would find nothing there.
