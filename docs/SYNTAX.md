@@ -460,6 +460,9 @@ more". Damage watches optionally filter `combat: true` or `false`. They group
 by source, or by recipient with `received: true`; `of` selects that object and
 `{event: "amount"}` sums its matched damage. `player` can also name a side.
 See [damage](examples/damage.md) for simultaneous events and last known sources.
+For "during your turn", use `triggerIf: {turn: "self"}` on the watch.
+`event.whose` selects the step owner or searched library owner; it does not
+filter the turn of a departure or attack. See [turn-qualified triggers](examples/turn-qualified-triggers.md).
 
 An `is`/`matches` condition normally requires a live incarnation. Add
 `lastKnown: true` for an information check about that incarnation after it

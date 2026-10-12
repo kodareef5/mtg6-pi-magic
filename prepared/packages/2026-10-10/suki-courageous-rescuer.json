@@ -35,8 +35,7 @@
 					},
 					"from": [
 						"battlefield"
-					],
-					"whose": "you"
+					]
 				},
 				"limit": "once-per-turn",
 				"effect": {
@@ -60,6 +59,9 @@
 							}
 						}
 					]
+				},
+				"triggerIf": {
+					"turn": "self"
 				}
 			}
 		],

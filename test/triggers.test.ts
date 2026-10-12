@@ -8,8 +8,9 @@
  */
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import { commit, start } from "../src/core/commit.ts";
-import { deck } from "../src/core/decks.ts";
+import { alpha, deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
 import { relive } from "../src/core/journal.ts";
@@ -346,6 +347,26 @@ test("a leaves-the-battlefield watch looks back at a table that still remembers 
 	resolveTop(table);
 	commit(table, [{ do: "move", what: chocobo.id, to: "graveyard", reason: "resolve" }], "resolve");
 	assert.equal(table.waiting.length, 1, "the Elves were cast this turn, so the dies watch triggers");
+
+	// Suki's "during your turn" qualifies the departure, including simultaneous departure.
+	const suki = JSON.parse(readFileSync("prepared/packages/2026-10-10/suki-courageous-rescuer.json", "utf8")).package;
+	for (const mode of ["own", "opponent", "departing"] as const) {
+		const game = start(standard, [{ deck: alpha(deck("Boros Tokens")) }, { deck: alpha(deck("Mono-Red Aggro")) }], `suki-${mode}`);
+		const source = establish(game, 0, suki.card, suki.registers);
+		const [one, two, three] = place(game, 0, "battlefield", "Mountain", "Mountain", "Mountain");
+		main(game, mode === "opponent" ? 1 : 0, mode === "opponent" ? 4 : 3);
+		commit(game, [one!, two!, ...(mode === "departing" ? [source] : [])].map(card => ({ do: "move", what: card.id, to: "graveyard", reason: "sacrifice" })), "resolve");
+		assert.equal(game.waiting.length, mode === "opponent" ? 0 : 1, `${mode}: once per own turn, not once per departing permanent`);
+		if (mode === "opponent") continue;
+		const pending = structuredClone(game), at = game.ledger.length;
+		trigger(game); resolveTop(game);
+		const allies = cardsIn(game, "battlefield", 0).filter(card => card.token?.name === "Ally Token");
+		assert.equal(allies.length, 1);
+		assert.equal(characteristics(game, allies[0]!)!.power, mode === "departing" ? 1 : 2);
+		assert.deepEqual(relive(pending, game.ledger.slice(at)), game, "a clone with Suki's trigger waiting creates the same Ally");
+		commit(game, [{ do: "move", what: three!.id, to: "graveyard", reason: "sacrifice" }], "resolve");
+		assert.equal(game.waiting.length, 0, "a second departure does not trigger again this turn");
+	}
 });
 
 test("a cast watch reads the zone the spell was cast from", () => {
