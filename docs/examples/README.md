@@ -15,6 +15,7 @@ schemas, and every `basis` is checked against the card's text.
 | `face-down-exile.md` | Private face-down exile and play while a live condition holds |
 | `spells.md` | targets, any target, destroy, modes as separate procedures, kicker, a token's activated ability |
 | `target-counts.md` | one or two distinct targets, mixed players and permanents, simultaneous damage and returns |
+| `controller-targets.md` | targets limited per opponent, announced controllers and simultaneous returns |
 | `divided-targets.md` | Any number of targets and positive counter or damage shares fixed before payment |
 | `casting-life.md` | Additional life costs based on selected spell targets, combined payments and cancellation |
 | `mana.md` | mana abilities in a package, "or", counted mana, spend restrictions, a token's mana ability, a Verge's conditional ability |

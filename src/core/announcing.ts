@@ -68,6 +68,7 @@ export function announcing(table: Table): Pending | null {
 		const at = draft.targets.length, slot = base.slots[at]!;
 		const { maximum: count, minimum } = targetBounds(slot, { ...base.scope, targets: draft.targets });
 		question += ` Choose target group ${at + 1}: ${minimum === count ? count : `${minimum} to ${count}`} targets. Selected ${draft.selecting.length}.`;
+		if (slot.perController) question += ` At most ${slot.perController} per controller; each target must remain under that player's control.`;
 		const pool = targetCandidates(slot, { ...base.scope, targets: draft.targets });
 		for (const target of pool) {
 			if (draft.selecting.some((one) => targetKey(one) === targetKey(target))) continue;

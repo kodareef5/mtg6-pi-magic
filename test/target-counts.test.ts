@@ -5,6 +5,15 @@ import { commit, start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { relive } from "../src/core/journal.ts";
+import { apply, advance, nextDecision } from "../src/core/decisions.ts";
+import { workFrame } from "../src/core/work-tools.ts";
+import { announcementOffers } from "../src/core/announcement-options.ts";
+import { beginAnnouncement } from "../src/core/announcing.ts";
+import { project } from "../src/core/view.ts";
+import { tableWorld, targetKey } from "../src/core/selectors.ts";
+import { validTargetControllers } from "../src/core/targeting.ts";
+import { begin } from "../src/core/resolution.ts";
+import { cardsIn, type Table } from "../src/core/table.ts";
 import { activationChanges, checkProcedure } from "../src/core/procedures.ts";
 import { announce, example, finish, main, offered, passBoth, place, step } from "./play.ts";
 
@@ -51,4 +60,57 @@ test("one target slot enforces its range and uniqueness while resolving all surv
 	const returned = table.log.at(-1)!.changes.filter((one) => one.do === "move" && one.to === "hand");
 	assert.equal(returned.length, 2); assert.equal(crab!.zone, "hand"); assert.equal(hearth!.zone, "hand");
 	finish(table); assert.deepEqual(relive(initial, table.ledger.slice(at)), table);
+	controllerTargets();
 });
+
+/** One generic target group retains the player named by each choice. */
+function controllerTargets() {
+	const procedure = example("Activate The Theorist's -2 with up to one target per opponent");
+	assert.throws(() => checkProcedure({ ...procedure, targets: [{ ...procedure.targets![0], player: "any" }] }), /objects only/);
+	const pick = (table: Table, id: string) => { assert.ok(nextDecision(table)!.options.some(one => one.id === id), id); apply(table, id, "model", "chosen"); };
+	for (const opponents of [1, 2]) for (const choose of [false, true]) {
+		const table = start({ ...standard, seats: { min: 2, max: 3 } }, [{ deck: deck("Azorius Control") },
+			...Array.from({ length: opponents }, () => ({ deck: deck("Izzet Spellementals") }))], `controller-targets-${opponents}-${choose}`, undefined, { announcementsFrom: 0 });
+		const [jace] = place(table, 0, "battlefield", "The Theorist, Jace Beleren");
+		const pairs = Array.from({ length: opponents }, (_, at) => place(table, at + 1, "battlefield", "Eddymurk Crab", "Eddymurk Crab"));
+		main(table, 0);
+		const initial = structuredClone(table), version = table.ledger.length;
+		const choices = offered(table, procedure);
+		assert.equal(choices.length, 3 ** opponents, "zero or either creature from each controller, without same-controller pairs");
+		const complete = choices.find(one => one.activation.targets[0]!.length === opponents)!;
+		const duplicated = structuredClone(complete.activation);
+		duplicated.targets[0] = pairs[0]!.map(one => ({ id: one.id, incarnation: one.incarnation, controller: 1 }));
+		assert.throws(() => activationChanges(table, duplicated), /per-controller/);
+		const missingController = structuredClone(complete.activation); delete missingController.targets[0]![0]!.controller;
+		assert.throws(() => activationChanges(table, missingController), /per-controller/);
+		const ref = complete.activation.targets[0]![0]!;
+		const changed = { ...tableWorld(table), objects: tableWorld(table).objects.map(one => one.id === ("id" in ref ? ref.id : "") ? { ...one, controller: 0 } : one) };
+		assert.equal(validTargetControllers(procedure.targets![0]!, [ref], { world: changed, controller: 0 }), false);
+		const entry = announcementOffers(procedure, workFrame(table, 0), "procedure")[0]!;
+		beginAnnouncement(table, entry.announcement, { picked: entry.option.id, offered: [entry.option.id], by: "model", why: "declared" });
+		if (choose) for (const pair of pairs) {
+			pick(table, `announce:target:${targetKey(pair[0]!)}`);
+			assert.ok(!nextDecision(table)!.options.some(one => one.id === `announce:target:${targetKey(pair[1]!)}`));
+		}
+		const middle = structuredClone(table), from = table.ledger.length;
+		nextDecision(table); assert.deepEqual(table, middle, "discovery is pure mid-selection");
+		assert.equal(project(table, 1).announcement, undefined);
+		pick(table, "announce:targets-done"); pick(table, "announce:cost:0");
+		assert.equal(jace!.counters.loyalty, 3, "selection spends no loyalty");
+		pick(table, nextDecision(table)!.options.find(one => one.id.startsWith("announce:payment:"))!.id);
+		assert.equal(jace!.counters.loyalty, 1);
+		assert.deepEqual(relive(structuredClone(middle), table.ledger.slice(from)), table);
+		const ability = cardsIn(table, "stack")[0]!;
+		if (choose) {
+			// A hypothetical later control change makes only that player's target illegal.
+			const altered = structuredClone(table); altered.things.get(pairs[0]![0]!.id)!.controller = opponents;
+			if (opponents > 1) assert.deepEqual((begin(altered, altered.things.get(ability.id)!) as { illegal: string[] }).illegal, [targetKey(pairs[0]![0]!)]);
+		}
+		for (let at = 0; at <= opponents; at++) { while (!nextDecision(table)) advance(table); pick(table, "pass"); }
+		step(table);
+		const returned = table.log.at(-1)!.changes.filter(one => one.do === "move" && one.to === "hand");
+		assert.equal(returned.length, choose ? opponents : 0, "legal chosen targets return in one group");
+		for (const pair of pairs) { assert.equal(pair[0]!.zone, choose ? "hand" : "battlefield"); assert.equal(pair[1]!.zone, "battlefield"); }
+		finish(table); assert.deepEqual(relive(initial, table.ledger.slice(version)), table);
+	}
+}

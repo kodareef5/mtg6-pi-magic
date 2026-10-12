@@ -1,7 +1,7 @@
 /** A proposed use retains its accepted meaning while the seat selects its parts.
  * Feasibility reads projected resources; it neither chooses nor spends them. */
 import { offerBases, offerCosts, paidActivation, targetCandidates, type OfferBase, type OfferCost } from "./announce.ts";
-import { targetBounds, validDivision } from "./targeting.ts";
+import { targetBounds, validDivision, validTargetControllers } from "./targeting.ts";
 import { payable, paymentOptions } from "./payment-options.ts";
 import { completePayments } from "./complete-payments.ts";
 import { targetKey, type Chosen } from "./selectors.ts";
@@ -54,10 +54,11 @@ export function canAnnounce(base: OfferBase, frame: Frame, completed: Chosen[][]
 		if (!slot) return canAfford(base, frame, targets);
 		const scope = { ...base.scope, targets }, pool = targetCandidates(slot, scope);
 		const { minimum, maximum } = targetBounds(slot, scope, pool.length);
-		if (selected.length > maximum || new Set(selected.map(targetKey)).size !== selected.length ||
+		if (!validTargetControllers(slot, selected, scope) || selected.length > maximum || new Set(selected.map(targetKey)).size !== selected.length ||
 			selected.some((one) => !pool.some((candidate) => targetKey(candidate) === targetKey(one)))) return false;
 		const remaining = pool.filter((one) => !selected.some((old) => targetKey(old) === targetKey(one)));
 		const fill = (at: number, chosen: Chosen[]): boolean => {
+			if (!validTargetControllers(slot, chosen, scope)) return false;
 			if (chosen.length >= minimum && visit([...targets, chosen], [])) return true;
 			if (chosen.length === maximum || chosen.length + remaining.length - at < minimum) return false;
 			for (let next = at; next < remaining.length; next++) if (fill(next + 1, [...chosen, remaining[next]!])) return true;

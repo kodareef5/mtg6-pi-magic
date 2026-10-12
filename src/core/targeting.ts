@@ -6,7 +6,21 @@ import type { Amount, Target } from "./language.ts";
 export function targetCandidates(slot: Target, scope: Scope): Chosen[] {
 	const seats = slot.player === undefined ? [] : slot.player === "any" ? scope.world.players.map(one => one.id) : players(scope, slot.player);
 	return [...(slot.object ? scope.world.objects.filter(object => matches(scope, object, slot.object!))
-		.map(({ id, incarnation }) => ({ id, incarnation })) : []), ...seats.map(player => ({ player }))];
+		.map(({ id, incarnation, controller }) => ({ id, incarnation, ...(slot.perController ? { controller } : {}) })) : []), ...seats.map(player => ({ player }))];
+}
+
+/** A per-player target names that controller when announced (601.2c). */
+export function validTargetControllers(slot: Target, chosen: Chosen[], scope: Scope): boolean {
+	if (!slot.perController) return chosen.every(one => one.controller === undefined);
+	const counts = new Map<number, number>();
+	for (const one of chosen) {
+		if (!("id" in one) || one.controller === undefined || !scope.world.objects.some(object =>
+			object.id === one.id && object.incarnation === one.incarnation && object.controller === one.controller)) return false;
+		const count = (counts.get(one.controller) ?? 0) + 1;
+		if (count > slot.perController) return false;
+		counts.set(one.controller, count);
+	}
+	return true;
 }
 
 export function targetBounds(slot: Target, scope: Scope, available = targetCandidates(slot, scope).length) {
@@ -48,6 +62,7 @@ export const targetings = (slots: Target[], scope: Scope): Chosen[][][] => slots
 		}
 	};
 	const select = (from: number, chosen: Chosen[]) => {
+		if (!validTargetControllers(slot, chosen, scoped)) return;
 		if (chosen.length >= minimum) {
 			if (slot.divide === undefined) found.push(chosen);
 			else divide(chosen, 0, amount(scoped, slot.divide));

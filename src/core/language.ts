@@ -173,6 +173,8 @@ export const Defs = {
 		player: Type.Optional(Side),
 		/** Default 1. */
 		count: Type.Optional(Type.Union([positive, Type.Literal("any")])),
+		/** At most this many objects per controller; each chosen controller stays fixed. */
+		perController: Type.Optional(positive),
 		/** Divide this amount among this group's targets, at least one each (601.2d). */
 		divide: Type.Optional(Type.Ref("Amount")),
 		/** A positive minimum below count, such as one or two targets. Omit with upTo. */

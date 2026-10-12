@@ -121,6 +121,13 @@ zero. Apply a single printed instruction to that whole slot: damage or movement
 to two targets happens in one committed group. Separate slots can name the same
 object when the card has separate occurrences of "target" (115.3).
 
+`perController: N` limits an object target group to N for each controller.
+Each chosen object records that player and must remain under their control
+through the resolution target check. Use `count: "any"` for optional targets
+per opponent, with `object.controller: "opponent"`. This expresses an upper
+bound, not a minimum per player; it cannot include player targets.
+See [The Theorist](examples/controller-targets.md).
+
 `count: "any"` allows any number of distinct targets, including zero. With
 `divide: Amount`, the seat assigns the total among its targets before costs;
 every chosen target must receive a positive integer (601.2d). A zero total

@@ -5,7 +5,7 @@
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
 import { variableSacrifice } from "./sacrifice-costs.ts";
-import { targetBounds, validDivision } from "./targeting.ts";
+import { targetBounds, validDivision, validTargetControllers } from "./targeting.ts";
 import { costChanges } from "./costs.ts";
 import { announcedActivation, announcementPayments } from "./announcement-options.ts";
 import { project } from "./view.ts";
@@ -105,6 +105,7 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if ("combination" in value && (!("any" in value) || !value.any || "colors" in value)) throw new Error("A mana combination needs any and cannot also state colors.");
 			for (const [key, one] of Object.entries(value)) {
 				if (key === "targets" && Array.isArray(one)) for (const slot of one as Target[]) {
+					if (slot.perController && (!slot.object || slot.player)) throw new Error("A per-controller target group selects objects only.");
 					if (slot.atLeast !== undefined && (slot.upTo || (slot.count !== "any" && slot.atLeast > (slot.count ?? 1))))
 						throw new Error("A target minimum cannot exceed its count or combine with upTo.");
 				}
@@ -188,6 +189,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	activation.slots.forEach((slot, at) => {
 		const chosen = activation.targets[at] ?? [], { minimum, maximum } = targetBounds(slot, scope);
 		if (chosen.length < minimum || chosen.length > maximum) throw new Error("A target slot has the wrong number of targets.");
+		if (!validTargetControllers(slot, chosen, scope)) throw new Error("A target slot exceeds its per-controller count or names a different controller.");
 		if (!validDivision(slot, chosen, scope)) throw new Error("A target division must assign positive integers adding to the announced total.");
 		if (new Set(chosen.map((one) => "player" in one ? `player:${one.player}` : `${one.id}@${one.incarnation}`)).size !== chosen.length)
 			throw new Error("One target slot cannot name the same target twice.");

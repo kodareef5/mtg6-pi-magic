@@ -28,7 +28,8 @@ export function begin(table: Table, object: Thing): Change {
 	const illegal = ability.slots.flatMap((slot, at) => (ability.targets[at] ?? []).filter((chosen) => {
 		if ("player" in chosen) return !table.seats.some((one) => one.id === chosen.player && !one.result) || (slot.player !== "any" && !!slot.player && !players(scope, slot.player).includes(chosen.player));
 		const now = table.things.get(chosen.id);
-		return !now || now.incarnation !== chosen.incarnation || !slot.object || !matches(scope, now, slot.object);
+		return !now || now.incarnation !== chosen.incarnation || !slot.object || !matches(scope, now, slot.object) ||
+			(slot.perController !== undefined && now.controller !== chosen.controller);
 	}).map(targetKey));
 	const chosen = ability.targets.flat();
 	const spent = trigger?.limit === "once-per-turn-use" && usedThisTurn(table, ability.source, ability.basis, ability.controller);
