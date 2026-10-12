@@ -51,6 +51,24 @@ the original target no longer exists after the move.
 }
 ```
 
+Appa can airbend permanents owned by different players. `who: "owner"` grants
+one permission per affected card, only to that card's owner. It does not give
+any owner access to another owner's cards. These targets leave simultaneously.
+
+```json package
+{
+  "card": "Appa, Steadfast Guardian",
+  "registers": [
+    { "basis": "When Appa enters, airbend any number of other target nonland permanents you control. (Exile them. While each one is exiled, its owner may cast it for {2} rather than its mana cost.)", "kind": "watch",
+      "event": { "on": "enters", "of": { "is": "this" } },
+      "effect": { "targets": [{ "object": { "controller": "you", "not": { "types": ["land"], "is": "this" } }, "count": "any" }], "instructions": [
+        { "do": "move", "what": "target:0", "to": "exile", "reason": "exile", "as": "airbent" },
+        { "do": "permit", "what": "bound:airbent", "who": "owner", "mana": "{2}", "until": "indefinite" }
+      ] } }
+  ]
+}
+```
+
 ## Through the next turn
 
 `endOfNextTurn` names the player whose next turn ends the permission. Core

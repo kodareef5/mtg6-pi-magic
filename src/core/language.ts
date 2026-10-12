@@ -300,8 +300,8 @@ export const Defs = {
 			{ oneOf: [{ required: ["spec"], not: { anyOf: [{ required: ["copy"] }, { required: ["except"] }] } }, { required: ["copy"], not: { required: ["spec"] } }] }),
 		/** Writes a public label on each affected object; `label` is its text, the claim when omitted. */
 		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification"), label: Type.Optional(text) }),
-		/** "You may play that card": `from` "next-turn" for warp's "after the current turn has ended". */
-		step({ do: Type.Literal("permit"), what: ObjectRef, who: PlayerRef, from: Type.Optional(one("now", "next-turn")),
+		/** A play permission: `who: owner` pairs each card with its own owner; `from` delays it for warp. */
+		step({ do: Type.Literal("permit"), what: ObjectRef, who: Type.Union([PlayerRef, Type.Literal("owner")]), from: Type.Optional(one("now", "next-turn")),
 			while: Type.Optional(Type.Ref("Condition")),
 			until: Type.Union([Duration, object({ endOfNextTurn: PlayerRef })]),
 			/** An alternative price grants casting only, not a land play or the printed price. */

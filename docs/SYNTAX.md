@@ -209,7 +209,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `prepare` | `what`, `prepared` true or false; preparing creates its castable copy in exile |
 | `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, starting `loyalty`, words, registrations; optional `controller` names each creator (default `you`); `tapped` and `attacking`, with each entering attack's defender chosen before the group enters |
 | `modify` | change characteristics `until` a duration, written as a public label |
-| `permit` | a player may play a card, `from` now or next turn, `until` a duration; optional `mana` grants casting at that alternative price only; `while` rechecks a live condition on each use |
+| `permit` | a player may play a card; `who: "owner"` grants each affected card's owner permission for that card; `from` now or next turn, `until` a duration; optional `mana` grants casting at that alternative price only; `while` rechecks a live condition on each use |
 | `register` | add a registration to an object |
 | `delay` | a delayed trigger: an event and an effect, once unless `until` gives it a span (603.7) |
 | `reflect` | "when you do": a reflexive trigger with its intervening `check` (603.12) |

@@ -276,12 +276,15 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 				bind(instruction, { objects: affected.map(ref), players: [] }));
 		}
 		case "permit": {
-			const cards = live(table, objects(scope, instruction.what)), who = players(scope, instruction.who)[0] ?? controller;
+			const cards = live(table, objects(scope, instruction.what)), who = instruction.who === "owner" ? undefined : players(scope, instruction.who)[0] ?? controller;
 			const fromTurn = table.cursor.turn + (instruction.from === "next-turn" ? 1 : 0);
 			const until: Until = typeof instruction.until === "string" ? instruction.until as Until : {
 				endOfNextTurn: players(scope, instruction.until.endOfNextTurn)[0] ?? controller, afterTurn: table.cursor.turn };
-			return one(`${seat(table, who).name} may ${instruction.mana ? `cast for ${instruction.mana === "printed" ? "its printed mana cost" : instruction.mana}` : "play"} ${cards.map(name).join(", ") || "nothing"}${instruction.leavesStack ? `; put it into ${instruction.leavesStack} whenever it leaves the stack` : ""}`, cards.map((object): Change => ({ do: "note", note: {
-				kind: "permit", by: controller, until, on: ref(object), who, fromTurn, ...(instruction.mana ? { mana: instruction.mana } : {}),
+			const permission = `may ${instruction.mana ? `cast for ${instruction.mana === "printed" ? "its printed mana cost" : instruction.mana}` : "play"}`;
+			const label = who === undefined ? cards.map(object => `${seat(table, object.owner).name} ${permission} ${name(object)}`).join("; ") || "No cards receive a play permission"
+				: `${seat(table, who).name} ${permission} ${cards.map(name).join(", ") || "nothing"}`;
+			return one(`${label}${instruction.leavesStack ? `; put it into ${instruction.leavesStack} whenever it leaves the stack` : ""}`, cards.map((object): Change => ({ do: "note", note: {
+				kind: "permit", by: controller, until, on: ref(object), who: who ?? object.owner, fromTurn, ...(instruction.mana ? { mana: instruction.mana } : {}),
 				...(instruction.while ? { while: structuredClone(instruction.while) } : {}),
 				...(instruction.of ? { of: structuredClone(instruction.of) } : {}), ...(instruction.leavesStack ? { leavesStack: instruction.leavesStack as Zone } : {}),
 				...(source && until === "while-source" ? { source } : {}) } })));

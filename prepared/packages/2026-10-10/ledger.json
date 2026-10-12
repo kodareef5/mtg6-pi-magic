@@ -15,14 +15,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Appa, Steadfast Guardian": {
-		"reason": "Appa, Steadfast Guardian is not ready: When Appa enters, airbend any number of other target nonland permanents you control. (Exile them. While each one is exiled, its owner may cast it for {2} rather than its mana cost.) — The standing entry trigger requires an unrestricted number of announced targets, including zero. Target.count supports only a fixed positive integer maximum; no supplied target shape expresses any number. A fixed cap or a nontargeted choice would change the ability.",
-		"decks": [
-			"Bant Airbending Combo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Ardyn, the Usurper": {
 		"reason": "Ardyn, the Usurper is not ready: Starscourge — At the beginning of combat on your turn, exile up to one target creature card from a graveyard. If you exiled a card this way, create a token that's a copy of that card, except it's a 5/5 black Demon. — Unsupported: copying the exiled creature card and applying copiable black color and Demon creature-subtype exceptions. token.copy supports battlefield permanent sources, and token.except supports only fixed power/toughness, not color or subtype exceptions; a later modification would not faithfully express these copy exceptions.",
 		"decks": [

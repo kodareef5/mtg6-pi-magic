@@ -1,4 +1,5 @@
-/** Permissions preserve their price, player, incarnation and expiration through replay. */
+/** Permissions preserve their price, player, incarnation and expiration through replay.
+ * The shared invariant includes mixed owners and turn expiry past 150 lines. */
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { commit, start } from "../src/core/commit.ts";
@@ -119,6 +120,31 @@ test("a granted casting price belongs to its player and incarnation, with explic
 	assert.equal(castingPrices(world, 1, claw, 2).length, 3);
 	assert.deepEqual(castingPrices(world, 1, claw, 2, 0, "{0}"), [{}]);
 	assert.equal(castingPrices(viewWorld(project(table, 0)), 0, claw, 2).length, 0);
+
+	// A single airbend can include a permanent its controller does not own.
+	for (const count of [0, 2]) {
+		const mixed = start(standard, [{ deck: deck("Bant Airbending Combo") }, { deck: deck("Mono-Red Aggro") }], `appa-owners-${count}`);
+		const appa = establish(mixed, 0, "Appa, Steadfast Guardian", []), elf = establish(mixed, 0, "Llanowar Elves", []);
+		const [borrowed] = place(mixed, 1, "graveyard", "Hired Claw");
+		commit(mixed, [{ do: "move", what: borrowed!.id, to: "battlefield", controller: 0, reason: "resolve" }], "resolve");
+		main(mixed, 0);
+		commit(mixed, [{ do: "move", what: appa.id, to: "exile", reason: "exile" },
+			{ do: "move", what: appa.id, to: "battlefield", reason: "resolve", registers: pack("Appa, Steadfast Guardian") }], "resolve");
+		const beforeMixed = structuredClone(mixed), from = mixed.ledger.length;
+		const choice = nextDecision(mixed)!.options.find(one => one.trigger?.targets.length === count)!;
+		assert.ok(choice); apply(mixed, choice.id, "model", "chosen"); passBoth(mixed);
+		const mid = structuredClone(mixed), at = mixed.ledger.length; finish(mixed);
+		const notes = mixed.notes.filter(one => one.kind === "permit"); assert.equal(notes.length, count);
+		for (const card of [elf, borrowed!]) {
+			assert.equal(card.zone, count ? "exile" : "battlefield");
+			const owned = notes.find(one => one.kind === "permit" && one.on.id === card.id);
+			if (count) assert.ok(owned?.kind === "permit" && owned.who === card.owner && owned.mana === "{2}" && owned.on.incarnation === card.incarnation);
+			for (const seat of [0, 1]) assert.equal(playable(tableWorld(mixed), seat, card, mixed.cursor.turn, false), !!count && seat === card.owner);
+		}
+		if (count) assert.equal(mixed.log.filter(row => row.changes.filter(one => one.do === "move" && one.to === "exile").length === 2).length, 1);
+		assert.deepEqual(relive(mid, mixed.ledger.slice(at)), mixed);
+		assert.deepEqual(relive(beforeMixed, mixed.ledger.slice(from)), mixed);
+	}
 
 	for (const duringOwnTurn of [true, false]) {
 		const game = start(standard, [{ name: "Roku", deck: deck("Boros Dragons") }, { name: "Red", deck: deck("Mono-Red Aggro") }], "roku-permission");
