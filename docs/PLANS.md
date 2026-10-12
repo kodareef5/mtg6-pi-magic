@@ -233,6 +233,9 @@ and replay/clone parity. Preserve failed and canceled calls in the accounting.
 Keep hypotheses, raw results and long reviews in ignored `design-ref/` or `.pi/`.
 Published notes contain only current decisions and a short results summary.
 
-Both `npm test` and `npm run check` must pass before every commit. No inference
-runs in either. Full-game completion requires coherent choices and legal play,
+`npm test` (fast invariants) and `npm run check` must pass before every commit.
+Run affected whole-game tests when changing lifecycle, replay, planning or
+adapters. `npm run test:slow` holds those nine files; `npm run test:all` runs
+every test before pushing a completed batch or releasing. The split changes
+frequency, not coverage. No inference runs in any test lane. Full-game completion requires coherent choices and legal play,
 not merely reaching an outcome with a healthy journal.

@@ -76,7 +76,7 @@ Inference is Pi's. Pi holds the providers, the credentials and the model
 catalogue, which is most of why this is a Pi package and not a program with a
 config file. A role is a Pi model pattern and nothing more: the string a person
 types at `/model`, an id with an optional thinking level after a colon. No
-endpoint, no key and no provider name is written in this repo.
+endpoint or credential is written in this repo.
 
 Five roles, because they want different models. `decide` is a classifier and
 answers with one of the ids the table listed, which is why a model cannot invent
@@ -95,6 +95,11 @@ off in testing. Haiku replaced Luna low on October 10, when the growth fixtures
 showed thinking effort, not prompting, was what found lethal lines. Keep that
 roster while improving gameplay; a different model or effort is a different
 experiment, and changes only when explicitly asked.
+
+An explicit `claude-cli/claude-haiku-5-5:medium` pattern selects the installed
+Claude CLI through a Pi provider; the CLI owns authentication. `--claude` on
+the matchup and simulation tools selects it for strategy and judge. Jev still
+uses its selected classifier provider. See `docs/INFERENCE.md`.
 
 `src/context/roles.ts` holds the roles, the suggested patterns, the resolution
 and why each default is what it is. `/magic models` reads the roster and says
@@ -424,8 +429,11 @@ rather than adding a test for each branch.
   as execution. Passing confirms the current completion or waiting conditions.
   Unmentioned cards create no separate strategy review. Every move stays available.
 
-`npm test` runs them, `npm run check` runs the types. Both pass on every commit
-or the commit is not done. Neither makes a network call: the decision model is a
+`npm test` runs the fast invariant lane; `npm run check` runs the types. Both
+pass on every commit. `npm run test:slow` runs the nine whole-game invariant
+files named in `tools/test.ts`; run affected slow files when changing their
+behavior. `npm run test:all` runs both lanes before a completed batch is pushed
+and before a release. All lanes accept `-- --concurrency N`. Neither makes a network call: the decision model is a
 double whose shape is Pi's own `classify`. `npm run smoke` is the live run, opt
 in, and it reports the seed, the outcome, the model calls, the forced ratio and
 the gaps. Tests live in `test/` and ship with nothing:
@@ -519,6 +527,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
 src/context/           questions for a decision model. Its own AGENTS.md
   roles.ts             which model answers which part, and why each default
   model.ts, reason.ts  the two adapters onto Pi: classifier, and chat
+  claude-cli.ts, claude-process.ts  explicit CLI provider and isolated subprocess transport
   spend.ts             what every call cost, and the output ceiling per role
   brief.ts             the pregame wave, and the snippets it files by use
   brief-cache.ts       source- and roster-pinned matchup advice for fresh games
