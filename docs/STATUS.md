@@ -18,9 +18,9 @@ measures whether ordinary games can execute their cards correctly.
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
 | Current runtime work | Corrected Azorius versus Izzet and Landfall versus Azorius continuations are running |
 | Recent shared mechanics | Complete payments with explicit remaining resources; plot with later-turn casting; private face-down exile and continuing play conditions; stun-counter untap replacement |
-| Stored card assessments | 250 accepted, 58 refused, five basic lands; Bant has two standing blockers left |
+| Stored card assessments | 251 accepted, 57 refused, five basic lands; Bant needs Interdimensional Web Watch |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 284 invariant tests pass |
+| Validation | Type check and 285 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Four Azorius finishes supplied both colors from Deserted Beach and are withdrawn. Four corrected Dragons continuations replace the excluded stun runs; earlier source failures remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

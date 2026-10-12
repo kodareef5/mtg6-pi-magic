@@ -18,7 +18,7 @@ import { resolutionNumber } from "./resolution-counts.ts";
 import type { Step } from "./steps.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
-	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "copy" | "copied" | "choices" | "registrations" | "lookedBy">> & { card?: string };
+	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "designations" | "copy" | "copied" | "choices" | "registrations" | "lookedBy">> & { card?: string };
 /** Something that happened this turn that cards count. All of it is public. */
 export type Happened =
 	| { kind: "cast"; by: SeatId; spell: Seen; traits?: Traits }
@@ -251,6 +251,7 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 		(value !== undefined && (range.atLeast === undefined || value >= amount(scope, range.atLeast)) && (range.atMost === undefined || value <= amount(scope, range.atMost)));
 	if (!within(traits.power, selector.power) || !within(traits.toughness, selector.toughness) || !within(traits.manaValue, selector.manaValue)) return false;
 	if (selector.tapped !== undefined && selector.tapped !== object.tapped) return false;
+	if (selector.designations && !selector.designations.every(one => object.designations?.includes(one))) return false;
 	if (selector.token !== undefined && selector.token !== !!object.token) return false;
 	const combat = scope.world.combat;
 	if (selector.attacking !== undefined && selector.attacking !== !!combat?.attackers.some((one) => one.id === object.id && one.incarnation === object.incarnation)) return false;

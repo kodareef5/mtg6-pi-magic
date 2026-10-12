@@ -35,6 +35,7 @@ const heldBy = (frame: Frame): Set<string> => new Set((currentPlan(frame)?.holds
 export const sameness = (frame: Frame, object: SeenObject): string => [
 	object.card, object.zone, object.tapped, heldBy(frame).has(object.id), JSON.stringify(object.counters), object.damage, sick(frame, object), JSON.stringify(object.registrations ?? []),
 	JSON.stringify(object.choices),
+	JSON.stringify(object.designations),
 	...(frame.view.notes ?? []).filter((note) => "on" in note && note.on.id === object.id && note.on.incarnation === object.incarnation).map((note) => JSON.stringify(note)).sort(),
 ].join("|");
 

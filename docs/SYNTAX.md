@@ -87,6 +87,7 @@ watched. Each field narrows, and a list matches any of its members.
 | `words` | "creature with flying" |
 | `power`, `toughness`, `manaValue` | `manaValue: {atMost: 3}`; bounds may also be amounts, such as `{atMost: {x: true}}` |
 | `hasAdventure` | whether the visible object has Adventure characteristics, including when its normal face is active (715.2a) |
+| `designations` | every named physical designation must be present; currently `harnessed` (701.64) |
 | `subtypes.chosen` | read the source's named entry choice; a missing choice matches nothing; mana freezes it when produced |
 | `tapped`, `token`, `attacking`, `blocking` | |
 | `blocked` | true selects blocked attackers; false selects unblocked attackers, after the blocker declaration; a departed blocker does not change that status |
@@ -207,6 +208,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `transform` | `what` or `every`; keep the same permanent and turn it to its other face |
 | `door` | `what`, `action` unlock or lock, optional `face`; otherwise the player chooses an eligible door |
 | `prepare` | `what`, `prepared` true or false; preparing creates its castable copy in exile |
+| `designate` | `what`, `designation: "harnessed"`; marks the current permanent until it leaves the battlefield |
 | `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, starting `loyalty`, words, registrations; optional `controller` names each creator (default `you`); `tapped` and `attacking`, with each entering attack's defender chosen before the group enters |
 | `modify` | change characteristics `until` a duration, written as a public label |
 | `permit` | a player may play a card; `who: "owner"` grants each affected card's owner permission for that card; `from` now or next turn, `until` a duration; optional `mana` grants casting at that alternative price only; `while` rechecks a live condition on each use |

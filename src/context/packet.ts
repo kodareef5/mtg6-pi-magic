@@ -38,7 +38,7 @@ export type Seen = {
 	tapped?: true; summoningSick?: boolean; types?: string[]; subtypes?: string[]; body?: string;
 	colors?: string[]; manaValue?: number; faceDown?: true;
 	counters?: Record<string, number>; damage?: number; words?: string[]; effect?: string[];
-	activeName?: string; face?: 0 | 1; doors?: (0 | 1)[]; prepared?: true; copy?: SeenObject["copy"];
+	activeName?: string; face?: 0 | 1; doors?: (0 | 1)[]; prepared?: true; copy?: SeenObject["copy"]; designations?: SeenObject["designations"];
 	targets?: NonNullable<SeenObject["ability"]>["targets"]; source?: NonNullable<SeenObject["ability"]>["source"];
 };
 export type Packet = {
@@ -68,6 +68,7 @@ const seen = (object: SeenObject): Seen => {
 		...(traits && traits.name !== object.card ? { activeName: traits.name } : {}),
 		...(!object.faceDown ? { ...(object.face !== undefined ? { face: object.face } : {}), ...(object.doors ? { doors: [...object.doors] } : {}),
 			...(object.prepared ? { prepared: true as const } : {}), ...(object.copy ? { copy: structuredClone(object.copy) } : {}) } : {}),
+		...(object.designations ? { designations: [...object.designations] } : {}),
 		...(object.zone === "stack" ? { position: object.position } : {}),
 		...(object.tapped ? { tapped: true as const } : {}), ...(traits?.power !== undefined ? { body: `${traits.power}/${traits.toughness}` } : {}),
 		...(Object.keys(object.counters).length ? { counters: { ...object.counters } } : {}), ...(object.damage ? { damage: object.damage } : {}),

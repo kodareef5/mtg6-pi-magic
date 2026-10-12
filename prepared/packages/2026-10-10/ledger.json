@@ -385,15 +385,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"The Mind Stone": {
-		"reason": "The Mind Stone is not ready: {5}{W}, {T}: Harness The Mind Stone. (Once harnessed, its ∞ ability is active.) ... ∞ — At the beginning of your end step, exile up to one other target nonland permanent you control, then return that card to the battlefield under its owner's control. — Harness grants the harnessed designation (701.64). The supplied syntax cannot grant or test that designation, or gate the ∞ end-step trigger on it. Registering an unconditional trigger or substituting a counter or keyword would not preserve this mechanic.",
-		"decks": [
-			"Bant Airbending Combo",
-			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"The Ooze": {
 		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess The Ooze: Deferred use Pay {1}, tap and sacrifice a Mutagen token to put a +1/+1 counter on target creature; activate only as a sorcery. must name The Ooze, its source zones and controller, without game object ids.",
 		"decks": [

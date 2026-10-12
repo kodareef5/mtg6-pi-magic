@@ -36,7 +36,8 @@ assessments.
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Bant needs mana restricted to exile casts and the harnessed designation.
+   stopped games. Bant needs Web Watch's mana restricted to exile casts,
+   including mixed colors and payments that leave mana floating.
    Azorius Momo needs combined tap payments, draw replacement and spell copies.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.

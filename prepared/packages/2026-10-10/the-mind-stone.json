@@ -1,0 +1,107 @@
+{
+	"card": "The Mind Stone",
+	"generated": "2026-10-10",
+	"source": "8bfbf93345bde2c6b456f0c4486d4b49840eaf7bf0766e19f281e86c8f080d61",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Mind Stone",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Indestructible",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"indestructible"
+					]
+				}
+			},
+			{
+				"kind": "mana",
+				"basis": "{T}: Add {W}.",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"kind": "continuous",
+				"basis": "∞ — At the beginning of your end step, exile up to one other target nonland permanent you control, then return that card to the battlefield under its owner's control.",
+				"affects": {
+					"is": "this",
+					"designations": [
+						"harnessed"
+					]
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "∞ — At the beginning of your end step, exile up to one other target nonland permanent you control, then return that card to the battlefield under its owner's control.",
+							"event": {
+								"on": "step",
+								"step": "end",
+								"whose": "you"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"controller": "you",
+											"other": true,
+											"not": {
+												"types": [
+													"land"
+												]
+											}
+										},
+										"count": 1,
+										"upTo": true
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "exile",
+										"reason": "exile",
+										"as": "exiled"
+									},
+									{
+										"do": "move",
+										"what": "bound:exiled",
+										"to": "battlefield",
+										"controller": "owner:bound:exiled",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Harness The Mind Stone",
+				"basis": "{5}{W}, {T}: Harness The Mind Stone. (Once harnessed, its ∞ ability is active.)",
+				"source": {
+					"card": "The Mind Stone",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

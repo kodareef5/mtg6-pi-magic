@@ -263,6 +263,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				delete moving.face; delete moving.doors;
 				delete moving.transformed;
 				delete moving.prepared;
+				delete moving.designations;
 				delete moving.choices;
 				delete moving.copied;
 				if (change.to === "battlefield" && change.copied) moving.copied = structuredClone(change.copied);
@@ -309,6 +310,12 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (change.prepared) prepare(table, thing(table, change.what));
 				else delete thing(table, change.what).prepared;
 				break;
+			case "designate": {
+				const object = thing(table, change.what);
+				if (object.zone === "battlefield" && !object.designations?.includes(change.designation))
+					object.designations = [...(object.designations ?? []), change.designation];
+				break;
+			}
 			case "door": {
 				const object = thing(table, change.what);
 				if (object.zone !== "battlefield" || !room(object.card ? table.printed[object.card] : undefined)) break;

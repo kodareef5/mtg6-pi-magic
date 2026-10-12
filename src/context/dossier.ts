@@ -90,6 +90,7 @@ function state(frame: Frame, object: SeenObject, name: (seat: SeatId) => string)
 	return [object.tapped ? "tapped" : "untapped", object.faceDown ? "face down" : "",
 		!object.faceDown && object.traits?.name !== undefined && object.traits.name !== object.card ? `active name: ${object.traits.name || "none"}` : "",
 		object.prepared ? "prepared" : "", object.copy ? "Prepare spell copy" : "",
+		...(object.designations ?? []),
 		object.doors ? `unlocked doors: ${object.doors.join(", ") || "none"}` : "",
 		object.traits?.types.includes("creature") ? sickness(frame, object, name) : "",
 		object.damage ? `${object.damage} damage marked` : "", attached ? `attached to ${named(attached)}` : "",

@@ -103,6 +103,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			!permanent.faceDown && permanent.face !== undefined ? `face ${permanent.face}` : null,
 			!permanent.faceDown && permanent.doors ? `unlocked doors: ${permanent.doors.join(", ") || "none"}` : null,
 			!permanent.faceDown && permanent.prepared ? "prepared" : null,
+			...(permanent.designations ?? []),
 			...(!permanent.faceDown ? Object.entries(permanent.choices ?? {}).map(([key, value]) => `${key}: ${value}`) : []),
 			permanent.tapped ? "tapped" : null,
 			permanent.damage ? `${permanent.damage} damage marked` : null,
@@ -378,6 +379,10 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				break;
 			case "prepare":
 				parts.push(`${change.prepared ? "prepared" : "unprepared"} ${publicName(receipt.before[change.what])}`);
+				break;
+			case "designate":
+				if (receipt.after[change.what]?.designations?.includes(change.designation) && !receipt.before[change.what]?.designations?.includes(change.designation))
+					parts.push(`designated ${publicName(receipt.before[change.what])} as ${change.designation}`);
 				break;
 			case "door":
 				parts.push(`${change.unlocked ? "unlocked" : "locked"} door ${change.face} of ${publicName(receipt.before[change.what])}`);

@@ -21,7 +21,7 @@ import type { Printed } from "./printed.ts";
 import type { Tap } from "./funding.ts";
 import type { Said } from "./say.ts";
 import type { Step } from "./steps.ts";
-import type { Change, Reason, Zone } from "./syntax.ts";
+import type { Change, Designation, Reason, Zone } from "./syntax.ts";
 import type { Decision, Outcome, SeatId, Viewer } from "./types.ts";
 import type { Workspace, WorkEntry } from "./work.ts";
 import type { Ruled } from "./judge.ts";
@@ -58,6 +58,8 @@ export type Thing = {
 	transformed?: number;
 	doors?: (0 | 1)[];
 	prepared?: true;
+	/** Physical markers, independent of the permanent's abilities and copiable characteristics. */
+	designations?: Designation[];
 	/** A castable Prepare copy names its printed face and the permanent that sustains it. */
 	copy?: { face: 0 | 1; source: ObjectRef };
 	/** An entry copy effect freezes copiable terms, not the current layer result. */

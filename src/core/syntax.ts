@@ -29,6 +29,9 @@ export type Zone =
 	/** A sideboard, a dungeon not yet ventured into, anything wished for. */
 	| "outside";
 
+/** Physical designations persist for this battlefield incarnation, not as abilities or copiable values. */
+export type Designation = "harnessed";
+
 /**
  * Cards watch the reason, not the motion. Destroying, discarding, milling and
  * sacrificing are one motion with four reasons, and leaving the reason off is
@@ -94,6 +97,7 @@ export type Change =
 	| { do: "transform"; what: string; since?: number }
 	| { do: "door"; what: string; face: 0 | 1; unlocked: boolean }
 	| { do: "prepare"; what: string; prepared: boolean }
+	| { do: "designate"; what: string; designation: Designation }
 	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector; until?: Mana["until"]; spellWords?: string[] }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
 	| { do: "damage"; source: string | ObjectRef; target: ObjectRef | { player: SeatId }; amount: number; combat?: true; prevented?: number; replacements?: string[] }

@@ -161,6 +161,11 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			return one(`Transform ${turning.map(name).join(", ") || "nothing"}`, turning.map((object): Change => ({ do: "transform", what: object.id,
 				...(ability?.source.id === object.id && ability.source.incarnation === object.incarnation && ability.transformAt !== undefined ? { since: ability.transformAt } : {}) })));
 		}
+		case "designate": {
+			const marked = live(table, objects(scope, instruction.what)).filter(object => object.zone === "battlefield" && !object.designations?.includes(instruction.designation));
+			return one(`Designate ${marked.map(name).join(", ") || "nothing"} as ${instruction.designation}`,
+				marked.map((object): Change => ({ do: "designate", what: object.id, designation: instruction.designation })));
+		}
 		case "prepare": {
 			const objectsToPrepare = live(table, objects(scope, instruction.what));
 			return one(`${instruction.prepared ? "Prepare" : "Unprepare"} ${objectsToPrepare.map(name).join(", ") || "nothing"}`,

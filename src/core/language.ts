@@ -32,6 +32,7 @@ const ManaCost = Type.String({ pattern: "^(\\{([0-9]+|[WUBRGCX])\\})+$" });
 const Duration = one("end-of-turn", "end-of-combat", "while-source", "indefinite");
 const DamageMode = Type.Union([Type.Literal("prevent"), Type.Literal("unpreventable")]);
 const ManaDuration = one("end-of-combat", "end-of-turn");
+const Designation = Type.Literal("harnessed");
 const Reason = one("resolve", "destroy", "sacrifice", "discard", "mill", "exile", "bounce", "counter");
 const Step = Type.Enum(Object.keys(STEPS) as (keyof typeof STEPS)[]);
 
@@ -76,6 +77,8 @@ const SelectorFields = {
 	/** Has the alternative Adventure characteristics, even when they are inactive (715.2a). */
 	hasAdventure: Type.Optional(Type.Boolean()),
 	tapped: Type.Optional(Type.Boolean()),
+	/** Each named physical designation must be present. */
+	designations: Type.Optional(Type.Array(Designation, { minItems: 1, uniqueItems: true })),
 	token: Type.Optional(Type.Boolean()),
 	attacking: Type.Optional(Type.Boolean()),
 	blocking: Type.Optional(Type.Boolean()),
@@ -295,6 +298,7 @@ export const Defs = {
 		step({ do: Type.Literal("transform"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("door"), what: ObjectRef, action: one("unlock", "lock"), face: Type.Optional(Face) }),
 		step({ do: Type.Literal("prepare"), what: ObjectRef, prepared: Type.Boolean() }),
+		step({ do: Type.Literal("designate"), what: ObjectRef, designation: Designation }),
 		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Optional(Type.Ref("TokenSpec")), copy: Type.Optional(ObjectRef),
 			except: Type.Optional(object({ power: Type.Integer(), toughness: Type.Integer() })), controller: Type.Optional(PlayerRef), tapped: Type.Optional(Type.Literal(true)), attacking: Type.Optional(Type.Literal(true)) },
 			{ oneOf: [{ required: ["spec"], not: { anyOf: [{ required: ["copy"] }, { required: ["except"] }] } }, { required: ["copy"], not: { required: ["spec"] } }] }),
