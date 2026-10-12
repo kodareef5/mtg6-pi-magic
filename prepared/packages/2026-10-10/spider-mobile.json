@@ -1,0 +1,144 @@
+{
+	"card": "Spider-Mobile",
+	"generated": "2026-10-10",
+	"source": "e87204da57590362c76493970a71932b20c2848386995453ab38b90ed87984a5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider-Mobile",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this Vehicle attacks or blocks, it gets +1/+1 until end of turn for each Spider you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"count": {
+										"subtypes": [
+											"Spider"
+										],
+										"controller": "you"
+									}
+								},
+								"toughness": {
+									"count": {
+										"subtypes": [
+											"Spider"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this Vehicle attacks or blocks, it gets +1/+1 until end of turn for each Spider you control.",
+				"kind": "watch",
+				"event": {
+					"on": "blocks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"count": {
+										"subtypes": [
+											"Spider"
+										],
+										"controller": "you"
+									}
+								},
+								"toughness": {
+									"count": {
+										"subtypes": [
+											"Spider"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spider-Mobile",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Spider-Mobile",
+				"basis": "Crew 2",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

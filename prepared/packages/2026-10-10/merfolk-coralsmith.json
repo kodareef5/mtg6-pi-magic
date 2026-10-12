@@ -1,0 +1,62 @@
+{
+	"card": "Merfolk Coralsmith",
+	"generated": "2026-10-10",
+	"source": "08516b61536ca2e88800608a9b75777e18782d5141fb5004f60afba6c3807f42",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Merfolk Coralsmith",
+		"registers": [
+			{
+				"basis": "When this creature dies, scry 2.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Merfolk Coralsmith",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Merfolk Coralsmith +1/-1 until end of turn.",
+				"basis": "{1}: This creature gets +1/-1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": -1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

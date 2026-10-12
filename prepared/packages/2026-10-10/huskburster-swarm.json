@@ -1,0 +1,63 @@
+{
+	"card": "Huskburster Swarm",
+	"generated": "2026-10-10",
+	"source": "f8edca36e1f7975c7cf024f76f16a35601c2689e351ec1328d01a256d8f0069e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Huskburster Swarm",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Menace, deathtouch",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"menace",
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Huskburster Swarm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Huskburster Swarm with its creature-card cost reduction",
+				"basis": "This spell costs {1} less to cast for each creature card you own in exile and in your graveyard.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"exile",
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						}
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

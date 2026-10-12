@@ -1,0 +1,68 @@
+{
+	"card": "Bear Trap",
+	"generated": "2026-10-10",
+	"source": "4fb7c4cf3a2e7d8fb4f0eeca607e649e4715c1d50dd1df3199ccbb64f75866ad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bear Trap",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bear Trap",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Bear Trap to deal 3 damage to target creature",
+				"basis": "{3}, {T}, Sacrifice this artifact: It deals 3 damage to target creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

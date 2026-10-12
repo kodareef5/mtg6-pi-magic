@@ -1,0 +1,49 @@
+{
+	"card": "Molecular Modifier",
+	"generated": "2026-10-10",
+	"source": "9bf94bd87c610898149cf9fa592268ace2760300743d58b2d9d007a08aedc805",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Molecular Modifier",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, target creature you control gets +1/+0 and gains first strike until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"words": [
+									"first strike"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

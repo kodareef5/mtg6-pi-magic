@@ -1,0 +1,52 @@
+{
+	"card": "Rodeo Pyromancers",
+	"generated": "2026-10-10",
+	"source": "e5e51f84cad82a440a13e07ff447d6645e022483ec061019ae553dbe81284cbf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rodeo Pyromancers",
+		"registers": [
+			{
+				"basis": "Whenever you cast your first spell each turn, add {R}{R}.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"ordinal": 1,
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"land",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R",
+								"R"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

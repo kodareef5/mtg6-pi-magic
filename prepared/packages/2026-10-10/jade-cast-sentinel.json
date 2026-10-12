@@ -1,0 +1,67 @@
+{
+	"card": "Jade-Cast Sentinel",
+	"generated": "2026-10-10",
+	"source": "d30646225114b5956bc50c9f481a83b1695808d1684c8e91964037677be73f5b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jade-Cast Sentinel",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Jade-Cast Sentinel",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put target card from a graveyard on the bottom of its owner's library.",
+				"basis": "{2}, {T}: Put target card from a graveyard on the bottom of its owner's library.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"token": false
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

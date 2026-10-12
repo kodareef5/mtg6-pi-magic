@@ -1,0 +1,58 @@
+{
+	"card": "Los Diablos Missile Base",
+	"generated": "2026-10-10",
+	"source": "34a3ed9862a1404ebbfa61d4f61ceaa254dc82c068f0ecf1730e212bd25f7de5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Los Diablos Missile Base",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "When this land enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {R} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {R} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

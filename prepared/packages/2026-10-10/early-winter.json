@@ -1,0 +1,84 @@
+{
+	"card": "Early Winter",
+	"generated": "2026-10-10",
+	"source": "d5a3b0c9049642e3a69e4aec1af5e1e14457662f7cea2e44ba8f1848f45795d6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Early Winter",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Early Winter",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Early Winter: exile target creature",
+				"basis": "Choose one —\n• Exile target creature.\n• Target opponent exiles an enchantment they control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Early Winter",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Early Winter: target opponent exiles an enchantment they control",
+				"basis": "Choose one —\n• Exile target creature.\n• Target opponent exiles an enchantment they control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"types": [
+								"enchantment"
+							],
+							"controller": "target:0"
+						},
+						"count": 1,
+						"as": "enchantment"
+					},
+					{
+						"do": "move",
+						"what": "bound:enchantment",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

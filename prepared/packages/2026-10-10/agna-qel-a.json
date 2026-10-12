@@ -1,0 +1,87 @@
+{
+	"card": "Agna Qel'a",
+	"generated": "2026-10-10",
+	"source": "79ebbdebd6ff47aab474f3f3e35cf4cfaff191f5eae9b753ae7c5cf5a30497f4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Agna Qel'a",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a basic land.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"supertypes": [
+									"basic"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Agna Qel'a",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card, then discard a card.",
+				"basis": "{2}{U}, {T}: Draw a card, then discard a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{U}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

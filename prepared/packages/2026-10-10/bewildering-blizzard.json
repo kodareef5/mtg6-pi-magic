@@ -1,0 +1,49 @@
+{
+	"card": "Bewildering Blizzard",
+	"generated": "2026-10-10",
+	"source": "215fa13afe74792788e8f0e4b682a35704e88f52c473f9d397cca7d9a4b1fb16",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bewildering Blizzard",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bewildering Blizzard",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bewildering Blizzard",
+				"basis": "Draw three cards. Creatures your opponents control get -3/-0 until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": -3,
+							"toughness": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

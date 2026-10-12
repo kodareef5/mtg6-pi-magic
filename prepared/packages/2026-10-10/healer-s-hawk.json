@@ -1,0 +1,48 @@
+{
+	"card": "Healer's Hawk",
+	"generated": "2026-10-10",
+	"source": "2960ae85d2d7ce88efb83b80c0c5c6fe443b1ccf3e7f33da71cda3f9ea8a9c3b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Healer's Hawk",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Lifelink (Damage dealt by this creature also causes you to gain that much life.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

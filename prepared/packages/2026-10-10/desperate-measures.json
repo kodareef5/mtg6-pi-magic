@@ -1,0 +1,69 @@
+{
+	"card": "Desperate Measures",
+	"generated": "2026-10-10",
+	"source": "da3654f4a725b8e9ce9eb1c9c02f4a08eaa73d9f36361f16076fe8c77d61ba0d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Desperate Measures",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Desperate Measures",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Desperate Measures",
+				"basis": "Target creature gets +1/-1 until end of turn. When it dies under your control this turn, draw two cards.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": -1
+						}
+					},
+					{
+						"do": "delay",
+						"event": {
+							"on": "dies",
+							"of": {
+								"is": "target:0",
+								"controller": "you"
+							}
+						},
+						"until": "end-of-turn",
+						"effect": {
+							"instructions": [
+								{
+									"do": "draw",
+									"who": "you",
+									"count": 2
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

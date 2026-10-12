@@ -1,0 +1,53 @@
+{
+	"card": "Dreamroot Cascade",
+	"generated": "2026-10-10",
+	"source": "75fb1469310bba35eb8ad1ce22162475d27013cca310a067c514e8f00b2f4a42",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dreamroot Cascade",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control two or more other lands.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"controller": "you",
+								"other": true
+							}
+						},
+						"atLeast": 2
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {G} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add {G} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

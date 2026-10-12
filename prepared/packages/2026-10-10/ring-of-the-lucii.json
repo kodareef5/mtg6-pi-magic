@@ -1,0 +1,64 @@
+{
+	"card": "Ring of the Lucii",
+	"generated": "2026-10-10",
+	"source": "f15350ed3d8079eb1980d7cc206476b6dfa8ada3cccf5c59470ccf0317d53de3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ring of the Lucii",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}{C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C",
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ring of the Lucii",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap target nonland permanent.",
+				"basis": "{2}, {T}, Pay 1 life: Tap target nonland permanent.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"life": 1
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

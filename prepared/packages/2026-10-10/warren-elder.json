@@ -1,0 +1,46 @@
+{
+	"card": "Warren Elder",
+	"generated": "2026-10-10",
+	"source": "100a4ca0f6e48e4eda0b38ecaa9896af0b234bbdcdaf68857c24e0539ad4a34e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Warren Elder",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Warren Elder",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give creatures you control +1/+1 until end of turn",
+				"basis": "{3}{W}: Creatures you control get +1/+1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

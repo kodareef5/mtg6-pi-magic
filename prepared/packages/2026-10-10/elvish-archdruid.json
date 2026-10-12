@@ -1,0 +1,51 @@
+{
+	"card": "Elvish Archdruid",
+	"generated": "2026-10-10",
+	"source": "7b18fe092fa15c2ace73ddd502497ab610f6570e29182569c45a8533cb66aa51",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elvish Archdruid",
+		"registers": [
+			{
+				"basis": "Other Elf creatures you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"subtypes": [
+						"Elf"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"basis": "{T}: Add {G} for each Elf you control.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"times": {
+					"count": {
+						"subtypes": [
+							"Elf"
+						],
+						"controller": "you"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

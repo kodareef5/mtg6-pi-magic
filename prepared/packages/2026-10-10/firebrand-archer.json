@@ -1,0 +1,42 @@
+{
+	"card": "Firebrand Archer",
+	"generated": "2026-10-10",
+	"source": "2cbefcda8cae1067a2b528bc2e620b10a71ca3abbbb1dbb9f9a9cc6e95b12ccb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Firebrand Archer",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a noncreature spell, this creature deals 1 damage to each opponent.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

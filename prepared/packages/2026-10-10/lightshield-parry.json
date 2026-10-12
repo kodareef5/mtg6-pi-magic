@@ -1,0 +1,71 @@
+{
+	"card": "Lightshield Parry",
+	"generated": "2026-10-10",
+	"source": "80e60eb3814ddb3bad02c526ec4c5a3f400467ff9d075f694222af371e2cea04",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lightshield Parry",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lightshield Parry",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Lightshield Parry",
+				"basis": "Target creature gets +2/+2 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Lightshield Parry",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Lightshield Parry",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

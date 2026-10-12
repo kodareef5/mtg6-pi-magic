@@ -1,0 +1,71 @@
+{
+	"card": "Mind into Matter",
+	"generated": "2026-10-10",
+	"source": "4a065d62e6a242c250c7ba8fae811534926792c1cbd9eb1b4cc81b63c9308ca1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mind into Matter",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mind into Matter",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mind into Matter",
+				"basis": "Draw X cards. Then you may put a permanent card with mana value X or less from your hand onto the battlefield tapped.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"x": true
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							],
+							"manaValue": {
+								"atMost": {
+									"x": true
+								}
+							}
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "permanent"
+					},
+					{
+						"do": "move",
+						"what": "bound:permanent",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

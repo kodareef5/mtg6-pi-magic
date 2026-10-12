@@ -1,0 +1,77 @@
+{
+	"card": "Magnificent End",
+	"generated": "2026-10-10",
+	"source": "aaaac385a826c4aa1d4b8ae054b1714cb09e0d7507cf8d357845e17f5001d7f4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Magnificent End",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Magnificent End",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Magnificent End, reducing its generic cost by three if its target is tapped",
+				"basis": "This spell costs {3} less to cast if it targets a tapped creature. ... Magnificent End deals 5 damage to target creature.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"sum": [
+							{
+								"count": {
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							},
+							{
+								"count": {
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							},
+							{
+								"count": {
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							}
+						]
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 5
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

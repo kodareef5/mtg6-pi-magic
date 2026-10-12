@@ -1,0 +1,67 @@
+{
+	"card": "Frog Butler",
+	"generated": "2026-10-10",
+	"source": "586c7f5ef836120677dedc6a81e0ab42892c0e3dbb6ea510296621579d7e11c4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Frog Butler",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Frog Butler",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Gain reach until end of turn",
+				"basis": "{2}: This creature gains reach until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"reach"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

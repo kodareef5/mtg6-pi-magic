@@ -1,0 +1,68 @@
+{
+	"card": "Knightfisher",
+	"generated": "2026-10-10",
+	"source": "f71fdd65866d7f6fa27c19b5599e62a3289480981ad66e8df27218c47be01457",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Knightfisher",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another nontoken Bird you control enters, create a 1/1 blue Fish creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"other": true,
+						"token": false,
+						"subtypes": [
+							"Bird"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Fish",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Fish"
+								],
+								"colors": [
+									"U"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

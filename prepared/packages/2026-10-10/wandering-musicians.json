@@ -1,0 +1,43 @@
+{
+	"card": "Wandering Musicians",
+	"generated": "2026-10-10",
+	"source": "eef435fc0f781b67a0d8a1d86db9b91410fbbb2a82561563f0525c744b64c6cb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wandering Musicians",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, creatures you control get +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

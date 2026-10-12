@@ -1,0 +1,55 @@
+{
+	"card": "Arcane Omens",
+	"generated": "2026-10-10",
+	"source": "0177326ea86792a211c79967d368a18537df3f8b782f096085296b8fa7f6c699",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Arcane Omens",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Arcane Omens",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Arcane Omens",
+				"basis": "Converge — Target player discards X cards, where X is the number of colors of mana spent to cast this spell.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "target:0"
+						},
+						"count": {
+							"colorsSpent": "this"
+						},
+						"as": "discarded"
+					},
+					{
+						"do": "move",
+						"what": "bound:discarded",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

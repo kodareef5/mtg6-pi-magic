@@ -1,0 +1,50 @@
+{
+	"card": "Pactdoll Terror",
+	"generated": "2026-10-10",
+	"source": "13ea8f19e7762a8eae1b055b3a8d1cc6968aca981c3b2b40a1269eb88b3f7052",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pactdoll Terror",
+		"registers": [
+			{
+				"basis": "Whenever this creature or another artifact you control enters, each opponent loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"types": [
+									"artifact"
+								],
+								"controller": "you",
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

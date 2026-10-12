@@ -1,0 +1,37 @@
+{
+	"card": "Impact Tremors",
+	"generated": "2026-10-10",
+	"source": "b5489d886c85d889dbf017256016098b3fbab41dd5751e53c30f689178103b20",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Impact Tremors",
+		"registers": [
+			{
+				"basis": "Whenever a creature you control enters, this enchantment deals 1 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,64 @@
+{
+	"card": "Sun-Blessed Peak",
+	"generated": "2026-10-10",
+	"source": "6e25b637ead880756b84d482286e82ce325342e16c0bab901fa10165d4ea4c51",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sun-Blessed Peak",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {R} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {R} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sun-Blessed Peak",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Sun-Blessed Peak to draw a card",
+				"basis": "{4}, {T}, Sacrifice this land: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,76 @@
+{
+	"card": "Steel Wrecking Ball",
+	"generated": "2026-10-10",
+	"source": "fb386da17ed27f7a507f9a7a80f76a2e0a146c42cb41f7dbecfd6bd20002de32",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Steel Wrecking Ball",
+		"registers": [
+			{
+				"basis": "When this artifact enters, it deals 5 damage to target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 5,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Steel Wrecking Ball",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard Steel Wrecking Ball to destroy target artifact",
+				"basis": "{1}{R}, Discard this card: Destroy target artifact.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}",
+					"discard": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

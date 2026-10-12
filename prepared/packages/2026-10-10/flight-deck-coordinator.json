@@ -1,0 +1,45 @@
+{
+	"card": "Flight-Deck Coordinator",
+	"generated": "2026-10-10",
+	"source": "de6eb86a9e702a6617492c86d4ebabe6e899f16ede1fec8728d9212ee5b0e008",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Flight-Deck Coordinator",
+		"registers": [
+			{
+				"basis": "At the beginning of your end step, if you control two or more tapped creatures, you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": true
+						}
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,62 @@
+{
+	"card": "Sterling Supplier",
+	"generated": "2026-10-10",
+	"source": "35933591fbd7557efa674ac1158ed1c9ed9d5078dc0a3fa0beb7be2efe883c26",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sterling Supplier",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, put a +1/+1 counter on another target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

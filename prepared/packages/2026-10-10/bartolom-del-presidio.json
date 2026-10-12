@@ -1,0 +1,48 @@
+{
+	"card": "Bartolomé del Presidio",
+	"generated": "2026-10-10",
+	"source": "b00c53549e952373ee0c77de064fa11f411aad52d45bd3134888788d8a9b6d10",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bartolomé del Presidio",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bartolomé del Presidio",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature or artifact to put a +1/+1 counter on Bartolomé del Presidio.",
+				"basis": "Sacrifice another creature or artifact: Put a +1/+1 counter on Bartolomé del Presidio.",
+				"timing": "stack",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"controller": "you",
+							"types": [
+								"creature",
+								"artifact"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,56 @@
+{
+	"card": "Linden, the Steadfast Queen",
+	"generated": "2026-10-10",
+	"source": "73bbfb8f07e60e18738ae01784c2490b2330d1dd634a95f8685a344a71816428",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Linden, the Steadfast Queen",
+		"registers": [
+			{
+				"basis": "Vigilance (Attacking doesn't cause this creature to tap.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Whenever a white creature you control attacks, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"colors": [
+							"W"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

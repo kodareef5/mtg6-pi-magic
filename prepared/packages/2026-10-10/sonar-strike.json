@@ -1,0 +1,71 @@
+{
+	"card": "Sonar Strike",
+	"generated": "2026-10-10",
+	"source": "8e3e734073605c5a94226a5886259efb978576753cf2fa393b96e44920f8e474",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sonar Strike",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sonar Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Sonar Strike",
+				"basis": "Sonar Strike deals 4 damage to target attacking, blocking, or tapped creature. You gain 3 life if you control a Bat.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"any": [
+								{
+									"attacking": true
+								},
+								{
+									"blocking": true
+								},
+								{
+									"tapped": true
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3,
+						"if": {
+							"amount": {
+								"count": {
+									"controller": "you",
+									"subtypes": [
+										"Bat"
+									]
+								}
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

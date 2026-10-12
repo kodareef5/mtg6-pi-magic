@@ -1,0 +1,97 @@
+{
+	"card": "Mental Modulation",
+	"generated": "2026-10-10",
+	"source": "f23bcee2c854db147c110b7ad92fcd1d1414e225342c2fa1210fa99176b85e30",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mental Modulation",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mental Modulation",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mental Modulation during your turn",
+				"basis": "This spell costs {1} less to cast during your turn. ... Tap target artifact or creature. ... Draw a card.",
+				"timing": "spell",
+				"if": {
+					"turn": "self"
+				},
+				"cost": {
+					"reduce": 1
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Mental Modulation",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mental Modulation outside your turn",
+				"basis": "This spell costs {1} less to cast during your turn. ... Tap target artifact or creature. ... Draw a card.",
+				"timing": "spell",
+				"if": {
+					"not": {
+						"turn": "self"
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

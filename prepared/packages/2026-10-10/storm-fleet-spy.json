@@ -1,0 +1,41 @@
+{
+	"card": "Storm Fleet Spy",
+	"generated": "2026-10-10",
+	"source": "06db08a000b0ae4ae517f090abece3de6c05a52ec109640f2656ae5953db1f3b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Storm Fleet Spy",
+		"registers": [
+			{
+				"basis": "Raid — When this creature enters, if you attacked this turn, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

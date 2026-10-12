@@ -1,0 +1,49 @@
+{
+	"card": "Undergrowth Recon",
+	"generated": "2026-10-10",
+	"source": "52e3a2c1b85aa639043e08917377d4feef8038434d7f73d1c60f4aaabae1dbbf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Undergrowth Recon",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, return target land card from your graveyard to the battlefield tapped.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"land"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"tapped": true,
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

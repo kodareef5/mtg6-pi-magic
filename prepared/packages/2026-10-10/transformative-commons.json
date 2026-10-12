@@ -1,0 +1,52 @@
+{
+	"card": "Transformative Commons",
+	"generated": "2026-10-10",
+	"source": "4fb4d6f81ef4d5fcece862d0391df914c2f269d7eccaa6e365e697c39c4df2db",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Transformative Commons",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a planeswalker.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"planeswalker"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {G} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add {G} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

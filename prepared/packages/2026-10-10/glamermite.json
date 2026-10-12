@@ -1,0 +1,107 @@
+{
+	"card": "Glamermite",
+	"generated": "2026-10-10",
+	"source": "5d9e285658a4bd51e58aa2ed35f7349066ec3e4d99e2b787ca872c554679d6de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Glamermite",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, choose one —\n• Tap target creature.\n• Untap target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "tap",
+									"what": "target:0"
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "untap",
+									"what": "target:0"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

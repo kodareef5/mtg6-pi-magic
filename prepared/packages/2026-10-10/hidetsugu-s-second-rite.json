@@ -1,0 +1,47 @@
+{
+	"card": "Hidetsugu's Second Rite",
+	"generated": "2026-10-10",
+	"source": "6180309d23ccdc9ab6d2c5360f19937dec0f7c40193c751b6d663fb9e0f3f8c7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hidetsugu's Second Rite",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hidetsugu's Second Rite",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Deal 10 damage to target player if they have exactly 10 life.",
+				"basis": "If target player has exactly 10 life, Hidetsugu's Second Rite deals 10 damage to that player.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 10,
+						"if": {
+							"amount": {
+								"life": "target:0"
+							},
+							"atLeast": 10,
+							"atMost": 10
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

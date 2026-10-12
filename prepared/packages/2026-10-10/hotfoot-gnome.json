@@ -1,0 +1,69 @@
+{
+	"card": "Hotfoot Gnome",
+	"generated": "2026-10-10",
+	"source": "55dae52cb2d4c17565e488c5fc8c02276e3199fe19a8f2324214a160b77ffd91",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hotfoot Gnome",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hotfoot Gnome",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give another target creature haste until end of turn",
+				"basis": "{T}: Another target creature gains haste until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

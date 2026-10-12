@@ -1,0 +1,62 @@
+{
+	"card": "Mischievous Sneakling",
+	"generated": "2026-10-10",
+	"source": "cdccc73d6c32894f42d3a2acfcc885e045fc726029efb13b7499706b1e77fc3c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mischievous Sneakling",
+		"registers": [
+			{
+				"basis": "Changeling (This card is every creature type.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"subtypes": {
+						"allCreatureTypes": true
+					},
+					"words": [
+						"changeling"
+					]
+				}
+			},
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

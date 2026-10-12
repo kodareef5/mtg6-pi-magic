@@ -1,0 +1,93 @@
+{
+	"card": "Benthic Criminologists",
+	"generated": "2026-10-10",
+	"source": "54c6c6601d3d244841df1645ea3d7456894e5a86c98850402ea581acecb234bb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Benthic Criminologists",
+		"registers": [
+			{
+				"basis": "Whenever this creature enters or attacks, you may sacrifice an artifact. If you do, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"types": [
+											"artifact"
+										],
+										"controller": "you"
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed-artifact"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "sacrificed-artifact"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, you may sacrifice an artifact. If you do, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"types": [
+											"artifact"
+										],
+										"controller": "you"
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed-artifact"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "sacrificed-artifact"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,53 @@
+{
+	"card": "Searslicer Goblin",
+	"generated": "2026-10-10",
+	"source": "5340cd5b6d42e0e6b7924a488b84f022754a015e01700cf9f54bac9a573b5337",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Searslicer Goblin",
+		"registers": [
+			{
+				"basis": "Raid — At the beginning of your end step, if you attacked this turn, create a 1/1 red Goblin creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Goblin",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Goblin"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

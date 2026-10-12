@@ -1,0 +1,51 @@
+{
+	"card": "Hero in Training",
+	"generated": "2026-10-10",
+	"source": "7b16b710691953f38a6305595def56631b92120da307cfbf45fb70b1c7898ff3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hero in Training",
+		"registers": [
+			{
+				"basis": "When this creature enters, draw a card. If you control another Hero, you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"subtypes": [
+											"Hero"
+										],
+										"other": true
+									}
+								},
+								"atLeast": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

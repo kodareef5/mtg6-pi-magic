@@ -1,0 +1,51 @@
+{
+	"card": "Matoya, Archon Elder",
+	"generated": "2026-10-10",
+	"source": "6c6c00afc0baba85d26a46d7d803d376ede193236ca188e029a6531a35a03bd8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Matoya, Archon Elder",
+		"registers": [
+			{
+				"basis": "Whenever you scry or surveil, draw a card. (Draw after you scry or surveil.)",
+				"kind": "watch",
+				"event": {
+					"on": "keyword",
+					"keyword": "scry",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you scry or surveil, draw a card. (Draw after you scry or surveil.)",
+				"kind": "watch",
+				"event": {
+					"on": "keyword",
+					"keyword": "surveil",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

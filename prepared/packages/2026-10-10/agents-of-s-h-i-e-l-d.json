@@ -1,0 +1,51 @@
+{
+	"card": "Agents of S.H.I.E.L.D.",
+	"generated": "2026-10-10",
+	"source": "b5dcda6325abccc10def1c7a274ffefb8ef44fa972f9dd138bc2748f88ba89ab",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Agents of S.H.I.E.L.D.",
+		"registers": [
+			{
+				"basis": "Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"is": "event:objects"
+						}
+					},
+					"atLeast": 1,
+					"atMost": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "event:objects",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

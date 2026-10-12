@@ -1,0 +1,46 @@
+{
+	"card": "Timid Shieldbearer",
+	"generated": "2026-10-10",
+	"source": "76cd283fa7d7aa52c2d9e66d0cdd95ec8d9ad6e5d7c55c8f0136d175823bec09",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Timid Shieldbearer",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Timid Shieldbearer",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give creatures you control +1/+1 until end of turn",
+				"basis": "{4}{W}: Creatures you control get +1/+1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,107 @@
+{
+	"card": "Denzilore Fatehold",
+	"generated": "2026-10-10",
+	"source": "f5a785daadd7de14c3f3a6c5b9c2ab1255ecaf27ea0c939c350d0bf29c19f273",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Denzilore Fatehold",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you scry or surveil, put a +1/+1 counter on each creature you control.",
+				"event": {
+					"on": "keyword",
+					"keyword": "scry",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you scry or surveil, put a +1/+1 counter on each creature you control.",
+				"event": {
+					"on": "keyword",
+					"keyword": "surveil",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

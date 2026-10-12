@@ -1,0 +1,92 @@
+{
+	"card": "Sudden Setback",
+	"generated": "2026-10-10",
+	"source": "be8720342d1622bc476c1b8da594720314b038c63c188a7bbb3ffffe98d45591",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sudden Setback",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sudden Setback",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Sudden Setback; the target's owner chooses top or bottom on resolution",
+				"basis": "The owner of target spell or nonland permanent puts it on their choice of the top or bottom of their library.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"zones": [
+										"stack"
+									],
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"instant",
+										"kindred",
+										"planeswalker",
+										"sorcery"
+									]
+								},
+								{
+									"zones": [
+										"battlefield"
+									],
+									"not": {
+										"types": [
+											"land"
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "top-chosen",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "top",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "top-chosen"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

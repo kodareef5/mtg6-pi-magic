@@ -1,0 +1,64 @@
+{
+	"card": "Airship Engine Room",
+	"generated": "2026-10-10",
+	"source": "65dadd4e507be81329da1a42809a88a0c45fb45ef6ebc454c49707acab00b914",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Airship Engine Room",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {U} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			},
+			{
+				"basis": "{T}: Add {U} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Airship Engine Room",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Airship Engine Room to draw a card",
+				"basis": "{4}, {T}, Sacrifice this land: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

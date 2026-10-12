@@ -1,0 +1,53 @@
+{
+	"card": "Rockfall Vale",
+	"generated": "2026-10-10",
+	"source": "42622c8054fb174db89be1985f40e58183e67f165150831bf107307cdd8edd23",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rockfall Vale",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control two or more other lands.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"controller": "you",
+								"other": true
+							}
+						},
+						"atLeast": 2
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {R} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {R} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

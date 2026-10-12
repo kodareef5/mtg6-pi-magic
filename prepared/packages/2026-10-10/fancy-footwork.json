@@ -1,0 +1,54 @@
+{
+	"card": "Fancy Footwork",
+	"generated": "2026-10-10",
+	"source": "ee69031ac9c9a56b231bd15c20401c128ca0fa749e527c6d875a17e405f0b278",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fancy Footwork",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Untap one or two creatures and give each +2/+2 until end of turn",
+				"basis": "Untap one or two target creatures. They each get +2/+2 until end of turn.",
+				"source": {
+					"card": "Fancy Footwork",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"atLeast": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "untap",
+						"what": "target:0"
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

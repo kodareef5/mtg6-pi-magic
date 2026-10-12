@@ -1,0 +1,72 @@
+{
+	"card": "Tune Up",
+	"generated": "2026-10-10",
+	"source": "7fb042fe08ec3474a834a8e4f6cce7b85824372df4bafadc310d62063595fd1a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tune Up",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tune Up",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return an artifact and animate it if it is a Vehicle",
+				"basis": "Return target artifact card from your graveyard to the battlefield. If it's a Vehicle, it becomes an artifact creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve",
+						"as": "returned"
+					},
+					{
+						"do": "modify",
+						"what": "bound:returned",
+						"until": "indefinite",
+						"if": {
+							"is": "bound:returned",
+							"matches": {
+								"subtypes": [
+									"Vehicle"
+								]
+							}
+						},
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

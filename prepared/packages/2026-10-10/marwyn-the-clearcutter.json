@@ -1,0 +1,48 @@
+{
+	"card": "Marwyn, the Clearcutter",
+	"generated": "2026-10-10",
+	"source": "5bbf661346c6c4a88623b9be14ff75d93ec4e2fe80ab30931d91f8020f80b9a7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Marwyn, the Clearcutter",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Marwyn, the Clearcutter",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice an artifact or land to draw a card",
+				"basis": "{2}, {T}, Sacrifice an artifact or land: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"artifact",
+								"land"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

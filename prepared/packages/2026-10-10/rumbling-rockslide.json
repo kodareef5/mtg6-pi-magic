@@ -1,0 +1,51 @@
+{
+	"card": "Rumbling Rockslide",
+	"generated": "2026-10-10",
+	"source": "692af6d5884f67c09a9cb5cd11c0eda4306d11710e555b6c65c8fd51e4599f59",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rumbling Rockslide",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rumbling Rockslide",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rumbling Rockslide",
+				"basis": "Rumbling Rockslide deals damage to target creature equal to the number of lands you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

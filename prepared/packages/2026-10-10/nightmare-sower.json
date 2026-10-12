@@ -1,0 +1,78 @@
+{
+	"card": "Nightmare Sower",
+	"generated": "2026-10-10",
+	"source": "b06b05a44774326d308c9ccda78054d8b6e3a57c9f98c948c324c77760cf6984",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nightmare Sower",
+		"registers": [
+			{
+				"basis": "Flying, lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a spell during an opponent's turn, put a -1/-1 counter on up to one target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"triggerIf": {
+					"turn": "opponent"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "-1/-1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

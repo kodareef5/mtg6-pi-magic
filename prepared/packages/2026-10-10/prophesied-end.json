@@ -1,0 +1,55 @@
+{
+	"card": "Prophesied End",
+	"generated": "2026-10-10",
+	"source": "1c972d3457b20fd927c7be21c0921be46a7a0b3edc6b9e9a87bc6b14d4e3233e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prophesied End",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Prophesied End",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy a creature; its controller draws if it wasn't attacking.",
+				"basis": "Destroy target creature. If it wasn't attacking, its controller draws a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "draw",
+						"who": "controller:target:0",
+						"count": 1,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"attacking": false
+							},
+							"lastKnown": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

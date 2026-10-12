@@ -1,0 +1,38 @@
+{
+	"card": "Mary Jane Watson",
+	"generated": "2026-10-10",
+	"source": "10cb59aa74762a6774e43042df7555abc99569ec1f6ebbe43cadfa6dc5538213",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mary Jane Watson",
+		"registers": [
+			{
+				"basis": "Whenever a Spider you control enters, draw a card. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"controller": "you",
+						"subtypes": [
+							"Spider"
+						]
+					}
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

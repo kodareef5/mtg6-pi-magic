@@ -1,0 +1,48 @@
+{
+	"card": "Rock Soldiers",
+	"generated": "2026-10-10",
+	"source": "063da21f079857934066051491358f064f76649f1f9f01da3a6d57b3c5505686",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rock Soldiers",
+		"registers": [
+			{
+				"basis": "When this creature enters, destroy up to one target noncreature artifact.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact"
+								],
+								"not": {
+									"types": [
+										"creature"
+									]
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

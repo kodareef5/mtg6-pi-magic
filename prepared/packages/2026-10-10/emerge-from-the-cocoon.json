@@ -1,0 +1,55 @@
+{
+	"card": "Emerge from the Cocoon",
+	"generated": "2026-10-10",
+	"source": "61b0d426333b1949c8f4f5f6b45993b942909059f2b2f12024983a3e7e245f32",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Emerge from the Cocoon",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Emerge from the Cocoon",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return a creature card from your graveyard and gain 3 life.",
+				"basis": "Return target creature card from your graveyard to the battlefield. You gain 3 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

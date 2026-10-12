@@ -1,0 +1,57 @@
+{
+	"card": "Strangled Cemetery",
+	"generated": "2026-10-10",
+	"source": "80cfb2a966d82f81221cac72ec449ce3ef3759b4712e204c76a33f749e825538",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Strangled Cemetery",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless a player has 13 or less life.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"any": [
+							{
+								"amount": {
+									"life": "you"
+								},
+								"atMost": 13
+							},
+							{
+								"amount": {
+									"life": "opponent"
+								},
+								"atMost": 13
+							}
+						]
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {B} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "{T}: Add {B} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

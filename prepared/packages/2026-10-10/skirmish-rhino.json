@@ -1,0 +1,55 @@
+{
+	"card": "Skirmish Rhino",
+	"generated": "2026-10-10",
+	"source": "2327ea6b4455d28dc1bd6db425633ce1c5730aed24b79fa761da8ba6ea09e83e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Skirmish Rhino",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, each opponent loses 2 life and you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

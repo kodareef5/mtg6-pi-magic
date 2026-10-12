@@ -1,0 +1,50 @@
+{
+	"card": "Shopkeeper's Bane",
+	"generated": "2026-10-10",
+	"source": "26e339d01f43a2ebf2253fcb6a92cb82d41c2b16c490c217c4766c5221c86983",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shopkeeper's Bane",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

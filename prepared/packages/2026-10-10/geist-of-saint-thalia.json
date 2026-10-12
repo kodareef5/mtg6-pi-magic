@@ -1,0 +1,47 @@
+{
+	"card": "Geist of Saint Thalia",
+	"generated": "2026-10-10",
+	"source": "f6e9fcd49d9d10258fa7d2bb918531b288b3e5f9c0f47b3bbfcfbfcc02c8a6e4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Geist of Saint Thalia",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Noncreature spells you cast cost {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"not": {
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"reduce": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

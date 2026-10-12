@@ -1,0 +1,49 @@
+{
+	"card": "Envoy of Okinec Ahau",
+	"generated": "2026-10-10",
+	"source": "e30717572a8faa4e8769f44f2878b72ea0d0c37733cede0a499005d4b4fb4e1f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Envoy of Okinec Ahau",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Envoy of Okinec Ahau",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a Gnome token",
+				"basis": "{4}{W}: Create a 1/1 colorless Gnome artifact creature token.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{W}"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Gnome",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"subtypes": [
+								"Gnome"
+							],
+							"colors": [],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

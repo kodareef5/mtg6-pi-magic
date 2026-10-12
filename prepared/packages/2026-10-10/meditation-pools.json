@@ -1,0 +1,64 @@
+{
+	"card": "Meditation Pools",
+	"generated": "2026-10-10",
+	"source": "09628df8f5d2561d5e7e4d6729970f3425850fdb5bd0825fe888797eb5ae0bcc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Meditation Pools",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {G} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add {G} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Meditation Pools",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Meditation Pools to draw a card",
+				"basis": "{4}, {T}, Sacrifice this land: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

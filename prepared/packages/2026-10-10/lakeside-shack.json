@@ -1,0 +1,57 @@
+{
+	"card": "Lakeside Shack",
+	"generated": "2026-10-10",
+	"source": "b86a9ef2fb38ae7049c37b04e6798a614d14884766ce4ee0c13626133e048d7e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lakeside Shack",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless a player has 13 or less life.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"any": [
+							{
+								"amount": {
+									"life": "you"
+								},
+								"atMost": 13
+							},
+							{
+								"amount": {
+									"life": "opponent"
+								},
+								"atMost": 13
+							}
+						]
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {G} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add {G} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

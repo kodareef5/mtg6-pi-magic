@@ -1,0 +1,68 @@
+{
+	"card": "Voracious Tome-Skimmer",
+	"generated": "2026-10-10",
+	"source": "75fe0f8343201985d0806b3f9f719db196029101734a2444b33e7bc6c06c4247",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Voracious Tome-Skimmer",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a spell during an opponent's turn, you may pay 1 life. If you do, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"of": {
+						"zones": [
+							"stack"
+						]
+					},
+					"by": "you"
+				},
+				"triggerIf": {
+					"turn": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"life": 1
+							},
+							"may": true,
+							"as": "paid-life"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "paid-life"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

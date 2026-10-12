@@ -1,0 +1,58 @@
+{
+	"card": "Maximum Overdrive",
+	"generated": "2026-10-10",
+	"source": "c38b8292210bb83ec2611b676911b8915edb59d6ed9140e7ec6c11fe654c8f0f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Maximum Overdrive",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Maximum Overdrive",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put a +1/+1 counter on a creature and grant deathtouch and indestructible until end of turn.",
+				"basis": "Put a +1/+1 counter on target creature. It gains deathtouch and indestructible until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"deathtouch",
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

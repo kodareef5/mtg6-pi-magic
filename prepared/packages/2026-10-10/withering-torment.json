@@ -1,0 +1,49 @@
+{
+	"card": "Withering Torment",
+	"generated": "2026-10-10",
+	"source": "34ff200e7b19fe353806541f3dba76789ac2f2d58f5b6e63655447de7fb4df05",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Withering Torment",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Withering Torment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Withering Torment",
+				"basis": "Destroy target creature or enchantment. You lose 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

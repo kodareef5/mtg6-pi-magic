@@ -1,0 +1,56 @@
+{
+	"card": "Acolyte of Aclazotz",
+	"generated": "2026-10-10",
+	"source": "6f03c938d83863c671abd45a72c28436053fd90d901e5dd4bad1c06382f44303",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Acolyte of Aclazotz",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Acolyte of Aclazotz",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap and sacrifice another creature or artifact to drain opponents",
+				"basis": "{T}, Sacrifice another creature or artifact: Each opponent loses 1 life and you gain 1 life.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature",
+								"artifact"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

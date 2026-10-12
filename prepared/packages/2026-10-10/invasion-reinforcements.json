@@ -1,0 +1,66 @@
+{
+	"card": "Invasion Reinforcements",
+	"generated": "2026-10-10",
+	"source": "f9b6b6f18a8e1771c9face7296b9384f6702817ab0d089017ac9b7348496d770",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Invasion Reinforcements",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create a 1/1 white Ally creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Ally",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Ally"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

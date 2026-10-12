@@ -1,0 +1,74 @@
+{
+	"card": "High-Flying Ace",
+	"generated": "2026-10-10",
+	"source": "72c0800cb5c46a9de5b7c5c1b5c6b3626fa2e5d41ccf1ee1a834322773cd5143",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "High-Flying Ace",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "High-Flying Ace",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Grant flying to a creature without flying",
+				"basis": "{3}{W}: Target creature without flying gains flying until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}{W}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"not": {
+								"words": [
+									"flying"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

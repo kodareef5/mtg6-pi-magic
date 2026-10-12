@@ -1,0 +1,54 @@
+{
+	"card": "Return to the Light Realms",
+	"generated": "2026-10-10",
+	"source": "fb00fb41280380421b9c4c6144df70e2d0fcc0f445aaddf83ecb64d5249305d6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Return to the Light Realms",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Return to the Light Realms",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Return to the Light Realms",
+				"basis": "Return all nonland permanent cards from your graveyard to the battlefield.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"planeswalker"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

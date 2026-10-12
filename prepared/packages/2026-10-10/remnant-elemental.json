@@ -1,0 +1,56 @@
+{
+	"card": "Remnant Elemental",
+	"generated": "2026-10-10",
+	"source": "826256b36e7f1ca55d0ff5725a1d6dd75acc13bbc6fd55a1de36aca9ede61c2d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Remnant Elemental",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, this creature gets +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

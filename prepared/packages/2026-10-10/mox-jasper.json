@@ -1,0 +1,34 @@
+{
+	"card": "Mox Jasper",
+	"generated": "2026-10-10",
+	"source": "4ad7f474e205da1f4f8ceddd12b8d85d39e9305baf8cad314dda47e3b1831074",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mox Jasper",
+		"registers": [
+			{
+				"basis": "{T}: Add one mana of any color. Activate only if you control a Dragon.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"if": {
+					"amount": {
+						"count": {
+							"subtypes": [
+								"Dragon"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

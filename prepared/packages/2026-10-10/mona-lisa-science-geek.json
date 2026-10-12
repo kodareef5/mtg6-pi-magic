@@ -1,0 +1,43 @@
+{
+	"card": "Mona Lisa, Science Geek",
+	"generated": "2026-10-10",
+	"source": "f62b499acb2afae4e07224cf5d193f820f759682fbfe58481f479383788abb92",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mona Lisa, Science Geek",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add X mana of any one color, where X is Mona Lisa's power.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"times": {
+					"power": "this"
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

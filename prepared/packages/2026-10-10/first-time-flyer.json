@@ -1,0 +1,60 @@
+{
+	"card": "First-Time Flyer",
+	"generated": "2026-10-10",
+	"source": "50bf332d6be14cc014dd4b26699f34f7e4cccf6fb2d401939b73bd504fd77dfb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "First-Time Flyer",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "This creature gets +1/+1 as long as there's a Lesson card in your graveyard.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Lesson"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"card": "Plunge into Winter",
+	"generated": "2026-10-10",
+	"source": "8eee21a62d077bdaa4b09c78910561222111a96f78870b3e3ac322863966a986",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Plunge into Winter",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Plunge into Winter",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Plunge into Winter",
+				"basis": "Tap up to one target creature. Scry 1, then draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "keyword",
+						"name": "scry",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

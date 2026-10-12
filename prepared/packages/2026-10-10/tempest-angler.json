@@ -1,0 +1,43 @@
+{
+	"card": "Tempest Angler",
+	"generated": "2026-10-10",
+	"source": "27904b714380f3b8f5fadce5efbd18c90abfa6fb88b774cbf3c6068c84e7a02a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tempest Angler",
+		"registers": [
+			{
+				"basis": "Whenever you cast a noncreature spell, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

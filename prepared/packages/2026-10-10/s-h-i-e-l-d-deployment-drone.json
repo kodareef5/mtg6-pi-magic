@@ -1,0 +1,63 @@
+{
+	"card": "S.H.I.E.L.D. Deployment Drone",
+	"generated": "2026-10-10",
+	"source": "891f884ab97718d93ad42d9b1eaa5bb431de5a89dd7a160e48f7ec7e04aba7f8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "S.H.I.E.L.D. Deployment Drone",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create a 1/1 white Soldier creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Soldier",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

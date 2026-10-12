@@ -1,0 +1,60 @@
+{
+	"card": "Vanguard of the Rose",
+	"generated": "2026-10-10",
+	"source": "336d8fa6d4e58879106db4dadb5feee298d4ff9010c80851a13330a5bffd4935",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vanguard of the Rose",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vanguard of the Rose",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature or artifact to gain indestructible and tap Vanguard of the Rose",
+				"basis": "{1}, Sacrifice another creature or artifact: This creature gains indestructible until end of turn. Tap it.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature",
+								"artifact"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					},
+					{
+						"do": "tap",
+						"what": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

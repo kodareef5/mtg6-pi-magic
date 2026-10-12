@@ -1,0 +1,67 @@
+{
+	"card": "Red Herring",
+	"generated": "2026-10-10",
+	"source": "48c57a3589d440b31323955564c17885b24d3c77e4873f3d03e0dd983d50e6bd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Red Herring",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Haste",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "This creature attacks each combat if able.",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"attacks each combat if able"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Red Herring",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Red Herring to draw a card",
+				"basis": "{2}, Sacrifice this creature: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

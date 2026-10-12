@@ -1,0 +1,57 @@
+{
+	"card": "Hard-Hitting Question",
+	"generated": "2026-10-10",
+	"source": "346d569826b0c07f19b60dd3e11c276ccc7a1357f8aaaba888217b21c639f263",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hard-Hitting Question",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hard-Hitting Question",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Have your creature deal damage equal to its power to an opposing creature or planeswalker.",
+				"basis": "Target creature you control deals damage equal to its power to target creature or planeswalker you don't control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

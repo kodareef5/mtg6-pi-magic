@@ -1,0 +1,53 @@
+{
+	"card": "Boulder Dash",
+	"generated": "2026-10-10",
+	"source": "cc405a3d420c42322f2277d1b40d6feefd7d64ccb00f101040ebec1d22735350",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boulder Dash",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Deal 2 damage to one target and 1 damage to a distinct other target",
+				"basis": "Boulder Dash deals 2 damage to any target and 1 damage to any other target.",
+				"source": {
+					"card": "Boulder Dash",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any",
+						"count": 2,
+						"divide": 3
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"divided": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

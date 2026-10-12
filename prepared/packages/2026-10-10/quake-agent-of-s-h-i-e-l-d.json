@@ -1,0 +1,61 @@
+{
+	"card": "Quake, Agent of S.H.I.E.L.D.",
+	"generated": "2026-10-10",
+	"source": "3163b05fd7cfab8baf0d9f423ca740435a02d70e8a5a826aa5220453c7d129e6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Quake, Agent of S.H.I.E.L.D.",
+		"registers": [
+			{
+				"basis": "Seismic Takedown — Whenever you cast a noncreature spell, tap target creature or land.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"land"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "tap",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

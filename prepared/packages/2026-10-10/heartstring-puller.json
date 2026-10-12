@@ -1,0 +1,62 @@
+{
+	"card": "Heartstring Puller",
+	"generated": "2026-10-10",
+	"source": "88be44e05836a0c724b411c7c8b0284c445bb6d8d10e98371cb7344108534d74",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Heartstring Puller",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create a 2/2 colorless Wizard Soldier creature token named Cadet.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Cadet",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Wizard",
+									"Soldier"
+								],
+								"colors": [],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

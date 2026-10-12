@@ -1,0 +1,55 @@
+{
+	"card": "Eternal Student",
+	"generated": "2026-10-10",
+	"source": "4371c1c95751e232d09e57a1eb10e69cd96472c0fd86f15395d04646eac3c355",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eternal Student",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Eternal Student",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Eternal Student to create two Inklings",
+				"basis": "{1}{B}, Exile this card from your graveyard: Create two 1/1 white and black Inkling creature tokens with flying.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}",
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Inkling",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Inkling"
+							],
+							"colors": [
+								"W",
+								"B"
+							],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,48 @@
+{
+	"card": "Raise the Past",
+	"generated": "2026-10-10",
+	"source": "a431bcfc0963e7cec66e5a1938649ec8f13310561dd1af60cb5008ef3389ac7b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Raise the Past",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Raise the Past",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Raise the Past to return all creature cards with mana value 2 or less from your graveyard to the battlefield.",
+				"basis": "Return all creature cards with mana value 2 or less from your graveyard to the battlefield.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atMost": 2
+							}
+						},
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

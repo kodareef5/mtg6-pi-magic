@@ -1,0 +1,55 @@
+{
+	"card": "Cloudsculpt Technician",
+	"generated": "2026-10-10",
+	"source": "a858d3146dc1bc8696f434c064c5045fe38f29255098edefa418dc00e56eff74",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cloudsculpt Technician",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "As long as you control an artifact, this creature gets +1/+0.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"power": 1
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

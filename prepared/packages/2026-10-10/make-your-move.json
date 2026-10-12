@@ -1,0 +1,56 @@
+{
+	"card": "Make Your Move",
+	"generated": "2026-10-10",
+	"source": "13fc0a04e4363569cabf4aa43985542da148c33994402bcef20ccb563ef9639f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Make Your Move",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Make Your Move",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target artifact, enchantment, or creature with power 4 or greater.",
+				"basis": "Destroy target artifact, enchantment, or creature with power 4 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									],
+									"power": {
+										"atLeast": 4
+									}
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

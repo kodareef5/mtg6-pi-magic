@@ -1,0 +1,46 @@
+{
+	"card": "Mechanized Ninja Cavalry",
+	"generated": "2026-10-10",
+	"source": "3773aa1a57381eb87c2289aa70a8fb9cff54f1e58562ce85ebc741c49fb98252",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mechanized Ninja Cavalry",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 1/1 colorless Robot artifact creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Robot",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Robot"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

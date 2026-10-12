@@ -1,0 +1,49 @@
+{
+	"card": "Tomb Trawler",
+	"generated": "2026-10-10",
+	"source": "adee2a64c8cbd60d2e7c77617a7cd523f303a66100a07c88f1d67a00157c5851",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tomb Trawler",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tomb Trawler",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a card from your graveyard on the bottom of your library",
+				"basis": "{2}: Put target card from your graveyard on the bottom of your library.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

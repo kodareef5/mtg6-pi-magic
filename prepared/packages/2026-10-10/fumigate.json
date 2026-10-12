@@ -1,0 +1,49 @@
+{
+	"card": "Fumigate",
+	"generated": "2026-10-10",
+	"source": "f2ef650416021fe92b93a19e074d49d941acfb79161a8be1bbf606b38d298bad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fumigate",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fumigate",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fumigate",
+				"basis": "Destroy all creatures. You gain 1 life for each creature destroyed this way.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"as": "destroyed"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"bound": "destroyed"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

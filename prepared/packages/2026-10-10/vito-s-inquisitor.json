@@ -1,0 +1,62 @@
+{
+	"card": "Vito's Inquisitor",
+	"generated": "2026-10-10",
+	"source": "e8707527d5e31b13bbede4c727cbbe62d057028a2560f3f53e967428a197cb27",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vito's Inquisitor",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vito's Inquisitor",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature or artifact to add a +1/+1 counter and gain menace until end of turn",
+				"basis": "{B}, Sacrifice another creature or artifact: Put a +1/+1 counter on this creature. It gains menace until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{B}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature",
+								"artifact"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"menace"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

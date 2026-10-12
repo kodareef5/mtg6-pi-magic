@@ -1,0 +1,79 @@
+{
+	"card": "Arni, Humble Scribe",
+	"generated": "2026-10-10",
+	"source": "cee96abd75cb6379a25334087b9b230eb9e57bd324b8d485f641d301c95f88cf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Arni, Humble Scribe",
+		"registers": [
+			{
+				"basis": "Whenever another nontoken creature you control enters, untap Arni.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"token": false,
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "untap",
+							"what": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Arni, Humble Scribe",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card, then discard a card",
+				"basis": "{T}: Draw a card, then discard a card.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

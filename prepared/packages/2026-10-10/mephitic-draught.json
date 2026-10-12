@@ -1,0 +1,75 @@
+{
+	"card": "Mephitic Draught",
+	"generated": "2026-10-10",
+	"source": "6f5706263d274e51d38ddb432702b9c1cd87968a6e450df6b3634052637b97cd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mephitic Draught",
+		"registers": [
+			{
+				"basis": "When this artifact enters or is put into a graveyard from the battlefield, you draw a card and you lose 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this artifact enters or is put into a graveyard from the battlefield, you draw a card and you lose 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

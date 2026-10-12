@@ -1,0 +1,63 @@
+{
+	"card": "Fear of Exposure",
+	"generated": "2026-10-10",
+	"source": "ccf6fed5f65e41c4486f37038df92e3227293b1dc6a419a9e889316cae69a186",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fear of Exposure",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fear of Exposure",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fear of Exposure, tapping two untapped creatures and/or lands you control",
+				"basis": "As an additional cost to cast this spell, tap two untapped creatures and/or lands you control.",
+				"timing": "spell",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature",
+								"land"
+							],
+							"controller": "you",
+							"tapped": false
+						},
+						"count": 2
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

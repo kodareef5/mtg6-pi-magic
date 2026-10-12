@@ -1,0 +1,57 @@
+{
+	"card": "Deepchannel Duelist",
+	"generated": "2026-10-10",
+	"source": "4425b1c3d2eee47611c68588908fc717bb4db695c36bb0497780f24102e96c19",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deepchannel Duelist",
+		"registers": [
+			{
+				"basis": "At the beginning of your end step, untap target Merfolk you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"subtypes": [
+									"Merfolk"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "untap",
+							"what": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Other Merfolk you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Merfolk"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,47 @@
+{
+	"card": "Spider-Byte, Web Warden",
+	"generated": "2026-10-10",
+	"source": "c32c10ffd08104c24d10668555f1c03921eaf9e1b064995e70f1ef52af606a79",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider-Byte, Web Warden",
+		"registers": [
+			{
+				"basis": "When Spider-Byte enters, return up to one target nonland permanent to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

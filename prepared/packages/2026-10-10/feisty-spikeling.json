@@ -1,0 +1,55 @@
+{
+	"card": "Feisty Spikeling",
+	"generated": "2026-10-10",
+	"source": "4cb6bb8509f092229592fbdd0c1ae4c8cdf770e6ed09fdb26fd1d7e1fcab4dce",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Feisty Spikeling",
+		"registers": [
+			{
+				"basis": "Changeling (This card is every creature type.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"subtypes": {
+						"allCreatureTypes": true
+					}
+				}
+			},
+			{
+				"basis": "During your turn, this creature has first strike.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"turn": "self"
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,63 @@
+{
+	"card": "Forlorn Flats",
+	"generated": "2026-10-10",
+	"source": "c4675997352f7624f078ffcfadc0bbe8d221525318fc9d98f3fc4f95373bbd90",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Forlorn Flats",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "When this land enters, it deals 1 damage to target opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {W} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"basis": "{T}: Add {W} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

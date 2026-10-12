@@ -1,0 +1,70 @@
+{
+	"card": "Break the Spell",
+	"generated": "2026-10-10",
+	"source": "3bda6e4bf0e5b1638a421fe8208efe19522066341b82b9d82498567c5264f9f8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Break the Spell",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Break the Spell",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy an enchantment; draw if a permanent you controlled or a token was destroyed this way.",
+				"basis": "Destroy target enchantment. If a permanent you controlled or a token was destroyed this way, draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0",
+						"as": "destroyed"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"all": [
+								{
+									"bound": "destroyed"
+								},
+								{
+									"is": "target:0",
+									"matches": {
+										"any": [
+											{
+												"controller": "you"
+											},
+											{
+												"token": true
+											}
+										]
+									},
+									"lastKnown": true
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

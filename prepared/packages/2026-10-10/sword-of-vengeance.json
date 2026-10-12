@@ -1,0 +1,68 @@
+{
+	"card": "Sword of Vengeance",
+	"generated": "2026-10-10",
+	"source": "1ab651509e3fdb4ce259ce6e12a4b0b4bbd0b2b0cb28bdd195e6179653b0a272",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sword of Vengeance",
+		"registers": [
+			{
+				"basis": "Equipped creature gets +2/+0 and has first strike, vigilance, trample, and haste.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2,
+					"words": [
+						"first strike",
+						"vigilance",
+						"trample",
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sword of Vengeance",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Sword of Vengeance",
+				"basis": "Equip {3}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

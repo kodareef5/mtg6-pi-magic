@@ -1,0 +1,58 @@
+{
+	"card": "Tranquil Cove",
+	"generated": "2026-10-10",
+	"source": "dba0e3564483ef9548f2296de2a6b6c4144b65b036f545da21e8711025a4c4f1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tranquil Cove",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "When this land enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {W} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"basis": "{T}: Add {W} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

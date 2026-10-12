@@ -1,0 +1,46 @@
+{
+	"card": "Mocking Sprite",
+	"generated": "2026-10-10",
+	"source": "a34c5b14cf798f931f7b41ef46a1ff9bf44ccca9d5a23f8ede07aa4b9b1f28ce",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mocking Sprite",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Instant and sorcery spells you cast cost {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"types": [
+						"instant",
+						"sorcery"
+					]
+				},
+				"reduce": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,76 @@
+{
+	"card": "Reputable Merchant",
+	"generated": "2026-10-10",
+	"source": "593bf2bb5d5a9b6e3aa9a5568cf7dd0f6a33cdc69e61d6a06c1a6c411269f2ad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Reputable Merchant",
+		"registers": [
+			{
+				"basis": "When this creature enters or dies, put a +1/+1 counter on target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters or dies, put a +1/+1 counter on target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

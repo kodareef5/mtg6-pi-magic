@@ -1,0 +1,51 @@
+{
+	"card": "Zealous Display",
+	"generated": "2026-10-10",
+	"source": "527fa25327162b9eb61b3a5c0f85815ed2ac17b15797d3abdcca883c3eef2f7e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zealous Display",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Zealous Display",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Zealous Display",
+				"basis": "Creatures you control get +2/+0 until end of turn. If it's not your turn, untap those creatures.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2
+						},
+						"as": "creatures"
+					},
+					{
+						"do": "untap",
+						"what": "bound:creatures",
+						"if": {
+							"turn": "opponent"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

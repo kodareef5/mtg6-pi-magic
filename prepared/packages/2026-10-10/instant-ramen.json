@@ -1,0 +1,78 @@
+{
+	"card": "Instant Ramen",
+	"generated": "2026-10-10",
+	"source": "3e5a33c65310b828e3391258c93df1f9fab10c53faa78566ddbb93d376e6b859",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Instant Ramen",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When this artifact enters, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Instant Ramen",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Instant Ramen to gain 3 life",
+				"basis": "{2}, {T}, Sacrifice this artifact: You gain 3 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

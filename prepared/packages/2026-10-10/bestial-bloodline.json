@@ -1,0 +1,80 @@
+{
+	"card": "Bestial Bloodline",
+	"generated": "2026-10-10",
+	"source": "25cad112d2bca2fd6ebe72e79dddddbfdea66173535eeeaf56248b98be0205ab",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bestial Bloodline",
+		"registers": [
+			{
+				"basis": "Enchanted creature gets +2/+2.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bestial Bloodline",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bestial Bloodline enchanting a creature",
+				"basis": "Enchant creature",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Bestial Bloodline",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Bestial Bloodline from your graveyard to your hand",
+				"basis": "{4}{G}: Return this card from your graveyard to your hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{G}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

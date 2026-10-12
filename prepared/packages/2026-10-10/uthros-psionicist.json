@@ -1,0 +1,39 @@
+{
+	"card": "Uthros Psionicist",
+	"generated": "2026-10-10",
+	"source": "f8f283998499c50b89e30222cd9bb6da5974221683744dde43289642e85d6bda",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Uthros Psionicist",
+		"registers": [
+			{
+				"kind": "cost",
+				"basis": "The second spell you cast each turn costs {2} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you"
+				},
+				"reduce": 2,
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							]
+						}
+					},
+					"atLeast": 1,
+					"atMost": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

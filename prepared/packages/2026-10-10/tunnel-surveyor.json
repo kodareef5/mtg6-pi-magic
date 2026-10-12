@@ -1,0 +1,48 @@
+{
+	"card": "Tunnel Surveyor",
+	"generated": "2026-10-10",
+	"source": "4c93c3502d365a1165dbf01751eb57c5f176efeadeb958749ad31b57790e324f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tunnel Surveyor",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 1/1 white Glimmer enchantment creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Glimmer",
+								"types": [
+									"enchantment",
+									"creature"
+								],
+								"subtypes": [
+									"Glimmer"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

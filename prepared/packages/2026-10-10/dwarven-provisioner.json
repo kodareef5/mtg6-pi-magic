@@ -1,0 +1,46 @@
+{
+	"card": "Dwarven Provisioner",
+	"generated": "2026-10-10",
+	"source": "1a96145b0e0283c64a1eda11d9a6eff03fd4c5ac9262aab0292070058b4711ab",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dwarven Provisioner",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dwarven Provisioner",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give creatures you control +1/+1 until end of turn",
+				"basis": "{3}{W}: Creatures you control get +1/+1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

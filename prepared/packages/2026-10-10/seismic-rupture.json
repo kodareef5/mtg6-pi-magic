@@ -1,0 +1,45 @@
+{
+	"card": "Seismic Rupture",
+	"generated": "2026-10-10",
+	"source": "7f56b877ab6f9cc24c5cb23237c7b646190d5fce26cb119acb699064cf8eac41",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seismic Rupture",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Seismic Rupture",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Seismic Rupture",
+				"basis": "Seismic Rupture deals 2 damage to each creature without flying.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"not": {
+								"words": [
+									"flying"
+								]
+							}
+						},
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

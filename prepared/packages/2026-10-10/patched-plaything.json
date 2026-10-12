@@ -1,0 +1,43 @@
+{
+	"card": "Patched Plaything",
+	"generated": "2026-10-10",
+	"source": "cc164e9b456c558fa3bbacc27bee2ec72bca26741c5ba97bfd27c43fe61ca857",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Patched Plaything",
+		"registers": [
+			{
+				"basis": "Double strike",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			},
+			{
+				"basis": "This creature enters with two -1/-1 counters on it if you cast it from your hand.",
+				"kind": "enters",
+				"counters": {
+					"-1/-1": 2
+				},
+				"if": {
+					"cast": "this",
+					"from": "hand",
+					"by": "you"
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

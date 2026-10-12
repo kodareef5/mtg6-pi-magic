@@ -1,0 +1,77 @@
+{
+	"card": "Desert's Due",
+	"generated": "2026-10-10",
+	"source": "b42f93fbda02bac55ac27bad060b74e461acff1cc0861edca94bf1594b716af0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Desert's Due",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Desert's Due",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Desert's Due",
+				"basis": "Target creature gets -2/-2 until end of turn. It gets an additional -1/-1 until end of turn for each Desert you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -2,
+							"toughness": -2
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"negate": {
+									"count": {
+										"subtypes": [
+											"Desert"
+										],
+										"controller": "you"
+									}
+								}
+							},
+							"toughness": {
+								"negate": {
+									"count": {
+										"subtypes": [
+											"Desert"
+										],
+										"controller": "you"
+									}
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

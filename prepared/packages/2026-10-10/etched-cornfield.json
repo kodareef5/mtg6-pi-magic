@@ -1,0 +1,57 @@
+{
+	"card": "Etched Cornfield",
+	"generated": "2026-10-10",
+	"source": "799079e7f2ea6dd46e89b9578531ef1ef509e1e03cf9539edcdb63baeec313ee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Etched Cornfield",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless a player has 13 or less life.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"any": [
+							{
+								"amount": {
+									"life": "you"
+								},
+								"atMost": 13
+							},
+							{
+								"amount": {
+									"life": "opponent"
+								},
+								"atMost": 13
+							}
+						]
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {G} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add {G} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

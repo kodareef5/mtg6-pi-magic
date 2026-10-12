@@ -1,0 +1,50 @@
+{
+	"card": "Scarblade Scout",
+	"generated": "2026-10-10",
+	"source": "32d36ee498cb131335abb9f7ad10e1a1cb7cbe6c8a7c1cefecd5ac92591b7065",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scarblade Scout",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, mill two cards. (Put the top two cards of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"card": "Nori, Teller of Tales",
+	"generated": "2026-10-10",
+	"source": "eb999484d95d3c01ded06ccf476d1b2295ebc5753cf16d98897c8548124fc46d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nori, Teller of Tales",
+		"registers": [
+			{
+				"basis": "Whenever Nori attacks, target attacking creature gains first strike until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"attacking": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"first strike"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

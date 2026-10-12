@@ -1,0 +1,52 @@
+{
+	"card": "Theorix Annex",
+	"generated": "2026-10-10",
+	"source": "cc0abb8bc9a0ade8aba3e3a94bc6cb898525f2a263ee648109e2e5af9b848098",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Theorix Annex",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a planeswalker.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"planeswalker"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {U} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			},
+			{
+				"basis": "{T}: Add {U} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

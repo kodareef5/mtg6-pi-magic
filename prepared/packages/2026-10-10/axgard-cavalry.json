@@ -1,0 +1,51 @@
+{
+	"card": "Axgard Cavalry",
+	"generated": "2026-10-10",
+	"source": "b8f747a80d66b9fde5076326d85c45ee3c654493ad5c7add5b2b7b78e4cda643",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Axgard Cavalry",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Axgard Cavalry",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give target creature haste until end of turn.",
+				"basis": "{T}: Target creature gains haste until end of turn. (It can attack and {T} this turn.)",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

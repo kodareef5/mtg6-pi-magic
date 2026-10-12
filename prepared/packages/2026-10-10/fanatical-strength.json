@@ -1,0 +1,51 @@
+{
+	"card": "Fanatical Strength",
+	"generated": "2026-10-10",
+	"source": "7999b8628ab69f3d295aaab1f126f5f278922e165f40523a58f0b54e2237435e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fanatical Strength",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fanatical Strength",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +3/+3 and trample until end of turn.",
+				"basis": "Target creature gets +3/+3 and gains trample until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3,
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

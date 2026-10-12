@@ -1,0 +1,77 @@
+{
+	"card": "Vision of Love",
+	"generated": "2026-10-10",
+	"source": "65c005999cb5413fb1d61ef4b3b668d243574dd8d34892bad206f40172855866",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vision of Love",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vision of Love",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Optionally sacrifice an artifact or discard a card, then draw two if paid",
+				"basis": "You may sacrifice an artifact or discard a card. If you do, draw two cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"sacrifice": {
+								"choose": {
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								},
+								"count": 1
+							}
+						},
+						"may": true,
+						"as": "sacrificed"
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"discard": 1
+						},
+						"may": true,
+						"as": "discarded",
+						"if": {
+							"not": {
+								"bound": "sacrificed"
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"any": [
+								{
+									"bound": "sacrificed"
+								},
+								{
+									"bound": "discarded"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

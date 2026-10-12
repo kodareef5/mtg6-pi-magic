@@ -1,0 +1,38 @@
+{
+	"card": "Phyrexian Arena",
+	"generated": "2026-10-10",
+	"source": "92ac37cebe2633e858952582c02b5ad358fe09302b70f5589f6b308de060f954",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Phyrexian Arena",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, you draw a card and lose 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

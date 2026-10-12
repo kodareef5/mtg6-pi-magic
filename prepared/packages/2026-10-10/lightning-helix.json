@@ -1,0 +1,52 @@
+{
+	"card": "Lightning Helix",
+	"generated": "2026-10-10",
+	"source": "e9d8bc24feaa4997d3d89e50b84641e14ac3428c3b4da7437c2b3d970c559c7a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lightning Helix",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lightning Helix",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Lightning Helix",
+				"basis": "Lightning Helix deals 3 damage to any target and you gain 3 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

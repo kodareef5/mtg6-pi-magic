@@ -1,0 +1,70 @@
+{
+	"card": "Kindlespark Duo",
+	"generated": "2026-10-10",
+	"source": "df6002d8675fd162acb739d2997dd32d05782fa866ae1e5a4a6c07c9303c1a4d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kindlespark Duo",
+		"registers": [
+			{
+				"basis": "Whenever you cast a noncreature spell, untap this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "untap",
+							"what": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kindlespark Duo",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap to deal 1 damage to target opponent",
+				"basis": "{T}: This creature deals 1 damage to target opponent.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 1,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

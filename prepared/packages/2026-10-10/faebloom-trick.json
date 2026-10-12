@@ -1,0 +1,76 @@
+{
+	"card": "Faebloom Trick",
+	"generated": "2026-10-10",
+	"source": "2c402b3290d15f6b164c45050c29da4cb26b485a5e6522cca0bd1f198a8083fa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Faebloom Trick",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Faebloom Trick",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Create two flying Faeries, then trigger tapping an opposing creature.",
+				"basis": "Create two 1/1 blue Faerie creature tokens with flying. When you do, tap target creature an opponent controls.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Faerie",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Faerie"
+							],
+							"colors": [
+								"U"
+							],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"flying"
+							]
+						},
+						"as": "faeries"
+					},
+					{
+						"do": "reflect",
+						"if": {
+							"bound": "faeries"
+						},
+						"effect": {
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"creature"
+										],
+										"controller": "opponent"
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "tap",
+									"what": "target:0"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

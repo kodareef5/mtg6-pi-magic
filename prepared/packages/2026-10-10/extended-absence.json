@@ -1,0 +1,56 @@
+{
+	"card": "Extended Absence",
+	"generated": "2026-10-10",
+	"source": "2b05a967d0a1d6b2cd224b9e89b4df163ab2d23398da1181e0450cc68c16425d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Extended Absence",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Extended Absence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Extended Absence",
+				"basis": "Exile target creature or planeswalker. Extended Absence deals 1 damage to each opponent and you gain 1 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "damage",
+						"to": "opponent",
+						"amount": 1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

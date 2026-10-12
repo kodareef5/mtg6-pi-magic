@@ -1,0 +1,66 @@
+{
+	"card": "Zookeeper Mechan",
+	"generated": "2026-10-10",
+	"source": "25249c97d7820be0a57e5ff0f2f7680eb8127e9fdf5b184cdf26e3652c2a5d00",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zookeeper Mechan",
+		"registers": [
+			{
+				"basis": "{T}: Add {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Zookeeper Mechan",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give a creature you control +4/+0 until end of turn.",
+				"basis": "{6}{R}: Target creature you control gets +4/+0 until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{6}{R}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 4,
+							"toughness": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,72 @@
+{
+	"card": "Ruthless Lawbringer",
+	"generated": "2026-10-10",
+	"source": "090d5d56bf26c94f0dd6830e4919910a21bde6eabdd93989dbffc8de8cbbaeaf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ruthless Lawbringer",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may sacrifice another creature. When you do, destroy target nonland permanent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"other": true
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "sacrificed"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"not": {
+												"types": [
+													"land"
+												]
+											}
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "destroy",
+										"what": "target:0"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,66 @@
+{
+	"card": "Skulduggery",
+	"generated": "2026-10-10",
+	"source": "a60dbd1921151fba7f90498b212fffb25a6dfb66d845b6f47083d802e00f8162",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Skulduggery",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Skulduggery",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give your creature +1/+1 and an opponent's creature -1/-1 until end of turn.",
+				"basis": "Until end of turn, target creature you control gets +1/+1 and target creature an opponent controls gets -1/-1.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

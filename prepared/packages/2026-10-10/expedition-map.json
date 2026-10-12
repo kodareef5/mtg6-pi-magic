@@ -1,0 +1,61 @@
+{
+	"card": "Expedition Map",
+	"generated": "2026-10-10",
+	"source": "d6bc3e0729d16ca27551dd0db1d8ce3ebc9be09f3cde8222523d79f9c2ccde86",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Expedition Map",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Expedition Map",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Expedition Map to search for a land card",
+				"basis": "{2}, {T}, Sacrifice this artifact: Search your library for a land card, reveal it, put it into your hand, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

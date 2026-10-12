@@ -1,0 +1,55 @@
+{
+	"card": "Sneering Shadewriter",
+	"generated": "2026-10-10",
+	"source": "ead429bcbc38e3b084a3998b5cc8c712343f987e58943a74279be12744135649",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sneering Shadewriter",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, each opponent loses 2 life and you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

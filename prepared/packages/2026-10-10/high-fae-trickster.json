@@ -1,0 +1,86 @@
+{
+	"card": "High Fae Trickster",
+	"generated": "2026-10-10",
+	"source": "29c7d85fe423fbe70ddd98916d71f30817ae94ccb6b41ae3d4ddb66f18b89d69",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "High Fae Trickster",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash (You may cast this spell any time you could cast an instant.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "permit",
+				"basis": "You may cast spells as though they had flash.",
+				"flash": {
+					"controller": "you",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack"
+					],
+					"types": [
+						"artifact",
+						"battle",
+						"creature",
+						"enchantment",
+						"instant",
+						"kindred",
+						"planeswalker",
+						"sorcery"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

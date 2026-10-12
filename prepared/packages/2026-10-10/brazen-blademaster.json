@@ -1,0 +1,49 @@
+{
+	"card": "Brazen Blademaster",
+	"generated": "2026-10-10",
+	"source": "e48d6dabffb0050ab84854db4b76a579e6fb76f70431f607852b5d1d29a910e3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brazen Blademaster",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks while you control two or more artifacts, it gets +2/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,57 @@
+{
+	"card": "Neglected Manor",
+	"generated": "2026-10-10",
+	"source": "b705e84d0cd00faefc087084b63d195924960111ae7207a5efbd3cd4c68477ed",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Neglected Manor",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless a player has 13 or less life.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"any": [
+							{
+								"amount": {
+									"life": "you"
+								},
+								"atMost": 13
+							},
+							{
+								"amount": {
+									"life": "opponent"
+								},
+								"atMost": 13
+							}
+						]
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {W} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"basis": "{T}: Add {W} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

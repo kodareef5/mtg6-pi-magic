@@ -1,0 +1,64 @@
+{
+	"card": "Wanderbrine Trapper",
+	"generated": "2026-10-10",
+	"source": "07a4d43e0ee2e14a44926ce6ea984999b884ea1c60d7d14c9aed327ffab8e33d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wanderbrine Trapper",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Tap an opponent's creature",
+				"basis": "{1}, {T}, Tap another untapped creature you control: Tap target creature an opponent controls.",
+				"source": {
+					"card": "Wanderbrine Trapper",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": {
+						"source": true,
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": false,
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

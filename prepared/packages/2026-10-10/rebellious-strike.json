@@ -1,0 +1,52 @@
+{
+	"card": "Rebellious Strike",
+	"generated": "2026-10-10",
+	"source": "e3596f1c3a9591376de51faa079085b04d0de35deca1b4f6926d9456d92b0186",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rebellious Strike",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rebellious Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rebellious Strike",
+				"basis": "Target creature gets +3/+0 until end of turn. ... Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

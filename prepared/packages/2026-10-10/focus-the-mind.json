@@ -1,0 +1,141 @@
+{
+	"card": "Focus the Mind",
+	"generated": "2026-10-10",
+	"source": "b418e1c77f4011f3159efcb23204357838f8582626d417d1f8bab678824a77de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Focus the Mind",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Focus the Mind",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Focus the Mind with no earlier spell cast this turn",
+				"basis": "This spell costs {2} less to cast if you've cast another spell this turn. ... Draw three cards, then discard a card.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Focus the Mind",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Focus the Mind with its conditional generic reduction",
+				"basis": "This spell costs {2} less to cast if you've cast another spell this turn. ... Draw three cards, then discard a card.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

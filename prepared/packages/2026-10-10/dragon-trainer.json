@@ -1,0 +1,50 @@
+{
+	"card": "Dragon Trainer",
+	"generated": "2026-10-10",
+	"source": "05b8d6413a5805005f60d90bdf4824d24571224b311f1d32a6fa2861fed190d2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragon Trainer",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 4/4 red Dragon creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Dragon",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dragon"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 4,
+								"toughness": 4,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

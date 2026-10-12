@@ -1,0 +1,66 @@
+{
+	"card": "Black Waltz No. 3",
+	"generated": "2026-10-10",
+	"source": "c04a1765a0cf0c5ec92c06e6e7224cfd73689f80023d73587cf01c14fae1915d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Black Waltz No. 3",
+		"registers": [
+			{
+				"basis": "Flying, deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a noncreature spell, Black Waltz No. 3 deals 2 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 2,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

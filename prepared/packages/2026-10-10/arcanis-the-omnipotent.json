@@ -1,0 +1,60 @@
+{
+	"card": "Arcanis the Omnipotent",
+	"generated": "2026-10-10",
+	"source": "1955d5e9bbd9b2d3633131db79a5f136ebc0acd80300178ada839f13f7d9ec10",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Arcanis the Omnipotent",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Arcanis the Omnipotent",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap Arcanis to draw three cards",
+				"basis": "{T}: Draw three cards.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Arcanis the Omnipotent",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Arcanis to its owner's hand",
+				"basis": "{2}{U}{U}: Return Arcanis to its owner's hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{U}{U}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

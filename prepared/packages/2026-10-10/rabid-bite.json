@@ -1,0 +1,56 @@
+{
+	"card": "Rabid Bite",
+	"generated": "2026-10-10",
+	"source": "fb64ac6d5eadd3f8f459f628eac18d648cf6139b7fe3a7b8bbcc7f01aee00478",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rabid Bite",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rabid Bite",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rabid Bite",
+				"basis": "Target creature you control deals damage equal to its power to target creature you don't control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

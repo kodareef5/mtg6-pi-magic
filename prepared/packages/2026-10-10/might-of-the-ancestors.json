@@ -1,0 +1,49 @@
+{
+	"card": "Might of the Ancestors",
+	"generated": "2026-10-10",
+	"source": "8793fbb56cbcc39e5bea730f1aae2365e3910223c5b67515b512604164807b1f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Might of the Ancestors",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, target creature you control gets +2/+0 and gains vigilance until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"words": [
+									"vigilance"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

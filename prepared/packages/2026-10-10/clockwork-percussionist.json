@@ -1,0 +1,63 @@
+{
+	"card": "Clockwork Percussionist",
+	"generated": "2026-10-10",
+	"source": "16ddc73c8afc461712bda209b42ed4abbc191c9329d0e1e5b37bf3606c73a1e8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Clockwork Percussionist",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, exile the top card of your library. You may play it until the end of your next turn.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

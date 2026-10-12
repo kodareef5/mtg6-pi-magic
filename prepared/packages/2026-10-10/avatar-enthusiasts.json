@@ -1,0 +1,39 @@
+{
+	"card": "Avatar Enthusiasts",
+	"generated": "2026-10-10",
+	"source": "2e481c6df4d290937bf5916a276b2a05de06d2fc91ca379977e935711eee25a1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Avatar Enthusiasts",
+		"registers": [
+			{
+				"basis": "Whenever another Ally you control enters, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Ally"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

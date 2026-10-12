@@ -1,0 +1,79 @@
+{
+	"card": "Airship Crash",
+	"generated": "2026-10-10",
+	"source": "5135f8a32cd7b31e3a831d575a10c187aae43081b2132110804bb7e3d15308e8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Airship Crash",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Airship Crash",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Airship Crash to destroy an artifact, enchantment, or creature with flying",
+				"basis": "Destroy target artifact, enchantment, or creature with flying.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									],
+									"words": [
+										"flying"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Airship Crash",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Airship Crash",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

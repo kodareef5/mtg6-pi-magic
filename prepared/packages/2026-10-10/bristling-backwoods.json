@@ -1,0 +1,64 @@
+{
+	"card": "Bristling Backwoods",
+	"generated": "2026-10-10",
+	"source": "69816e16a482ba1de8e2f5e1f416fcd3cf16a9f684b184cc4d26c4b817d40456",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bristling Backwoods",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "When this land enters, it deals 1 damage to target opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {R} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {R} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

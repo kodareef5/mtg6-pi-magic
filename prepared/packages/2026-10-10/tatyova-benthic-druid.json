@@ -1,0 +1,42 @@
+{
+	"card": "Tatyova, Benthic Druid",
+	"generated": "2026-10-10",
+	"source": "7c1a879a5fcebcf3d7969d80dea09cfcd8f03ae17beb3fa85142d8f88e282b1f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tatyova, Benthic Druid",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, you gain 1 life and draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

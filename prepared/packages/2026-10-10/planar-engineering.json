@@ -1,0 +1,135 @@
+{
+	"card": "Planar Engineering",
+	"generated": "2026-10-10",
+	"source": "bccac13745374232450c452dbaee074ef00c135d6f070522bddc747c64208bd4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Planar Engineering",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Planar Engineering",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Planar Engineering",
+				"basis": "Sacrifice two lands. Search your library for four basic land cards, put them onto the battlefield tapped, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"land"
+							]
+						},
+						"count": 2,
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"types": [
+										"land"
+									]
+								}
+							},
+							"atLeast": 2
+						},
+						"as": "sacrificed-lands"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"land"
+							]
+						},
+						"count": {
+							"count": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you",
+								"types": [
+									"land"
+								]
+							}
+						},
+						"if": {
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"types": [
+										"land"
+									]
+								}
+							},
+							"atMost": 1
+						},
+						"as": "sacrificed-lands"
+					},
+					{
+						"do": "move",
+						"what": "bound:sacrificed-lands",
+						"to": "graveyard",
+						"reason": "sacrifice"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"supertypes": [
+								"basic"
+							],
+							"types": [
+								"land"
+							]
+						},
+						"count": 4,
+						"upTo": true,
+						"as": "basic-lands"
+					},
+					{
+						"do": "move",
+						"what": "bound:basic-lands",
+						"to": "battlefield",
+						"controller": "you",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

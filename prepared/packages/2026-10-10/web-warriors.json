@@ -1,0 +1,41 @@
+{
+	"card": "Web-Warriors",
+	"generated": "2026-10-10",
+	"source": "06977bf71ab6820da159659d1e6d86190b3dee4a677fe85329dfcf4363f691c1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Web-Warriors",
+		"registers": [
+			{
+				"basis": "When this creature enters, put a +1/+1 counter on each other creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

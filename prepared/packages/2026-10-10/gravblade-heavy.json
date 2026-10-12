@@ -1,0 +1,45 @@
+{
+	"card": "Gravblade Heavy",
+	"generated": "2026-10-10",
+	"source": "f609f13b6188b0e084c888c272d2c50bc273b7f3ebf8e9de0787fdafbfe79fee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gravblade Heavy",
+		"registers": [
+			{
+				"basis": "As long as you control an artifact, this creature gets +1/+0 and has deathtouch.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"power": 1,
+					"words": [
+						"deathtouch"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"zones": [
+								"battlefield"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

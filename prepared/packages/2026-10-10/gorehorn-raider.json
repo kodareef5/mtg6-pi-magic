@@ -1,0 +1,54 @@
+{
+	"card": "Gorehorn Raider",
+	"generated": "2026-10-10",
+	"source": "2d3aa87c4dac9ed5913edc87ff4ddf12084d6e399e9ad8be550934906fa8fd71",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gorehorn Raider",
+		"registers": [
+			{
+				"basis": "Raid — When this creature enters, if you attacked this turn, this creature deals 2 damage to any target.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 2,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

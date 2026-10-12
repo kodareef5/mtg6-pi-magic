@@ -1,0 +1,67 @@
+{
+	"card": "Aetherjacket",
+	"generated": "2026-10-10",
+	"source": "3c577c7a28de11ccce91a280bb2d05edebb23e231fdf444665348970f578e71f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aetherjacket",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Aetherjacket",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Aetherjacket to destroy another artifact",
+				"basis": "{2}, {T}, Sacrifice this creature: Destroy another target artifact. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact"
+							],
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

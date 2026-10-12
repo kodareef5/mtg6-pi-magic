@@ -1,0 +1,88 @@
+{
+	"card": "Seeker's Folly",
+	"generated": "2026-10-10",
+	"source": "89489a14e4e8e3d804f37add864a54f8768d4b6618350e99883a0a0ee0285dde",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seeker's Folly",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Seeker's Folly",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Seeker's Folly: opponent discards two cards",
+				"basis": "Choose one —\n• Target opponent discards two cards.\n• Creatures your opponents control get -1/-1 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "target:0"
+						},
+						"count": 2,
+						"as": "discarded"
+					},
+					{
+						"do": "move",
+						"what": "bound:discarded",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Seeker's Folly",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Seeker's Folly: opponents' creatures get -1/-1",
+				"basis": "Choose one —\n• Target opponent discards two cards.\n• Creatures your opponents control get -1/-1 until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

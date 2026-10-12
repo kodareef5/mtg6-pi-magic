@@ -1,0 +1,68 @@
+{
+	"card": "Imperious Perfect",
+	"generated": "2026-10-10",
+	"source": "0e39180c257d550b40d0644c317b0d67a3ca10d5535eaf3674e89c934446e7b1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Imperious Perfect",
+		"registers": [
+			{
+				"basis": "Other Elves you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"subtypes": [
+						"Elf"
+					],
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Imperious Perfect",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create an Elf Warrior token",
+				"basis": "{G}, {T}: Create a 1/1 green Elf Warrior creature token.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{G}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Elf Warrior",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Elf",
+								"Warrior"
+							],
+							"colors": [
+								"G"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

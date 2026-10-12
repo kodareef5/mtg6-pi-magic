@@ -1,0 +1,54 @@
+{
+	"card": "Virulent Emissary",
+	"generated": "2026-10-10",
+	"source": "c23d1708b4c421c842f5a636d7fc1fa712fad3ba1b272f3730042f6b97f93c50",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Virulent Emissary",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another creature you control enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

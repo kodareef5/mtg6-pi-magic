@@ -1,0 +1,46 @@
+{
+	"card": "Rimekin Recluse",
+	"generated": "2026-10-10",
+	"source": "23b252c065319012dee19738c6c48c3b640b043cb68ffecc1609b70af05daa29",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rimekin Recluse",
+		"registers": [
+			{
+				"basis": "When this creature enters, return up to one other target creature to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"other": true
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

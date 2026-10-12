@@ -1,0 +1,60 @@
+{
+	"card": "Slice from the Shadows",
+	"generated": "2026-10-10",
+	"source": "a64b10331929998ce21d57535b549a8694d1cd41821ae0edaf99c4bf7af2af84",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Slice from the Shadows",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Slice from the Shadows",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Slice from the Shadows",
+				"basis": "This spell can't be countered. (This includes by the ward ability.) ... Target creature gets -X/-X until end of turn.",
+				"timing": "spell",
+				"words": [
+					"can't be countered"
+				],
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"negate": {
+									"x": true
+								}
+							},
+							"toughness": {
+								"negate": {
+									"x": true
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

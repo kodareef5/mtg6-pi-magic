@@ -1,0 +1,61 @@
+{
+	"card": "Startled Relic Sloth",
+	"generated": "2026-10-10",
+	"source": "c4c098e190e298011a0166842c804bcc3988668ed3f9b4d6f451026e10265ad3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Startled Relic Sloth",
+		"registers": [
+			{
+				"basis": "Trample, lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample",
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of combat on your turn, exile up to one target card from a graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

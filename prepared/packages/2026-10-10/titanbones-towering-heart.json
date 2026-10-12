@@ -1,0 +1,83 @@
+{
+	"card": "Titanbones, Towering Heart",
+	"generated": "2026-10-10",
+	"source": "332807bc35bdc28868698d5dbc918a7f75068a22f103400e10743e97766bfc06",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Titanbones, Towering Heart",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Reach",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put two +1/+1 counters on Titanbones.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When you discard this card, you gain 3 life.",
+				"zones": [
+					"graveyard",
+					"exile",
+					"command",
+					"battlefield",
+					"stack"
+				],
+				"event": {
+					"on": "discarded",
+					"by": "owner:this",
+					"of": {
+						"is": "this",
+						"zones": [
+							"graveyard",
+							"exile",
+							"command",
+							"battlefield",
+							"stack"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "event:player",
+							"amount": 3
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

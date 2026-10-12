@@ -1,0 +1,50 @@
+{
+	"card": "Artifist Acumen",
+	"generated": "2026-10-10",
+	"source": "2ff94b77315d1e3f5cc223963ea35973750f5c62b276a6876fbceaeb9fd4b8d2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Artifist Acumen",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Artifist Acumen",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Artifist Acumen",
+				"basis": "Creatures you control gain first strike until end of turn. ... Draw a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"first strike"
+							]
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

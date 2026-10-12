@@ -1,0 +1,75 @@
+{
+	"card": "K'un-Lun Warrior",
+	"generated": "2026-10-10",
+	"source": "d653d4fac1a66569fe6f0b1ce6dd47940d4e8cf9e6abe1a30ba87a44cbcbb049",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "K'un-Lun Warrior",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may sacrifice an artifact or discard a card. If you do, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"types": [
+											"artifact"
+										],
+										"controller": "you"
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded",
+							"if": {
+								"not": {
+									"bound": "sacrificed"
+								}
+							}
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"any": [
+									{
+										"bound": "sacrificed"
+									},
+									{
+										"bound": "discarded"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

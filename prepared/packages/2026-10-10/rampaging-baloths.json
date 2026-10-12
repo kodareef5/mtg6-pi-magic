@@ -1,0 +1,66 @@
+{
+	"card": "Rampaging Baloths",
+	"generated": "2026-10-10",
+	"source": "1338a0c7b9ebb143dc9aab98741ec9df09bb04b143101206a7f2cadc6d91b9f1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rampaging Baloths",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, create a 4/4 green Beast creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Beast",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Beast"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 4,
+								"toughness": 4
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

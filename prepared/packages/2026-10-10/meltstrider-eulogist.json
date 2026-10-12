@@ -1,0 +1,47 @@
+{
+	"card": "Meltstrider Eulogist",
+	"generated": "2026-10-10",
+	"source": "d7fcc39ef2ba99a3d74446009058a218e8a32d9a62a7d5db315c53a85cb0b526",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Meltstrider Eulogist",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever a creature you control with a +1/+1 counter on it dies, draw a card.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"counters": "+1/+1",
+						"on": "event:object"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,81 @@
+{
+	"card": "Haazda Vigilante",
+	"generated": "2026-10-10",
+	"source": "389b813cf86780e3240be7964b762973757384855d91ff2de31046eb9fdeba42",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Haazda Vigilante",
+		"registers": [
+			{
+				"basis": "Whenever this creature enters or attacks, put a +1/+1 counter on target creature you control with power 2 or less.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"power": {
+									"atMost": 2
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, put a +1/+1 counter on target creature you control with power 2 or less.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"power": {
+									"atMost": 2
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

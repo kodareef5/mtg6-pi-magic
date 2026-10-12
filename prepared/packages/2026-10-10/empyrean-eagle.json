@@ -1,0 +1,53 @@
+{
+	"card": "Empyrean Eagle",
+	"generated": "2026-10-10",
+	"source": "7abc96932ac934b673f9b405f6e23d476384bec141d8a629ac45d80631497158",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Empyrean Eagle",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Other creatures you control with flying get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"words": [
+						"flying"
+					],
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

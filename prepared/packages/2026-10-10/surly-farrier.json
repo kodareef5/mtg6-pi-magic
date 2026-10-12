@@ -1,0 +1,55 @@
+{
+	"card": "Surly Farrier",
+	"generated": "2026-10-10",
+	"source": "f22513171f5e821bb9f147d05734bff6e79fc567edc33c8ee48a88020c134012",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Surly Farrier",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Surly Farrier",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give a controlled creature +1/+1 and vigilance until end of turn",
+				"basis": "{T}: Target creature you control gets +1/+1 and gains vigilance until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"vigilance"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

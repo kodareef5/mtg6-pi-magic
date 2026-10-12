@@ -1,0 +1,68 @@
+{
+	"card": "Deduce",
+	"generated": "2026-10-10",
+	"source": "714536574967f4dc1477190944f5e8ce9aad60ad308a1f54e96292c72f87cb83",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deduce",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Deduce",
+				"basis": "Draw a card. Investigate. (Create a Clue token. It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"source": {
+					"card": "Deduce",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Clue",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Clue"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{2}, Sacrifice this token: Draw a card.",
+									"cost": {
+										"mana": "{2}",
+										"sacrifice": "this"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

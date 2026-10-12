@@ -1,0 +1,56 @@
+{
+	"card": "Peer Past the Veil",
+	"generated": "2026-10-10",
+	"source": "af459ce8d92137fd229f8a05d206cc588701a7efb53c4b1a055d05b56428cd1c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Peer Past the Veil",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Peer Past the Veil",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Discard your hand, then draw for the card types in your graveyard.",
+				"basis": "Discard your hand. Then draw X cards, where X is the number of card types among cards in your graveyard.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "you",
+							"controller": "you"
+						},
+						"to": "graveyard",
+						"reason": "discard"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"distinct": "card-types",
+							"among": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

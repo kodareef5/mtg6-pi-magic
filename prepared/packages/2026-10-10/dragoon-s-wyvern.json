@@ -1,0 +1,61 @@
+{
+	"card": "Dragoon's Wyvern",
+	"generated": "2026-10-10",
+	"source": "9386dc8799f6ea63a6fab0b1a65af20ad4474ebb330f6f84b163c4e7659637fe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragoon's Wyvern",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create a 1/1 colorless Hero creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Hero",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

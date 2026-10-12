@@ -1,0 +1,102 @@
+{
+	"card": "Eaten Alive",
+	"generated": "2026-10-10",
+	"source": "590a6028bddad5346dc525e233c292fcd9ee45a5d4ef15bb2fed1f6b50c25b75",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eaten Alive",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Eaten Alive",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Eaten Alive sacrificing a creature",
+				"basis": "As an additional cost to cast this spell, sacrifice a creature or pay {3}{B}.\nExile target creature or planeswalker.",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Eaten Alive",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Eaten Alive paying the additional mana",
+				"basis": "As an additional cost to cast this spell, sacrifice a creature or pay {3}{B}.\nExile target creature or planeswalker.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "additional-mana",
+							"mana": "{3}{B}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

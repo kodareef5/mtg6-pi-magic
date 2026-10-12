@@ -1,0 +1,63 @@
+{
+	"card": "Iguana Parrot",
+	"generated": "2026-10-10",
+	"source": "a008d06b705ea2d402466ee3a235494fe620116b89d0d6a009b7ad5d592a5f71",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Iguana Parrot",
+		"registers": [
+			{
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

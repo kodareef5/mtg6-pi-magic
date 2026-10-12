@@ -1,0 +1,72 @@
+{
+	"card": "Kraum, Violent Cacophony",
+	"generated": "2026-10-10",
+	"source": "376003615bf3feed3748997da8c4c33465eb66078a5b3ce353680597d2c309ab",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kraum, Violent Cacophony",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast your second spell each turn, put a +1/+1 counter on Kraum and draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"ordinal": 2,
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"land",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

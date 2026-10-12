@@ -1,0 +1,65 @@
+{
+	"card": "The Spot's Portal",
+	"generated": "2026-10-10",
+	"source": "f3b9545f7e074bfc586aa352e26a1f6d3acab32db90799baaa1d0e1d3558cafb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Spot's Portal",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "The Spot's Portal",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put target creature on the bottom of its owner's library, then lose 2 life unless you control a Villain.",
+				"basis": "Put target creature on the bottom of its owner's library. You lose 2 life unless you control a Villain.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2,
+						"if": {
+							"not": {
+								"amount": {
+									"count": {
+										"controller": "you",
+										"subtypes": [
+											"Villain"
+										]
+									}
+								},
+								"atLeast": 1
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

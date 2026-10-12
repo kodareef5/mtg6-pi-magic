@@ -1,0 +1,39 @@
+{
+	"card": "Virus Beetle",
+	"generated": "2026-10-10",
+	"source": "31dca9078b44d5a2edff7b0fcb9d76a9287a9ee4380ef449f962974c25657306",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Virus Beetle",
+		"registers": [
+			{
+				"basis": "When this creature enters, each opponent discards a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": 1,
+							"actions": [
+								{
+									"discard": true
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,53 @@
+{
+	"card": "Spectral Interference",
+	"generated": "2026-10-10",
+	"source": "e0fe0dd799551b045b3fc5ac71d9d411e7457e78df3b613ba0885424e8877009",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spectral Interference",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spectral Interference",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Spectral Interference",
+				"basis": "Counter target artifact or creature spell unless its controller pays {4}.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{4}"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

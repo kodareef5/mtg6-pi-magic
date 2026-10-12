@@ -1,0 +1,83 @@
+{
+	"card": "Drill Too Deep",
+	"generated": "2026-10-10",
+	"source": "61471853b2528ed9c811c1e7a0959db423d64a811cb2e5ccb811d06258ecb8ba",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Drill Too Deep",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Drill Too Deep",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Drill Too Deep — put five charge counters on a Spacecraft or Planet you control",
+				"basis": "Choose one —\n• Put five charge counters on target Spacecraft or Planet you control.\n• Destroy target artifact.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Spacecraft",
+								"Planet"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "charge",
+						"amount": 5
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Drill Too Deep",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Drill Too Deep — destroy target artifact",
+				"basis": "Choose one —\n• Put five charge counters on target Spacecraft or Planet you control.\n• Destroy target artifact.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

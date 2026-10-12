@@ -1,0 +1,55 @@
+{
+	"card": "Foolish Fate",
+	"generated": "2026-10-10",
+	"source": "d36c51dbf1ab1fa6dd175f5afb25c31716d3aa510daadfd82329ca77e6baf3a4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Foolish Fate",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Foolish Fate",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target creature; if you gained life this turn, its controller loses 3 life.",
+				"basis": "Destroy target creature.\nInfusion — If you gained life this turn, that creature's controller loses 3 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "life",
+						"who": "controller:target:0",
+						"amount": -3,
+						"if": {
+							"amount": {
+								"history": "life-gained",
+								"by": "you"
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

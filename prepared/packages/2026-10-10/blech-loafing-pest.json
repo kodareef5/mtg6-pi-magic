@@ -1,0 +1,42 @@
+{
+	"card": "Blech, Loafing Pest",
+	"generated": "2026-10-10",
+	"source": "78a7b7b08da3f5794d8e4eefc5761f00e5ca97db4726110f3dcd0eb7ae974cdb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blech, Loafing Pest",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put a +1/+1 counter on each Pest, Bat, Insect, Snake, and Spider you control.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"controller": "you",
+								"subtypes": [
+									"Pest",
+									"Bat",
+									"Insect",
+									"Snake",
+									"Spider"
+								]
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

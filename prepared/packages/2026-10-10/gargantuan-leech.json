@@ -1,0 +1,75 @@
+{
+	"card": "Gargantuan Leech",
+	"generated": "2026-10-10",
+	"source": "4b902fc0de033acc822d9c2da47301cc2ab2568bfe642c9ea807aeb4e883bb72",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gargantuan Leech",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Lifelink",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gargantuan Leech",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gargantuan Leech with its Cave reduction",
+				"basis": "This spell costs {1} less to cast for each Cave you control and each Cave card in your graveyard.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"sum": [
+							{
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"subtypes": [
+										"Cave"
+									]
+								}
+							},
+							{
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"subtypes": [
+										"Cave"
+									]
+								}
+							}
+						]
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

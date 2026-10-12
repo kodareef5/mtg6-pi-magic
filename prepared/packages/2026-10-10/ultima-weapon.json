@@ -1,0 +1,88 @@
+{
+	"card": "Ultima Weapon",
+	"generated": "2026-10-10",
+	"source": "79035e09a32abc4ac6769c9248827cdefa361cf06e9677baee6510e7803967c0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ultima Weapon",
+		"registers": [
+			{
+				"basis": "Whenever equipped creature attacks, destroy target creature an opponent controls.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "attached"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +7/+7.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 7,
+					"toughness": 7
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ultima Weapon",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Ultima Weapon",
+				"basis": "Equip {7}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{7}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"card": "Crackling Cyclops",
+	"generated": "2026-10-10",
+	"source": "a4ac4acec34ac68ca159758e6707dc2832485698176f2815c145bb5ca7f03969",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Crackling Cyclops",
+		"registers": [
+			{
+				"basis": "Whenever you cast a noncreature spell, this creature gets +3/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"enchantment",
+							"instant",
+							"kindred",
+							"land",
+							"planeswalker",
+							"sorcery"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

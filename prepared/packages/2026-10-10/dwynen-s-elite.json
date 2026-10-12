@@ -1,0 +1,60 @@
+{
+	"card": "Dwynen's Elite",
+	"generated": "2026-10-10",
+	"source": "21da2fe8836dda4e0346abc91b2d60ef0f6807d31de71d5e8ab5394a8544bcb3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dwynen's Elite",
+		"registers": [
+			{
+				"basis": "When this creature enters, if you control another Elf, create a 1/1 green Elf Warrior creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Elf"
+							],
+							"other": true
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Elf Warrior",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Elf",
+									"Warrior"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

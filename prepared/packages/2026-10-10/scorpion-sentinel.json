@@ -1,0 +1,36 @@
+{
+	"card": "Scorpion Sentinel",
+	"generated": "2026-10-10",
+	"source": "b4356522d5d4857560146771071d972f75e302bc00b78c5267eebca1c5b724a1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scorpion Sentinel",
+		"registers": [
+			{
+				"basis": "As long as you control seven or more lands, this creature gets +3/+0.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 3
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 7
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

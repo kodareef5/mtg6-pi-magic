@@ -1,0 +1,63 @@
+{
+	"card": "Raft Security Officer",
+	"generated": "2026-10-10",
+	"source": "922e91f6ef1b8749a8157995b01034a422b25f18548b27a4fa4d1191d2e08d51",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Raft Security Officer",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Tap target creature, reducing the generic activation cost by one if its power is 3 or less when the cost is locked",
+				"basis": "{2}, {T}: Tap target creature. This ability costs {1} less to activate if it targets a creature with power 3 or less.",
+				"source": {
+					"card": "Raft Security Officer",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"is": "target:0",
+							"types": [
+								"creature"
+							],
+							"power": {
+								"atMost": 3
+							}
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

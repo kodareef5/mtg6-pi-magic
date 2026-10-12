@@ -1,0 +1,59 @@
+{
+	"card": "Cost of Brilliance",
+	"generated": "2026-10-10",
+	"source": "eb07002f9ef1a77a8e837859fdfcf27dbd6ff66114f159f4b03a4a6960b38caf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cost of Brilliance",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cost of Brilliance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cost of Brilliance",
+				"basis": "Target player draws two cards and loses 2 life. Put a +1/+1 counter on up to one target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 2
+					},
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": -2
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

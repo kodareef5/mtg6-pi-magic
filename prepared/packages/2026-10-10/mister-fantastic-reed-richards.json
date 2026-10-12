@@ -1,0 +1,53 @@
+{
+	"card": "Mister Fantastic, Reed Richards",
+	"generated": "2026-10-10",
+	"source": "5c8e11988fa71c242f132c2105a9c5e6b1a82558b39904ecc2b7f5fce00936c8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mister Fantastic, Reed Richards",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "Whenever one or more tokens you control enter, you may draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"token": true,
+						"controller": "you"
+					},
+					"batch": true
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

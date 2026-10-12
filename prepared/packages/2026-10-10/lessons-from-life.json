@@ -1,0 +1,59 @@
+{
+	"card": "Lessons from Life",
+	"generated": "2026-10-10",
+	"source": "e34a1367580c8b3b609f6c8102e321e9b98a71e62067249498cc089f9504cbad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lessons from Life",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lessons from Life",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw three cards, then optionally put a land card from your hand onto the battlefield tapped.",
+				"basis": "Draw three cards. You may put a land card from your hand onto the battlefield tapped.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you",
+							"types": [
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

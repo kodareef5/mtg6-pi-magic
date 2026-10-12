@@ -1,0 +1,58 @@
+{
+	"card": "Futurist Forge",
+	"generated": "2026-10-10",
+	"source": "3835d804ae84a55b92d25a74b2ca6f4dfb5030826b3d9fa6d5306e09cbeaf2b6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Futurist Forge",
+		"registers": [
+			{
+				"basis": "When this artifact enters, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Futurist Forge",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Futurist Forge to draw two cards",
+				"basis": "{3}{U}, Sacrifice this artifact: Draw two cards.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{U}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

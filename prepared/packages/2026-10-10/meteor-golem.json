@@ -1,0 +1,45 @@
+{
+	"card": "Meteor Golem",
+	"generated": "2026-10-10",
+	"source": "6ba5c8659e5059ec81be33755836929d3acd45b2b459a74a7068f94ccd52878b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Meteor Golem",
+		"registers": [
+			{
+				"basis": "When this creature enters, destroy target nonland permanent an opponent controls.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"controller": "opponent",
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

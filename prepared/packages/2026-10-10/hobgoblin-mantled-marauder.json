@@ -1,0 +1,53 @@
+{
+	"card": "Hobgoblin, Mantled Marauder",
+	"generated": "2026-10-10",
+	"source": "62d33746c1c4cf0ec9ebbfb96389bc7049fc1802c58d66538e33a90dd2e3a367",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hobgoblin, Mantled Marauder",
+		"registers": [
+			{
+				"basis": "Flying, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you discard a card, Hobgoblin gets +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "discarded",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,58 @@
+{
+	"card": "Attercop",
+	"generated": "2026-10-10",
+	"source": "aca8948fb39f0cd69ab0e0ae424881bd3975449266e58e174d44c7b5b6089ba2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Attercop",
+		"registers": [
+			{
+				"basis": "Reach, deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, this creature gets +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

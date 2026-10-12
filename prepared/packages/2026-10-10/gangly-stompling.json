@@ -1,0 +1,62 @@
+{
+	"card": "Gangly Stompling",
+	"generated": "2026-10-10",
+	"source": "36137b4a827bc4825abc4a7faf333921061dc4bee99116e242117932571f8f13",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gangly Stompling",
+		"registers": [
+			{
+				"basis": "Changeling (This card is every creature type.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"subtypes": {
+						"allCreatureTypes": true
+					},
+					"words": [
+						"changeling"
+					]
+				}
+			},
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

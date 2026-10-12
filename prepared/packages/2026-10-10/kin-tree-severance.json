@@ -1,0 +1,48 @@
+{
+	"card": "Kin-Tree Severance",
+	"generated": "2026-10-10",
+	"source": "64634e0bbe90011dc1a475bbcd241ec14b9d715566294e4bb9bd5e1d38202aa9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kin-Tree Severance",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kin-Tree Severance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Kin-Tree Severance",
+				"basis": "Exile target permanent with mana value 3 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"manaValue": {
+								"atLeast": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

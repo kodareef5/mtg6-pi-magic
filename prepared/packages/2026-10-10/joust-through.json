@@ -1,0 +1,57 @@
+{
+	"card": "Joust Through",
+	"generated": "2026-10-10",
+	"source": "da02444dcbe75ffd77184d6ac6524b36ce97d87e28c1aeb934b7dabfe3cdd9f7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Joust Through",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Joust Through",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Deal 3 damage to target attacking or blocking creature, then gain 1 life.",
+				"basis": "Joust Through deals 3 damage to target attacking or blocking creature. You gain 1 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"any": [
+								{
+									"attacking": true
+								},
+								{
+									"blocking": true
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

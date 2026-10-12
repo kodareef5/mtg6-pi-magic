@@ -1,0 +1,55 @@
+{
+	"card": "Acrobatic Leap",
+	"generated": "2026-10-10",
+	"source": "7244153a1adcc20cda1a3b849ae79ea5f36380fb809a79522dc4087fd39a6ef6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Acrobatic Leap",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Acrobatic Leap",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +1/+3 and flying until end of turn, then untap it.",
+				"basis": "Target creature gets +1/+3 and gains flying until end of turn. Untap it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 3,
+							"words": [
+								"flying"
+							]
+						}
+					},
+					{
+						"do": "untap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

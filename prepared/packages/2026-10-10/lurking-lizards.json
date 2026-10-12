@@ -1,0 +1,67 @@
+{
+	"card": "Lurking Lizards",
+	"generated": "2026-10-10",
+	"source": "5bd5e695807527860f8f535ca363be246b62c0816a28d18dcefc0d9d60390105",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lurking Lizards",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a spell with mana value 4 or greater, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						],
+						"manaValue": {
+							"atLeast": 4
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,70 @@
+{
+	"card": "Calamitous Tide",
+	"generated": "2026-10-10",
+	"source": "aece3152ea82a8346e9eaa5b3bc1e1c7f5cc37ac4311f4f0477a69396d8821e8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Calamitous Tide",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Calamitous Tide",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Calamitous Tide",
+				"basis": "Return up to two target creatures to their owners' hands. Draw two cards, then discard a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard-card"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard-card",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

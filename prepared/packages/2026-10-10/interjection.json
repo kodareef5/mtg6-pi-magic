@@ -1,0 +1,51 @@
+{
+	"card": "Interjection",
+	"generated": "2026-10-10",
+	"source": "2747e739ff5220b11a80fb5bec1b9999a8f69cf5c54e67f5936476d27658ac09",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Interjection",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Interjection",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +2/+2 and first strike until end of turn.",
+				"basis": "Target creature gets +2/+2 and gains first strike until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"first strike"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

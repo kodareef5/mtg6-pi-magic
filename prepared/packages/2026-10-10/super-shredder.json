@@ -1,0 +1,54 @@
+{
+	"card": "Super Shredder",
+	"generated": "2026-10-10",
+	"source": "6c6d33d75e3d1a9df21d3e5c993de0bc1d2115656db96e6c369237bc856e5885",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Super Shredder",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another permanent leaves the battlefield, put a +1/+1 counter on Super Shredder.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,40 @@
+{
+	"card": "Solarium Sentry",
+	"generated": "2026-10-10",
+	"source": "6b60239c15806a883c8d12f4b5c4deefd450a1eb07121110570c8060d35e8811",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Solarium Sentry",
+		"registers": [
+			{
+				"basis": "Whenever an opponent casts a spell with mana value 2 or less, you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "opponent",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"manaValue": {
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

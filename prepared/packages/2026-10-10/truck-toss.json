@@ -1,0 +1,111 @@
+{
+	"card": "Truck Toss",
+	"generated": "2026-10-10",
+	"source": "085a7426a3ee43e14ea59105f0c3d2ab12fff00259ed8049f1b549079b6d7364",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Truck Toss",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Truck Toss",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Truck Toss with its Vehicle discount",
+				"basis": "This spell costs {2} less to cast if you control a Vehicle. ... Truck Toss deals 4 damage to any target.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Vehicle"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Truck Toss",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Truck Toss without a Vehicle discount",
+				"basis": "This spell costs {2} less to cast if you control a Vehicle. ... Truck Toss deals 4 damage to any target.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Vehicle"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

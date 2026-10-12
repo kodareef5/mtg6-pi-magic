@@ -1,0 +1,55 @@
+{
+	"card": "Wary Thespian",
+	"generated": "2026-10-10",
+	"source": "acc869734bb98d97cdd4ccf025d14ad3ace80023728985e7ee532bc0731347f7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wary Thespian",
+		"registers": [
+			{
+				"basis": "When this creature enters or dies, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters or dies, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

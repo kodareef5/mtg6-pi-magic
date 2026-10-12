@@ -1,0 +1,64 @@
+{
+	"card": "Threadbind Clique // Rip the Seams",
+	"generated": "2026-10-10",
+	"source": "77f3f262128f28066ea2f9777b85dcd363463aca1a75b2dff457dacb043a7955",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Threadbind Clique // Rip the Seams",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Threadbind Clique // Rip the Seams",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rip the Seams",
+				"basis": "Destroy target tapped creature. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"tapped": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,69 @@
+{
+	"card": "Action News Crew",
+	"generated": "2026-10-10",
+	"source": "f08a9aeb3b61a5aaf05be4b8a6e1b99ddb4ced36243143847611cf7549378808",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Action News Crew",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Action News Crew",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Channel: put a +1/+1 counter on each creature you control, then draw a card",
+				"basis": "Channel — {6}, Discard this card: Put a +1/+1 counter on each creature you control. Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

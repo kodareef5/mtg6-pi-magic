@@ -1,0 +1,58 @@
+{
+	"card": "Loyal Tutor",
+	"generated": "2026-10-10",
+	"source": "0bd85d384c4c0d31dbcfdb9b32a33adcd32ab61e30ad7e2f743b8288c7540a8c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Loyal Tutor",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Loyal Tutor",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Loyal Tutor",
+				"basis": "Search your library for a planeswalker card, reveal it, then shuffle and put that card on top.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"planeswalker"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "planeswalker"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "move",
+						"what": "bound:planeswalker",
+						"to": "library",
+						"position": "top",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,66 @@
+{
+	"card": "Devoted Duelist",
+	"generated": "2026-10-10",
+	"source": "53d2adda98f8bcd146a5e0725c26279902f8dd55a0046449ce5087228e9efbe9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Devoted Duelist",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Flurry — Whenever you cast your second spell each turn, this creature deals 1 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"ordinal": 2,
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

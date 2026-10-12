@@ -1,0 +1,48 @@
+{
+	"card": "Elder Auntie",
+	"generated": "2026-10-10",
+	"source": "cb04bd92af1e0e337c26a410346c65153faeb9a2fe6123e40196406c09257c12",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elder Auntie",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 1/1 black and red Goblin creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Goblin",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Goblin"
+								],
+								"colors": [
+									"B",
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

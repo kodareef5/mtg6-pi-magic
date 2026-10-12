@@ -1,0 +1,57 @@
+{
+	"card": "Villainous Wrath",
+	"generated": "2026-10-10",
+	"source": "80f1ba1fef1e292b17070ae287fce39afb91736da9bb1118b1790031caf915d4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Villainous Wrath",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Villainous Wrath",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Target opponent loses life equal to their creature count, then destroy all creatures.",
+				"basis": "Target opponent loses life equal to the number of creatures they control. Then destroy all creatures.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": {
+							"negate": {
+								"count": {
+									"types": [
+										"creature"
+									],
+									"controller": "target:0"
+								}
+							}
+						}
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

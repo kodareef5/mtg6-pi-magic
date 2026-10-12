@@ -1,0 +1,75 @@
+{
+	"card": "Archway Angel",
+	"generated": "2026-10-10",
+	"source": "65baf5fc12f931bcb76d0c8cb3b140b63f59272fb97e2997ded3999e9489d5d3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Archway Angel",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, you gain 2 life for each Gate you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"sum": [
+									{
+										"count": {
+											"subtypes": [
+												"Gate"
+											],
+											"controller": "you"
+										}
+									},
+									{
+										"count": {
+											"subtypes": [
+												"Gate"
+											],
+											"controller": "you"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,87 @@
+{
+	"card": "Pearl of Wisdom",
+	"generated": "2026-10-10",
+	"source": "e321a1ba85768fb81eeb0cc76a2efe4fc6b8328e57f5c327ae7007286c54ab3a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pearl of Wisdom",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pearl of Wisdom",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pearl of Wisdom with its Otter discount",
+				"basis": "This spell costs {1} less to cast if you control an Otter. ... Draw two cards.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Otter"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Pearl of Wisdom",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pearl of Wisdom without an Otter",
+				"basis": "This spell costs {1} less to cast if you control an Otter. ... Draw two cards.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Otter"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

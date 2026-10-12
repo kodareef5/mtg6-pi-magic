@@ -1,0 +1,55 @@
+{
+	"card": "Repel Calamity",
+	"generated": "2026-10-10",
+	"source": "2de14d0c2728a577740cb57365f3d802e8413346ce56edb9726bdbfbc7a3ac2f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Repel Calamity",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Repel Calamity",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Repel Calamity",
+				"basis": "Destroy target creature with power or toughness 4 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"any": [
+								{
+									"power": {
+										"atLeast": 4
+									}
+								},
+								{
+									"toughness": {
+										"atLeast": 4
+									}
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

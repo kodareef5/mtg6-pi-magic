@@ -1,0 +1,54 @@
+{
+	"card": "Brazen Collector",
+	"generated": "2026-10-10",
+	"source": "c137274a51e949880c16c0ccae0529bb96f107ce2a8badd2c12df8e42931eafd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brazen Collector",
+		"registers": [
+			{
+				"basis": "First strike",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, add {R}. Until end of turn, you don't lose this mana as steps and phases end.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R"
+							],
+							"until": "end-of-turn"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

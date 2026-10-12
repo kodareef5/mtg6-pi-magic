@@ -1,0 +1,59 @@
+{
+	"card": "Skilled Battlecarver",
+	"generated": "2026-10-10",
+	"source": "900b0291e39c22966633e076b7b6656b3ef9b36ed5b594e433feec7313ebf00b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Skilled Battlecarver",
+		"registers": [
+			{
+				"basis": "During your turn, this creature has first strike.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				},
+				"if": {
+					"turn": "self"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Skilled Battlecarver",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Skilled Battlecarver +1/+0 until end of turn.",
+				"basis": "{1}{R}: This creature gets +1/+0 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{R}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

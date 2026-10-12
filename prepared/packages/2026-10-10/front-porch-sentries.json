@@ -1,0 +1,48 @@
+{
+	"card": "Front Porch Sentries",
+	"generated": "2026-10-10",
+	"source": "23e057483f407ccadbb985c4f54f6b4ad3c931e486b428347a052ebde6d3ac0b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Front Porch Sentries",
+		"registers": [
+			{
+				"basis": "When this creature dies, target creature an opponent controls gets -1/-1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": -1,
+								"toughness": -1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,62 @@
+{
+	"card": "Ghostly Keybearer",
+	"generated": "2026-10-10",
+	"source": "5c8a07200825e2bdbcc23c16c5bcedf24bc71be3e18a4a8fb5b919e6ac1439f6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ghostly Keybearer",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature deals combat damage to a player, unlock a locked door of up to one target Room you control.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"subtypes": [
+									"Room"
+								],
+								"controller": "you"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "door",
+							"what": "target:0",
+							"action": "unlock"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

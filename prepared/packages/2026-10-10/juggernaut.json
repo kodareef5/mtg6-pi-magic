@@ -1,0 +1,47 @@
+{
+	"card": "Juggernaut",
+	"generated": "2026-10-10",
+	"source": "3d0f9c01dd38be67e3bd257543f24b1ecb89d466a33d6466ef3f9cf293e342f2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Juggernaut",
+		"registers": [
+			{
+				"basis": "This creature attacks each combat if able.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"attacks each combat if able"
+					]
+				}
+			},
+			{
+				"basis": "This creature can't be blocked by Walls.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"is": "this"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						],
+						"subtypes": [
+							"Wall"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"card": "Screeching Soulbreaker",
+	"generated": "2026-10-10",
+	"source": "6f1c2f3f69e8a4cda47754fba2bb75004cd506b9c484b1382010b7a4311252d8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Screeching Soulbreaker",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, it deals 1 damage to each opponent and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

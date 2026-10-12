@@ -1,0 +1,34 @@
+{
+	"card": "Luxknight Breacher",
+	"generated": "2026-10-10",
+	"source": "de3e7670c3effaba348fe503770219bb20fc047f0059109a16380e6a254ba4b7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Luxknight Breacher",
+		"registers": [
+			{
+				"basis": "This creature enters with a +1/+1 counter on it for each other creature and/or artifact you control.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature",
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						}
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

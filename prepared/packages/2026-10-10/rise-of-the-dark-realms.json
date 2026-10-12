@@ -1,0 +1,44 @@
+{
+	"card": "Rise of the Dark Realms",
+	"generated": "2026-10-10",
+	"source": "9fb382fad9a8f27cbb138362ecf6dab4c1cb2c692c9420ab18c6df84e0ebb31b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rise of the Dark Realms",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rise of the Dark Realms",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put all creature cards from all graveyards onto the battlefield under my control.",
+				"basis": "Put all creature cards from all graveyards onto the battlefield under your control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

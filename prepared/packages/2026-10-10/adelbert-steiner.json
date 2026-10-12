@@ -1,0 +1,62 @@
+{
+	"card": "Adelbert Steiner",
+	"generated": "2026-10-10",
+	"source": "c246c29db333c6998c8cac054c3725048606b5ac87b170bbbe5d0fc85d762717",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Adelbert Steiner",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "Adelbert Steiner gets +1/+1 for each Equipment you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Equipment"
+							],
+							"controller": "you"
+						}
+					},
+					"toughness": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Equipment"
+							],
+							"controller": "you"
+						}
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

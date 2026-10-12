@@ -1,0 +1,58 @@
+{
+	"card": "Valley Mightcaller",
+	"generated": "2026-10-10",
+	"source": "a6299878ba46c442697367a72f919f478fb7a139236ac20759d507c067e2bd8e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Valley Mightcaller",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Frog, Rabbit, Raccoon, or Squirrel you control enters, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"controller": "you",
+						"other": true,
+						"subtypes": [
+							"Frog",
+							"Rabbit",
+							"Raccoon",
+							"Squirrel"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

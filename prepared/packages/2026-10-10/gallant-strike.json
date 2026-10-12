@@ -1,0 +1,69 @@
+{
+	"card": "Gallant Strike",
+	"generated": "2026-10-10",
+	"source": "90b12d89cf00fb19c1301bfbff419be51ca8bfc2b0be9c95aea8cc291d405090",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gallant Strike",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gallant Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gallant Strike",
+				"basis": "Destroy target creature with toughness 4 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"toughness": {
+								"atLeast": 4
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Gallant Strike",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Gallant Strike",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

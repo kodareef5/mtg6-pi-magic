@@ -1,0 +1,51 @@
+{
+	"card": "Eager Glyphmage",
+	"generated": "2026-10-10",
+	"source": "771d4eea7d325814384918f7b3ea4e437287ea3ca262590c6d2be358d10bab0c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eager Glyphmage",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 1/1 white and black Inkling creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Inkling",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Inkling"
+								],
+								"colors": [
+									"W",
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

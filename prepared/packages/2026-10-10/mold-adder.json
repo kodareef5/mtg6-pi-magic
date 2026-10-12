@@ -1,0 +1,43 @@
+{
+	"card": "Mold Adder",
+	"generated": "2026-10-10",
+	"source": "dab9ef787f4bd821d91b1fe392e0070652af8a61eb52cb858331ee45bc5a82a8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mold Adder",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever an opponent casts a blue or black spell, you may put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "cast",
+					"by": "opponent",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"colors": [
+							"U",
+							"B"
+						]
+					}
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

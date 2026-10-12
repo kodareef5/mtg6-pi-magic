@@ -1,0 +1,34 @@
+{
+	"card": "Pulse Tracker",
+	"generated": "2026-10-10",
+	"source": "5a1efeed88b1523a6463bab787e5ebe773aa640a86a19ec61188be62a3c3a2e3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pulse Tracker",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, each opponent loses 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

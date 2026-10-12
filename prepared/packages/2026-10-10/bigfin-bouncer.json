@@ -1,0 +1,45 @@
+{
+	"card": "Bigfin Bouncer",
+	"generated": "2026-10-10",
+	"source": "ad14e0240cb8587dbb9c67520dc7ad8538609c2cf6ee26abd15fbe78ae12d2ce",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bigfin Bouncer",
+		"registers": [
+			{
+				"basis": "When this creature enters, return target creature an opponent controls to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"card": "Stony-Voiced Goblins",
+	"generated": "2026-10-10",
+	"source": "d3dd0c14088ca5b6b9e190e81c547fd1d1e8c06b856817454aac90836dc73f99",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stony-Voiced Goblins",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, each opponent discards a card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": 1,
+							"actions": [
+								{
+									"discard": true
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

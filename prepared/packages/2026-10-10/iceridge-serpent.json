@@ -1,0 +1,45 @@
+{
+	"card": "Iceridge Serpent",
+	"generated": "2026-10-10",
+	"source": "8a09714069da8f3f0cc5de3113b2fe494724ca8db3448b13ce424c0e47011d05",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Iceridge Serpent",
+		"registers": [
+			{
+				"basis": "When this creature enters, return target creature an opponent controls to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

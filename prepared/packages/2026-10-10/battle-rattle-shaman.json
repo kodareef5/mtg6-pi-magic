@@ -1,0 +1,47 @@
+{
+	"card": "Battle-Rattle Shaman",
+	"generated": "2026-10-10",
+	"source": "975cb04536106f3a6961b7bccc5c3569854f40c8c14ec772cce2de794204c7e8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Battle-Rattle Shaman",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, you may have target creature get +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"may": true,
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

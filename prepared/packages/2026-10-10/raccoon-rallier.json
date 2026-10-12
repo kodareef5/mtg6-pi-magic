@@ -1,0 +1,53 @@
+{
+	"card": "Raccoon Rallier",
+	"generated": "2026-10-10",
+	"source": "3301be1c7da7726ecc3f02eefd243b120d5fb3e8cde0a6d6a79096aeaee7bbe5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Raccoon Rallier",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Raccoon Rallier",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give a creature you control haste until end of turn.",
+				"basis": "{T}: Target creature you control gains haste until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

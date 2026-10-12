@@ -1,0 +1,57 @@
+{
+	"card": "Rite of the Dragoncaller",
+	"generated": "2026-10-10",
+	"source": "f9c550485d74fd77112aaa43b036354b45599a6b33b01e64d6fa1bec4baa3285",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rite of the Dragoncaller",
+		"registers": [
+			{
+				"basis": "Whenever you cast an instant or sorcery spell, create a 5/5 red Dragon creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Dragon",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Dragon"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 5,
+								"toughness": 5,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

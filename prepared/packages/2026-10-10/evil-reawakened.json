@@ -1,0 +1,54 @@
+{
+	"card": "Evil Reawakened",
+	"generated": "2026-10-10",
+	"source": "9e716a7878c9146c70138d2541dab77235c2bbfb958fc2becfb0b964936c2cb0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Evil Reawakened",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Evil Reawakened",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Evil Reawakened",
+				"basis": "Return target creature card from your graveyard to the battlefield with two additional +1/+1 counters on it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"counters": {
+							"+1/+1": 2
+						},
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

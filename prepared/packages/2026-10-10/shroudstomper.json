@@ -1,0 +1,89 @@
+{
+	"card": "Shroudstomper",
+	"generated": "2026-10-10",
+	"source": "cde4c87002d7af7fca23b53b8f9ce3fe19ca498a1493e4e214fd6c6c0aa9584b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shroudstomper",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, each opponent loses 2 life. You gain 2 life and draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature enters or attacks, each opponent loses 2 life. You gain 2 life and draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

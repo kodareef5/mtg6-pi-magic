@@ -1,0 +1,112 @@
+{
+	"card": "Gold Rush",
+	"generated": "2026-10-10",
+	"source": "bdb3abba9f482bae5f643f546091ae9f4c955d485f313257a482d1dc053d4543",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gold Rush",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gold Rush",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gold Rush",
+				"basis": "Create a Treasure token. Until end of turn, up to one target creature gets +2/+2 for each Treasure you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Treasure",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"sum": [
+									{
+										"count": {
+											"subtypes": [
+												"Treasure"
+											],
+											"controller": "you"
+										}
+									},
+									{
+										"count": {
+											"subtypes": [
+												"Treasure"
+											],
+											"controller": "you"
+										}
+									}
+								]
+							},
+							"toughness": {
+								"sum": [
+									{
+										"count": {
+											"subtypes": [
+												"Treasure"
+											],
+											"controller": "you"
+										}
+									},
+									{
+										"count": {
+											"subtypes": [
+												"Treasure"
+											],
+											"controller": "you"
+										}
+									}
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

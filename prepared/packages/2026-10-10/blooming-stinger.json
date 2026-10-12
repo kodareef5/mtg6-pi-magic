@@ -1,0 +1,66 @@
+{
+	"card": "Blooming Stinger",
+	"generated": "2026-10-10",
+	"source": "1d10b141a87c2223c7cdef6c0765df79c1e82697109c8d1481ece7cca3f1553c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blooming Stinger",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, another target creature you control gains deathtouch until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"deathtouch"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

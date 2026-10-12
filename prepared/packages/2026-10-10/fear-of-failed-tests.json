@@ -1,0 +1,37 @@
+{
+	"card": "Fear of Failed Tests",
+	"generated": "2026-10-10",
+	"source": "8d51dd837f0f7c09fb73d2f3edeb1a406c776949f4047d23cadcb224767fd7df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fear of Failed Tests",
+		"registers": [
+			{
+				"basis": "Whenever this creature deals combat damage to a player, draw that many cards.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"event": "amount"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

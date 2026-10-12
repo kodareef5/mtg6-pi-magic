@@ -1,0 +1,62 @@
+{
+	"card": "Vulture, Scheming Scavenger",
+	"generated": "2026-10-10",
+	"source": "41ce7124fee395734d6d00df44e933b4852db5ef5c930a58d13cdfb000a179db",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vulture, Scheming Scavenger",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Vulture attacks, other Villains you control gain flying until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"subtypes": [
+									"Villain"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

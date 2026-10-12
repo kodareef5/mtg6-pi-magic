@@ -1,0 +1,64 @@
+{
+	"card": "United Front",
+	"generated": "2026-10-10",
+	"source": "0426a6a59b29c4883d27ab9d58f28c45f94a549b6e1751d6c93c744fd07f95b3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "United Front",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "United Front",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast United Front",
+				"basis": "Create X 1/1 white Ally creature tokens, then put a +1/+1 counter on each creature you control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"x": true
+						},
+						"spec": {
+							"name": "Ally",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Ally"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "counters",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,53 @@
+{
+	"card": "Elvish Regrower",
+	"generated": "2026-10-10",
+	"source": "62f8a0ad7d575c832f16fae9375ab901028e529e0e42763ae98a51e191c51a3d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elvish Regrower",
+		"registers": [
+			{
+				"basis": "When this creature enters, return target permanent card from your graveyard to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"artifact",
+									"battle",
+									"creature",
+									"enchantment",
+									"land",
+									"planeswalker"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

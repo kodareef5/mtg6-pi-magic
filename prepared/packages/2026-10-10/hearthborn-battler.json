@@ -1,0 +1,70 @@
+{
+	"card": "Hearthborn Battler",
+	"generated": "2026-10-10",
+	"source": "b79a031f1b8d00bebeb1787a3856a787fe1af57cab5cc88ae207306897cdfe8d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hearthborn Battler",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever a player casts their second spell each turn, this creature deals 2 damage to target opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "any",
+					"ordinal": 2,
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 2,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

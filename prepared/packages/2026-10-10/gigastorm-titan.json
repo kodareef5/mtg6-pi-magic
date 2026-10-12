@@ -1,0 +1,72 @@
+{
+	"card": "Gigastorm Titan",
+	"generated": "2026-10-10",
+	"source": "7b0f1e51eabee2c52320438b52369e6ce5efd1f33d215cd90759807c12f61e25",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gigastorm Titan",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gigastorm Titan",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gigastorm Titan before casting another spell this turn",
+				"basis": "This spell costs {3} less to cast if you've cast another spell this turn.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Gigastorm Titan",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gigastorm Titan with its three-generic-mana reduction",
+				"basis": "This spell costs {3} less to cast if you've cast another spell this turn.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 3
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

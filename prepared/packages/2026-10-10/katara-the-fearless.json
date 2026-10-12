@@ -1,0 +1,26 @@
+{
+	"card": "Katara, the Fearless",
+	"generated": "2026-10-10",
+	"source": "702ea8b9b7604d8bd8fd0730c4c05a1ba46210a94365a160fe5aa9d071571b41",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Katara, the Fearless",
+		"registers": [
+			{
+				"basis": "If a triggered ability of an Ally you control triggers, that ability triggers an additional time.",
+				"kind": "trigger-rule",
+				"affects": {
+					"controller": "you",
+					"subtypes": [
+						"Ally"
+					]
+				},
+				"additional": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

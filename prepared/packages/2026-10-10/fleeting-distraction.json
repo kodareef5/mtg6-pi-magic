@@ -1,0 +1,52 @@
+{
+	"card": "Fleeting Distraction",
+	"generated": "2026-10-10",
+	"source": "59f826438ca42e318a29feebd855a5318d1dad6bef93a20c3a994ac7bbb975b0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fleeting Distraction",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fleeting Distraction",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature -1/-0 until end of turn, then draw a card.",
+				"basis": "Target creature gets -1/-0 until end of turn. ... Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -1
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

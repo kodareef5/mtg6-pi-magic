@@ -1,0 +1,86 @@
+{
+	"card": "Training Compound",
+	"generated": "2026-10-10",
+	"source": "d39685f2a7e14945601d997f35a8b02eb41d7337455b92d6960068725262f187",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Training Compound",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add {R} or {G}. Activate only if this land entered this turn or if you control a basic land.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				],
+				"if": {
+					"any": [
+						{
+							"enteredThisTurn": "this"
+						},
+						{
+							"amount": {
+								"count": {
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {R} or {G}. Activate only if this land entered this turn or if you control a basic land.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"if": {
+					"any": [
+						{
+							"enteredThisTurn": "this"
+						},
+						{
+							"amount": {
+								"count": {
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

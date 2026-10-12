@@ -1,0 +1,37 @@
+{
+	"card": "Druid of the Spade",
+	"generated": "2026-10-10",
+	"source": "b886adbd941260454650c973a92090647be2e2985c91d8036953934bd25861d6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Druid of the Spade",
+		"registers": [
+			{
+				"basis": "As long as you control a token, this creature gets +2/+0 and has trample.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 2,
+					"words": [
+						"trample"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"token": true
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

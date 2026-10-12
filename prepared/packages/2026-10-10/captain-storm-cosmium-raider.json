@@ -1,0 +1,48 @@
+{
+	"card": "Captain Storm, Cosmium Raider",
+	"generated": "2026-10-10",
+	"source": "8ad5726e37868e7f53db2e7088c534e8b2316de93334252dc703da89c479b332",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Captain Storm, Cosmium Raider",
+		"registers": [
+			{
+				"basis": "Whenever an artifact you control enters, put a +1/+1 counter on target Pirate you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"subtypes": [
+									"Pirate"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

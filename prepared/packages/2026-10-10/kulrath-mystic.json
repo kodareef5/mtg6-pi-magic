@@ -1,0 +1,57 @@
+{
+	"card": "Kulrath Mystic",
+	"generated": "2026-10-10",
+	"source": "3aeb10db49ee3109d25a22ef6359086a8879e49c4ba757088a514c9096e99ae4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kulrath Mystic",
+		"registers": [
+			{
+				"basis": "Whenever you cast a spell with mana value 4 or greater, this creature gets +2/+0 and gains vigilance until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"land",
+							"planeswalker",
+							"sorcery"
+						],
+						"manaValue": {
+							"atLeast": 4
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"words": [
+									"vigilance"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

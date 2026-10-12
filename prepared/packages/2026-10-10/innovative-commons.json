@@ -1,0 +1,52 @@
+{
+	"card": "Innovative Commons",
+	"generated": "2026-10-10",
+	"source": "9d1d172bb99eea386b375a24a74670d0c4a2da5c330877b0a123ba05e4e15645",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Innovative Commons",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a planeswalker.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"planeswalker"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {U} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			},
+			{
+				"basis": "{T}: Add {U} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"card": "Good-Fortune Unicorn",
+	"generated": "2026-10-10",
+	"source": "5ad097b0c3ce6b11c1b003c35035c25cd75a1514688264e9136fcc98387ec34a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Good-Fortune Unicorn",
+		"registers": [
+			{
+				"basis": "Whenever another creature you control enters, put a +1/+1 counter on that creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "event:object",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

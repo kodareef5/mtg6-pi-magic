@@ -1,0 +1,40 @@
+{
+	"card": "Cast Away Doubt",
+	"generated": "2026-10-10",
+	"source": "8975a250e4ef14d9f41158acece7d335961e34099fa64bd898fa1db32870ebcc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cast Away Doubt",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cast Away Doubt",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cast Away Doubt",
+				"basis": "Draw two cards. Cast Away Doubt deals 2 damage to each player.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "damage",
+						"to": "each-player",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

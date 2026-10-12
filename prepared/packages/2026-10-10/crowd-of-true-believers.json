@@ -1,0 +1,81 @@
+{
+	"card": "Crowd of True Believers",
+	"generated": "2026-10-10",
+	"source": "8ea3b764b745b10040a68c49e8d94c619348670ff3902e832c7f24d66a818cce",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Crowd of True Believers",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Crowd of True Believers",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give target creature you control that's attacking alone +1/+0 until end of turn, then gain 1 life.",
+				"basis": "{T}: Target creature you control that's attacking alone gets +1/+0 until end of turn. You gain 1 life.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"attacking": true,
+							"power": {
+								"atLeast": {
+									"sum": [
+										{
+											"aggregate": "max",
+											"of": {
+												"types": [
+													"creature"
+												],
+												"attacking": true
+											},
+											"value": "power"
+										},
+										{
+											"count": {
+												"types": [
+													"creature"
+												],
+												"attacking": true
+											}
+										},
+										-1
+									]
+								}
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,38 @@
+{
+	"card": "Thrill of Possibility",
+	"generated": "2026-10-10",
+	"source": "6674c50822e4f11c561eeb1671fe205d09333efcf9cfeb3ff8b9e92e3782b60d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thrill of Possibility",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thrill of Possibility",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Thrill of Possibility, discarding a card to draw two cards",
+				"basis": "As an additional cost to cast this spell, discard a card. ... Draw two cards.",
+				"timing": "spell",
+				"cost": {
+					"discard": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,67 @@
+{
+	"card": "Rescue Girl, First Responder",
+	"generated": "2026-10-10",
+	"source": "ba31b7be4c58dfa8a0f8ba29920a081c0a06fe03683969c0ddc713366541e6d5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rescue Girl, First Responder",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rescue Girl, First Responder",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Return another permanent you control to its owner's hand during your turn.",
+				"basis": "{T}: Return another target permanent you control to its owner's hand. Activate only during your turn.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"if": {
+					"turn": "self"
+				},
+				"targets": [
+					{
+						"object": {
+							"controller": "you",
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

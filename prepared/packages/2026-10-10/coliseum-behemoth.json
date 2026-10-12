@@ -1,0 +1,73 @@
+{
+	"card": "Coliseum Behemoth",
+	"generated": "2026-10-10",
+	"source": "6dafaa1ab994f2c31c8b6fbba7c11a4d82a9abfa7d2a075ad055c5ff4048e606",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Coliseum Behemoth",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, choose one —\n• Destroy target artifact or enchantment.\n• Draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"types": [
+											"artifact",
+											"enchantment"
+										]
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "destroy",
+									"what": "target:0"
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "draw",
+									"who": "you",
+									"count": 1
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,70 @@
+{
+	"card": "Cathar Commando",
+	"generated": "2026-10-10",
+	"source": "c89252f0f1600ae25dff9d7fc0ec91bb283ac1b96f22a3a45452182b1f5a1bdf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cathar Commando",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cathar Commando",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Cathar Commando to destroy target artifact or enchantment",
+				"basis": "{1}, Sacrifice this creature: Destroy target artifact or enchantment.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

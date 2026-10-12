@@ -1,0 +1,1885 @@
+{
+	"card": "Wildvine Pummeler",
+	"generated": "2026-10-10",
+	"source": "b2e2dbdd0ad0a7947dd79fa1799766b36518092441d55364b5ac86542fa08cc1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wildvine Pummeler",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Reach, trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Wildvine Pummeler",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Wildvine Pummeler with no colors among controlled permanents",
+				"basis": "Vivid — This spell costs {1} less to cast for each color among permanents you control.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"colors": [
+								"W",
+								"U",
+								"B",
+								"R",
+								"G"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"cost": {
+					"reduce": 0
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Wildvine Pummeler",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Wildvine Pummeler with one color among controlled permanents",
+				"basis": "Vivid — This spell costs {1} less to cast for each color among permanents you control.",
+				"timing": "spell",
+				"cost": {
+					"reduce": 1
+				},
+				"if": {
+					"any": [
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U",
+												"B",
+												"R",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"B",
+												"R",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"U",
+												"R",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"U",
+												"B",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"U",
+												"B",
+												"R"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						}
+					]
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Wildvine Pummeler",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Wildvine Pummeler with two colors among controlled permanents",
+				"basis": "Vivid — This spell costs {1} less to cast for each color among permanents you control.",
+				"timing": "spell",
+				"cost": {
+					"reduce": 2
+				},
+				"if": {
+					"any": [
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B",
+												"R",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U",
+												"R",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U",
+												"B",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U",
+												"B",
+												"R"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"R",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"B",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"B",
+												"R"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"U",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"U",
+												"R"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"U",
+												"B"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						}
+					]
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Wildvine Pummeler",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Wildvine Pummeler with three colors among controlled permanents",
+				"basis": "Vivid — This spell costs {1} less to cast for each color among permanents you control.",
+				"timing": "spell",
+				"cost": {
+					"reduce": 3
+				},
+				"if": {
+					"any": [
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B",
+												"R"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U",
+												"R"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U",
+												"B"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"R"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"B"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W",
+												"U"
+											]
+										}
+									},
+									"atMost": 0
+								}
+							]
+						}
+					]
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Wildvine Pummeler",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Wildvine Pummeler with four colors among controlled permanents",
+				"basis": "Vivid — This spell costs {1} less to cast for each color among permanents you control.",
+				"timing": "spell",
+				"cost": {
+					"reduce": 4
+				},
+				"if": {
+					"any": [
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atMost": 0
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atMost": 0
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atMost": 0
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atMost": 0
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						},
+						{
+							"all": [
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"G"
+											]
+										}
+									},
+									"atMost": 0
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"W"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"U"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"B"
+											]
+										}
+									},
+									"atLeast": 1
+								},
+								{
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"controller": "you",
+											"colors": [
+												"R"
+											]
+										}
+									},
+									"atLeast": 1
+								}
+							]
+						}
+					]
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Wildvine Pummeler",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Wildvine Pummeler with all five colors among controlled permanents",
+				"basis": "Vivid — This spell costs {1} less to cast for each color among permanents you control.",
+				"timing": "spell",
+				"cost": {
+					"reduce": 5
+				},
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

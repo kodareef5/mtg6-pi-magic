@@ -1,0 +1,68 @@
+{
+	"card": "Withering Curse",
+	"generated": "2026-10-10",
+	"source": "1f6fd6a53d0e51e4109ad19b9a9aef69206a6f02613b41995557d653eee67a3a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Withering Curse",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Withering Curse",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Withering Curse",
+				"basis": "All creatures get -2/-2 until end of turn. ... Infusion — If you gained life this turn, destroy all creatures instead.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": -2,
+							"toughness": -2
+						},
+						"if": {
+							"not": {
+								"amount": {
+									"history": "life-gained",
+									"by": "you"
+								},
+								"atLeast": 1
+							}
+						}
+					},
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"creature"
+							]
+						},
+						"if": {
+							"amount": {
+								"history": "life-gained",
+								"by": "you"
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

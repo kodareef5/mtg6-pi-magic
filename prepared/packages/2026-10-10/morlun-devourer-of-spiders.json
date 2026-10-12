@@ -1,0 +1,82 @@
+{
+	"card": "Morlun, Devourer of Spiders",
+	"generated": "2026-10-10",
+	"source": "d351f105c88e09f4bfcae20d548288d940369bf721444e3f8232b885d0f3ef4a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Morlun, Devourer of Spiders",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "Morlun enters with X +1/+1 counters on him.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": {
+						"x": true
+					}
+				}
+			},
+			{
+				"basis": "When Morlun enters, he deals X damage to target opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": {
+								"x": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Morlun, Devourer of Spiders",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Morlun, Devourer of Spiders with chosen X",
+				"basis": "Morlun enters with X +1/+1 counters on him.",
+				"timing": "spell",
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

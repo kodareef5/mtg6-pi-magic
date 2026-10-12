@@ -1,0 +1,60 @@
+{
+	"card": "Memory Guardian",
+	"generated": "2026-10-10",
+	"source": "c9619a1ecc7ba77d2f4120eedefae60ee7b6a3c15ada0907040b0a3ee3e63141",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Memory Guardian",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Memory Guardian",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Memory Guardian with affinity for artifacts",
+				"basis": "Affinity for artifacts (This spell costs {1} less to cast for each artifact you control.)",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

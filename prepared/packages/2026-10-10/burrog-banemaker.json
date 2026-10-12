@@ -1,0 +1,58 @@
+{
+	"card": "Burrog Banemaker",
+	"generated": "2026-10-10",
+	"source": "a2624ed4409884adfd9efcb2f011d523b1e518abafa855229f9959fb59f8113e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Burrog Banemaker",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Burrog Banemaker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Burrog Banemaker +1/+1 until end of turn",
+				"basis": "{1}{B}: This creature gets +1/+1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

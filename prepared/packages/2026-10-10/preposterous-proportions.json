@@ -1,0 +1,47 @@
+{
+	"card": "Preposterous Proportions",
+	"generated": "2026-10-10",
+	"source": "c129680d7a96e690c593ab74676f4db7ea28672feef03e2a4792272fd096450b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Preposterous Proportions",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Preposterous Proportions",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give creatures you control +10/+10 and vigilance until end of turn.",
+				"basis": "Creatures you control get +10/+10 and gain vigilance until end of turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 10,
+							"toughness": 10,
+							"words": [
+								"vigilance"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,54 @@
+{
+	"card": "Helping Hand",
+	"generated": "2026-10-10",
+	"source": "09ce01194b1688d7e0e5eb4f34b03ee8097f3ce8aff545d52f7f0b73602f829c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Helping Hand",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Helping Hand",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return a creature card with mana value 3 or less from your graveyard to the battlefield tapped.",
+				"basis": "Return target creature card with mana value 3 or less from your graveyard to the battlefield tapped.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

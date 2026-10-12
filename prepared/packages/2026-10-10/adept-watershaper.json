@@ -1,0 +1,35 @@
+{
+	"card": "Adept Watershaper",
+	"generated": "2026-10-10",
+	"source": "e28df8109c3a0c3df1004ba563cea2b0a223406f1952ddf255c683ca537d827c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Adept Watershaper",
+		"registers": [
+			{
+				"basis": "Other tapped creatures you control have indestructible.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"tapped": true,
+					"other": true
+				},
+				"change": {
+					"words": [
+						"indestructible"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

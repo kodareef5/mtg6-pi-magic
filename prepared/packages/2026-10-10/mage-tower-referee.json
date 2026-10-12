@@ -1,0 +1,102 @@
+{
+	"card": "Mage Tower Referee",
+	"generated": "2026-10-10",
+	"source": "5cffa49be4e7179d55c05aed9b64292549071790b360e983c0578dd39ee78059",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mage Tower Referee",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a multicolored spell, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"any": [
+							{
+								"all": [
+									{
+										"colors": [
+											"W"
+										]
+									},
+									{
+										"colors": [
+											"U",
+											"B",
+											"R",
+											"G"
+										]
+									}
+								]
+							},
+							{
+								"all": [
+									{
+										"colors": [
+											"U"
+										]
+									},
+									{
+										"colors": [
+											"B",
+											"R",
+											"G"
+										]
+									}
+								]
+							},
+							{
+								"all": [
+									{
+										"colors": [
+											"B"
+										]
+									},
+									{
+										"colors": [
+											"R",
+											"G"
+										]
+									}
+								]
+							},
+							{
+								"all": [
+									{
+										"colors": [
+											"R"
+										]
+									},
+									{
+										"colors": [
+											"G"
+										]
+									}
+								]
+							}
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

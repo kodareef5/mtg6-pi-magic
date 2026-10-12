@@ -1,0 +1,41 @@
+{
+	"card": "Stormkeld Prowler",
+	"generated": "2026-10-10",
+	"source": "222b10a0c5163c102fbfbcde5683755116ea9563faf0abc70c42db96be02c749",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stormkeld Prowler",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a spell with mana value 5 or greater, put two +1/+1 counters on this creature.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"manaValue": {
+							"atLeast": 5
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

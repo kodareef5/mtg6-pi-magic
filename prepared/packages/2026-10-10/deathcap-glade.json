@@ -1,0 +1,53 @@
+{
+	"card": "Deathcap Glade",
+	"generated": "2026-10-10",
+	"source": "d68366e18b63934352f9661b4208acf8cf774d57a39347f92c58d5efcee37a35",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deathcap Glade",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control two or more other lands.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"controller": "you",
+								"other": true
+							}
+						},
+						"atLeast": 2
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {B} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "{T}: Add {B} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

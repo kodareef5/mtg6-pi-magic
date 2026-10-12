@@ -1,0 +1,52 @@
+{
+	"card": "Fatehold Annex",
+	"generated": "2026-10-10",
+	"source": "f9b7be0aaa94b1c44a18528cb56cec10dbe8cc90678aae47914bd5a3e67ccc25",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fatehold Annex",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a planeswalker.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"planeswalker"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {W} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"basis": "{T}: Add {W} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

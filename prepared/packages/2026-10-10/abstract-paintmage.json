@@ -1,0 +1,45 @@
+{
+	"card": "Abstract Paintmage",
+	"generated": "2026-10-10",
+	"source": "bf948685435c239e79899c0503ad1c8cfee8c122f46b4015b7a6a4f4e1a3a5cb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Abstract Paintmage",
+		"registers": [
+			{
+				"basis": "At the beginning of your first main phase, add {U}{R}. Spend this mana only to cast instant and sorcery spells.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"U",
+								"R"
+							],
+							"spendOnly": {
+								"zones": [
+									"stack"
+								],
+								"types": [
+									"instant",
+									"sorcery"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

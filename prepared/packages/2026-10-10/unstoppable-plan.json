@@ -1,0 +1,39 @@
+{
+	"card": "Unstoppable Plan",
+	"generated": "2026-10-10",
+	"source": "310e3f5737336ad7e36cb037137063a4b99cbea0e5edba9d4c2ffe2b9480acc3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unstoppable Plan",
+		"registers": [
+			{
+				"basis": "At the beginning of your end step, untap all nonland permanents you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "untap",
+							"every": {
+								"controller": "you",
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

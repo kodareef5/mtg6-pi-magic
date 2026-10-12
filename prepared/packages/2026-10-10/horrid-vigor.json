@@ -1,0 +1,50 @@
+{
+	"card": "Horrid Vigor",
+	"generated": "2026-10-10",
+	"source": "4f406ca47cccdbba91cae9420e1937badaa4d072f368818139258389ff250631",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Horrid Vigor",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Horrid Vigor",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature deathtouch and indestructible until end of turn.",
+				"basis": "Target creature gains deathtouch and indestructible until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"deathtouch",
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

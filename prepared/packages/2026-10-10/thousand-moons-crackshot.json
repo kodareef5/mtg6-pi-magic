@@ -1,0 +1,61 @@
+{
+	"card": "Thousand Moons Crackshot",
+	"generated": "2026-10-10",
+	"source": "8ab2b3cf0b4eff24defcb4df63c73b6ff65695fdf690f08d4c8118e1fe529e6d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thousand Moons Crackshot",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, you may pay {2}{W}. When you do, tap target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{2}{W}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "paid"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "tap",
+										"what": "target:0"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

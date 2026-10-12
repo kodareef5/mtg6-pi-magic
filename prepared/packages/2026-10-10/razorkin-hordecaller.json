@@ -1,0 +1,61 @@
+{
+	"card": "Razorkin Hordecaller",
+	"generated": "2026-10-10",
+	"source": "317df2735ee6bdf93a9d32c3906b059411f3aab9b356ad64c0fca4c92bc93822",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Razorkin Hordecaller",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you attack, create a 1/1 red Gremlin creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Gremlin",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Gremlin"
+								],
+								"colors": [
+									"R"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"card": "Bile-Vial Boggart",
+	"generated": "2026-10-10",
+	"source": "c13b9a74d320d32dcc95f5ecca96fd001fdce9b756f82e2e68af4e51888d7757",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bile-Vial Boggart",
+		"registers": [
+			{
+				"basis": "When this creature dies, put a -1/-1 counter on up to one target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "-1/-1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,62 @@
+{
+	"card": "Splatter Technique",
+	"generated": "2026-10-10",
+	"source": "a8de38354e12459bf7c9bea752685ab34f546afc261a0dcda1105c34b913a714",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Splatter Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Splatter Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Splatter Technique: draw four cards",
+				"basis": "Choose one —\n• Draw four cards.\n• Splatter Technique deals 4 damage to each creature and planeswalker.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 4
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Splatter Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Splatter Technique: deal 4 damage to each creature and planeswalker",
+				"basis": "Choose one —\n• Draw four cards.\n• Splatter Technique deals 4 damage to each creature and planeswalker.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						},
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

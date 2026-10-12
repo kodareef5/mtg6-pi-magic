@@ -1,0 +1,53 @@
+{
+	"card": "Mentor of the Meek",
+	"generated": "2026-10-10",
+	"source": "08de9ffe9fd945d931d13350be32737ded935ef47b9e2c5f5fc9992487b55687",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mentor of the Meek",
+		"registers": [
+			{
+				"basis": "Whenever another creature you control with power 2 or less enters, you may pay {1}. If you do, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true,
+						"power": {
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{1}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

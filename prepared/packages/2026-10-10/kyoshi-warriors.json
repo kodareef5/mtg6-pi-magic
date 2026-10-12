@@ -1,0 +1,47 @@
+{
+	"card": "Kyoshi Warriors",
+	"generated": "2026-10-10",
+	"source": "de6abeacc289b820720ad0f3f7777d3d09d09fa0104c4d0d9af8c7f453cc6875",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kyoshi Warriors",
+		"registers": [
+			{
+				"basis": "When this creature enters, create a 1/1 white Ally creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Ally",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Ally"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

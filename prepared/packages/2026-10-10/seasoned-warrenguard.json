@@ -1,0 +1,46 @@
+{
+	"card": "Seasoned Warrenguard",
+	"generated": "2026-10-10",
+	"source": "b26546145ac415e7cf03cf099d98ed88dc120aa0b3513eaa4627e6c3bd7ddc33",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seasoned Warrenguard",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks while you control a token, this creature gets +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"token": true
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

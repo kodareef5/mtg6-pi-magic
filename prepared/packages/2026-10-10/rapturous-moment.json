@@ -1,0 +1,64 @@
+{
+	"card": "Rapturous Moment",
+	"generated": "2026-10-10",
+	"source": "aa308652b5428340ed0a112ecd6fe456428405e6517cbc880d3db08811a6654c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rapturous Moment",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rapturous Moment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw three cards, discard two, then add five mana.",
+				"basis": "Draw three cards, then discard two cards. Add {U}{U}{R}{R}{R}.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 2,
+						"as": "cards"
+					},
+					{
+						"do": "move",
+						"what": "bound:cards",
+						"to": "graveyard",
+						"reason": "discard"
+					},
+					{
+						"do": "mana",
+						"who": "you",
+						"colors": [
+							"U",
+							"U",
+							"R",
+							"R",
+							"R"
+						]
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

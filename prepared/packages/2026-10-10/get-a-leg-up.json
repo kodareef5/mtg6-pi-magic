@@ -1,0 +1,65 @@
+{
+	"card": "Get a Leg Up",
+	"generated": "2026-10-10",
+	"source": "3434cbae8691f0bd758ad66cdc4d4ec9ca5075dc1ef924510093cfc32cf86d24",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Get a Leg Up",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Get a Leg Up",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Get a Leg Up",
+				"basis": "Until end of turn, target creature gets +1/+1 for each creature you control and gains reach.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"count": {
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							"toughness": {
+								"count": {
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							"words": [
+								"reach"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

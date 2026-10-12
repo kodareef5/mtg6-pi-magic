@@ -1,0 +1,73 @@
+{
+	"card": "H.E.R.B.I.E. Scout Unit",
+	"generated": "2026-10-10",
+	"source": "0e3cc6bb0d62c5ae43b567a585c182914a7f97f07fddb10cd4df14a1c0a2d2b9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "H.E.R.B.I.E. Scout Unit",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, draw a card, then you may put a land card from your hand onto the battlefield tapped.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you",
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "battlefield",
+							"tapped": true,
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

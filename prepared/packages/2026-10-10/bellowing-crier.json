@@ -1,0 +1,52 @@
+{
+	"card": "Bellowing Crier",
+	"generated": "2026-10-10",
+	"source": "cd4bf29caa1adbab03083683ae88a66ecbf7e7d2444a8c2efb66ab41bceb1987",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bellowing Crier",
+		"registers": [
+			{
+				"basis": "When this creature enters, draw a card, then discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

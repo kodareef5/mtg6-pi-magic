@@ -1,4 +1,59 @@
 {
+	"A Tale for the Ages": {
+		"reason": "A Tale for the Ages is not ready: \"Enchanted creatures you control get +2/+2.\" — Unsupported selector: creatures you control with one or more Auras attached to them. The syntax cannot express being enchanted by any Aura; attached only names this source's attachment, and attachedTo selects attachments rather than their recipients.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Abzan Devotee": {
+		"status": "unsupported",
+		"reason": "Abzan Devotee is not ready: {1}: Add {W}, {B}, or {G}. Activate only once each turn. — Mana registrations do not support a shared once-per-turn activation limit across the three alternative mana outputs.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Agency Coroner": {
+		"status": "unsupported",
+		"reason": "Agency Coroner is not ready: {2}{B}, Sacrifice another creature: Draw a card. If the sacrificed creature was suspected, draw two cards instead. — Unsupported: reading the sacrificed creature's suspected designation as it last existed on the battlefield and using that fact to replace drawing one card with drawing two. Suspected is not a supported designation; it cannot be approximated by a keyword or counter. The activation therefore cannot be prepared completely.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Agent Maria Hill": {
+		"status": "unsupported",
+		"reason": "Agent Maria Hill is not ready: Whenever Agent Maria Hill becomes tapped to pay a teamwork cost, put a +1/+1 counter on her and draw a card. — Unsupported trigger event: becoming tapped specifically to pay a teamwork cost; the available event schema supports neither becoming tapped nor identifying a teamwork payment.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"April O'Neil, Hacktivist": {
+		"status": "unsupported",
+		"reason": "April O'Neil, Hacktivist is not ready: At the beginning of your end step, draw a card for each card type among spells you've cast this turn. — The supported amounts cannot count distinct card types across this turn's cast-spell history for a single draw instruction; distinct card-types reads a current object selector, not historical spells.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Arashin Sunshield": {
+		"status": "unsupported",
+		"reason": "Arashin Sunshield is not ready: When this creature enters, exile up to two target cards from a single graveyard. — The target syntax cannot constrain all cards in a multiple-target slot to the same graveyard while allowing any player's graveyard. An unrestricted graveyard selector would incorrectly allow targets from different graveyards.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Atlantean Cavalry": {
+		"status": "unsupported",
+		"reason": "Atlantean Cavalry is not ready: Whenever you draw your second card each turn, put a +1/+1 counter on this creature. — Draw-event watches and the per-player second-card-drawn ordinal each turn are unsupported; library-to-hand movement is not equivalent to drawing.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Attuma, Atlantean Warlord": {
+		"status": "unsupported",
+		"reason": "Attuma, Atlantean Warlord is not ready: Whenever one or more Merfolk you control attack a player, draw a card. — The supplied attack-event semantics do not support filtering by player defenders and grouping matching attackers separately for each attacked player; a generic attacked-with batch would not preserve this trigger condition.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
 	"Aven Interrupter": {
 		"reason": "Aven Interrupter is not ready: When this creature enters, exile target spell. It becomes plotted. (Its owner may cast it as a sorcery on a later turn without paying its mana cost.) — Exiling the targeted spell is expressible, but the syntax has no plotted designation or permission combining an owner's free alternative-cost cast, mandatory sorcery timing, and exclusion of the turn it became plotted. A generic permit would not implement this ability.; Spells your opponents cast from graveyards or from exile cost {2} more to cast. — The syntax has no standing casting-cost increase registration or selector for the zone a spell is being cast from; characteristic words do not implement the required additional generic mana payment.",
 		"decks": [
@@ -6,6 +61,187 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
+	},
+	"Beanstalk Wurm // Plant Beans": {
+		"status": "unsupported",
+		"reason": "Beanstalk Wurm // Plant Beans is not ready: Face 1 — \"You may play an additional land this turn. (Then exile this card. You may cast the creature later from exile.)\" Temporary additional land-play allowance for the resolving spell's controller is not expressible: standing permit.lands has no duration, and the permit instruction grants card-specific play permission rather than an additional land play.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Behold the Sinister Six!": {
+		"status": "unsupported",
+		"reason": "Behold the Sinister Six! is not ready: Return up to six target creature cards with different names from your graveyard to the battlefield. — The target syntax cannot require every selected card to have a different name; omitting that target-group restriction would broaden the spell's legal targets.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Bender's Waterskin": {
+		"status": "unsupported",
+		"reason": "Bender's Waterskin is not ready: Untap this artifact during each other player's untap step. — Nontriggered untapping during other players' untap steps has no supported standing registration; an untap-step trigger would incorrectly use the stack.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Beorn, Reluctant Host // Till and Tend": {
+		"status": "unsupported",
+		"reason": "Beorn, Reluctant Host // Till and Tend is not ready: Face 1 — \"You may play an additional land this turn. (Then exile this card. You may cast the creature later from exile.)\" The syntax has no resolving instruction that grants a player an additional land play until end of turn independently of the spell's continued existence. Standing permit.lands does not implement this temporary spell effect. Adventure exile and later creature-casting permission are supplied by the shared mechanic.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Besotted Knight // Betroth the Beast": {
+		"status": "unsupported",
+		"reason": "Besotted Knight // Betroth the Beast is not ready: Face 1 — \"Create a Royal Role token attached to target creature you control. (Enchanted creature gets +1/+1 and has ward {1}.)\" Role creation cannot be prepared: the engine lacks the required state-based action in rule 303.7a that puts all but the most recent Role controlled by the same player attached to a permanent into their owners' graveyards. Token abilities and a separate attach instruction do not implement this rule.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Bloodthirsty Conqueror": {
+		"status": "unsupported",
+		"reason": "Bloodthirsty Conqueror is not ready: Whenever an opponent loses life, you gain that much life. (Damage causes loss of life.) — Unsupported life-loss event watch retaining the opponent and amount lost, including damage, life payments, and non-damage life loss. A damage watch would not cover this ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Bolg's Company": {
+		"status": "unsupported",
+		"reason": "Bolg's Company is not ready: {T}, Sacrifice another Goblin: Add {B}{R}. — Selecting another controlled Goblin to sacrifice as a mana-ability cost is unsupported; the mana-payment examples explicitly leave arbitrary sacrifice selections unimplemented.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Bot Bashing Time": {
+		"status": "unsupported",
+		"reason": "Bot Bashing Time is not ready: \"Bot Bashing Time deals 6 damage to target creature. If that creature would die this turn, exile it instead.\" — The standalone resolving death-to-exile replacement must survive the creature losing its abilities. The supplied register instruction instead grants a removable ability, so this spell cannot be faithfully prepared. Damage must precede creation of the replacement as printed; state-based actions do not occur between these instructions.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Broadcast Takeover": {
+		"status": "unsupported",
+		"reason": "Broadcast Takeover is not ready: Gain control of all artifacts your opponents control until end of turn. Untap them. They gain haste until end of turn. — Taking control of permanents until end of turn is unsupported, so the complete spell effect cannot be prepared.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Brush Off": {
+		"status": "unsupported",
+		"reason": "Brush Off is not ready: This spell costs {1}{U} less to cast if it targets an instant or sorcery spell. — Conditional casting-cost reduction includes a colored {U} reduction, which is unsupported; the printed cost must not be replaced with an alternative cost to approximate it.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Burrowguard Mentor": {
+		"status": "unsupported",
+		"reason": "Burrowguard Mentor is not ready: \"Burrowguard Mentor's power and toughness are each equal to the number of creatures you control.\" — This is an all-zone characteristic-defining ability applied in layer 7a. The supplied syntax does not distinguish characteristic-defining abilities; change.base applies in layer 7b and cannot faithfully implement this ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Cackling Slasher": {
+		"status": "unsupported",
+		"reason": "Cackling Slasher is not ready: This creature enters with a +1/+1 counter on it if a creature died this turn. — The entry condition requires creature-death history this turn, which the supported history conditions cannot query, including deaths before this source entered.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Carnelian Orb of Dragonkind": {
+		"status": "unsupported",
+		"reason": "Carnelian Orb of Dragonkind is not ready: \"{T}: Add {R}. If that mana is spent on a Dragon creature spell, it gains haste until end of turn.\" — Cannot express a conditional, end-of-turn haste grant from spending unrestricted mana. spellWords has no qualifying-spell filter or grant duration; spendOnly would incorrectly restrict this mana to Dragon creature spells.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Cautious Survivor": {
+		"status": "unsupported",
+		"reason": "Cautious Survivor is not ready: Survival — At the beginning of your second main phase, if this creature is tapped, you gain 2 life. — The event syntax cannot select exactly the second main phase of the current turn. A postcombat-main watch also matches later main phases (505.1a–b), so it does not faithfully express this trigger.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Chancellor of Tales": {
+		"status": "unsupported",
+		"reason": "Chancellor of Tales is not ready: Whenever you cast an Adventure spell, you may copy it. You may choose new targets for the copy. — Cannot prepare this trigger faithfully: copying multiple-face Adventure spells and choosing new targets for spell copies are unsupported.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Clammy Prowler": {
+		"status": "unsupported",
+		"reason": "Clammy Prowler is not ready: Whenever this creature attacks, another target attacking creature can't be blocked this turn. — Unsupported operation: a resolving, end-of-turn standalone blocking prohibition on another target attacking creature. This restriction grants no ability and must survive that creature losing all abilities; modify.change.words or granted registrations cannot faithfully represent it.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Clinquant Skymage": {
+		"status": "unsupported",
+		"reason": "Clinquant Skymage is not ready: Whenever you draw a card, put a +1/+1 counter on this creature. — A triggered watch for each individual card drawn is unsupported by the available event syntax; library-to-hand movement is not equivalent to drawing.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Conduct Electricity": {
+		"status": "unsupported",
+		"reason": "Conduct Electricity is not ready: Conduct Electricity deals 6 damage to target creature and 2 damage to up to one target creature token. — The syntax cannot express one simultaneous damage event with different fixed amounts for two independent target slots; separate damage instructions would incorrectly make the damage sequential.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Confiscate": {
+		"reason": "Confiscate is not ready: \"You control enchanted permanent.\" — Continuous control-changing effects on the enchanted permanent are unsupported.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Cooped Up": {
+		"status": "unsupported",
+		"reason": "Cooped Up is not ready: Enchanted creature can't attack or block. — The cross-object attack prohibition cannot be represented. Granting \"can't attack\" to the enchanted creature would incorrectly make this restriction removable by that creature losing its abilities.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Cosmogoyf": {
+		"status": "unsupported",
+		"reason": "Cosmogoyf is not ready: Cosmogoyf's power is equal to the number of cards you own in exile and its toughness is equal to that number plus 1. — Requires a characteristic-defining power/toughness ability functioning in all zones in layer 7a; change.base supplies a layer 7b effect and cannot faithfully prepare this ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Creeping Peeper": {
+		"status": "unsupported",
+		"reason": "Creeping Peeper is not ready: {T}: Add {U}. Spend this mana only to cast an enchantment spell, unlock a door, or turn a permanent face up. — The mana restriction cannot be expressed: spendOnly can select enchantment spells, but cannot include precisely door-unlock and turn-face-up payments without also permitting unrelated payments.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Crossroads Village": {
+		"status": "unsupported",
+		"reason": "Crossroads Village is not ready: {T}: Add one mana of the chosen color. — Mana output cannot read the color remembered by the entry choice; neither unrestricted any-color mana nor five freely selectable outputs preserves this ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Cruel Calculations": {
+		"status": "unsupported",
+		"reason": "Cruel Calculations is not ready: Draw X cards, where X is the number of cards that were put into target player's graveyard from their library this turn. — Unsupported historical amount: count all cards moved from the targeted player's library into their graveyard this turn, including cards no longer in that graveyard, to determine the number of cards drawn at resolution.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Crusader of Odric": {
+		"status": "unsupported",
+		"reason": "Crusader of Odric is not ready: \"Crusader of Odric's power and toughness are each equal to the number of creatures you control.\" — Requires a characteristic-defining power/toughness effect in layer 7a, functioning in all zones and outside the game. The supplied syntax cannot distinguish characteristic-defining abilities; change.base applies in layer 7b and is not an equivalent implementation.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Cryoshatter": {
+		"status": "unsupported",
+		"reason": "Cryoshatter is not ready: \"When enchanted creature becomes tapped or is dealt damage, destroy it.\" — The becomes-tapped trigger requires a tap-transition event, which the supported Event schema does not provide. The damage branch is registered, but the tap branch remains unsupported.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
 	},
 	"Crystal Barricade": {
 		"reason": "Crystal Barricade is not ready: Prevent all noncombat damage that would be dealt to other creatures you control. — Missing a standing damage-prevention effect that filters noncombat damage and protects other creatures controlled by this permanent's controller.",
@@ -15,6 +251,34 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
+	"Curator of Sun's Creation": {
+		"status": "unsupported",
+		"reason": "Curator of Sun's Creation is not ready: Whenever you discover, discover again for the same value. This ability triggers only once each turn. — Discover completion events and the discover action are unsupported; the trigger cannot watch discovery or repeat it using the original discover value.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Cursed Courtier": {
+		"status": "unsupported",
+		"reason": "Cursed Courtier is not ready: When this creature enters, create a Cursed Role token attached to it. (Enchanted creature is 1/1.) — Creating an Aura token attached as it enters, and not creating it if it cannot legally enchant that creature, is unsupported. Separate token and attach instructions do not express this operation.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Dark Matter Manipulator": {
+		"status": "unsupported",
+		"reason": "Dark Matter Manipulator is not ready: \"This creature gets +2/+0 for every seven cards in your graveyard.\" — Requires a continuous power bonus of 2 × floor(number of cards in your graveyard / 7). The amount syntax does not support division by seven or counting complete groups of seven; a single threshold grant would not implement the full ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Deadly Embrace": {
+		"status": "unsupported",
+		"reason": "Deadly Embrace is not ready: Destroy target creature an opponent controls. Then draw a card for each creature that died this turn. — The destruction and opponent-controlled creature target are supported, but no supported history amount counts all creatures that died this turn, including tokens and the creature destroyed by this spell. Cannot implement the required draw count faithfully.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
 	"Decorum Dissertation": {
 		"reason": "Decorum Dissertation is not ready: Paradigm (Then exile this spell. After you first resolve a spell with this name, you may cast a copy of it from exile without paying its mana cost at the beginning of each of your first main phases.) — The syntax cannot create and optionally cast a spell copy from exile without paying its mana cost. It also lacks first-resolution-by-name tracking needed to establish this recurring precombat-main-phase effect only once. General spell copying beyond Prepare is explicitly unsupported.",
 		"decks": [
@@ -22,6 +286,111 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
+	},
+	"Deeproot Pilgrimage": {
+		"status": "unsupported",
+		"reason": "Deeproot Pilgrimage is not ready: \"Whenever one or more nontoken Merfolk you control become tapped, create a 1/1 blue Merfolk creature token with hexproof.\" — Unsupported event: one or more qualifying permanents becoming tapped in a simultaneous group, including tapping for costs, combat, or effects. Attack events or current tapped-state conditions cannot substitute for this trigger. Its effect would create one 1/1 blue Merfolk creature token with hexproof per matching group.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Delta Bloodflies": {
+		"status": "unsupported",
+		"reason": "Delta Bloodflies is not ready: Whenever this creature attacks, if you control a creature with a counter on it, each opponent loses 1 life. — Unsupported intervening-if condition: the syntax cannot test whether any creature you control has any kind of counter on it, both when the attack triggers and at resolution.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Deserter's Disciple": {
+		"status": "unsupported",
+		"reason": "Deserter's Disciple is not ready: {T}: Another target creature you control with power 2 or less can't be blocked this turn. — Requires a resolving, end-of-turn standalone blocking prohibition on the targeted creature. The syntax does not supply this operation; granting a removable ability with modify.change.words or modify.change.registers would not faithfully represent it.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Diamond Mare": {
+		"status": "unsupported",
+		"reason": "Diamond Mare is not ready: Whenever you cast a spell of the chosen color, you gain 1 life. — The syntax cannot match a spell's colors against the source's remembered chosen color; colors selectors accept only fixed color arrays.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Diligent Zookeeper": {
+		"status": "unsupported",
+		"reason": "Diligent Zookeeper is not ready: Each non-Human creature you control gets +1/+1 for each of its creature types, to a maximum of 10. — Unsupported: dynamically counting each affected creature's creature types and capping its power/toughness bonus at 10. The available amount readers do not count creature subtypes per affected object.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Divergent Equation": {
+		"status": "unsupported",
+		"reason": "Divergent Equation is not ready: Return up to X target instant and/or sorcery cards from your graveyard to your hand. ... Exile Divergent Equation. — The casting use requires a target slot with a maximum count equal to the announced X, including zero. Target.count supports only fixed positive integers or \"any\", so this X-bounded targeting cannot be expressed faithfully. Returning the legal targets together and then exiling this spell are supported, but cannot supply a complete executable cast without that target bound.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Dockworker Drone": {
+		"status": "unsupported",
+		"reason": "Dockworker Drone is not ready: When this creature dies, put its counters on target creature you control. — Requires placing the last-known number of every kind of counter it had onto the target. The available counters instruction specifies a fixed kind and cannot enumerate and reproduce all counter kinds from the departed creature; reproducing only +1/+1 counters would omit part of the ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Doppelgang": {
+		"status": "unsupported",
+		"reason": "Doppelgang is not ready: For each of X target permanents, create X tokens that are copies of that permanent. — Cannot express exactly X distinct targets: target count accepts only a fixed positive integer or \"any\", not the announced X.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Dracogenesis": {
+		"status": "unsupported",
+		"reason": "Dracogenesis is not ready: You may cast Dragon spells without paying their mana costs. — Unsupported standing alternative-cost grant for qualifying spells: the available cost registration only reduces generic mana, and native permit.cast grants zone permission for its own card rather than a controller-wide alternative price preserving existing casting permissions.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Dragon's Prey": {
+		"status": "unsupported",
+		"reason": "Dragon's Prey is not ready: This spell costs {2} more to cast if it targets a Dragon. — Conditional generic mana cost increases are unsupported.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Drakuseth, Maw of Flames": {
+		"status": "unsupported",
+		"reason": "Drakuseth, Maw of Flames is not ready: Whenever Drakuseth attacks, Drakuseth deals 4 damage to any target and 3 damage to each of up to two other targets. — Cannot express one simultaneous damage group with these fixed differing amounts and enforce distinctness across the primary target and optional other targets, including player targets.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Dreaded Bat-Cloud": {
+		"status": "unsupported",
+		"reason": "Dreaded Bat-Cloud is not ready: This spell costs {3} less to cast if a creature died this turn. — The syntax cannot query whether a creature died this turn to condition this spell's casting-cost reduction.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Duskmourn's Domination": {
+		"status": "unsupported",
+		"reason": "Duskmourn's Domination is not ready: You control enchanted creature. — Continuous control-changing effects are unsupported.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Eardrum Rattler": {
+		"status": "unsupported",
+		"reason": "Eardrum Rattler is not ready: {1}, {T}: Another target creature you control with power 2 or less can't be blocked this turn. — The activation requires a temporary standalone blocking prohibition for the target until end of turn, surviving that creature losing all abilities. This operation is unsupported; granting restriction words or an ability with modify would not faithfully represent it.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Eerie Interference": {
+		"status": "unsupported",
+		"reason": "Eerie Interference is not ready: Prevent all damage that would be dealt to you and creatures you control this turn by creatures. — Unsupported resolving prevention effect: the end-of-turn damage-rule instruction cannot filter creature damage sources or recipients. Standing filtered damage-rule registrations do not provide this spell-created duration; locking in current creatures would incorrectly omit creatures controlled later this turn.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
 	},
 	"Elegy Acolyte": {
 		"reason": "Elegy Acolyte is not ready: Void — At the beginning of your end step, if a nonland permanent left the battlefield this turn or a spell was warped this turn, create a 2/2 colorless Robot artifact creature token. — Cannot express the intervening condition: the available history operations cannot test nonland permanents leaving the battlefield this turn or spells being cast for their warp cost this turn, including events before Elegy Acolyte entered.",
@@ -31,6 +400,158 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
+	"Elvenking's Harper": {
+		"status": "unsupported",
+		"reason": "Elvenking's Harper is not ready: {4}{U}: Target creature can't be blocked this turn. — Unsupported temporary standalone blocking prohibition: the resolving effect must survive the target losing all abilities; modify.change.words or granted registrations would incorrectly make it a removable ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Enigma Drake": {
+		"status": "unsupported",
+		"reason": "Enigma Drake is not ready: Enigma Drake's power is equal to the number of instant and sorcery cards in your graveyard. — Requires a power-only characteristic-defining effect in layer 7a, functioning in all zones. The available base modification sets both power and toughness in layer 7b and cannot faithfully implement this ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Enter the Enigma": {
+		"status": "unsupported",
+		"reason": "Enter the Enigma is not ready: \"Target creature can't be blocked this turn. ... Draw a card.\" — The cast cannot be fully prepared: temporary standalone blocking prohibitions are unsupported. This rule-changing restriction must survive the target losing all abilities; granting a removable ability with modify.change.words or modify.change.registers would not implement it.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Erudite Wizard": {
+		"status": "unsupported",
+		"reason": "Erudite Wizard is not ready: Whenever you draw your second card each turn, put a +1/+1 counter on this creature. — Unsupported: a card-draw watch and per-player second-draw ordinal each turn. Library-to-hand movement is not equivalent to drawing, and draw-rule replacements cannot implement this trigger.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Expel the Interlopers": {
+		"status": "unsupported",
+		"reason": "Expel the Interlopers is not ready: Choose a number between 0 and 10. Destroy all creatures with power greater than or equal to the chosen number. — Unsupported: choosing and binding an integer during resolution for the subsequent simultaneous destruction's power threshold. The syntax has no resolving number-choice instruction; separate casting procedures would incorrectly choose the number at announcement.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Fanatic of the Harrowing": {
+		"status": "unsupported",
+		"reason": "Fanatic of the Harrowing is not ready: When this creature enters, each player discards a card. If you discarded a card this way, draw a card. — The simultaneous discard is supported, but the supplied semantics provide no player-specific discard-success binding for choose-actions. Filtering bound discarded objects by owner cannot reliably test your discard, because an unrevealed discard into a hidden destination supplies no object reference. The conditional draw needs that player-specific result, not a current-zone object count or turn-wide discard history.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Fear of Being Hunted": {
+		"reason": "Fear of Being Hunted is not ready: This creature must be blocked if able. — Blocking requirements across the complete blocker declaration are unsupported; prohibit.block expresses forbidden attacker/blocker pairs, not a requirement to block.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Feed the Flames": {
+		"status": "unsupported",
+		"reason": "Feed the Flames is not ready: Feed the Flames deals 5 damage to target creature. If that creature would die this turn, exile it instead. — The damage is expressible, but the resolved standalone death-to-exile replacement is not: register makes it an ability of the creature, removable by loseAbilities, whereas this replacement must survive ability loss. A faithful cast requires a standalone replacement lasting until end of turn, installed after the damage in printed instruction order; state-based actions do not occur between those instructions.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Frenzied Goblin": {
+		"status": "unsupported",
+		"reason": "Frenzied Goblin is not ready: Whenever this creature attacks, you may pay {R}. If you do, target creature can't block this turn. — The resolving effect requires a temporary standalone blocking prohibition that survives the target losing its abilities. This operation is unsupported; granting \"can't block\" with modify would incorrectly make the restriction a removable ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Fungal Colossus": {
+		"status": "unsupported",
+		"reason": "Fungal Colossus is not ready: \"This spell costs {X} less to cast, where X is the number of differently named lands you control.\" — Computing the number of distinct names among controlled lands for a casting-cost reduction is unsupported; the available distinct amount counts card types, not names.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Goblin Maskmaker": {
+		"status": "unsupported",
+		"reason": "Goblin Maskmaker is not ready: Whenever this creature attacks, face-down spells you cast this turn cost {1} less to cast. — Cannot prepare the triggered reduction: the supported spell selector has no face-down predicate. Matching colorless or nameless creature spells would incorrectly broaden the effect.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Gratuitous Violence": {
+		"status": "unsupported",
+		"reason": "Gratuitous Violence is not ready: \"If a creature you control would deal damage to a permanent or player, it deals double that damage instead.\" — Damage multiplication replacements are unsupported; fixed damage additions cannot represent doubling.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Griffnaut Tracker": {
+		"status": "unsupported",
+		"reason": "Griffnaut Tracker is not ready: When this creature enters, exile up to two target cards from a single graveyard. — The target syntax cannot constrain a zero-to-two target group to one graveyard while preserving each target's independent legality. Making the second target depend on owner:target:0 incorrectly makes it depend on information from the first target if that target becomes illegal.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Groundchuck & Dirtbag": {
+		"reason": "Groundchuck & Dirtbag is not ready: Whenever you tap a land for mana, add {G}. — Unsupported: watching resolution of a land's tap-symbol mana ability that produces mana, and resolving this triggered mana ability immediately during payment without using the stack.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Guidelight Optimizer": {
+		"status": "unsupported",
+		"reason": "Guidelight Optimizer is not ready: {T}: Add {U}. Spend this mana only to cast an artifact spell or activate an ability. — The mana-spending selector cannot distinguish casting an artifact spell from activating any ability regardless of its source zone, including abilities activated from a nonartifact source on the stack. A source-zone approximation would not preserve the printed restriction.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Harmless Offering": {
+		"status": "unsupported",
+		"reason": "Harmless Offering is not ready: Target opponent gains control of target permanent you control. — Changing control of a permanent is unsupported.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Hazard of the Dunes": {
+		"status": "unsupported",
+		"reason": "Hazard of the Dunes is not ready: Exhaust — {6}{G}: Put three +1/+1 counters on this creature. (Activate each exhaust ability only once.) — The once-per-ability, per-incarnation activation restriction cannot be expressed; once-per-turn would not implement exhaust.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Head of the Hunt": {
+		"status": "unsupported",
+		"reason": "Head of the Hunt is not ready: \"If a creature an opponent controls would die, exile it instead. When you do, create a 2/2 green Wolf creature token.\" — The syntax cannot register a source-controlled replacement affecting opposing creatures' deaths, with a reflexive token-creation trigger tied specifically to that replacement being applied. A generic exile watch or granting those creatures their own replacement abilities would not preserve this behavior.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Heartless Act": {
+		"status": "unsupported",
+		"reason": "Heartless Act is not ready: Destroy target creature with no counters on it. — The selector syntax cannot restrict a target to creatures with zero counters of every kind; a resolution-only condition would not preserve this targeting restriction.; Remove up to three counters from target creature. — No supported instruction chooses zero to three existing counters across arbitrary counter kinds and removes that chosen group.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"High Noon": {
+		"status": "unsupported",
+		"reason": "High Noon is not ready: Each player can't cast more than one spell each turn. — Per-player spell-count casting limits are unsupported by prohibit.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Homunculus Horde": {
+		"status": "unsupported",
+		"reason": "Homunculus Horde is not ready: Whenever you draw your second card each turn, create a token that's a copy of this creature. — Cannot register the trigger: draw events and second-card-drawn ordinal matching are unsupported. Cast-event ordinal matching does not apply to draws, and library-to-hand movement is not equivalent to drawing.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Hydraulic Helper": {
+		"status": "unsupported",
+		"reason": "Hydraulic Helper is not ready: {T}: Add {U}. This mana can't be spent to cast a nonartifact spell. — The mana-spending syntax cannot prohibit only nonartifact spell casting while allowing all activation, special-action, and resolving-instruction payments. Restricting spending to artifact stack objects would incorrectly prohibit other permitted payments.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
 	"Hydro-Man, Fluid Felon": {
 		"reason": "Hydro-Man, Fluid Felon is not ready: At the beginning of your end step, untap Hydro-Man. Until your next turn, he becomes a land and gains \"{T}: Add {U}.\" (He's not a creature during that time.) — Untapping, setting the card type to land, and granting the blue tap mana ability are expressible, but the required duration \"until your next turn\" is not. The available durations cannot expire the type-changing effect and granted mana ability as your next turn begins; restoring printed types later would not correctly end this effect amid other type-changing effects. This standing trigger cannot be deferred or shortened to end of turn.",
 		"decks": [
@@ -39,6 +560,13 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
+	"Inquisitive Glimmer": {
+		"status": "unsupported",
+		"reason": "Inquisitive Glimmer is not ready: Unlock costs you pay cost {1} less. — Generic cost reductions for Room unlock special actions are unsupported; unlocks are neither casts nor activated abilities.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
 	"Intimidation Tactics": {
 		"reason": "Intimidation Tactics is not ready: Target opponent reveals their hand. You choose an artifact or creature card from it. Exile that card. — Revealing an opponent's entire hand for the spell's controller to choose from is not expressible in the available syntax.",
 		"decks": [
@@ -46,6 +574,75 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
+	},
+	"It Doesn't Add Up": {
+		"status": "unsupported",
+		"reason": "It Doesn't Add Up is not ready: Return target creature card from your graveyard to the battlefield. Suspect it. (It has menace and can't block.) — The suspect action and suspected designation are unsupported; granting menace and can't block alone would not implement suspecting the returned permanent.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Jaded Analyst": {
+		"status": "unsupported",
+		"reason": "Jaded Analyst is not ready: Whenever you draw your second card each turn, this creature loses defender and gains vigilance until end of turn. — Unsupported: watching the second individual card draw each turn, and removing only defender until end of turn. The event schema has no draw event, and modifications cannot selectively remove a keyword.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Jem Lightfoote, Sky Explorer": {
+		"status": "unsupported",
+		"reason": "Jem Lightfoote, Sky Explorer is not ready: \"At the beginning of your end step, if you haven't cast a spell from your hand this turn, draw a card.\" — Requires an intervening-if condition counting spells you cast this turn specifically from hand, including casts before Jem entered. Cast-history amounts cannot filter the original casting zone; a stack selector cannot express that restriction.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Jolly Gerbils": {
+		"reason": "Jolly Gerbils is not ready: \"Whenever you give a gift, draw a card.\" — Unsupported give-a-gift event watch: this triggers when your gifted instant or sorcery resolves or your permanent's gift triggered ability resolves (702.174c). No supported event represents those resolutions; a cast, draw, or token-entry watch is not equivalent.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Joraga Invocation": {
+		"status": "unsupported",
+		"reason": "Joraga Invocation is not ready: Each creature you control gets +3/+3 until end of turn and must be blocked this turn if able. — The +3/+3 modification is supported, but the mandatory blocking requirement cannot be expressed: prohibit.block only forbids blocker–attacker pairs, and inert keyword prose does not implement this requirement.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Karn, Gilded Guardian": {
+		"status": "unsupported",
+		"reason": "Karn, Gilded Guardian is not ready: When Karn enters, draw a card for each color among other artifacts you control. — Missing amount operation to count distinct colors among other controlled artifacts at resolution, for the total draw instruction. The supported distinct aggregate counts card types, not colors.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Kindred Judgment": {
+		"status": "unsupported",
+		"reason": "Kindred Judgment is not ready: Choose a creature type. Destroy all creatures that aren't of the chosen type. — Unsupported resolving creature-type choice: enters.choose only supplies entry choices, and no instruction chooses and binds a creature type during spell resolution for the subsequent simultaneous destruction.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Kraven, Proud Predator": {
+		"status": "unsupported",
+		"reason": "Kraven, Proud Predator is not ready: Top of the Food Chain — Kraven's power is equal to the greatest mana value among permanents you control. — Requires an all-zone characteristic-defining ability setting power alone in layer 7a. The available modifications do not express this: base sets both power and toughness in layer 7b, while power adds in layer 7c.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Krotiq Nestguard": {
+		"status": "unsupported",
+		"reason": "Krotiq Nestguard is not ready: {2}{G}: This creature can attack this turn as though it didn't have defender. — No supported operation grants this temporary attack exception while retaining defender; recording the permission as an arbitrary change.words string does not execute it.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Lakeshore Apothecary": {
+		"status": "unsupported",
+		"reason": "Lakeshore Apothecary is not ready: Whenever you draw your second card each turn, put a +1/+1 counter on this creature. — The syntax has no draw event or per-player second-draw ordinal/history to register this trigger faithfully.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
 	},
 	"Laughing Jasper Flint": {
 		"reason": "Laughing Jasper Flint is not ready: At the beginning of your upkeep, exile the top X cards of target opponent's library, where X is the number of outlaws you control. Until end of turn, you may cast spells from among those cards, and mana of any type can be spent to cast those spells. — Missing operations: select and exile a variable-sized top-of-library group (X counts controlled permanents with Assassin, Mercenary, Pirate, Rogue, or Warlock subtype, each once); grant casting-only permission for that group until end of turn without permitting land plays; allow mana of any type to pay for those spells. The provided top reference accepts only a fixed integer, and permit has neither a casting-only restriction nor a mana-type override. Choosing arbitrary library cards or granting unrestricted play permission would change the ability.",
@@ -63,6 +660,153 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
+	"Loot, the Nexus": {
+		"status": "unsupported",
+		"reason": "Loot, the Nexus is not ready: {T}: Choose a color. Add one mana of that color for each different power among creatures you control. — Counting distinct power values among controlled creatures is not supported by the amount syntax; max, min, sum, and creature count do not express this count.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Luminollusk": {
+		"status": "unsupported",
+		"reason": "Luminollusk is not ready: Vivid — When this creature enters, you gain life equal to the number of colors among permanents you control. — Unsupported amount operation: counting distinct colors among controlled permanents for a single life-gain instruction.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Lunar Insight": {
+		"status": "unsupported",
+		"reason": "Lunar Insight is not ready: Draw a card for each different mana value among nonland permanents you control. — Casting this sorcery requires a draw count equal to the number of distinct mana values among controlled nonland permanents at resolution. The available amount syntax cannot count distinct mana values; aggregate max, min, or sum and permanent counts do not express this operation.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Mabel, Bitter Recluse": {
+		"status": "unsupported",
+		"reason": "Mabel, Bitter Recluse is not ready: When Mabel enters, remove up to three counters from another target creature or planeswalker. — Unsupported resolution-time choice of zero to three counters across arbitrary counter kinds on one other target creature or planeswalker; the counters instruction requires a specified kind and amount and cannot express this choice.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Mabel, Valley Hero": {
+		"status": "unsupported",
+		"reason": "Mabel, Valley Hero is not ready: Whenever Mabel or another creature you control enters, put a +1/+1 counter on target creature that entered this turn. — The target selector cannot restrict targets to creatures that entered this turn. enteredThisTurn is available only as a condition; a resolution-time condition would not implement the printed targeting restriction.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Maha, Its Feathers Night": {
+		"status": "unsupported",
+		"reason": "Maha, Its Feathers Night is not ready: Creatures your opponents control have base toughness 1. — Setting base toughness alone while leaving base power unchanged is not expressible: change.base requires both power and toughness.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Malicious Eclipse": {
+		"status": "unsupported",
+		"reason": "Malicious Eclipse is not ready: All creatures get -2/-2 until end of turn. If a creature an opponent controls would die this turn, exile it instead. — The -2/-2 modification is expressible, but the turn-wide death replacement is not: it must check opposing control when death would occur and apply to creatures entering later. Object-local replace registrations and modifications affecting a fixed set cannot express that rule.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Marvin, Murderous Mimic": {
+		"status": "unsupported",
+		"reason": "Marvin, Murderous Mimic is not ready: Marvin has all activated abilities of creatures you control that don't have the same name as this creature. — Unsupported: dynamically inheriting all activated abilities from qualifying controlled creatures, updating as their names, abilities, or battlefield presence change. The syntax supports granting explicit registrations, but has no operation to inherit another object's activated abilities continuously.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Mathemagics": {
+		"status": "unsupported",
+		"reason": "Mathemagics is not ready: Target player draws 2ˣ cards. (2⁰ = 1, 2¹ = 2, 2² = 4, 2³ = 8, 2⁴ = 16, 2⁵ = 32, and so on.) — Computing the draw count as 2 raised to the announced X is unsupported by the Amount syntax; finite X-specific variants would not cover every legal cast.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Mechan Navigator": {
+		"status": "unsupported",
+		"reason": "Mechan Navigator is not ready: \"Whenever this creature becomes tapped, draw a card, then discard a card.\" — Unsupported trigger event: this permanent becoming tapped, whether from attacking, paying a cost, or an effect. No supported watch event expresses this untapped-to-tapped transition.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Merfolk Cave-Diver": {
+		"status": "unsupported",
+		"reason": "Merfolk Cave-Diver is not ready: Whenever a creature you control explores, this creature gets +1/+0 until end of turn and can't be blocked this turn. — Unsupported explore completion event/watch; reveal, movement, and counter instructions do not emit an explore event.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Mikey & Leo, Chaos & Order": {
+		"status": "unsupported",
+		"reason": "Mikey & Leo, Chaos & Order is not ready: Whenever you put a counter on a creature you control, draw a card. This ability triggers only once each turn. — Unsupported: counter-placement events do not record who put the counter, so the required actor-specific condition (you put the counter) cannot be represented. A recipient-controller filter alone would incorrectly trigger for counters placed by other players.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Mild-Mannered Librarian": {
+		"status": "unsupported",
+		"reason": "Mild-Mannered Librarian is not ready: {3}{G}: This creature becomes a Werewolf. Put two +1/+1 counters on it and you draw a card. Activate only once. — Unsupported: restricting this ability to one activation over the permanent's lifetime, including an activation that is countered. The supported once-per-turn limit does not express this restriction.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Mirage Mesa": {
+		"status": "unsupported",
+		"reason": "Mirage Mesa is not ready: {T}: Add one mana of the chosen color. — Mana registrations cannot read a remembered entry color choice for their output, and conditions cannot test that choice to select a fixed-color mana registration.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Mirkwood Pathmaker": {
+		"status": "unsupported",
+		"reason": "Mirkwood Pathmaker is not ready: \"Mirkwood Pathmaker's power and toughness are each equal to the number of lands you control.\" — This is a characteristic-defining ability requiring layer 7a power/toughness calculation in all zones and outside the game. The supplied syntax has no characteristic-defining classification or layer 7a operation; change.base applies in layer 7b and cannot faithfully implement this ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Mirrorform": {
+		"status": "unsupported",
+		"reason": "Mirrorform is not ready: Each nonland permanent you control becomes a copy of target non-Aura permanent. — Making existing battlefield permanents become copies is unsupported, as confirmed by token-copies.md; neither entry copying nor token creation implements this resolving effect.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Mischievous Mystic": {
+		"status": "unsupported",
+		"reason": "Mischievous Mystic is not ready: \"Whenever you draw your second card each turn, create a 1/1 blue Faerie creature token with flying.\" — Drawing-card trigger events and per-player second-draw tracking each turn are unsupported; library-to-hand movement is not a draw event.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Multiversal Incursion": {
+		"status": "unsupported",
+		"reason": "Multiversal Incursion is not ready: For each nontoken creature you control, create a token that's a copy of that creature, except it isn't legendary. — The supported token-copy exceptions cannot remove the legendary supertype from copiable values. The syntax also lacks a simultaneous token-creation group copying a different creature for each token; sequential each instructions would not preserve this effect.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Nanoform Sentinel": {
+		"status": "unsupported",
+		"reason": "Nanoform Sentinel is not ready: Whenever this creature becomes tapped, untap another target permanent. This ability triggers only once each turn. — Unsupported event: this creature becoming tapped. The syntax has no tap-transition watch; an attacks watch would omit other ways of tapping and incorrectly include attacks without tapping.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Narset's Rebuke": {
+		"status": "unsupported",
+		"reason": "Narset's Rebuke is not ready: \"Narset's Rebuke deals 5 damage to target creature. Add {U}{R}{W}. If that creature would die this turn, exile it instead.\" — The resolving spell must create a standalone, incarnation-bound death-to-exile replacement lasting this turn that survives the creature losing its abilities. The engine's register instruction instead grants a removable ability and cannot represent this operation faithfully. The printed instruction order is deal 5 damage to the target creature, add one blue, one red and one white mana together, then establish the replacement; no state-based actions occur between these instructions. Do not use the proposed reordered register approximation.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Neriv, Heart of the Storm": {
+		"status": "unsupported",
+		"reason": "Neriv, Heart of the Storm is not ready: If a creature you control that entered this turn would deal damage, it deals twice that much damage instead. — Damage multiplication replacement (doubling) is unsupported; fixed damage additions cannot represent it.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
 	"Nowhere to Run": {
 		"reason": "Nowhere to Run is not ready: Creatures your opponents control can be the targets of spells and abilities as though they didn't have hexproof. Ward abilities of those creatures don't trigger. — The syntax cannot selectively disregard hexproof for targeting while leaving that ability intact, or suppress only ward abilities of the affected creatures. A targeted-event suppression would also suppress unrelated targeting triggers and is not equivalent.",
 		"decks": [
@@ -70,6 +814,13 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
+	},
+	"Obeka, Splitter of Seconds": {
+		"status": "unsupported",
+		"reason": "Obeka, Splitter of Seconds is not ready: Whenever Obeka deals combat damage to a player, you get that many additional upkeep steps after this phase. — Inserting additional upkeep steps after the current phase, equal to the combat damage dealt, is not supported by the available instructions.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
 	},
 	"Oildeep Gearhulk": {
 		"reason": "Oildeep Gearhulk is not ready: When this creature enters, look at target player's hand. You may choose a card from it. If you do, that player discards that card, then draws a card. — Missing operation: privately looking at another player's entire hand and optionally choosing a card from it for that player to discard.",
@@ -79,6 +830,62 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
+	"Omniscience": {
+		"status": "unsupported",
+		"reason": "Omniscience is not ready: You may cast spells from your hand without paying their mana costs. — The syntax lacks a standing permission granting the controller an optional zero-mana alternative cost for all spells cast from their hand. Native permit.cast applies only to its own card; generic reductions cannot waive colored mana costs.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Otter-Penguin": {
+		"status": "unsupported",
+		"reason": "Otter-Penguin is not ready: \"Whenever you draw your second card each turn, this creature gets +1/+2 until end of turn and can't be blocked this turn.\" — Unsupported draw-event watch and per-player second-card-drawn tracking each turn; library-to-hand entry watches do not distinguish draws from other movements.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Overgrown Zealot": {
+		"status": "unsupported",
+		"reason": "Overgrown Zealot is not ready: {T}: Add two mana of any one color. Spend this mana only to turn permanents face up. — The mana spending restriction to turn-face-up payments cannot be expressed: spendOnly selects object characteristics, not payment actions, and would also allow other payments involving matching permanents.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Pacifism": {
+		"status": "unsupported",
+		"reason": "Pacifism is not ready: \"Enchanted creature can't attack or block.\" — The attack restriction requires a cross-object attack prohibition, which the syntax does not support. Granting \"can't attack\" to the enchanted creature would incorrectly make the restriction removable by that creature losing its abilities.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Perfect Intimidation": {
+		"status": "unsupported",
+		"reason": "Perfect Intimidation is not ready: Choose one or both — ... • Remove all counters from target creature. — Removing every counter kind from a creature is not expressible by the supplied counter instructions. The counter-removal-only and both-modes casts cannot be completely prepared.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Pestered Wellguard": {
+		"status": "unsupported",
+		"reason": "Pestered Wellguard is not ready: Whenever this creature becomes tapped, create a 1/1 blue and black Faerie creature token with flying. — Unsupported triggering event: this creature becoming tapped, including taps from attacking, costs, and effects. The available event syntax cannot watch untapped-to-tapped transitions; an attack trigger or tapped-state condition would not preserve this ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Petrify": {
+		"status": "unsupported",
+		"reason": "Petrify is not ready: Enchanted permanent can't attack or block, and its activated abilities can't be activated. — The cross-object attack prohibition is unsupported. Granting \"can't attack\" to the enchanted permanent would incorrectly make the restriction removable when that permanent loses its abilities.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Pompous Gadabout": {
+		"status": "unsupported",
+		"reason": "Pompous Gadabout is not ready: \"This creature can't be blocked by creatures that don't have a name.\" — prohibit.block cannot select nameless creatures: the supported selectors have no has-name/nameless predicate. Restricting this to face-down creatures would not preserve the printed restriction.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
 	"Preacher of the Schism": {
 		"reason": "Preacher of the Schism is not ready: Whenever this creature attacks the player with the most life or tied for most life, create a 1/1 white Vampire creature token with lifelink. — Missing an attack-event filter identifying the attacked player (excluding attacks against planeswalkers or battles) and checking that player's life ranking when attackers are declared. The documented event.player filter concerns combat damage, not the recipient of an attack.",
 		"decks": [
@@ -86,6 +893,34 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
+	},
+	"Prowcatcher Specialist": {
+		"status": "unsupported",
+		"reason": "Prowcatcher Specialist is not ready: Exhaust — {3}{R}: Put two +1/+1 counters on this creature. (Activate each exhaust ability only once.) — The once-per-ability activation limit for this permanent incarnation cannot be expressed; once-per-turn would not implement exhaust.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Purple Dragon Punks": {
+		"status": "unsupported",
+		"reason": "Purple Dragon Punks is not ready: {T}: Add {R}. Spend this mana only to cast an artifact spell or to activate an ability. — The mana's payment restriction cannot be represented faithfully: spendOnly selects spell characteristics or an activation's source, but cannot distinguish arbitrary ability-activation payments from nonartifact spell-casting payments involving the same source zones.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Pym Particles": {
+		"status": "unsupported",
+		"reason": "Pym Particles is not ready: Target creature gains vigilance until end of turn and can't be blocked this turn.\nDraw a card. — The cast requires a temporary standalone blocking prohibition on the target creature that survives losing all abilities. This operation is unsupported; granting \"can't be blocked\" as an ability would not faithfully implement the effect.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Ragged Playmate": {
+		"status": "unsupported",
+		"reason": "Ragged Playmate is not ready: {1}, {T}: Target creature with power 2 or less can't be blocked this turn. — The resolving ability creates an end-of-turn blocking restriction without granting the target an ability. The available modify.change.registers form instead grants a removable prohibit ability; change.words does not execute this restriction. A temporary rule-changing blocking prohibition independent of the target's abilities cannot be prepared with the supplied syntax.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
 	},
 	"Ral, Crackling Wit": {
 		"reason": "Ral, Crackling Wit is not ready: −10: Draw three cards. You get an emblem with \"Instant and sorcery spells you cast have storm.\" (Whenever you cast an instant or sorcery spell, copy it for each spell cast before it this turn.) — Creating an emblem and copying spells through storm are not expressible in the supplied syntax.",
@@ -96,6 +931,27 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
+	"Rampaging Ceratops": {
+		"status": "unsupported",
+		"reason": "Rampaging Ceratops is not ready: This creature can't be blocked except by three or more creatures. — A minimum of three creatures in the complete blocking group is unsupported; pairwise prohibit.block cannot express this restriction.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Rampaging Soulrager": {
+		"status": "unsupported",
+		"reason": "Rampaging Soulrager is not ready: This creature gets +3/+0 as long as there are two or more unlocked doors among Rooms you control. — Unsupported: counting currently unlocked doors among controlled Rooms to condition the continuous +3/+0 effect; Room counts or unlock-event counts are not equivalent.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Raucous Entertainer": {
+		"status": "unsupported",
+		"reason": "Raucous Entertainer is not ready: {1}, {T}: Put a +1/+1 counter on each creature you control that entered this turn. — Unsupported operation: simultaneously put counters on the set of current controlled creatures whose current battlefield incarnations entered this turn. enteredThisTurn is available as a condition, but not as a selector filter; the proposed each loop places counters sequentially rather than in one simultaneous group.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
 	"Raven Eagle": {
 		"reason": "Raven Eagle is not ready: Whenever you draw your second card each turn, each opponent loses 1 life and you gain 1 life. — The supplied Event schema has no draw event, and Amount.history has no cards-drawn history; it cannot register a trigger specifically on your second draw each turn.",
 		"decks": [
@@ -103,6 +959,62 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
+	},
+	"Ravenhill Flock": {
+		"status": "unsupported",
+		"reason": "Ravenhill Flock is not ready: Whenever you draw a card, put a +1/+1 counter on this creature. — Watching individual card-draw events is unsupported; library-to-hand movement is not an equivalent draw event.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Razorkin Needlehead": {
+		"status": "unsupported",
+		"reason": "Razorkin Needlehead is not ready: Whenever an opponent draws a card, this creature deals 1 damage to them. — Unsupported card-draw event watch: must trigger separately for each card an opponent draws and deal 1 damage to that drawing player; ordinary library-to-hand movement is not equivalent to drawing.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Razzle-Dazzler": {
+		"status": "unsupported",
+		"reason": "Razzle-Dazzler is not ready: \"Whenever you cast your second spell each turn, put a +1/+1 counter on this creature. It can't be blocked this turn.\" — The resolving temporary blocking prohibition cannot be represented: it must survive this creature losing all abilities, and the syntax supplies no temporary standalone blocking prohibition.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Red Guardian, Super-Soldier": {
+		"status": "unsupported",
+		"reason": "Red Guardian, Super-Soldier is not ready: When Red Guardian enters, destroy target creature an opponent controls that dealt damage this turn. — The target restriction requires per-object history of damage dealt this turn; no supported selector expresses that history. A damage watch cannot recover damage dealt before Red Guardian entered.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Regal Bunnicorn": {
+		"status": "unsupported",
+		"reason": "Regal Bunnicorn is not ready: Regal Bunnicorn's power and toughness are each equal to the number of nonland permanents you control. — This is an all-zone characteristic-defining ability applying in layer 7a. The supplied syntax cannot classify or apply a power/toughness characteristic-defining ability in layer 7a; change.base applies in layer 7b and is not an equivalent implementation.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Renet, Temporal Apprentice": {
+		"status": "unsupported",
+		"reason": "Renet, Temporal Apprentice is not ready: When Renet enters, return each other nonland permanent that entered this turn to its owner's hand. — The syntax provides enteredThisTurn as an object condition, but not as a selector filter for a simultaneous movement of all qualifying permanents; each.objects would incorrectly return them sequentially.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Rescue Leopard": {
+		"status": "unsupported",
+		"reason": "Rescue Leopard is not ready: Whenever this creature becomes tapped, you may discard a card. If you do, draw a card. — Unsupported trigger event: this creature becoming tapped, whether from attacking, paying a cost, or another effect. The event syntax has no becomes-tapped watch; an attacks watch would not preserve this ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Resilient Roadrunner": {
+		"status": "unsupported",
+		"reason": "Resilient Roadrunner is not ready: {3}: This creature can't be blocked this turn except by creatures with haste. — Missing an until-end-of-turn blocking-rule effect independent of the creature's abilities. modify.change.registers instead grants a removable ability; prohibit.block has no duration, and register supplies no expiry.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
 	},
 	"Rest in Peace": {
 		"reason": "Rest in Peace is not ready: If a card or token would be put into a graveyard from anywhere, exile it instead. — Requires a standing replacement affecting all cards and tokens moving to any graveyard from any zone. The supported replace registration only replaces the registered object's death; it cannot express this global, any-origin graveyard replacement.",
@@ -117,6 +1029,55 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
+	"Rogue's Passage": {
+		"status": "unsupported",
+		"reason": "Rogue's Passage is not ready: {4}, {T}: Target creature can't be blocked this turn. — Requires a temporary standalone blocking prohibition that survives the target losing abilities (rule 113.12); the supplied syntax has no such operation. Granting a word or registration with modify would incorrectly make this a removable ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Run Away Together": {
+		"status": "unsupported",
+		"reason": "Run Away Together is not ready: Choose two target creatures controlled by different players. Return those creatures to their owners' hands. — The syntax cannot express the cross-target requirement that the creatures have different controllers, including its resolution-time legality check. Fixed you/opponent target selectors substitute different restrictions and are not equivalent.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Safewright Cavalry": {
+		"status": "unsupported",
+		"reason": "Safewright Cavalry is not ready: \"This creature can't be blocked by more than one creature.\" — A maximum blocker count for a whole blocking group is unsupported; prohibit.block only restricts individual attacker/blocker pairs.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Sandstorm Verge": {
+		"status": "unsupported",
+		"reason": "Sandstorm Verge is not ready: {3}, {T}: Target creature can't block this turn. Activate only as a sorcery. — Requires a temporary standalone blocking prohibition lasting until end of turn. The syntax does not supply this operation; granting \"can't block\" via modify would incorrectly create an ability removable by ability loss.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Scarecrow Guide": {
+		"status": "unsupported",
+		"reason": "Scarecrow Guide is not ready: {1}: Add one mana of any color. Activate only once each turn. — Mana registrations cannot express the once-per-turn activation limit; registering this without that limit would broaden the ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Scrawling Crawler": {
+		"status": "unsupported",
+		"reason": "Scrawling Crawler is not ready: Whenever an opponent draws a card, that player loses 1 life. — The event syntax has no card-drawn watch to trigger separately for each opponent's individual draw and retain that player for the life loss. Library-to-hand movement cannot substitute for drawing.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Self-Destruct": {
+		"status": "unsupported",
+		"reason": "Self-Destruct is not ready: Target creature you control deals X damage to any other target and X damage to itself, where X is its power. — Cannot express one simultaneous damage group combining the creature in one target slot with another target slot that may name a player. Separate damage instructions would incorrectly make the damage sequential.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
 	"Sheltered by Ghosts": {
 		"reason": "Sheltered by Ghosts is not ready: When this Aura enters, exile target nonland permanent an opponent controls until this Aura leaves the battlefield. — Missing operation: exile until a specified event with the immediate, nontriggered return required by rule 610.3, returning the exiled object under its owner's control. If this Aura has already left before the enters trigger resolves, the target must not move (610.3b). A delayed leaves trigger is not equivalent.",
 		"decks": [
@@ -125,6 +1086,55 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
+	"Shinestriker": {
+		"status": "unsupported",
+		"reason": "Shinestriker is not ready: Vivid — When this creature enters, draw cards equal to the number of colors among permanents you control. — Unsupported amount: counting distinct colors among controlled permanents for one draw instruction. The available distinct amount counts card types, not colors; colorsSpent counts casting payment colors, not permanent colors.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Silvergill Peddler": {
+		"status": "unsupported",
+		"reason": "Silvergill Peddler is not ready: Whenever this creature becomes tapped, draw a card, then discard a card. — Unsupported trigger event: this creature becoming tapped (whether from attacking, paying a cost, or an effect); the event syntax has no tapped-state transition watch.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Skewer Slinger": {
+		"status": "unsupported",
+		"reason": "Skewer Slinger is not ready: Whenever this creature blocks or becomes blocked by a creature, this creature deals 1 damage to that creature. — The available event syntax does not supply the blocking-pair counterpart needed to identify “that creature,” or a becomes-blocked-by event per blocking creature.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Skystreak Engineer": {
+		"status": "unsupported",
+		"reason": "Skystreak Engineer is not ready: Exhaust — {4}{U}: Put two +1/+1 counters on this creature. (Activate each exhaust ability only once.) — The once-per-ability, per-incarnation activation restriction cannot be expressed by the supported procedure limits or activation-history conditions.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Snow Villiers": {
+		"status": "unsupported",
+		"reason": "Snow Villiers is not ready: Snow Villiers's power is equal to the number of creatures you control. — This characteristic-defining ability requires power setting in layer 7a in all zones. The supplied syntax provides only layer-7b base setting or layer-7c modification, not characteristic-defining power setting.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Sower of Chaos": {
+		"status": "unsupported",
+		"reason": "Sower of Chaos is not ready: {2}{R}: Target creature can't block this turn. — Requires a temporary standalone blocking prohibition that survives the target losing all abilities. This operation is unsupported; granting \"can't block\" through modify would incorrectly create a removable ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Spell Stutter": {
+		"status": "unsupported",
+		"reason": "Spell Stutter is not ready: Counter target spell unless its controller pays {2} plus an additional {1} for each Faerie you control. — A resolving counter.unless payment cannot express the computed generic mana cost of 2 plus the number of Faeries you control; cost.mana accepts only a fixed mana string, not an amount expression.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
 	"Sphinx of False Conclusions": {
 		"reason": "Sphinx of False Conclusions is not ready: When this creature dies, if it isn't a token, create a token that's a copy of it. — Creating a token copy using the dying creature's last-known copiable characteristics is not expressible: token instructions require a fixed TokenSpec and provide no copy operation.",
 		"decks": [
@@ -132,6 +1142,48 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
+	},
+	"Spider-Gwen, Free Spirit": {
+		"status": "unsupported",
+		"reason": "Spider-Gwen, Free Spirit is not ready: Whenever Spider-Gwen becomes tapped, you may discard a card. If you do, draw a card. — Unsupported triggering event: this permanent becoming tapped, including tapping for costs or effects; no supported watch event represents this transition.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Squawkroaster": {
+		"status": "unsupported",
+		"reason": "Squawkroaster is not ready: Vivid — Squawkroaster's power is equal to the number of colors among permanents you control. — Requires an all-zone characteristic-defining power ability counting distinct colors among controlled permanents; the supplied syntax has neither a distinct-colors amount nor characteristic-defining layer support.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Stiltzkin, Moogle Merchant": {
+		"status": "unsupported",
+		"reason": "Stiltzkin, Moogle Merchant is not ready: {2}, {T}: Target opponent gains control of another target permanent you control. If they do, you draw a card. — Changing control of a permanent is unsupported; the activation and its draw conditional on that control change cannot be implemented faithfully.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Stingblade Assassin": {
+		"status": "unsupported",
+		"reason": "Stingblade Assassin is not ready: When this creature enters, destroy target creature an opponent controls that was dealt damage this turn. — The target requires a per-incarnation damage-received-this-turn history selector, which the supplied syntax does not support. Current marked damage cannot substitute for that history.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Sultai Devotee": {
+		"status": "unsupported",
+		"reason": "Sultai Devotee is not ready: {1}: Add {B}, {G}, or {U}. Activate only once each turn. — Mana registrations cannot express the once-per-turn activation limit shared across all three color alternatives.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Summit Intimidator": {
+		"status": "unsupported",
+		"reason": "Summit Intimidator is not ready: When this creature enters, target creature can't block this turn. — Requires a temporary standalone blocking prohibition that survives the target losing abilities; the syntax does not supply this operation. modify.change.words would incorrectly grant a removable ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
 	},
 	"Sunspine Lynx": {
 		"reason": "Players can't gain life. Source review rejected the refreshed inert change.words sentence; the life-change path needs a standing prohibition. The damage-prevention prohibition is supported separately.",
@@ -142,6 +1194,41 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
+	},
+	"Swarm Culler": {
+		"status": "unsupported",
+		"reason": "Swarm Culler is not ready: Whenever this creature becomes tapped, you may sacrifice another creature or artifact. If you do, draw a card. — Unsupported triggering event: this creature becoming tapped. The event syntax cannot watch untapped-to-tapped transitions, including tapping from attack declarations, costs, and effects.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Tattered Ratter": {
+		"status": "unsupported",
+		"reason": "Tattered Ratter is not ready: Whenever a Rat you control becomes blocked, it gets +2/+0 until end of turn. — Unsupported triggering event: a creature becoming blocked, once per attacker regardless of how many creatures block it. The blocks event watches blocking creatures, not attackers becoming blocked.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Temur Battlecrier": {
+		"status": "unsupported",
+		"reason": "Temur Battlecrier is not ready: “During your turn, spells you cast cost {1} less to cast for each creature you control with power 4 or greater.” requires a standing generic-mana reduction equal to a dynamically computed creature count, restricted to your turn. Cost registrations support only fixed positive integer reductions, not count-based amounts.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Temur Devotee": {
+		"status": "unsupported",
+		"reason": "Temur Devotee is not ready: {1}: Add {G}, {U}, or {R}. Activate only once each turn. — Mana registrations cannot express the once-per-turn activation limit shared by the three color alternatives; a stack activation would incorrectly change this mana ability's timing.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Thalia, the Survivor": {
+		"status": "unsupported",
+		"reason": "Thalia, the Survivor is not ready: Noncreature spells your opponents cast cost {1} more to cast. — Standing generic mana cost increases are unsupported.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
 	},
 	"The Ooze": {
 		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess The Ooze: Deferred use Pay {1}, tap and sacrifice a Mutagen token to put a +1/+1 counter on target creature; activate only as a sorcery. must name The Ooze, its source zones and controller, without game object ids.",
@@ -168,6 +1255,83 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
+	"Thousand Moons Infantry": {
+		"status": "unsupported",
+		"reason": "Thousand Moons Infantry is not ready: Untap this creature during each other player's untap step. — No supported standing term adds this creature to other players' turn-based untap actions. A step watch would incorrectly turn this static ability into a triggered ability using the stack.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Three Tree Mascot": {
+		"status": "unsupported",
+		"reason": "Three Tree Mascot is not ready: {1}: Add one mana of any color. Activate only once each turn. — Mana registrations do not support a once-per-turn activation limit; a stack activation would incorrectly change this mana ability's timing.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Tin Street Gossip": {
+		"status": "unsupported",
+		"reason": "Tin Street Gossip is not ready: {T}: Add {R}{G}. Spend this mana only to cast face-down spells or to turn creatures face up. — The mana restriction cannot be represented: spendOnly cannot select face-down spells or restrict payment to turning creatures face up.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Traxos, Scourge Eternal": {
+		"status": "unsupported",
+		"reason": "Traxos, Scourge Eternal is not ready: Traxos doesn't untap during your untap step. — Untap-step restrictions have no supported executable registration.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Tributary Vaulter": {
+		"status": "unsupported",
+		"reason": "Tributary Vaulter is not ready: Whenever this creature becomes tapped, another target Merfolk you control gets +2/+0 until end of turn. — Unsupported event: this creature becoming tapped; the event syntax has no tap-state transition watch. An attack watch or current tapped-state condition would not cover all tapping events.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Trick Shot": {
+		"status": "unsupported",
+		"reason": "Trick Shot is not ready: “Trick Shot deals 6 damage to target creature and 2 damage to up to one other target creature token.” Unsupported operation: simultaneous damage with different fixed amounts to two distinct target slots. Separate damage instructions would deal the damage sequentially; one damage instruction cannot assign these fixed amounts to the separate slots.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Turtle-Duck": {
+		"status": "unsupported",
+		"reason": "Turtle-Duck is not ready: {3}: Until end of turn, this creature has base power 4 and gains trample. — Setting only base power while leaving base toughness unaffected is not expressible: change.base requires both power and toughness. Setting toughness to 4 or its current toughness would change the effect.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Uncharted Haven": {
+		"status": "unsupported",
+		"reason": "Uncharted Haven is not ready: {T}: Add one mana of the chosen color. — Mana output cannot read the remembered entry color in the supplied syntax; unrestricted any-color mana would not implement this ability.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Unsparing Boltcaster": {
+		"status": "unsupported",
+		"reason": "Unsparing Boltcaster is not ready: When this creature enters, it deals 5 damage to target creature an opponent controls that was dealt damage this turn. — Unsupported target restriction: selecting a creature that was dealt damage this turn requires per-incarnation damage history, which the available selectors do not express. Current marked damage is not an equivalent restriction.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Valgavoth's Lair": {
+		"status": "unsupported",
+		"reason": "Valgavoth's Lair is not ready: {T}: Add one mana of the chosen color. — Mana registrations cannot read the stored entry color choice, and conditions cannot test that named choice to restrict fixed-color mana alternatives.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Vantress Transmuter // Croaking Curse": {
+		"status": "unsupported",
+		"reason": "Vantress Transmuter // Croaking Curse is not ready: Tap target creature. Create a Cursed Role token attached to it. (Enchanted creature is 1/1.) — Creating an Aura token already attached to the specified creature is unsupported: token has no entry-attachment field. Creating it first and attaching it afterward is not equivalent; if it cannot legally enchant that creature, the Aura token must not be created.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
 	"Vengeful Tracker": {
 		"reason": "Vengeful Tracker is not ready: Whenever an opponent sacrifices an artifact, this creature deals 2 damage to them. — Cannot register faithfully: the available event schema has no sacrifice event or sacrifice-reason filter. A leaves or dies watch would also trigger for nonsacrifice events and would not correctly handle sacrifices whose graveyard destination is replaced.",
 		"decks": [
@@ -175,5 +1339,61 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
+	},
+	"Verdant Outrider": {
+		"status": "unsupported",
+		"reason": "Verdant Outrider is not ready: {1}{G}: This creature can't be blocked by creatures with power 2 or less this turn. — Unsupported: a resolving temporary standalone blocking prohibition. The syntax cannot create this end-of-turn restriction independently of the creature's abilities; granting words or a prohibit.block ability would incorrectly allow ability loss to remove it.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Vicious Rivalry": {
+		"status": "unsupported",
+		"reason": "Vicious Rivalry is not ready: As an additional cost to cast this spell, pay X life. ... Destroy all artifacts and creatures with mana value X or less. — Unsupported: announcing X through a variable additional life payment (including X = 0) and retaining that chosen X for the simultaneous destruction. cost.life supports only a fixed positive integer, not an X amount.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Volatile Wanderglyph": {
+		"status": "unsupported",
+		"reason": "Volatile Wanderglyph is not ready: Whenever this creature becomes tapped, you may discard a card. If you do, draw a card. — The event syntax does not support a permanent becoming tapped. An attack watch would omit tapping from costs or effects and incorrectly trigger on attacks without tapping. The required tap-event watch cannot be registered.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Wanderbrine Preacher": {
+		"status": "unsupported",
+		"reason": "Wanderbrine Preacher is not ready: Whenever this creature becomes tapped, you gain 2 life. — The event syntax does not support watching a permanent become tapped; an attack trigger or tapped-state condition cannot replace this event.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Wanderwine Distracter": {
+		"status": "unsupported",
+		"reason": "Wanderwine Distracter is not ready: Whenever this creature becomes tapped, target creature an opponent controls gets -3/-0 until end of turn. — Unsupported trigger event: this creature becoming tapped, including tapping for attacks, costs, or effects. The available watch events cannot represent this transition; an attacks watch would not cover it faithfully.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Wax-Wane Witness": {
+		"status": "unsupported",
+		"reason": "Wax-Wane Witness is not ready: \"Whenever you gain or lose life during your turn, this creature gets +1/+0 until end of turn.\" — The life-loss branch requires a life-lost event watch, including life paid and non-damage life loss. No supported event expresses this; damage watches or life-loss history cannot substitute. The registered life-gain branch is only partial coverage.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Wylie Duke, Atiin Hero": {
+		"status": "unsupported",
+		"reason": "Wylie Duke, Atiin Hero is not ready: Whenever Wylie Duke becomes tapped, you gain 1 life and draw a card. — Unsupported event: this permanent becoming tapped; the watch event syntax cannot represent untapped-to-tapped transitions.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
+	},
+	"Zaffai and the Tempests": {
+		"status": "unsupported",
+		"reason": "Zaffai and the Tempests is not ready: \"Once during each of your turns, you may cast an instant or sorcery spell from your hand without paying its mana cost.\" — Unsupported standing alternative-cost permission for other instant or sorcery spells in the controller's hand, restricted to once during each of that controller's turns. The available native permit.cast applies only to its own source card and cannot express this permission or its shared usage limit.",
+		"decks": [],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-12"
 	}
 }

@@ -1,0 +1,46 @@
+{
+	"card": "Water Tribe Captain",
+	"generated": "2026-10-10",
+	"source": "5f30fe778e3345542c4524d1a12d59a1bd71f17ab0df8c4089f0d1b2bc2111f5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Water Tribe Captain",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Water Tribe Captain",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give creatures you control +1/+1 until end of turn",
+				"basis": "{5}: Creatures you control get +1/+1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

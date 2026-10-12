@@ -1,0 +1,51 @@
+{
+	"card": "Hedron Archive",
+	"generated": "2026-10-10",
+	"source": "ae494760bbb3db9848c1f1381633c93fc7afcb303cac01a662cbd1a6447f1a7b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hedron Archive",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}{C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C",
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hedron Archive",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Hedron Archive to draw two cards",
+				"basis": "{2}, {T}, Sacrifice this artifact: Draw two cards.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

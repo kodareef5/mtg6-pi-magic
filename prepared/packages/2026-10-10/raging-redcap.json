@@ -1,0 +1,31 @@
+{
+	"card": "Raging Redcap",
+	"generated": "2026-10-10",
+	"source": "eeaccd6c8db2dceadbc1b586769f15e6ee5c5cc2ac175b91b6c4c37e6bb7df45",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Raging Redcap",
+		"registers": [
+			{
+				"basis": "Double strike (This creature deals both first-strike and regular combat damage.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

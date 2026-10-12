@@ -1,0 +1,52 @@
+{
+	"card": "Skullcap Snail",
+	"generated": "2026-10-10",
+	"source": "7cdb8790b6452bd43187e146dfec59d463184e621e13fc995310223c9590f99f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Skullcap Snail",
+		"registers": [
+			{
+				"basis": "When this creature enters, target opponent exiles a card from their hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "target:0",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "target:0"
+							},
+							"count": 1,
+							"as": "chosen-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen-card",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

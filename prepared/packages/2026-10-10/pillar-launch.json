@@ -1,0 +1,55 @@
+{
+	"card": "Pillar Launch",
+	"generated": "2026-10-10",
+	"source": "062f7a860fd4c7ceab9a53ac5fa9138df16cea9d9c1c0ee3c5e2d2f538aaca85",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pillar Launch",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pillar Launch",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +2/+2 and reach until end of turn, then untap it.",
+				"basis": "Target creature gets +2/+2 and gains reach until end of turn. Untap it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"reach"
+							]
+						}
+					},
+					{
+						"do": "untap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

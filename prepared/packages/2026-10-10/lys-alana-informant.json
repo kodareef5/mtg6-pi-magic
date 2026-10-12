@@ -1,0 +1,56 @@
+{
+	"card": "Lys Alana Informant",
+	"generated": "2026-10-10",
+	"source": "5e42010db7a2e8d810177d346db80ad0c2fb9411520ba567044114055fb88b0f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lys Alana Informant",
+		"registers": [
+			{
+				"basis": "When this creature enters or dies, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters or dies, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

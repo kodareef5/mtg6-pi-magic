@@ -1,0 +1,79 @@
+{
+	"card": "Dina's Guidance",
+	"generated": "2026-10-10",
+	"source": "a4a4524f5d438fe86b2c3eb6f2235510a7cabe7f56b8ce0d8bd5a7e3b602bb52",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dina's Guidance",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dina's Guidance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dina's Guidance; choose hand or graveyard for the revealed creature during resolution",
+				"basis": "Search your library for a creature card, reveal it, put it into your hand or graveyard, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"reveal": true,
+						"as": "creature"
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"may": true,
+						"if": {
+							"bound": "creature"
+						},
+						"as": "hand-choice",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "bound:creature",
+								"to": "hand",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "bound:creature",
+						"to": "graveyard",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "hand-choice"
+							}
+						}
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

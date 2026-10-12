@@ -1,0 +1,50 @@
+{
+	"card": "Shrewd Storyteller",
+	"generated": "2026-10-10",
+	"source": "7f793953265ddb1d21dc4eeae2a8d974f8ac1b86bea83a10b650df934168393e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shrewd Storyteller",
+		"registers": [
+			{
+				"basis": "Survival — At the beginning of your second main phase, if this creature is tapped, put a +1/+1 counter on target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "postcombat-main",
+					"whose": "you"
+				},
+				"if": {
+					"is": "this",
+					"matches": {
+						"tapped": true
+					},
+					"lastKnown": true
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

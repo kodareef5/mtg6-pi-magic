@@ -1,0 +1,57 @@
+{
+	"card": "Depressurize",
+	"generated": "2026-10-10",
+	"source": "3748804ed115a8502487e4385461f5398d4ef375f639453a97f6867964b8aa91",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Depressurize",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Depressurize",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Depressurize",
+				"basis": "Target creature gets -3/-0 until end of turn. Then if that creature's power is 0 or less, destroy it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -3
+						}
+					},
+					{
+						"do": "destroy",
+						"what": "target:0",
+						"if": {
+							"amount": {
+								"power": "target:0"
+							},
+							"atMost": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,88 @@
+{
+	"card": "Arcane Epiphany",
+	"generated": "2026-10-10",
+	"source": "e2e6e184226177a110c730913f21afae7ead307aff02fb79dcb09ae547b3a8a8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Arcane Epiphany",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Arcane Epiphany",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Arcane Epiphany with its Wizard discount",
+				"basis": "This spell costs {1} less to cast if you control a Wizard. ... Draw three cards.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Wizard"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Arcane Epiphany",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Arcane Epiphany without a Wizard",
+				"basis": "This spell costs {1} less to cast if you control a Wizard. ... Draw three cards.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Wizard"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

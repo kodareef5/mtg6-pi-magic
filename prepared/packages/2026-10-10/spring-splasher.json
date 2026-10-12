@@ -1,0 +1,47 @@
+{
+	"card": "Spring Splasher",
+	"generated": "2026-10-10",
+	"source": "e72494094458d277201916394ae54731db6621074724edb8388ca33ad2595220",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spring Splasher",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, target creature defending player controls gets -3/-0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": -3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

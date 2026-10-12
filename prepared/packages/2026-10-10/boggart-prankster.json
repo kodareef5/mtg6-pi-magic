@@ -1,0 +1,46 @@
+{
+	"card": "Boggart Prankster",
+	"generated": "2026-10-10",
+	"source": "961d340873765251b202b9cb1d5d0ca9b39ca344b5f98e192377378caf00a2d3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boggart Prankster",
+		"registers": [
+			{
+				"basis": "Whenever you attack, target attacking Goblin you control gets +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"subtypes": [
+									"Goblin"
+								],
+								"controller": "you",
+								"attacking": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

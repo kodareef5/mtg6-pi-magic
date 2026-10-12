@@ -1,0 +1,61 @@
+{
+	"card": "Maelstrom Pulse",
+	"generated": "2026-10-10",
+	"source": "5837831a6be2bc10bccd6bf71f46a51c238f1670b777965a671d4f43db97dbb6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Maelstrom Pulse",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Maelstrom Pulse",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Maelstrom Pulse",
+				"basis": "Destroy target nonland permanent and all other permanents with the same name as that permanent.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"any": [
+								{
+									"is": "target:0"
+								},
+								{
+									"nameOf": "target:0"
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

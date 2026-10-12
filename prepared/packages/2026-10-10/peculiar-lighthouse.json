@@ -1,0 +1,57 @@
+{
+	"card": "Peculiar Lighthouse",
+	"generated": "2026-10-10",
+	"source": "a805e8c4d041896c6a257659839360387b57a26b485b630a88247b85f4577cd2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Peculiar Lighthouse",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless a player has 13 or less life.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"any": [
+							{
+								"amount": {
+									"life": "you"
+								},
+								"atMost": 13
+							},
+							{
+								"amount": {
+									"life": "opponent"
+								},
+								"atMost": 13
+							}
+						]
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {U} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			},
+			{
+				"basis": "{T}: Add {U} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

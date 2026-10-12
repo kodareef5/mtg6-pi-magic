@@ -1,0 +1,65 @@
+{
+	"card": "Walltop Sentries",
+	"generated": "2026-10-10",
+	"source": "b300d228f7add33e67c13db5b21e22b56ad0875626ca6aef8237e0595b2bfc5c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Walltop Sentries",
+		"registers": [
+			{
+				"basis": "Reach, deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, if there's a Lesson card in your graveyard, you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"subtypes": [
+								"Lesson"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

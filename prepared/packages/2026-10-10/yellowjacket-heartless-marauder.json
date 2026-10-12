@@ -1,0 +1,60 @@
+{
+	"card": "Yellowjacket, Heartless Marauder",
+	"generated": "2026-10-10",
+	"source": "bdf29256d0744a7ed1f0cc6725eeb339d2fc14512418b6984069748b5006153b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Yellowjacket, Heartless Marauder",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Villain you control enters, Yellowjacket gets +1/+0 and gains lifelink until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Villain"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"words": [
+									"lifelink"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

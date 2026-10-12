@@ -1,0 +1,51 @@
+{
+	"card": "Give In to Violence",
+	"generated": "2026-10-10",
+	"source": "49f6b7b17b7e6feb564ebd1d93fe4d31c552776a8e31ff4657097d72a78fba1d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Give In to Violence",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Give In to Violence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +2/+2 and lifelink until end of turn.",
+				"basis": "Target creature gets +2/+2 and gains lifelink until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"lifelink"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

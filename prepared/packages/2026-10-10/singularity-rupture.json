@@ -1,0 +1,91 @@
+{
+	"card": "Singularity Rupture",
+	"generated": "2026-10-10",
+	"source": "07c438e5cf85dddece90f83e2f023ee0412b3b9f41b1f7b34aa7252c70eae99e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Singularity Rupture",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Singularity Rupture",
+				"basis": "Destroy all creatures, then any number of target players each mill half their library, rounded down.",
+				"source": {
+					"card": "Singularity Rupture",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any",
+						"count": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"owner": "target:0",
+							"any": [
+								{
+									"is": {
+										"top": {
+											"half": {
+												"count": {
+													"zones": [
+														"library"
+													],
+													"owner": "you"
+												}
+											},
+											"round": "down"
+										},
+										"of": "you"
+									}
+								},
+								{
+									"is": {
+										"top": {
+											"half": {
+												"count": {
+													"zones": [
+														"library"
+													],
+													"owner": "opponent"
+												}
+											},
+											"round": "down"
+										},
+										"of": "opponent"
+									}
+								}
+							]
+						},
+						"to": "graveyard",
+						"reason": "mill"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

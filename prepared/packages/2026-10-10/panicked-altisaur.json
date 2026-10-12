@@ -1,0 +1,54 @@
+{
+	"card": "Panicked Altisaur",
+	"generated": "2026-10-10",
+	"source": "7ed38f112a63caffd6b81bb9f5f31d72823949cc0edcc8fbdfe2a9bc774d3644",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Panicked Altisaur",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Panicked Altisaur",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Deal 2 damage to each opponent",
+				"basis": "{T}: This creature deals 2 damage to each opponent.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "opponent",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

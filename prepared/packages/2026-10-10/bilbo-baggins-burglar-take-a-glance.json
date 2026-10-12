@@ -1,0 +1,59 @@
+{
+	"card": "Bilbo Baggins, Burglar // Take a Glance",
+	"generated": "2026-10-10",
+	"source": "db1ab729e52334e57cdafc0685cd1f69320f7c7c71e57625b57f9945e56a5aec",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bilbo Baggins, Burglar // Take a Glance",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "When Bilbo Baggins enters, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Bilbo Baggins, Burglar // Take a Glance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Take a Glance",
+				"basis": "Scry 2. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "scry",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

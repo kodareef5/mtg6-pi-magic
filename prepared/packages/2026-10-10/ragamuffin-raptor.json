@@ -1,0 +1,58 @@
+{
+	"card": "Ragamuffin Raptor",
+	"generated": "2026-10-10",
+	"source": "fbe069739644bcdef749495b5f41f7bfeffac8df80d3a71b02e3429fdd6471a9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ragamuffin Raptor",
+		"registers": [
+			{
+				"basis": "When this creature enters, return up to one target creature or Food card from your graveyard to your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"any": [
+									{
+										"types": [
+											"creature"
+										]
+									},
+									{
+										"subtypes": [
+											"Food"
+										]
+									}
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

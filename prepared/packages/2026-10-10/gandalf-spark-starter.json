@@ -1,0 +1,67 @@
+{
+	"card": "Gandalf, Spark Starter",
+	"generated": "2026-10-10",
+	"source": "1c6011d949e3b95e97e78279bf931007e994298ef83343f0f1361d3c1ea2b058",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gandalf, Spark Starter",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "When Gandalf enters, he deals 3 damage divided as you choose among one, two, or three targets.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any",
+							"count": 3,
+							"atLeast": 1,
+							"divide": 3
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": {
+								"divided": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

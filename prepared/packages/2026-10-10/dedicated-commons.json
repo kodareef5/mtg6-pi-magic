@@ -1,0 +1,52 @@
+{
+	"card": "Dedicated Commons",
+	"generated": "2026-10-10",
+	"source": "ca32daa4d009be6bbf85e0a21a9ba215fc8d2d2e1f6757da8176f67675931b2c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dedicated Commons",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a planeswalker.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"planeswalker"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {R} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {R} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

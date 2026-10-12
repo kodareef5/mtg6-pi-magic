@@ -1,0 +1,39 @@
+{
+	"card": "Agate-Blade Assassin",
+	"generated": "2026-10-10",
+	"source": "6e803f37e55b8b24ea6fdc7ab5239f888b01eedf16835006b091c73bc831f7df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Agate-Blade Assassin",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, defending player loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

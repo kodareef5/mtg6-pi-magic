@@ -1,0 +1,66 @@
+{
+	"card": "Skycrash",
+	"generated": "2026-10-10",
+	"source": "360bccffbecfd02539b552a99bf903700ec96819a37bc1fc90c4ba0031a5f4f9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Skycrash",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Skycrash",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Skycrash to destroy target artifact",
+				"basis": "Destroy target artifact.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Skycrash",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Skycrash",
+				"basis": "Cycling {R} ({R}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{R}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

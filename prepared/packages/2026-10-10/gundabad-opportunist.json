@@ -1,0 +1,47 @@
+{
+	"card": "Gundabad Opportunist",
+	"generated": "2026-10-10",
+	"source": "03c751ebb896a2b1706c9b7602351d4f838d555ea6d88619c229d538ff2bc316",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gundabad Opportunist",
+		"registers": [
+			{
+				"basis": "When this creature enters, exile the top card of your library. Until the end of your next turn, you may play that card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

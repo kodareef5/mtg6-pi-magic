@@ -1,0 +1,66 @@
+{
+	"card": "Tweeze",
+	"generated": "2026-10-10",
+	"source": "6d2728533c61821944e5c9eaf2902df5f207e602864868e6d80927e969fc2a48",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tweeze",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tweeze",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Tweeze",
+				"basis": "Tweeze deals 3 damage to any target. You may discard a card. If you do, draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					},
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"discard": 1
+						},
+						"may": true,
+						"as": "discarded"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"bound": "discarded"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

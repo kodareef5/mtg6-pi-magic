@@ -1,0 +1,52 @@
+{
+	"card": "Slagdrill Scrapper",
+	"generated": "2026-10-10",
+	"source": "52065afa5a51108b7a6b897f02004581d0d02d8a8f37f749670feaf703e608e4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Slagdrill Scrapper",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Slagdrill Scrapper",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another artifact or land to draw a card.",
+				"basis": "{2}, {T}, Sacrifice another artifact or land: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"land"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

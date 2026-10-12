@@ -1,0 +1,51 @@
+{
+	"card": "Buzz Bots",
+	"generated": "2026-10-10",
+	"source": "3c1ed88c585b2e22826234dcb6e12d33afb0f93b66d72bb5e32ce64ffc6e1b08",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Buzz Bots",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature dies, draw a card.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

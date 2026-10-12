@@ -1,0 +1,40 @@
+{
+	"card": "Tunnel Rats",
+	"generated": "2026-10-10",
+	"source": "0299a3c4c51e87b013b85c0c9ac5e2f0dffb178581389646e277c7d996451d17",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tunnel Rats",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tunnel Rats",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Tunnel Rats from your graveyard to the battlefield tapped",
+				"basis": "{4}{B}: Return this card from your graveyard to the battlefield tapped.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{B}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "battlefield",
+						"controller": "you",
+						"tapped": true,
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,54 @@
+{
+	"card": "Lyra, Archangel of Dawn",
+	"generated": "2026-10-10",
+	"source": "84bb4d2cf3afc5e18d177f18212b13c53a0e484a6ff341baed40095e66f84c1c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lyra, Archangel of Dawn",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put a +1/+1 counter on each Angel you control.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"subtypes": [
+									"Angel"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,51 @@
+{
+	"card": "Unburied Earthcarver",
+	"generated": "2026-10-10",
+	"source": "991d857dc3c08060bbc69a46f3a79fdd6dd64c1e14c2747a89c4a170af62719e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unburied Earthcarver",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unburied Earthcarver",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature to put a +1/+1 counter on Unburied Earthcarver",
+				"basis": "{2}, Sacrifice another creature: Put a +1/+1 counter on this creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

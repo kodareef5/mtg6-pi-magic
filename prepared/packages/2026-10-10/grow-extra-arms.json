@@ -1,0 +1,58 @@
+{
+	"card": "Grow Extra Arms",
+	"generated": "2026-10-10",
+	"source": "f1104654d269c0943ce2b399a393a6f276fcdafb663bdc9920fab89a23294d22",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Grow Extra Arms",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Grow Extra Arms",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Grow Extra Arms giving target creature +4/+4, with its Spider targeting discount",
+				"basis": "This spell costs {1} less to cast if it targets a Spider. ... Target creature gets +4/+4 until end of turn.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"is": "target:0",
+							"subtypes": [
+								"Spider"
+							]
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 4,
+							"toughness": 4
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

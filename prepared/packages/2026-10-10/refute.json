@@ -1,0 +1,76 @@
+{
+	"card": "Refute",
+	"generated": "2026-10-10",
+	"source": "2125b686d2ea33af3063a931291999c654b5fb45939740195e2b80f2b80655a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Refute",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Refute",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Refute",
+				"basis": "Counter target spell. Draw a card, then discard a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,78 @@
+{
+	"card": "Cycle of Renewal",
+	"generated": "2026-10-10",
+	"source": "9292ab25ea61ee2492c8fcdab610065ad0cf29d830269af1bc9e65898e5b609f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cycle of Renewal",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cycle of Renewal",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cycle of Renewal",
+				"basis": "Sacrifice a land. Search your library for up to two basic land cards, put them onto the battlefield tapped, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "sacrificed-land"
+					},
+					{
+						"do": "move",
+						"what": "bound:sacrificed-land",
+						"to": "graveyard",
+						"reason": "sacrifice"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							]
+						},
+						"count": 2,
+						"upTo": true,
+						"as": "basic-lands"
+					},
+					{
+						"do": "move",
+						"what": "bound:basic-lands",
+						"to": "battlefield",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,48 @@
+{
+	"card": "Hungry Ghoul",
+	"generated": "2026-10-10",
+	"source": "6e04b33af04d5c2784fe41548d7253d0c0fadfb46d752a5630ac9e71615a80e5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hungry Ghoul",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hungry Ghoul",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature to put a +1/+1 counter on Hungry Ghoul.",
+				"basis": "{1}, Sacrifice another creature: Put a +1/+1 counter on this creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

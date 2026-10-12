@@ -1,0 +1,30 @@
+{
+	"card": "Ballyrush Banneret",
+	"generated": "2026-10-10",
+	"source": "09463187df9c98b10c2df2028d3d24da0f0c12e185c0a66ae3e7f45764a98910",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ballyrush Banneret",
+		"registers": [
+			{
+				"kind": "cost",
+				"basis": "Kithkin spells and Soldier spells you cast cost {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"subtypes": [
+						"Kithkin",
+						"Soldier"
+					]
+				},
+				"reduce": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"card": "Relm's Sketching",
+	"generated": "2026-10-10",
+	"source": "c60e42cb35afec10d1e0246a9372c8b6454e903edbab3f0d6c979239c6484757",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Relm's Sketching",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Relm's Sketching",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Relm's Sketching to create a token copy",
+				"basis": "Create a token that's a copy of target artifact, creature, or land.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature",
+								"land"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"copy": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

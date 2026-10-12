@@ -1,0 +1,46 @@
+{
+	"card": "Ashiok's Reaper",
+	"generated": "2026-10-10",
+	"source": "8b087a25b94c4e511f285b082ebc9a6e4ed605cf723700c929ae85bc525e6043",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ashiok's Reaper",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever an enchantment you control is put into a graveyard from the battlefield, draw a card.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

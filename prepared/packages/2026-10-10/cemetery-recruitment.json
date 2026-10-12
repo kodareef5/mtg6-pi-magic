@@ -1,0 +1,66 @@
+{
+	"card": "Cemetery Recruitment",
+	"generated": "2026-10-10",
+	"source": "86fa313ae9b230f37b57a18cbca0102e090882a6890eb539b28fd1045cbd076d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cemetery Recruitment",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cemetery Recruitment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return a creature card and draw if it is a Zombie card",
+				"basis": "Return target creature card from your graveyard to your hand. If it's a Zombie card, draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"zones": [
+									"graveyard"
+								],
+								"subtypes": [
+									"Zombie"
+								]
+							},
+							"lastKnown": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

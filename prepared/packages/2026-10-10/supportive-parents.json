@@ -1,0 +1,35 @@
+{
+	"card": "Supportive Parents",
+	"generated": "2026-10-10",
+	"source": "f320d2308423143a47efa00bb71c23fd58a93e28a6b386a32ee71cf3bfc3a29b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Supportive Parents",
+		"registers": [
+			{
+				"basis": "Tap two untapped creatures you control: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"tapped": false
+						},
+						"count": 2
+					}
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,66 @@
+{
+	"card": "Sureshot Sower",
+	"generated": "2026-10-10",
+	"source": "73b800d56ea3a54e74c726a085fad8c5f5d9dc0aed9b7e3ba59e633e6c96ba38",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sureshot Sower",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sureshot Sower",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard Sureshot Sower to destroy a creature with flying",
+				"basis": "{3}{G}, Discard this card: Destroy target creature with flying.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{G}",
+					"discard": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"words": [
+								"flying"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,91 @@
+{
+	"card": "Knife",
+	"generated": "2026-10-10",
+	"source": "a93cdfe347e158ea567b4a20f8e53b8030bf0eeaa2832e1a2e043f7c2bf8c1e3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Knife",
+		"registers": [
+			{
+				"basis": "During your turn, equipped creature gets +1/+0 and has first strike.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"if": {
+					"turn": "self"
+				},
+				"change": {
+					"power": 1,
+					"words": [
+						"first strike"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Knife",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Knife to draw a card",
+				"basis": "{2}, Sacrifice this Equipment: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Knife",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Equip Knife",
+				"basis": "Equip {2}",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

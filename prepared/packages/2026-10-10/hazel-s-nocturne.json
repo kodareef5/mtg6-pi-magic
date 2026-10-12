@@ -1,0 +1,61 @@
+{
+	"card": "Hazel's Nocturne",
+	"generated": "2026-10-10",
+	"source": "5e0bc04873d786c693c63efa70e2e3efcfa4859b1ad2ef19d74714e1fc0bbd1f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hazel's Nocturne",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hazel's Nocturne",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Hazel's Nocturne",
+				"basis": "Return up to two target creature cards from your graveyard to your hand. Each opponent loses 2 life and you gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -2
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,67 @@
+{
+	"card": "Fog Bank",
+	"generated": "2026-10-10",
+	"source": "31003dd2149e13e76909a7edfac5b675ba5c19d1ed7c77cc732a34efc1705fdd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fog Bank",
+		"registers": [
+			{
+				"basis": "Defender (This creature can't attack.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"defender"
+					]
+				}
+			},
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Prevent all combat damage that would be dealt to and dealt by this creature.",
+				"kind": "damage-rule",
+				"mode": "prevent",
+				"combat": true,
+				"to": {
+					"object": {
+						"is": "this"
+					}
+				}
+			},
+			{
+				"basis": "Prevent all combat damage that would be dealt to and dealt by this creature.",
+				"kind": "damage-rule",
+				"mode": "prevent",
+				"combat": true,
+				"from": {
+					"is": "this"
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

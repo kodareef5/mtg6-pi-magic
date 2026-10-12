@@ -1,0 +1,83 @@
+{
+	"card": "Illvoi Galeblade",
+	"generated": "2026-10-10",
+	"source": "be9a9704f49ca9d990c920c280e7e99401c35b3aef62417feabdf1245c472e0d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Illvoi Galeblade",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Illvoi Galeblade",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Illvoi Galeblade to draw a card",
+				"basis": "{2}, Sacrifice this creature: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

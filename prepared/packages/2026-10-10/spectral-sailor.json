@@ -1,0 +1,82 @@
+{
+	"card": "Spectral Sailor",
+	"generated": "2026-10-10",
+	"source": "0c3790a464cd7a17d9b2ea972acb7c25ca361de0d4b1748164a453b0ddbcfa81",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spectral Sailor",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash (You may cast this spell any time you could cast an instant.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spectral Sailor",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card",
+				"basis": "{3}{U}: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{U}"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

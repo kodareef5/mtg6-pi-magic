@@ -1,0 +1,60 @@
+{
+	"card": "Deadeye Duelist",
+	"generated": "2026-10-10",
+	"source": "2b44035118a0d2b2fb1152520452f85fc5dfa25034795a0fa2059ea3fb607d10",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deadeye Duelist",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Deadeye Duelist",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Deal 1 damage to target opponent.",
+				"basis": "{1}, {T}: This creature deals 1 damage to target opponent.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

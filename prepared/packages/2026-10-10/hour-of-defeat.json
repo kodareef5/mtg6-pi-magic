@@ -1,0 +1,49 @@
+{
+	"card": "Hour of Defeat",
+	"generated": "2026-10-10",
+	"source": "043e583d5e5933ce9aab0025bed94d79f091694adafa7d1c02f746f0218c20f9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hour of Defeat",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hour of Defeat",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Hour of Defeat",
+				"basis": "Destroy target creature. Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

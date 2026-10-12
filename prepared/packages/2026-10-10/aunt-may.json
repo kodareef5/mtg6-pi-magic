@@ -1,0 +1,53 @@
+{
+	"card": "Aunt May",
+	"generated": "2026-10-10",
+	"source": "9f52ec07f49cb40375d3981a2aa0f8292044cfd3fcbce8dc23353174023d938c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aunt May",
+		"registers": [
+			{
+				"basis": "Whenever another creature you control enters, you gain 1 life. If it's a Spider, put a +1/+1 counter on it.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						},
+						{
+							"do": "counters",
+							"on": "event:object",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"is": "event:object",
+								"matches": {
+									"subtypes": [
+										"Spider"
+									]
+								},
+								"lastKnown": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

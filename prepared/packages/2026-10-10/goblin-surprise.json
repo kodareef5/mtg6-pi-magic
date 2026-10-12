@@ -1,0 +1,78 @@
+{
+	"card": "Goblin Surprise",
+	"generated": "2026-10-10",
+	"source": "13fb7d746dcf2d5517bec181832ac33b485ab34d3e81d621a24c7357888ce7a6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goblin Surprise",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Goblin Surprise",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Goblin Surprise: boost your creatures",
+				"basis": "Choose one —\n• Creatures you control get +2/+0 until end of turn.\n• Create two 1/1 red Goblin creature tokens.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 0
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Goblin Surprise",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Goblin Surprise: create two Goblins",
+				"basis": "Choose one —\n• Creatures you control get +2/+0 until end of turn.\n• Create two 1/1 red Goblin creature tokens.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Goblin",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Goblin"
+							],
+							"colors": [
+								"R"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

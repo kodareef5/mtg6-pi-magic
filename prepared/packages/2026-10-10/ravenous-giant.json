@@ -1,0 +1,33 @@
+{
+	"card": "Ravenous Giant",
+	"generated": "2026-10-10",
+	"source": "0b1484bf4560eccb25955968418910d546c0356c8c422dbdda2fe109fd554b35",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ravenous Giant",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, this creature deals 1 damage to you.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

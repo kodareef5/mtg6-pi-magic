@@ -1,0 +1,51 @@
+{
+	"card": "Fight On!",
+	"generated": "2026-10-10",
+	"source": "b7aaccf597ea621541c58983b9062f3a61901898ab8818d8c52090127317d300",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fight On!",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fight On!",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return up to two creature cards from your graveyard to your hand",
+				"basis": "Return up to two target creature cards from your graveyard to your hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"types": [
+								"creature"
+							],
+							"owner": "you"
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

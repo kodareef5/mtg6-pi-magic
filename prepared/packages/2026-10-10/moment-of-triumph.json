@@ -1,0 +1,55 @@
+{
+	"card": "Moment of Triumph",
+	"generated": "2026-10-10",
+	"source": "88e43f2e68766e7bb797d92e77b578505abd2843dd830ef33a6507b076c997f3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Moment of Triumph",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Moment of Triumph",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +2/+2 until end of turn and gain 2 life.",
+				"basis": "Target creature gets +2/+2 until end of turn. You gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,64 @@
+{
+	"card": "Final Vengeance",
+	"generated": "2026-10-10",
+	"source": "f425827787f6b2134691d1b60e272ddc31f4a1b69f89cb6c9f73c09c974a8aee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Final Vengeance",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Final Vengeance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Final Vengeance",
+				"basis": "As an additional cost to cast this spell, sacrifice a creature or enchantment. ... Exile target creature.",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature",
+								"enchantment"
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

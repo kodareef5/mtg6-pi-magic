@@ -1,0 +1,51 @@
+{
+	"card": "Bestow Greatness",
+	"generated": "2026-10-10",
+	"source": "7d523ca52f0220ab5944c1c31bf1a7bd8323be0cbaa80db915ba76c80a70e333",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bestow Greatness",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bestow Greatness",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +4/+4 and trample until end of turn.",
+				"basis": "Target creature gets +4/+4 and gains trample until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 4,
+							"toughness": 4,
+							"words": [
+								"trample"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"card": "Thawbringer",
+	"generated": "2026-10-10",
+	"source": "ec5fbf5c61fe7472d3fcb942cb66fcc6318ee9317fde1aca7dbcc512955e3534",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thawbringer",
+		"registers": [
+			{
+				"basis": "When this creature enters or dies, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters or dies, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

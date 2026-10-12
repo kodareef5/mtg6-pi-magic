@@ -1,0 +1,60 @@
+{
+	"card": "Curious Cadaver",
+	"generated": "2026-10-10",
+	"source": "5ce82a98554ba312519dd672ea6d82c505b9e0cf7aee9d463699b6e85e30f801",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Curious Cadaver",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When you sacrifice a Clue, return this card from your graveyard to your hand.",
+				"zones": [
+					"graveyard"
+				],
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"subtypes": [
+							"Clue"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

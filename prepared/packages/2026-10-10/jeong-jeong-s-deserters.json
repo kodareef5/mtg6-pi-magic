@@ -1,0 +1,44 @@
+{
+	"card": "Jeong Jeong's Deserters",
+	"generated": "2026-10-10",
+	"source": "62ca5a10670587e38db50ec92e8abb03f95a77321508c0af52d4777e6ac35672",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jeong Jeong's Deserters",
+		"registers": [
+			{
+				"basis": "When this creature enters, put a +1/+1 counter on target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

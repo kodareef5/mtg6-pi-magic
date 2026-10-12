@@ -1,0 +1,62 @@
+{
+	"card": "Forecasting Fortune Teller",
+	"generated": "2026-10-10",
+	"source": "25c501c18a72368c8338a6eb187358c51a8316fa6ecd07e5f5823aacf0d108b8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Forecasting Fortune Teller",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, create a Clue token. (It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Clue",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Clue"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, Sacrifice this token: Draw a card.",
+										"cost": {
+											"mana": "{2}",
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

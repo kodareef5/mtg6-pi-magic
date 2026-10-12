@@ -1,0 +1,61 @@
+{
+	"card": "Light of Judgment",
+	"generated": "2026-10-10",
+	"source": "ac1fb586d3e890cc50e88851eec62bb3504b82ca1ceec047869ef2f25a982932",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Light of Judgment",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Light of Judgment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Light of Judgment",
+				"basis": "Light of Judgment deals 6 damage to target creature. Destroy up to one Equipment attached to that creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 6
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"subtypes": [
+								"Equipment"
+							],
+							"attachedTo": "target:0"
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "equipment"
+					},
+					{
+						"do": "destroy",
+						"what": "bound:equipment"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

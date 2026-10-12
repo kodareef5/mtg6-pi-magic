@@ -1,0 +1,45 @@
+{
+	"card": "Basking Capybara",
+	"generated": "2026-10-10",
+	"source": "16b9c173612c0943b67d1b24d5ae9b4c455589d1820fa9a0c139ef3c12febf9f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Basking Capybara",
+		"registers": [
+			{
+				"basis": "Descend 4 — This creature gets +3/+0 as long as there are four or more permanent cards in your graveyard.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": 3
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"token": false,
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						}
+					},
+					"atLeast": 4
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

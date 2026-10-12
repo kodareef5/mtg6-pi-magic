@@ -1,0 +1,76 @@
+{
+	"card": "Crash and Burn",
+	"generated": "2026-10-10",
+	"source": "076e1efb55a60eeffc27793c68da999bca0dd7845b7a4c420f839c1a60275a7e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Crash and Burn",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Crash and Burn",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Crash and Burn: destroy a Vehicle",
+				"basis": "Choose one —\n• Destroy target Vehicle.\n• Crash and Burn deals 6 damage to target creature or planeswalker.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"subtypes": [
+								"Vehicle"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Crash and Burn",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Crash and Burn: deal 6 damage to a creature or planeswalker",
+				"basis": "Choose one —\n• Destroy target Vehicle.\n• Crash and Burn deals 6 damage to target creature or planeswalker.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 6
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

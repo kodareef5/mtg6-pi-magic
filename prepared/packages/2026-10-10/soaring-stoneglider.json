@@ -1,0 +1,83 @@
+{
+	"card": "Soaring Stoneglider",
+	"generated": "2026-10-10",
+	"source": "5ba6d7fc8d62bdfe517b1921d2b7f4b1cd6fcedc11db68784a0154503ca5e7e6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Soaring Stoneglider",
+		"registers": [
+			{
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Soaring Stoneglider",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Soaring Stoneglider exiling two cards from your graveyard",
+				"basis": "As an additional cost to cast this spell, exile two cards from your graveyard or pay {1}{W}.",
+				"timing": "spell",
+				"cost": {
+					"exile": {
+						"choose": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you"
+						},
+						"count": 2
+					}
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Soaring Stoneglider",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Soaring Stoneglider paying the additional {1}{W}",
+				"basis": "As an additional cost to cast this spell, exile two cards from your graveyard or pay {1}{W}.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "additional-mana",
+							"mana": "{1}{W}"
+						}
+					]
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

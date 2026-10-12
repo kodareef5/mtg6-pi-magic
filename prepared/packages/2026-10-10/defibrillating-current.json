@@ -1,0 +1,50 @@
+{
+	"card": "Defibrillating Current",
+	"generated": "2026-10-10",
+	"source": "6ec965dca845e0a523cfa1e2a5dab6b1741ee3135f13a076944ce6bfca271876",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Defibrillating Current",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Defibrillating Current",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Defibrillating Current",
+				"basis": "Defibrillating Current deals 4 damage to target creature or planeswalker and you gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,43 @@
+{
+	"card": "Vampire Neonate",
+	"generated": "2026-10-10",
+	"source": "0f545d06d33186cc4db1a9da2048c02e1e49f544c8835aa4931f18abb314709d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vampire Neonate",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vampire Neonate",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Each opponent loses 1 life, and you gain 1 life.",
+				"basis": "{2}, {T}: Each opponent loses 1 life and you gain 1 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -1
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

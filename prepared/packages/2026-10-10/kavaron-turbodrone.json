@@ -1,0 +1,55 @@
+{
+	"card": "Kavaron Turbodrone",
+	"generated": "2026-10-10",
+	"source": "a5011d8a50bca91629465a6aae5421b2c9dcd168b3c417bc30f2769cafa6500e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kavaron Turbodrone",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kavaron Turbodrone",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give a creature you control +1/+1 and haste until end of turn.",
+				"basis": "{T}: Target creature you control gets +1/+1 and gains haste until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

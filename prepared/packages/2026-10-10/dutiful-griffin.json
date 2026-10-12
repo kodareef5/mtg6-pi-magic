@@ -1,0 +1,67 @@
+{
+	"card": "Dutiful Griffin",
+	"generated": "2026-10-10",
+	"source": "e51efb0b08960723c78044a4a46a1c839daee2517e7a98adc2ac02a493eea3dc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dutiful Griffin",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dutiful Griffin",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Dutiful Griffin from your graveyard to your hand",
+				"basis": "{2}{W}, Sacrifice two enchantments: Return this card from your graveyard to your hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"enchantment"
+							],
+							"controller": "you"
+						},
+						"count": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

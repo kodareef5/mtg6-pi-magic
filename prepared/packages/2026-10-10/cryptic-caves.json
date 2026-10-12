@@ -1,0 +1,60 @@
+{
+	"card": "Cryptic Caves",
+	"generated": "2026-10-10",
+	"source": "f238997af008194a8ca21cb7c98b4225980b1acb2f79f538482e8579582f6597",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cryptic Caves",
+		"registers": [
+			{
+				"kind": "mana",
+				"basis": "{T}: Add {C}.",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cryptic Caves",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Cryptic Caves to draw a card",
+				"basis": "{1}, {T}, Sacrifice this land: Draw a card. Activate only if you control five or more lands.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 5
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

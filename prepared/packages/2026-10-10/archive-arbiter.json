@@ -1,0 +1,74 @@
+{
+	"card": "Archive Arbiter",
+	"generated": "2026-10-10",
+	"source": "12286bbf4953364eb713c78447c03bf3624b5bf8b0a54eefd1c210649b0ca566",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Archive Arbiter",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, choose one —\n• Destroy target noncreature, nonland permanent.\n• You gain 4 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"not": {
+											"types": [
+												"creature",
+												"land"
+											]
+										}
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "destroy",
+									"what": "target:0"
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "life",
+									"who": "you",
+									"amount": 4
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

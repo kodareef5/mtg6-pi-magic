@@ -1,0 +1,31 @@
+{
+	"card": "Brazen Scourge",
+	"generated": "2026-10-10",
+	"source": "abb413df638dfda521aa74406bcb087649f219300dc441f61ab09a6b57e51259",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brazen Scourge",
+		"registers": [
+			{
+				"basis": "Haste (This creature can attack and {T} as soon as it comes under your control.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

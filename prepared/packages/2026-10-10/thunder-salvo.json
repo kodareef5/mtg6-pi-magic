@@ -1,0 +1,60 @@
+{
+	"card": "Thunder Salvo",
+	"generated": "2026-10-10",
+	"source": "92b0271b81cd8802059c4592085266e9f5fd7d37e31c594206d4c2b79d0cd9df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thunder Salvo",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thunder Salvo",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Thunder Salvo",
+				"basis": "Thunder Salvo deals X damage to target creature, where X is 2 plus the number of other spells you've cast this turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"sum": [
+								2,
+								{
+									"history": "cast",
+									"by": "you",
+									"of": {
+										"zones": [
+											"stack"
+										],
+										"not": {
+											"is": "this"
+										}
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

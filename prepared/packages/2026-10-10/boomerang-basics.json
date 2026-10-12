@@ -1,0 +1,60 @@
+{
+	"card": "Boomerang Basics",
+	"generated": "2026-10-10",
+	"source": "0b68cbda3cdbbf86793bdbc2b4c59f0b7a310ada5e8d4749788f41cacfc02c41",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boomerang Basics",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Boomerang Basics",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return a nonland permanent, then draw if you controlled it",
+				"basis": "Return target nonland permanent to its owner's hand. If you controlled that permanent, draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"controller": "you"
+							},
+							"lastKnown": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

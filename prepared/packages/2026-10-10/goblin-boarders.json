@@ -1,0 +1,29 @@
+{
+	"card": "Goblin Boarders",
+	"generated": "2026-10-10",
+	"source": "e296d0c2d1df9a4f6d9f66ded3101726320a69dfbf5d18554aef44d94560f8b6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goblin Boarders",
+		"registers": [
+			{
+				"basis": "Raid — This creature enters with a +1/+1 counter on it if you attacked this turn.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": 1
+				},
+				"if": {
+					"amount": {
+						"history": "attacked",
+						"by": "you"
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

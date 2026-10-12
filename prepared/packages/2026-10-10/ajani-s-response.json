@@ -1,0 +1,76 @@
+{
+	"card": "Ajani's Response",
+	"generated": "2026-10-10",
+	"source": "168120f824b403d432c47fbefed110d704a9c79292312ac8cb820ece24409ee1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ajani's Response",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ajani's Response",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ajani's Response; reduce its generic cost by three if its chosen target is tapped when the cost is locked",
+				"basis": "This spell costs {3} less to cast if it targets a tapped creature. ... Destroy target creature.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"sum": [
+							{
+								"count": {
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							},
+							{
+								"count": {
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							},
+							{
+								"count": {
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							}
+						]
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

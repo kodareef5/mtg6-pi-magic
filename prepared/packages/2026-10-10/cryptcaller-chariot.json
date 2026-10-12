@@ -1,0 +1,106 @@
+{
+	"card": "Cryptcaller Chariot",
+	"generated": "2026-10-10",
+	"source": "08b67e80264200cdc1f77a293a08fb0b23aa2e8c2a31a900b27e9b6b51c8d11f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cryptcaller Chariot",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you discard one or more cards, create that many tapped 2/2 black Zombie creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "discarded",
+					"by": "you",
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"event": "amount"
+							},
+							"tapped": true,
+							"spec": {
+								"name": "Zombie",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Zombie"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cryptcaller Chariot",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Cryptcaller Chariot",
+				"basis": "Crew 2",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true,
+							"tapped": false
+						},
+						"totalPower": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

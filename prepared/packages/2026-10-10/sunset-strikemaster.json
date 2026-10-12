@@ -1,0 +1,63 @@
+{
+	"card": "Sunset Strikemaster",
+	"generated": "2026-10-10",
+	"source": "9d8bde783f7bd6127c87c1b7687a5aa860c64c17c371bb0cd0a25deefde3f13b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sunset Strikemaster",
+		"registers": [
+			{
+				"basis": "{T}: Add {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sunset Strikemaster",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Sunset Strikemaster to deal 6 damage to target creature with flying.",
+				"basis": "{2}{R}, {T}, Sacrifice this creature: It deals 6 damage to target creature with flying.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{R}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"words": [
+								"flying"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 6,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

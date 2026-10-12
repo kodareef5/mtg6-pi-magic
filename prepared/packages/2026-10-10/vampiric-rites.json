@@ -1,0 +1,51 @@
+{
+	"card": "Vampiric Rites",
+	"generated": "2026-10-10",
+	"source": "95b4063a9d65ad2931a6cb363be234367b5d2a6cc805cffbf2617f93a41897fe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vampiric Rites",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Vampiric Rites",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice a creature to gain 1 life and draw a card",
+				"basis": "{1}{B}, Sacrifice a creature: You gain 1 life and draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}",
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

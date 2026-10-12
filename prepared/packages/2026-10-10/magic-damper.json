@@ -1,0 +1,56 @@
+{
+	"card": "Magic Damper",
+	"generated": "2026-10-10",
+	"source": "e4ec477d799d52edb9b3bbfa7ca62f3fab4410fb15415f71f275f53e3744f2c9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Magic Damper",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Magic Damper",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give a controlled creature +1/+1 and hexproof until end of turn, then untap it.",
+				"basis": "Target creature you control gets +1/+1 and gains hexproof until end of turn. Untap it.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"hexproof"
+							]
+						}
+					},
+					{
+						"do": "untap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

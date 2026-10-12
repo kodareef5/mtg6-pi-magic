@@ -1,0 +1,57 @@
+{
+	"card": "Skycoach Waypoint",
+	"generated": "2026-10-10",
+	"source": "f22e850ac4152a150caa51cfa23552aea44e34075832db4c97d36eba0d614293",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Skycoach Waypoint",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Skycoach Waypoint",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Prepare target creature",
+				"basis": "{3}, {T}: Target creature becomes prepared. (Only creatures with prepare spells can become prepared.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "prepare",
+						"what": "target:0",
+						"prepared": true
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"card": "Wicked Visitor",
+	"generated": "2026-10-10",
+	"source": "6861987f8ae1a06fb466e5b7871cc1a2a13cb240aea90c88db6243e6fb817761",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wicked Visitor",
+		"registers": [
+			{
+				"basis": "Whenever an enchantment you control is put into a graveyard from the battlefield, each opponent loses 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"battlefield"
+					],
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

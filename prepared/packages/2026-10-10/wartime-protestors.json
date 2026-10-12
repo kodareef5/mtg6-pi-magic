@@ -1,0 +1,65 @@
+{
+	"card": "Wartime Protestors",
+	"generated": "2026-10-10",
+	"source": "db0ea48577c93cff835adac6dd0f76bf0672a273a818ff9637ff2cf96048c528",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wartime Protestors",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Ally you control enters, put a +1/+1 counter on that creature and it gains haste until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Ally"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "event:object",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "modify",
+							"what": "event:object",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"haste"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

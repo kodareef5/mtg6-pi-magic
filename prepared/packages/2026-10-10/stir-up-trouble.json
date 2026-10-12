@@ -1,0 +1,96 @@
+{
+	"card": "Stir Up Trouble",
+	"generated": "2026-10-10",
+	"source": "75183d75a461a7fc8a6c47246257f69a9b2185bd9d49336a309e044b196c0ee2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stir Up Trouble",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stir Up Trouble",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Stir Up Trouble sacrificing an artifact or creature",
+				"basis": "As an additional cost to cast this spell, sacrifice an artifact or creature or pay {4}.\nDestroy target creature.",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Stir Up Trouble",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Stir Up Trouble paying the additional {4}",
+				"basis": "As an additional cost to cast this spell, sacrifice an artifact or creature or pay {4}.\nDestroy target creature.",
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "additional-mana",
+							"mana": "{4}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,56 @@
+{
+	"card": "Thunderhead Gunner",
+	"generated": "2026-10-10",
+	"source": "9d81ba651a53666527e6deb77535f6d842f2b09e548ff77c52e8f6f162a99d68",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thunderhead Gunner",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thunderhead Gunner",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard a card to draw a card",
+				"basis": "Discard a card: Draw a card. Activate only as a sorcery and only once each turn.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"limit": "once-per-turn",
+				"cost": {
+					"discard": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

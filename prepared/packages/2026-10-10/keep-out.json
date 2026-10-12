@@ -1,0 +1,76 @@
+{
+	"card": "Keep Out",
+	"generated": "2026-10-10",
+	"source": "1961c9c073e60bb9ed33e6c1f1e3cce52088cdf23c3617195069bfca05b65295",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Keep Out",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Keep Out",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Keep Out: deal 4 damage to a tapped creature",
+				"basis": "Choose one — ... • Keep Out deals 4 damage to target tapped creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"tapped": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Keep Out",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Keep Out: destroy an enchantment",
+				"basis": "Choose one — ... • Destroy target enchantment.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

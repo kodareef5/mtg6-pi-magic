@@ -1,0 +1,49 @@
+{
+	"card": "Wild Pack Squad",
+	"generated": "2026-10-10",
+	"source": "d84c86797b27a2907ab3ba0deddd8e811df74f9943fd9f3d761461518bf9e3c6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wild Pack Squad",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, up to one target creature gains first strike and vigilance until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"first strike",
+									"vigilance"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

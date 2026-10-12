@@ -1,0 +1,40 @@
+{
+	"card": "Rowdy Research",
+	"generated": "2026-10-10",
+	"source": "4766a0d2c1b95308345e08c1a7731ebd31f2c71c70b7d49c59d57c83f1b13d19",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rowdy Research",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rowdy Research",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rowdy Research",
+				"basis": "This spell costs {1} less to cast for each creature that attacked this turn. ... Draw three cards.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"history": "attacked"
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

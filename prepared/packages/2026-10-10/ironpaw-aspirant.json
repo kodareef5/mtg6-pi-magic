@@ -1,0 +1,44 @@
+{
+	"card": "Ironpaw Aspirant",
+	"generated": "2026-10-10",
+	"source": "1c46580f9458bc92862ca31bbb1bba4c0366e395f7c8fb42463c7ee531ae1888",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ironpaw Aspirant",
+		"registers": [
+			{
+				"basis": "When this creature enters, put a +1/+1 counter on target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

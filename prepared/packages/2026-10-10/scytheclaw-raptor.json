@@ -1,0 +1,87 @@
+{
+	"card": "Scytheclaw Raptor",
+	"generated": "2026-10-10",
+	"source": "b66b5098fd5ab6b72f3273283198110d0bb5447f2d9fd8157525fc32b2381579",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scytheclaw Raptor",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever a player casts a spell, if it's not their turn, this creature deals 4 damage to them.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"if": {
+					"turn": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "event:player",
+							"amount": 4,
+							"from": "this"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a player casts a spell, if it's not their turn, this creature deals 4 damage to them.",
+				"event": {
+					"on": "cast",
+					"by": "opponent",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"if": {
+					"turn": "self"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "event:player",
+							"amount": 4,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

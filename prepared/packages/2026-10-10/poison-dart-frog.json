@@ -1,0 +1,67 @@
+{
+	"card": "Poison Dart Frog",
+	"generated": "2026-10-10",
+	"source": "24b1b81c2cc5d9fd1737ffc0442ad0a22a02c924d831d86944219c12be064caa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Poison Dart Frog",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Poison Dart Frog",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Gain deathtouch until end of turn",
+				"basis": "{2}: This creature gains deathtouch until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"deathtouch"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,47 @@
+{
+	"card": "The Walls of Ba Sing Se",
+	"generated": "2026-10-10",
+	"source": "df364b4ff6b77d5f16807f9e837d5a19be68716a69c843a188c65249b432277d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Walls of Ba Sing Se",
+		"registers": [
+			{
+				"basis": "Defender",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"defender"
+					]
+				}
+			},
+			{
+				"basis": "Other permanents you control have indestructible.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"words": [
+						"indestructible"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

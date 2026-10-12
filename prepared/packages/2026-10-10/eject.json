@@ -1,0 +1,58 @@
+{
+	"card": "Eject",
+	"generated": "2026-10-10",
+	"source": "659e9e286b2586af7c93d964ba51d818678e5ff26ced40441a1fd1b3a75b048f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eject",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Eject",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Eject",
+				"basis": "This spell can't be countered. ... Return target nonland permanent to its owner's hand. ... Draw a card.",
+				"timing": "spell",
+				"words": [
+					"can't be countered"
+				],
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

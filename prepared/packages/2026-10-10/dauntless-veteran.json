@@ -1,0 +1,43 @@
+{
+	"card": "Dauntless Veteran",
+	"generated": "2026-10-10",
+	"source": "b7ee92e967f7e57563faa2fadb007453193d0ec1996b0f4019ebac44d68fbc49",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dauntless Veteran",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, creatures you control get +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

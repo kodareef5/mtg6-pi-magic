@@ -1,0 +1,56 @@
+{
+	"card": "The Thing, Ben Grimm",
+	"generated": "2026-10-10",
+	"source": "20976e1814e8601bc7c46286bdf086b9031bfff172d9485bea7c021475a6214c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Thing, Ben Grimm",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Whenever one or more Heroes you control deal damage to a player, put two +1/+1 counters on The Thing.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"of": {
+						"subtypes": [
+							"Hero"
+						],
+						"controller": "you"
+					},
+					"player": true,
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

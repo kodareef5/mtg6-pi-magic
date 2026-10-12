@@ -1,0 +1,67 @@
+{
+	"card": "Twisted Fates",
+	"generated": "2026-10-10",
+	"source": "36f3f52beac25256f60c13b28ac299df442622a9ef28ea36d03303e04e15a047",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Twisted Fates",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Twisted Fates",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Twisted Fates",
+				"basis": "Destroy target nonland permanent. Put a +1/+1 counter on each creature target player controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					},
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "counters",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "target:1"
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"card": "Youthful Valkyrie",
+	"generated": "2026-10-10",
+	"source": "5f01f7be54d3e728cbca639db2c20ea726e4e28eb5bb9a4f476eedaee2b429b3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Youthful Valkyrie",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Angel you control enters, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Angel"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

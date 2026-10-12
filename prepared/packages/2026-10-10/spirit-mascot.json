@@ -1,0 +1,43 @@
+{
+	"card": "Spirit Mascot",
+	"generated": "2026-10-10",
+	"source": "224fad609fa7dd2e10ef69680008e6a60d4f106dd76f2ff54a2e2d133183abd0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spirit Mascot",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more cards leave your graveyard, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"token": false
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,62 @@
+{
+	"card": "Taken by Nightmares",
+	"generated": "2026-10-10",
+	"source": "57970efa12a101d9ad5063df56e7ab7085dae05018d54257a244f30fd5f3230f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Taken by Nightmares",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Taken by Nightmares",
+				"basis": "Exile target creature. If you control an enchantment, scry 2.",
+				"source": {
+					"card": "Taken by Nightmares",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					},
+					{
+						"do": "keyword",
+						"name": "scry",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"amount": {
+								"count": {
+									"types": [
+										"enchantment"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

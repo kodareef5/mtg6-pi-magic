@@ -1,0 +1,38 @@
+{
+	"card": "Merchant of Many Hats",
+	"generated": "2026-10-10",
+	"source": "329815bb6b47ade710630dd83d37235a07493998626a33e9f70ad01c08a3b209",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Merchant of Many Hats",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Merchant of Many Hats",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Merchant of Many Hats from your graveyard to your hand.",
+				"basis": "{2}{B}: Return this card from your graveyard to your hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{B}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

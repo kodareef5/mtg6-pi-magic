@@ -1,0 +1,64 @@
+{
+	"card": "Serpent's Pass",
+	"generated": "2026-10-10",
+	"source": "8bb636d020b2f6739f15f075b7528b9ffe43a81f906e8954c2b2dd45addb814e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Serpent's Pass",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {U} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			},
+			{
+				"basis": "{T}: Add {U} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Serpent's Pass",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Serpent's Pass to draw a card",
+				"basis": "{4}, {T}, Sacrifice this land: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,54 @@
+{
+	"card": "Haunted Ridge",
+	"generated": "2026-10-10",
+	"source": "ae8b541abb3008d33b2131fa26c43c60939cb7bdb1b6892f37b235de6d72d531",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Haunted Ridge",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control two or more other lands.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"controller": "you",
+								"other": true
+							}
+						},
+						"atLeast": 2
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {B} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "{T}: Add {B} or {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

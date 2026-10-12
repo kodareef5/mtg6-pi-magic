@@ -1,0 +1,59 @@
+{
+	"card": "Duskwatch Hunter",
+	"generated": "2026-10-10",
+	"source": "b3a40b5179acd8bbcc4234d85dc2b1914332d0c4861418bfa862756bd444c49c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Duskwatch Hunter",
+		"registers": [
+			{
+				"basis": "This creature can't be blocked by tokens.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"is": "this"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						],
+						"token": true
+					}
+				}
+			},
+			{
+				"basis": "When this creature enters, put a +1/+1 counter on target creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

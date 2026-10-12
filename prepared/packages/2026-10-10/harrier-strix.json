@@ -1,0 +1,99 @@
+{
+	"card": "Harrier Strix",
+	"generated": "2026-10-10",
+	"source": "711635a78e28ed9bedb007747b5454304db459b1196cc227be00c463c9cc8c0a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Harrier Strix",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, tap target permanent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "tap",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Harrier Strix",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card, then discard a card",
+				"basis": "{2}{U}: Draw a card, then discard a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{U}"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

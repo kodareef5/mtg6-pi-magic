@@ -1,0 +1,62 @@
+{
+	"card": "Prideful Feastling",
+	"generated": "2026-10-10",
+	"source": "286eac8ec8a7c57354af29451bbdc2afc70372d4896070b0b8823ff10a34edc7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prideful Feastling",
+		"registers": [
+			{
+				"basis": "Changeling (This card is every creature type.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"changeling"
+					],
+					"subtypes": {
+						"allCreatureTypes": true
+					}
+				}
+			},
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

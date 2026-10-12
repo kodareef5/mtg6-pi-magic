@@ -1,0 +1,74 @@
+{
+	"card": "Sokka's Haiku",
+	"generated": "2026-10-10",
+	"source": "c02da57602ce3d0b2af24ac0fcf994b6f8d5d24d443a5e5382bef6610ecf9a26",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sokka's Haiku",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sokka's Haiku",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter a spell, draw a card, mill three cards, then untap a land.",
+				"basis": "Counter target spell.\nDraw a card, then mill three cards.\nUntap target land.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"land"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "mill",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "untap",
+						"what": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

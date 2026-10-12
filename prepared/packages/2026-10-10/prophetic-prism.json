@@ -1,0 +1,43 @@
+{
+	"card": "Prophetic Prism",
+	"generated": "2026-10-10",
+	"source": "567447b53618f6fd9c3dc5de5a17175524c945488933061f3227937de37a87c2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Prophetic Prism",
+		"registers": [
+			{
+				"basis": "When this artifact enters, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{1}, {T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

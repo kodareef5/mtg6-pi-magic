@@ -1,0 +1,51 @@
+{
+	"card": "Forgotten Monument",
+	"generated": "2026-10-10",
+	"source": "16136b47aff4d03dd6c904f84f3f09e0c717bfa42f93cbfbffcc476b35440226",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Forgotten Monument",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "Other Caves you control have \"{T}, Pay 1 life: Add one mana of any color.\"",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"subtypes": [
+						"Cave"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Other Caves you control have \"{T}, Pay 1 life: Add one mana of any color.\"",
+							"kind": "mana",
+							"cost": {
+								"tap": true,
+								"life": 1
+							},
+							"any": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

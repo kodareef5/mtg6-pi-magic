@@ -1,0 +1,44 @@
+{
+	"card": "Aetherize",
+	"generated": "2026-10-10",
+	"source": "881aac1415d4d885f33f9ff5519869a92227b95ba74ff0d60d7a8094cea3e6b5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aetherize",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Aetherize",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Aetherize, returning all attacking creatures to their owners' hands.",
+				"basis": "Return all attacking creatures to their owner's hand.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"attacking": true
+						},
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

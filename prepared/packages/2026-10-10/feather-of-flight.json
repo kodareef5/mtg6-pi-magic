@@ -1,0 +1,101 @@
+{
+	"card": "Feather of Flight",
+	"generated": "2026-10-10",
+	"source": "5e83f431a64c1f5d8e6ec786e8662f67a8406029cbc158c8a079703c372f231a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Feather of Flight",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When this Aura enters, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Enchanted creature gets +1/+0 and has flying.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": 1,
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Feather of Flight enchanting a creature",
+				"basis": "Flash ... Enchant creature",
+				"source": {
+					"card": "Feather of Flight",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"speed": "instant",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

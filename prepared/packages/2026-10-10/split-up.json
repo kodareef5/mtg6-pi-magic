@@ -1,0 +1,65 @@
+{
+	"card": "Split Up",
+	"generated": "2026-10-10",
+	"source": "6803c1a57e999bacb379fe413caf2440ef1e7e74f2496fd8ecc69e250dea3d77",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Split Up",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Split Up",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Split Up: destroy all tapped creatures",
+				"basis": "Choose one —\n• Destroy all tapped creatures.\n• Destroy all untapped creatures.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"tapped": true
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Split Up",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Split Up: destroy all untapped creatures",
+				"basis": "Choose one —\n• Destroy all tapped creatures.\n• Destroy all untapped creatures.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"tapped": false
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

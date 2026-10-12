@@ -1,0 +1,45 @@
+{
+	"card": "Goblin Tomb Raider",
+	"generated": "2026-10-10",
+	"source": "95b82a5eb4783537768071cca675ffb5d1833547df240605d35f07ff97d34b57",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goblin Tomb Raider",
+		"registers": [
+			{
+				"basis": "As long as you control an artifact, this creature gets +1/+0 and has haste.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"zones": [
+								"battlefield"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"power": 1,
+					"words": [
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

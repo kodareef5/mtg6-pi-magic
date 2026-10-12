@@ -1,0 +1,74 @@
+{
+	"card": "North Wind Avatar",
+	"generated": "2026-10-10",
+	"source": "0fbb62058d6a8b202243c2fd2ac606cd88ad46f104a55333f7cb29d19e011fa3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "North Wind Avatar",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, if you cast it, you may put a card you own from outside the game into your hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"by": "you"
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"outside"
+								],
+								"owner": "you"
+							},
+							"count": 1,
+							"as": "outside-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:outside-card",
+							"to": "hand",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

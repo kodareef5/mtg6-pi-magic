@@ -1,0 +1,46 @@
+{
+	"card": "Frilled Sparkshooter",
+	"generated": "2026-10-10",
+	"source": "48197a2138344fbf3e3faf19833221e11535d9901116f48561c353a913e90a46",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Frilled Sparkshooter",
+		"registers": [
+			{
+				"basis": "Reach, menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "This creature enters with a +1/+1 counter on it if an opponent lost life this turn.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": 1
+				},
+				"if": {
+					"amount": {
+						"history": "life-lost",
+						"by": "opponent"
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,81 @@
+{
+	"card": "Wingblade Disciple",
+	"generated": "2026-10-10",
+	"source": "f5d5daefc199fc872d7ee35974816ec1c58e873cc8e01a0c4662c4ab68ad6b81",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wingblade Disciple",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Flurry — Whenever you cast your second spell each turn, create a 1/1 white Bird creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"ordinal": 2,
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Bird",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Bird"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

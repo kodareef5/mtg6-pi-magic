@@ -1,0 +1,50 @@
+{
+	"card": "Lecturing Scornmage",
+	"generated": "2026-10-10",
+	"source": "ffa723bc73d88980d5180a2d8ebd328b494b9097f8d444ad1050afe0fa19026b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lecturing Scornmage",
+		"registers": [
+			{
+				"basis": "Repartee — Whenever you cast an instant or sorcery spell that targets a creature, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						],
+						"targeting": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

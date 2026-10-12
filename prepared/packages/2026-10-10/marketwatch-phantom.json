@@ -1,0 +1,46 @@
+{
+	"card": "Marketwatch Phantom",
+	"generated": "2026-10-10",
+	"source": "d0509f6faa1c0fc01799bed90c2dbea1621cc3b38088e57fab095643cd393909",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Marketwatch Phantom",
+		"registers": [
+			{
+				"basis": "Whenever another creature you control with power 2 or less enters, this creature gains flying until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true,
+						"power": {
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

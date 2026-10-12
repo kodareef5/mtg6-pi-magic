@@ -1,0 +1,77 @@
+{
+	"card": "Fresh Start",
+	"generated": "2026-10-10",
+	"source": "f32d37a461ba909346baf6d4c86598af01e329c0f12b97f0266264ec917d0607",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fresh Start",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "Enchanted creature gets -5/-0 and loses all abilities.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": -5,
+					"loseAbilities": true
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fresh Start",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fresh Start enchanting a creature",
+				"basis": "Flash ... Enchant creature",
+				"timing": "spell",
+				"speed": "instant",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

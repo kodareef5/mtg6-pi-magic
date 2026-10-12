@@ -1,0 +1,64 @@
+{
+	"card": "Raucous Audience",
+	"generated": "2026-10-10",
+	"source": "a4108352327f4f2d604a9a1ea691aa223fb83c71ef929db2ffd711fcef66bd46",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Raucous Audience",
+		"registers": [
+			{
+				"basis": "{T}: Add {G}. If you control a creature with power 4 or greater, add {G}{G} instead.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"power": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atMost": 0
+				}
+			},
+			{
+				"basis": "{T}: Add {G}. If you control a creature with power 4 or greater, add {G}{G} instead.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G",
+					"G"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"power": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

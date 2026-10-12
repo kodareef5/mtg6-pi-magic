@@ -1,0 +1,46 @@
+{
+	"card": "Frontline War-Rager",
+	"generated": "2026-10-10",
+	"source": "d43cc03e2dc85f4498973bb4dab5a45a5e6fa63b90202a652be8b433a8e369a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Frontline War-Rager",
+		"registers": [
+			{
+				"basis": "At the beginning of your end step, if you control two or more tapped creatures, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": true
+						}
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

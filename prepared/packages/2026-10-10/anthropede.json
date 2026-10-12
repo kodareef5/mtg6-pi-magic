@@ -1,0 +1,98 @@
+{
+	"card": "Anthropede",
+	"generated": "2026-10-10",
+	"source": "ef124cf7bac7bb78aaf03ec80082d17c57a2b84fa3ebf29acde9d101fdb87444",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Anthropede",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, you may discard a card or pay {2}. When you do, destroy target Room.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{2}"
+							},
+							"may": true,
+							"as": "paid",
+							"if": {
+								"not": {
+									"bound": "discarded"
+								}
+							}
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"any": [
+									{
+										"bound": "discarded"
+									},
+									{
+										"bound": "paid"
+									}
+								]
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"subtypes": [
+												"Room"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "destroy",
+										"what": "target:0"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

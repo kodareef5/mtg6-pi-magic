@@ -1,0 +1,64 @@
+{
+	"card": "Mintstrosity",
+	"generated": "2026-10-10",
+	"source": "69a4ae61f018711e74d7163f6b810a9ee3cf08dd5908252875d0257837fca88a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mintstrosity",
+		"registers": [
+			{
+				"basis": "When this creature dies, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Food",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Food"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+										"kind": "activated",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 3
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

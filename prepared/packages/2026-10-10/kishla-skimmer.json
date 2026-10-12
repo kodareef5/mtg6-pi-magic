@@ -1,0 +1,61 @@
+{
+	"card": "Kishla Skimmer",
+	"generated": "2026-10-10",
+	"source": "7ce9b934df82aecd389234523c6be6993a2d7a465dba38dba00be0852054de5a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kishla Skimmer",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a card leaves your graveyard during your turn, draw a card. This ability triggers only once each turn.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"token": false
+					}
+				},
+				"triggerIf": {
+					"turn": "self"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

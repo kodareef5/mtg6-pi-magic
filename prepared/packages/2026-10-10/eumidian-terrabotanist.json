@@ -1,0 +1,37 @@
+{
+	"card": "Eumidian Terrabotanist",
+	"generated": "2026-10-10",
+	"source": "43943a246586fc3fa13d96407bf44a2334cf15f2eeb3a8e3ae7d456d5a3ec487",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eumidian Terrabotanist",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

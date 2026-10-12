@@ -1,0 +1,52 @@
+{
+	"card": "Taxi Driver",
+	"generated": "2026-10-10",
+	"source": "45133f65ca5d3323167ae0cb69576aa913ff9f7f1cf6f46dd908b6fd771980ca",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Taxi Driver",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Taxi Driver",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give target creature haste until end of turn.",
+				"basis": "{1}, {T}: Target creature gains haste until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

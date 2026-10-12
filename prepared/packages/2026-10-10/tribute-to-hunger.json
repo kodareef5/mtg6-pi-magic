@@ -1,0 +1,70 @@
+{
+	"card": "Tribute to Hunger",
+	"generated": "2026-10-10",
+	"source": "bee6b038083aa40b84ee5efaf8c8759275c677124dc7ec4bb3151de8e28eed55",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tribute to Hunger",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tribute to Hunger",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Tribute to Hunger",
+				"basis": "Target opponent sacrifices a creature of their choice. You gain life equal to that creature's toughness.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						},
+						"count": 1,
+						"as": "creature"
+					},
+					{
+						"do": "move",
+						"what": "bound:creature",
+						"to": "graveyard",
+						"reason": "sacrifice"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"toughness": "bound:creature"
+						},
+						"if": {
+							"amount": {
+								"toughness": "bound:creature"
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

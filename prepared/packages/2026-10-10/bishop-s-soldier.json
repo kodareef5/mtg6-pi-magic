@@ -1,0 +1,31 @@
+{
+	"card": "Bishop's Soldier",
+	"generated": "2026-10-10",
+	"source": "31eb90218d94b3bc825f44ed42c88ac8cf62460b65cfc6d664d85240159969b3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bishop's Soldier",
+		"registers": [
+			{
+				"basis": "Lifelink (Damage dealt by this creature also causes you to gain that much life.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

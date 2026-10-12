@@ -1,0 +1,61 @@
+{
+	"card": "Earthshaker Dreadmaw",
+	"generated": "2026-10-10",
+	"source": "7b456d085c25de9929d37952aa42d531004963a81fe7e8208021d04c54075afa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Earthshaker Dreadmaw",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, draw a card for each other Dinosaur you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"subtypes": [
+										"Dinosaur"
+									],
+									"controller": "you",
+									"other": true
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"card": "Illvoi Operative",
+	"generated": "2026-10-10",
+	"source": "9487cac0ef472d0961b723d25f8361daa4d0ef5faa81166c796e4d1e2d3da76b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Illvoi Operative",
+		"registers": [
+			{
+				"basis": "Whenever you cast your second spell each turn, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"ordinal": 2,
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"instant",
+							"kindred",
+							"planeswalker",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

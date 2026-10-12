@@ -1,0 +1,45 @@
+{
+	"card": "Dwarven Castle Guard",
+	"generated": "2026-10-10",
+	"source": "6a6b0b7d6b3cbb0b357db409308e3cbfe14b8abc0b8b66fcb10cda6352af6724",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dwarven Castle Guard",
+		"registers": [
+			{
+				"basis": "When this creature dies, create a 1/1 colorless Hero creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Hero",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Hero"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

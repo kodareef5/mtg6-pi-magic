@@ -1,0 +1,79 @@
+{
+	"card": "Nameless Inversion",
+	"generated": "2026-10-10",
+	"source": "4f874416a068c449e48cfb382f004d836bfaffc66c4f8eabc6a145aca4288b96",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nameless Inversion",
+		"registers": [
+			{
+				"basis": "Changeling (This card is every creature type.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"subtypes": {
+						"allCreatureTypes": true
+					},
+					"words": [
+						"changeling"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Nameless Inversion",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Nameless Inversion",
+				"basis": "Target creature gets +3/-3 and loses all creature types until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": -3,
+							"subtypes": {
+								"set": [],
+								"of": "creature"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

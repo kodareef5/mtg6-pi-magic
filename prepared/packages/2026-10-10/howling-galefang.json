@@ -1,0 +1,58 @@
+{
+	"card": "Howling Galefang",
+	"generated": "2026-10-10",
+	"source": "ca3dc9b2f6b87155d3faa36161140f76ddbe0d366416276c5d80b4c3cc642ef5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Howling Galefang",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "This creature has haste as long as you own a card in exile that has an Adventure.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"exile"
+							],
+							"owner": "you",
+							"hasAdventure": true
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

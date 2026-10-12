@@ -1,0 +1,97 @@
+{
+	"card": "The Last Ride",
+	"generated": "2026-10-10",
+	"source": "6fe9f8ab9a25fd0dce36cf7e62ae45a098040d5a13889147906ae467e294f354",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Last Ride",
+		"registers": [
+			{
+				"basis": "The Last Ride gets -X/-X, where X is your life total.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"negate": {
+							"life": "you"
+						}
+					},
+					"toughness": {
+						"negate": {
+							"life": "you"
+						}
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "The Last Ride",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Pay 2 life and draw a card",
+				"basis": "{2}{B}, Pay 2 life: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{B}",
+					"life": 2
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "The Last Ride",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew The Last Ride",
+				"basis": "Crew 2",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

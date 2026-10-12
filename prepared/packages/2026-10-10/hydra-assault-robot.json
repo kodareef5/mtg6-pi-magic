@@ -1,0 +1,53 @@
+{
+	"card": "HYDRA Assault Robot",
+	"generated": "2026-10-10",
+	"source": "c314bbaeb7fa144aeaa60f8cfc95546e0b0939bd5aa199fe6c2295759bfb4986",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "HYDRA Assault Robot",
+		"registers": [
+			{
+				"basis": "Whenever another Villain and/or artifact you control enters, this creature deals 1 damage to target opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"controller": "you",
+						"other": true,
+						"any": [
+							{
+								"subtypes": [
+									"Villain"
+								]
+							},
+							{
+								"types": [
+									"artifact"
+								]
+							}
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

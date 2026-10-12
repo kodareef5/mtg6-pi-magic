@@ -1,0 +1,125 @@
+{
+	"card": "Overwhelming Surge",
+	"generated": "2026-10-10",
+	"source": "3c88a09ab8adbed3db952a8f98392b6ed94cabcb5ebb1acdd4fdb3ef442847d0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overwhelming Surge",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Overwhelming Surge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Overwhelming Surge choosing damage only",
+				"basis": "Choose one or both —\n• Overwhelming Surge deals 3 damage to target creature.\n• Destroy target noncreature artifact.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Overwhelming Surge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Overwhelming Surge choosing artifact destruction only",
+				"basis": "Choose one or both —\n• Overwhelming Surge deals 3 damage to target creature.\n• Destroy target noncreature artifact.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact"
+							],
+							"not": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Overwhelming Surge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Overwhelming Surge choosing both modes",
+				"basis": "Choose one or both —\n• Overwhelming Surge deals 3 damage to target creature.\n• Destroy target noncreature artifact.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"artifact"
+							],
+							"not": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					},
+					{
+						"do": "destroy",
+						"what": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

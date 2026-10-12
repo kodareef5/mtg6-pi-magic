@@ -1,0 +1,45 @@
+{
+	"card": "Loxodon Battle Priest",
+	"generated": "2026-10-10",
+	"source": "b82842437e7ae5443ac11ba92377b528c3560fa7c9e6faa16636f3c5ab493339",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Loxodon Battle Priest",
+		"registers": [
+			{
+				"basis": "At the beginning of combat on your turn, put a +1/+1 counter on another target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

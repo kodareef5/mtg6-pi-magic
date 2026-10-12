@@ -1,0 +1,83 @@
+{
+	"card": "Live or Die",
+	"generated": "2026-10-10",
+	"source": "96a1534e8bcb567bdddd0194c6436b870edd3250d12c046ee5d0b2b5c40e34b5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Live or Die",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Live or Die",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Live: return a creature card from your graveyard",
+				"basis": "Choose one —\n• Return target creature card from your graveyard to the battlefield.\n• Destroy target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Live or Die",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Die: destroy a creature",
+				"basis": "Choose one —\n• Return target creature card from your graveyard to the battlefield.\n• Destroy target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

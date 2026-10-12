@@ -1,0 +1,47 @@
+{
+	"card": "Pretending Poxbearers",
+	"generated": "2026-10-10",
+	"source": "53b923ce5b4a437f8547245eb8d7bd77d300f14d09a68aa74c04eb049eb11c3c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pretending Poxbearers",
+		"registers": [
+			{
+				"basis": "When this creature dies, create a 1/1 white Ally creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Ally",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Ally"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

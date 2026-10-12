@@ -1,0 +1,39 @@
+{
+	"card": "Moonglove Extractor",
+	"generated": "2026-10-10",
+	"source": "54e1a7d422788e202d4b04ada5ffda4beb7e54c3b2f3b2775ae0645c1c8ab3e2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Moonglove Extractor",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, you draw a card and lose 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

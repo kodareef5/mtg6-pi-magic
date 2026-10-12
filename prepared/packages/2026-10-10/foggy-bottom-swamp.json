@@ -1,0 +1,64 @@
+{
+	"card": "Foggy Bottom Swamp",
+	"generated": "2026-10-10",
+	"source": "a179fccb713587acac234b377105e646022c0c44371d943c16a18ba80fbf8e2c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Foggy Bottom Swamp",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {B} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "{T}: Add {B} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Foggy Bottom Swamp",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice this land to draw a card",
+				"basis": "{4}, {T}, Sacrifice this land: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

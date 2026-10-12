@@ -1,0 +1,82 @@
+{
+	"card": "Tether Technician",
+	"generated": "2026-10-10",
+	"source": "d57516259436b706dceb615b25ef5c9352acae16ef9dc3d2bbcb2f6e5074875d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tether Technician",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, you may discard a card. When you do, this creature deals 2 damage to any target.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "discarded"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature",
+												"planeswalker",
+												"battle"
+											]
+										},
+										"player": "any"
+									}
+								],
+								"instructions": [
+									{
+										"do": "damage",
+										"to": "target:0",
+										"amount": 2,
+										"from": "this"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

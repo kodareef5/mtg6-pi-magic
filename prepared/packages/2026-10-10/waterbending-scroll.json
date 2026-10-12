@@ -1,0 +1,49 @@
+{
+	"card": "Waterbending Scroll",
+	"generated": "2026-10-10",
+	"source": "7a55aa8469af4ea09b3652cc0be837dd460840abd03ed4e5d97881e4a50488fe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Waterbending Scroll",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Waterbending Scroll",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Activate Waterbending Scroll to draw a card",
+				"basis": "{6}, {T}: Draw a card. This ability costs {1} less to activate for each Island you control.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}",
+					"tap": true,
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Island"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

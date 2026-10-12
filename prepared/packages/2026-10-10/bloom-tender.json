@@ -1,0 +1,1779 @@
+{
+	"card": "Bloom Tender",
+	"generated": "2026-10-10",
+	"source": "67892970de770651792206d441761de201b87d0ffdbb9f2514c6c24bf088cb79",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bloom Tender",
+		"registers": [
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				],
+				"times": 0,
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"colors": [
+								"W",
+								"U",
+								"B",
+								"R",
+								"G"
+							]
+						}
+					},
+					"atMost": 0
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U",
+										"B",
+										"R",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"B",
+										"R",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"U",
+										"R",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"U",
+										"B",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"U",
+										"B",
+										"R"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"U"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B",
+										"R",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"B"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U",
+										"R",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"R"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U",
+										"B",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U",
+										"B",
+										"R"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U",
+					"B"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"R",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U",
+					"R"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"B",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"B",
+										"R"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B",
+					"R"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"U",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"U",
+										"R"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"U",
+										"B"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"U",
+					"B"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"U",
+					"R"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"U",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B",
+										"R"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"B",
+					"R"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"B",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U",
+										"R"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"R",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U",
+										"B"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U",
+					"B",
+					"R"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U",
+					"B",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"R"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U",
+					"R",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"B"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B",
+					"R",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W",
+										"U"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"U",
+					"B",
+					"R"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"U",
+					"B",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"U",
+					"R",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"B",
+					"R",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U",
+					"B",
+					"R",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"basis": "Vivid — {T}: For each color among permanents you control, add one mana of that color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"U",
+					"B",
+					"R",
+					"G"
+				],
+				"if": {
+					"all": [
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"W"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"U"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"B"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"R"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						{
+							"amount": {
+								"count": {
+									"controller": "you",
+									"colors": [
+										"G"
+									]
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

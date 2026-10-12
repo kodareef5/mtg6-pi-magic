@@ -1,0 +1,53 @@
+{
+	"card": "Overgrown Farmland",
+	"generated": "2026-10-10",
+	"source": "617e5f7c2a19d9e5d108cb5781de41217d672d7781344908a20ad7354e8a2589",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overgrown Farmland",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control two or more other lands.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"controller": "you",
+								"other": true
+							}
+						},
+						"atLeast": 2
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {G} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add {G} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

@@ -1,0 +1,58 @@
+{
+	"card": "Mai, Scornful Striker",
+	"generated": "2026-10-10",
+	"source": "f80786e366874290a9fcb6afd96300bd6d87ed3bc5bd8e2d59f8495f22571110",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mai, Scornful Striker",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "First strike",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a player casts a noncreature spell, they lose 2 life.",
+				"event": {
+					"on": "cast",
+					"by": "any",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "event:player",
+							"amount": -2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"card": "Masked Meower",
+	"generated": "2026-10-10",
+	"source": "6bda971b0c1dab382718c3f8f6ee62ac040fbfc065761d9ec168028d32e605bf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Masked Meower",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Masked Meower",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard a card and sacrifice Masked Meower to draw a card.",
+				"basis": "Discard a card, Sacrifice this creature: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"discard": 1,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

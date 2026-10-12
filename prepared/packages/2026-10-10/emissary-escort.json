@@ -1,0 +1,38 @@
+{
+	"card": "Emissary Escort",
+	"generated": "2026-10-10",
+	"source": "3a6dd2cb754ffcc717208968599468259030fc06a75b6f90b41d585188dca50e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Emissary Escort",
+		"registers": [
+			{
+				"basis": "This creature gets +X/+0, where X is the greatest mana value among other artifacts you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"aggregate": "max",
+						"of": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"value": "manaValue"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

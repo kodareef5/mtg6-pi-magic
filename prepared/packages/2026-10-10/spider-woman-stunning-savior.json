@@ -1,0 +1,43 @@
+{
+	"card": "Spider-Woman, Stunning Savior",
+	"generated": "2026-10-10",
+	"source": "3d853199f0995db72a62525d28370cd14b5b9791ef16460c116fbdaa2fa4d3b6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider-Woman, Stunning Savior",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Venom Blast — Artifacts and creatures your opponents control enter tapped.",
+				"kind": "enters",
+				"affects": {
+					"types": [
+						"artifact",
+						"creature"
+					],
+					"controller": "opponent"
+				},
+				"tapped": true
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,59 @@
+{
+	"card": "Serra Redeemer",
+	"generated": "2026-10-10",
+	"source": "5f7d923e97da34393bb30f4b42161eaffb97f8b0bc2f34bf12f789a67e1b9719",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Serra Redeemer",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another creature you control with power 2 or less enters, put two +1/+1 counters on that creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true,
+						"power": {
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "event:object",
+							"kind": "+1/+1",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

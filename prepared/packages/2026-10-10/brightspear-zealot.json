@@ -1,0 +1,56 @@
+{
+	"card": "Brightspear Zealot",
+	"generated": "2026-10-10",
+	"source": "080041db335826030a86088c7b9976d8b3b2806fd2f81fd265d72e8e9f823bc8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brightspear Zealot",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "This creature gets +2/+0 as long as you've cast two or more spells this turn.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"power": 2
+				},
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							]
+						}
+					},
+					"atLeast": 2
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

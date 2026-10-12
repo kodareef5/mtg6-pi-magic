@@ -1,0 +1,44 @@
+{
+	"card": "Kargan Dragonrider",
+	"generated": "2026-10-10",
+	"source": "de2c8f63e735d4c550d939e36d0709820e121ca8879ff21fda659b90bf7b2fa6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kargan Dragonrider",
+		"registers": [
+			{
+				"basis": "As long as you control a Dragon, this creature has flying.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Dragon"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

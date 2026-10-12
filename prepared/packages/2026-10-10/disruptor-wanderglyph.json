@@ -1,0 +1,45 @@
+{
+	"card": "Disruptor Wanderglyph",
+	"generated": "2026-10-10",
+	"source": "b4b9ec6bab602b5615fd16454d0d66738f73343c0f8abc365d124e3eae8a10c9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Disruptor Wanderglyph",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, exile target card from an opponent's graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

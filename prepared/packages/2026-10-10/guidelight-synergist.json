@@ -1,0 +1,54 @@
+{
+	"card": "Guidelight Synergist",
+	"generated": "2026-10-10",
+	"source": "4e7bb14c2d56be4ab814f6994b5a12708d7a848ec09a25e31740ab2afa3708e2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Guidelight Synergist",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "This creature gets +1/+0 for each artifact you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"power": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact"
+							],
+							"controller": "you"
+						}
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

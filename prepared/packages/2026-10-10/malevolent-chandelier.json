@@ -1,0 +1,66 @@
+{
+	"card": "Malevolent Chandelier",
+	"generated": "2026-10-10",
+	"source": "583c0e6610edeaa9d5a230508c27f2a0f9bc8dda3abd1857a5529accd7fe94e5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Malevolent Chandelier",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Malevolent Chandelier",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a graveyard card on the bottom of its owner's library",
+				"basis": "{2}: Put target card from a graveyard on the bottom of its owner's library. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

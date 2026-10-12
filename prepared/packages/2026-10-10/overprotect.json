@@ -1,0 +1,54 @@
+{
+	"card": "Overprotect",
+	"generated": "2026-10-10",
+	"source": "81cdea5a83caa7725a066f92186661d78fc2cf464c5e079e41f920da73bdface",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overprotect",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Overprotect",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Overprotect",
+				"basis": "Target creature you control gets +3/+3 and gains trample, hexproof, and indestructible until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 3,
+							"words": [
+								"trample",
+								"hexproof",
+								"indestructible"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

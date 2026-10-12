@@ -1,0 +1,46 @@
+{
+	"card": "Boneclub Berserker",
+	"generated": "2026-10-10",
+	"source": "8a00babed113c59cfb342b78246661431877346f9a55680ea23190ba0eb1d486",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boneclub Berserker",
+		"registers": [
+			{
+				"basis": "This creature gets +2/+0 for each other Goblin you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"sum": [
+							{
+								"count": {
+									"subtypes": [
+										"Goblin"
+									],
+									"controller": "you",
+									"other": true
+								}
+							},
+							{
+								"count": {
+									"subtypes": [
+										"Goblin"
+									],
+									"controller": "you",
+									"other": true
+								}
+							}
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

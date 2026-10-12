@@ -1,0 +1,70 @@
+{
+	"card": "Eagle of the Great Shelf",
+	"generated": "2026-10-10",
+	"source": "21543ec2a24b50c4b3037546aeb4aba460a73b7235c19873719ce66affd465de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eagle of the Great Shelf",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, it gets +1/+1 until end of turn for each other creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"other": true
+									}
+								},
+								"toughness": {
+									"count": {
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"other": true
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

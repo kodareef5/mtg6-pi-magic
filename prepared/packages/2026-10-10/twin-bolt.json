@@ -1,0 +1,52 @@
+{
+	"card": "Twin Bolt",
+	"generated": "2026-10-10",
+	"source": "ad5e4e5b09005019cbbd344ccd952e525f87095e9fb0a196690a75e179b296ce",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Twin Bolt",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Twin Bolt",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Twin Bolt with divided damage",
+				"basis": "Twin Bolt deals 2 damage divided as you choose among one or two targets.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any",
+						"count": 2,
+						"atLeast": 1,
+						"divide": 2
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": {
+							"divided": 0
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

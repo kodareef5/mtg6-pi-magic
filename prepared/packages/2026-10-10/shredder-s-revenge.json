@@ -1,0 +1,84 @@
+{
+	"card": "Shredder's Revenge",
+	"generated": "2026-10-10",
+	"source": "fb373b8260f3040126dc74ae0fed83fc8c354776ae89306262fe8f324afe5dbd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shredder's Revenge",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Shredder's Revenge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Shredder's Revenge: discard two cards",
+				"basis": "Choose one —\n• Target player discards two cards.\n• Target player draws two cards and loses 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "target:0"
+						},
+						"count": 2,
+						"as": "cards"
+					},
+					{
+						"do": "move",
+						"what": "bound:cards",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Shredder's Revenge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Shredder's Revenge: draw two cards and lose 2 life",
+				"basis": "Choose one —\n• Target player discards two cards.\n• Target player draws two cards and loses 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 2
+					},
+					{
+						"do": "life",
+						"who": "target:0",
+						"amount": -2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

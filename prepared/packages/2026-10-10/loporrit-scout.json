@@ -1,0 +1,42 @@
+{
+	"card": "Loporrit Scout",
+	"generated": "2026-10-10",
+	"source": "e9987c5190698fe9e1b9ca25d59b1b626c052188258114285d82184271b57b2a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Loporrit Scout",
+		"registers": [
+			{
+				"basis": "Whenever another creature you control enters, this creature gets +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

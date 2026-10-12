@@ -1,0 +1,63 @@
+{
+	"card": "Terramorphic Expanse",
+	"generated": "2026-10-10",
+	"source": "e9a97a0b41fab95eba0f338cc18f1197df059cf36e8fa9b07a17923f077dffa0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Terramorphic Expanse",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self",
+					"card": "Terramorphic Expanse"
+				},
+				"claim": "Sacrifice Terramorphic Expanse to search for a basic land",
+				"basis": "{T}, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"supertypes": [
+								"basic"
+							],
+							"types": [
+								"land"
+							]
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "land"
+					},
+					{
+						"do": "move",
+						"what": "bound:land",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

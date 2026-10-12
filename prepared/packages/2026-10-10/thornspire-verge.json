@@ -1,0 +1,49 @@
+{
+	"card": "Thornspire Verge",
+	"generated": "2026-10-10",
+	"source": "14ef6dbb01122f5551e006baaecb5b9a6157286bb92a9d15b996c8e487e5db75",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thornspire Verge",
+		"registers": [
+			{
+				"basis": "{T}: Add {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {G}. Activate only if you control a Mountain or a Forest.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Mountain",
+								"Forest"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

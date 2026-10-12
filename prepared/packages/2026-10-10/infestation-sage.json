@@ -1,0 +1,66 @@
+{
+	"card": "Infestation Sage",
+	"generated": "2026-10-10",
+	"source": "b865359c5427da19b9476c11cb6e95c21f9484ea5cac9428387df5cadceacc79",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Infestation Sage",
+		"registers": [
+			{
+				"basis": "When this creature dies, create a 1/1 black and green Insect creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Insect",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Insect"
+								],
+								"colors": [
+									"B",
+									"G"
+								],
+								"power": 1,
+								"toughness": 1,
+								"registers": [
+									{
+										"basis": "When this creature dies, create a 1/1 black and green Insect creature token with flying.",
+										"kind": "continuous",
+										"affects": {
+											"is": "this",
+											"zones": [
+												"battlefield"
+											]
+										},
+										"change": {
+											"words": [
+												"flying"
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

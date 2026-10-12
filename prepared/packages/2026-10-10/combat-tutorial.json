@@ -1,0 +1,55 @@
+{
+	"card": "Combat Tutorial",
+	"generated": "2026-10-10",
+	"source": "8e2de1885e3497c0e439d027943ec9a7ffbf67620d3c780442a2fabf17535b7c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Combat Tutorial",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Combat Tutorial",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Combat Tutorial",
+				"basis": "Target player draws two cards. Put a +1/+1 counter on up to one target creature you control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "target:0",
+						"count": 2
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

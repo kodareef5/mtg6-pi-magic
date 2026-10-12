@@ -1,0 +1,71 @@
+{
+	"card": "Unravel",
+	"generated": "2026-10-10",
+	"source": "aaa047a01f77ad01140fafcfdd4498ac97a418d6b1c5c97de964eef88d565fac",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unravel",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unravel",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter a spell, then draw if its casting payment was less than its mana value",
+				"basis": "Counter target spell. If the amount of mana spent to cast that spell was less than its mana value, you draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"amount": {
+								"manaSpent": "target:0"
+							},
+							"atMost": {
+								"sum": [
+									{
+										"manaValue": "target:0"
+									},
+									-1
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

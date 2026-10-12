@@ -1,0 +1,55 @@
+{
+	"card": "Minwu, White Mage",
+	"generated": "2026-10-10",
+	"source": "e662e683bcbe24794f328b620b1ee4d64084111d4e8dc9a8d8c20e2b006842d4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Minwu, White Mage",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Vigilance, lifelink",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance",
+						"lifelink"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put a +1/+1 counter on each Cleric you control.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"every": {
+								"controller": "you",
+								"subtypes": [
+									"Cleric"
+								]
+							},
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

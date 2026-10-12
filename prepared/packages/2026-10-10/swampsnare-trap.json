@@ -1,0 +1,70 @@
+{
+	"card": "Swampsnare Trap",
+	"generated": "2026-10-10",
+	"source": "41d504dc27a3f4585bfa3c570a3fd4cd6d4a0caa20a15a59345330608b006c8b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Swampsnare Trap",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Enchanted creature gets -5/-3.",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": -5,
+					"toughness": -3
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Swampsnare Trap",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Swampsnare Trap enchanting a creature, reducing its generic cost by one if that creature has flying",
+				"basis": "This spell costs {1} less to cast if it targets a creature with flying. ... Enchant creature",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"is": "target:0",
+							"types": [
+								"creature"
+							],
+							"words": [
+								"flying"
+							]
+						}
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

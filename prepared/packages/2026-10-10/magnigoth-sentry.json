@@ -1,0 +1,31 @@
+{
+	"card": "Magnigoth Sentry",
+	"generated": "2026-10-10",
+	"source": "978c20b47e5210e57648e12bef46d2840764618dbf1e83e6c87de953519a1598",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Magnigoth Sentry",
+		"registers": [
+			{
+				"basis": "Reach (This creature can block creatures with flying.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

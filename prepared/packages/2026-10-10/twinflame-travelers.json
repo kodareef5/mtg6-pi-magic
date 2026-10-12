@@ -1,0 +1,43 @@
+{
+	"card": "Twinflame Travelers",
+	"generated": "2026-10-10",
+	"source": "faf76c33dd7be5d76947bec1a2505a5e630d4c13b3e556671aacafbdc2416634",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Twinflame Travelers",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "If a triggered ability of another Elemental you control triggers, it triggers an additional time.",
+				"kind": "trigger-rule",
+				"affects": {
+					"controller": "you",
+					"subtypes": [
+						"Elemental"
+					],
+					"other": true
+				},
+				"additional": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

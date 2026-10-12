@@ -1,0 +1,59 @@
+{
+	"card": "Restore with Empathy",
+	"generated": "2026-10-10",
+	"source": "0bf1e415b44c2f720577557b042eaecc217104b3719d2ebc0c2008a5b46a30ba",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Restore with Empathy",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Restore with Empathy",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Restore with Empathy",
+				"basis": "Return target permanent card from your graveyard to your hand. You gain 4 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

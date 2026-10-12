@@ -1,0 +1,43 @@
+{
+	"card": "Tiger-Dillo",
+	"generated": "2026-10-10",
+	"source": "3b227e37a23eafa07d57f532b40b526f4decb1e2df38d82ad33affbf0ccd2920",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tiger-Dillo",
+		"registers": [
+			{
+				"basis": "This creature can't attack or block unless you control another creature with power 4 or greater.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true,
+							"power": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atMost": 0
+				},
+				"change": {
+					"words": [
+						"can't attack",
+						"can't block"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

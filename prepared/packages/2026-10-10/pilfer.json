@@ -1,0 +1,68 @@
+{
+	"card": "Pilfer",
+	"generated": "2026-10-10",
+	"source": "4bd287241c8000fb32d59504dff030d104b436ff30deb6bfcd9bbd3130da0b0a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pilfer",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Pilfer to reveal an opponent's hand and choose a nonland discard",
+				"basis": "Target opponent reveals their hand. You choose a nonland card from it. That player discards that card.",
+				"source": {
+					"card": "Pilfer",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "opponent"
+					}
+				],
+				"instructions": [
+					{
+						"do": "reveal",
+						"every": {
+							"zones": [
+								"hand"
+							],
+							"owner": "target:0"
+						},
+						"as": "hand"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"count": 1,
+						"as": "discard",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"is": "bound:hand",
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

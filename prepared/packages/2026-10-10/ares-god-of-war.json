@@ -1,0 +1,54 @@
+{
+	"card": "Ares, God of War",
+	"generated": "2026-10-10",
+	"source": "5e3067047ad1db5256b84a7c6531f8a005c4b7ae70d80b8c35ccdb4e3bd2e073",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ares, God of War",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Ares attacks each combat if able.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"attacks each combat if able"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever an attacking creature you control dies, return that card to its owner's hand.",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"attacking": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,42 @@
+{
+	"card": "Kraven's Cats",
+	"generated": "2026-10-10",
+	"source": "9b801d11730bf95210a9e5fadb7f159cf6baa91075e204cee63dfd35a40eaaea",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kraven's Cats",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kraven's Cats",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give this creature +2/+2 until end of turn.",
+				"basis": "{2}{G}: This creature gets +2/+2 until end of turn. Activate only once each turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{G}"
+				},
+				"limit": "once-per-turn",
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

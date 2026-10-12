@@ -1,0 +1,69 @@
+{
+	"card": "Pest Control",
+	"generated": "2026-10-10",
+	"source": "f1e885a5605bc724b30cc0a95f46d9c40c3b68e6201827ac4124e15e7081c0a2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pest Control",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pest Control",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pest Control",
+				"basis": "Destroy all nonland permanents with mana value 1 or less.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							},
+							"manaValue": {
+								"atMost": 1
+							}
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Pest Control",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Pest Control",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

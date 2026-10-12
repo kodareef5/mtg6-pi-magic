@@ -1,0 +1,45 @@
+{
+	"card": "Bogwater Lumaret",
+	"generated": "2026-10-10",
+	"source": "80db0506af9d2622748176f04432d65f19b44edd6a4014410be45ef1e1cb4777",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bogwater Lumaret",
+		"registers": [
+			{
+				"basis": "Whenever this creature or another creature you control enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

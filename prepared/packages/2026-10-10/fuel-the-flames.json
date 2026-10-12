@@ -1,0 +1,62 @@
+{
+	"card": "Fuel the Flames",
+	"generated": "2026-10-10",
+	"source": "b1be003af79afbca357147da4ad4fc2b138b60e26dc1ad41f30f5c2f5fbb60c5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fuel the Flames",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fuel the Flames",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fuel the Flames",
+				"basis": "Fuel the Flames deals 2 damage to each creature.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"types": [
+								"creature"
+							]
+						},
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Fuel the Flames",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Fuel the Flames",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,95 @@
+{
+	"card": "Debris Beetle",
+	"generated": "2026-10-10",
+	"source": "4799f22a2e6a251759b42925b43a00fd149f57b11e691c3adcaaff08e4441a4e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Debris Beetle",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When this Vehicle enters, each opponent loses 3 life and you gain 3 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -3
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Debris Beetle",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Crew Debris Beetle",
+				"basis": "Crew 2",
+				"timing": "stack",
+				"cost": {
+					"tap": {
+						"choose": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"totalPower": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"types": {
+								"add": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

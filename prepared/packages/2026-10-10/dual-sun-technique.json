@@ -1,0 +1,63 @@
+{
+	"card": "Dual-Sun Technique",
+	"generated": "2026-10-10",
+	"source": "c40acb8b25e76c1a73c3a99ce9356713556092ccd6a44141c02ac5d524285f8f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dual-Sun Technique",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dual-Sun Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Grant double strike, then draw if the creature has a +1/+1 counter.",
+				"basis": "Target creature you control gains double strike until end of turn. If it has a +1/+1 counter on it, draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"double strike"
+							]
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"amount": {
+								"counters": "+1/+1",
+								"on": "target:0"
+							},
+							"atLeast": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

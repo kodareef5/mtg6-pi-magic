@@ -1,0 +1,43 @@
+{
+	"card": "Adventurer's Inn",
+	"generated": "2026-10-10",
+	"source": "268fa96f9071fc754ae51f30156eda5e9fa9dec437b2f87a5f2003365218975d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Adventurer's Inn",
+		"registers": [
+			{
+				"basis": "When this land enters, you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

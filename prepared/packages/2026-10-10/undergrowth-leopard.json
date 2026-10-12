@@ -1,0 +1,64 @@
+{
+	"card": "Undergrowth Leopard",
+	"generated": "2026-10-10",
+	"source": "0bbb0bb0b84d48bb854e52edef52102ba777a8b7ac135a197905c9af4dfa7a0a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Undergrowth Leopard",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Undergrowth Leopard",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Undergrowth Leopard to destroy target artifact or enchantment.",
+				"basis": "{1}, Sacrifice this creature: Destroy target artifact or enchantment.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

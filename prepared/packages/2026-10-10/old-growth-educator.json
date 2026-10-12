@@ -1,0 +1,59 @@
+{
+	"card": "Old-Growth Educator",
+	"generated": "2026-10-10",
+	"source": "8c012534cc2c7bdd768197d22d366c1b5e111c9ed50fb967243043d389a1335e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Old-Growth Educator",
+		"registers": [
+			{
+				"basis": "Reach, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Infusion — When this creature enters, put two +1/+1 counters on it if you gained life this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 2,
+							"if": {
+								"amount": {
+									"history": "life-gained",
+									"by": "you"
+								},
+								"atLeast": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

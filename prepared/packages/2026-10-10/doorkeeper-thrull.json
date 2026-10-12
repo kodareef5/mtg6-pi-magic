@@ -1,0 +1,72 @@
+{
+	"card": "Doorkeeper Thrull",
+	"generated": "2026-10-10",
+	"source": "3c0c37c6087fef5c19b2bcb8837e1e596c31ddaa52506be5ceec53cd55739878",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Doorkeeper Thrull",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "suppress",
+				"basis": "Artifacts and creatures entering don't cause abilities to trigger.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact",
+							"creature"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"card": "Extravagant Replication",
+	"generated": "2026-10-10",
+	"source": "bf9d8aad92a866e16cce24980ec5176bbd583fea51a2560bcff8fd6d3c7b012d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Extravagant Replication",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, create a token that's a copy of another target nonland permanent you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you",
+								"other": true,
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"copy": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

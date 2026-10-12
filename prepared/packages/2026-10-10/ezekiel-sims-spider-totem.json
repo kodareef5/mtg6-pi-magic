@@ -1,0 +1,63 @@
+{
+	"card": "Ezekiel Sims, Spider-Totem",
+	"generated": "2026-10-10",
+	"source": "69a8696d33bc1dce5430252f5ce3abaaff95bce4a195adddef13efd44503fb51",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ezekiel Sims, Spider-Totem",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of combat on your turn, target Spider you control gets +2/+2 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"subtypes": [
+									"Spider"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

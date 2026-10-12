@@ -1,0 +1,70 @@
+{
+	"card": "Iron Hills Stalwart",
+	"generated": "2026-10-10",
+	"source": "5939cc1efdbc57b6555869d626ed2ac84a31a203107ec90e2a0d7050d3c037a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Iron Hills Stalwart",
+		"registers": [
+			{
+				"basis": "Reach, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, attach target Equipment you control to up to one target creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"subtypes": [
+									"Equipment"
+								],
+								"controller": "you"
+							}
+						},
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "attach",
+							"what": "target:0",
+							"to": "target:1"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

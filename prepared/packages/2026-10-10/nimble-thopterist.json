@@ -1,0 +1,49 @@
+{
+	"card": "Nimble Thopterist",
+	"generated": "2026-10-10",
+	"source": "10c1330dd520591df5265a8809111c8e00ca706344baab41e04ac4f452eaddef",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nimble Thopterist",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, create a 1/1 colorless Thopter artifact creature token with flying.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Thopter",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Thopter"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

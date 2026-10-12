@@ -1,0 +1,56 @@
+{
+	"card": "Kindled Heroism",
+	"generated": "2026-10-10",
+	"source": "1af6f337a2eb4061b29a41d4da2e1d226556bddd4922e10095bd30b3690af1b8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kindled Heroism",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kindled Heroism",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Kindled Heroism",
+				"basis": "Target creature gets +1/+0 and gains first strike until end of turn. Scry 1.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"words": [
+								"first strike"
+							]
+						}
+					},
+					{
+						"do": "keyword",
+						"name": "scry",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

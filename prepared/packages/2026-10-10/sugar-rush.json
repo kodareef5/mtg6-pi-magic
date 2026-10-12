@@ -1,0 +1,53 @@
+{
+	"card": "Sugar Rush",
+	"generated": "2026-10-10",
+	"source": "66b7a7e11ad3bb763f9a53ce50d7133b2642a5f6ecc3b9c1f58cc8a2afba78f0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sugar Rush",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sugar Rush",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Sugar Rush",
+				"basis": "Target creature gets +3/+0 until end of turn. ... Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": 0
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,63 @@
+{
+	"card": "Mockingbird, Ace Agent",
+	"generated": "2026-10-10",
+	"source": "cd044f2febd782d98897d298f3c93723d93c5336a85ed315abd66e077bb2ae8e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mockingbird, Ace Agent",
+		"registers": [
+			{
+				"basis": "Double strike",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a spell that targets a creature you control, put a +1/+1 counter on Mockingbird.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"targeting": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

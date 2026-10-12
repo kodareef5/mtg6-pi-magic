@@ -1,0 +1,64 @@
+{
+	"card": "Slagstorm",
+	"generated": "2026-10-10",
+	"source": "89f3620c36ed7d8f770ec01c3ff6ebb3971e4625256184623072e428dbf32c4f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Slagstorm",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Slagstorm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Slagstorm: deal 3 damage to each creature",
+				"basis": "Choose one — ... Slagstorm deals 3 damage to each creature.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Slagstorm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Slagstorm: deal 3 damage to each player",
+				"basis": "Choose one — ... Slagstorm deals 3 damage to each player.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "each-player",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

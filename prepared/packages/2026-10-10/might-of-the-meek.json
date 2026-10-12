@@ -1,0 +1,73 @@
+{
+	"card": "Might of the Meek",
+	"generated": "2026-10-10",
+	"source": "dc1a466af2f8f8066ece49063a68bc1eca73c87062eb056f6f2a437245483a20",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Might of the Meek",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Might of the Meek",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Might of the Meek",
+				"basis": "Target creature gains trample until end of turn. It also gets +1/+0 until end of turn if you control a Mouse. ... Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample"
+							]
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						},
+						"if": {
+							"amount": {
+								"count": {
+									"controller": "you",
+									"subtypes": [
+										"Mouse"
+									]
+								}
+							},
+							"atLeast": 1
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

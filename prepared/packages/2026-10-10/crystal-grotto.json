@@ -1,0 +1,53 @@
+{
+	"card": "Crystal Grotto",
+	"generated": "2026-10-10",
+	"source": "4590351989556e97b0e5b1adc75394232d629865f8a0d479f1aa5600dc37d579",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Crystal Grotto",
+		"registers": [
+			{
+				"basis": "When this land enters, scry 1.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "scry",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{1}, {T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

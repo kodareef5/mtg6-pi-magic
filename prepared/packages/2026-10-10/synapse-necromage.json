@@ -1,0 +1,63 @@
+{
+	"card": "Synapse Necromage",
+	"generated": "2026-10-10",
+	"source": "0ce3533995ea4ad42a6743c220f11a40a99742e2b101faa70960bd843748dd07",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Synapse Necromage",
+		"registers": [
+			{
+				"basis": "When this creature dies, create two 1/1 black Fungus creature tokens with \"This token can't block.\"",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Fungus",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Fungus"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 1,
+								"toughness": 1,
+								"registers": [
+									{
+										"basis": "This token can't block.",
+										"kind": "prohibit",
+										"block": {
+											"attacker": {
+												"types": [
+													"creature"
+												]
+											},
+											"blocker": {
+												"is": "this"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

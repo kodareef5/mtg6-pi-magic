@@ -1,0 +1,33 @@
+{
+	"card": "Ajani's Pridemate",
+	"generated": "2026-10-10",
+	"source": "d89b09d27b50e8e7ef0d8efddff42ac646e3a75c2efb8e9f1a0e9e0eea7a07cf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ajani's Pridemate",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

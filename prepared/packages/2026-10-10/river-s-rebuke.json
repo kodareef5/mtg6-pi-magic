@@ -1,0 +1,51 @@
+{
+	"card": "River's Rebuke",
+	"generated": "2026-10-10",
+	"source": "5543faaa89ffb34bc948ca699347ba80d9a8e97f7e9f2e3d25c96b0bca7d87b6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "River's Rebuke",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "River's Rebuke",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return all nonland permanents target player controls to their owner's hand.",
+				"basis": "Return all nonland permanents target player controls to their owner's hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "target:0",
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

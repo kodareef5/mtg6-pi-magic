@@ -1,0 +1,96 @@
+{
+	"card": "Mistmeadow Council",
+	"generated": "2026-10-10",
+	"source": "470f1ec54fbb9cd7482de8f8e1d0e65f89c04bd7744b84b6dbecf209b7c0529e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mistmeadow Council",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, draw a card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mistmeadow Council",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mistmeadow Council with its Kithkin discount",
+				"basis": "This spell costs {1} less to cast if you control a Kithkin.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Kithkin"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 1
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Mistmeadow Council",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mistmeadow Council without its Kithkin discount",
+				"basis": "This spell costs {1} less to cast if you control a Kithkin.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Kithkin"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

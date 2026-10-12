@@ -1,0 +1,61 @@
+{
+	"card": "Hulking Raptor",
+	"generated": "2026-10-10",
+	"source": "1f6c450e0f0d1491080efd279c42646f33bec79a6ebe03939d044efa6fe98a44",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hulking Raptor",
+		"registers": [
+			{
+				"basis": "Ward {2}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your first main phase, add {G}{G}.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "precombat-main",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"G",
+								"G"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,72 @@
+{
+	"card": "Invasive Maneuvers",
+	"generated": "2026-10-10",
+	"source": "d7da479fbef65bd791db5de98b6ba51e9173cc43537ef7f2917054e7b0e5d207",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Invasive Maneuvers",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Invasive Maneuvers",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Invasive Maneuvers",
+				"basis": "Invasive Maneuvers deals 3 damage to target creature. It deals 5 damage instead if you control a Spacecraft.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"amount": {
+								"count": {
+									"controller": "you",
+									"subtypes": [
+										"Spacecraft"
+									]
+								}
+							},
+							"atLeast": 1
+						},
+						"as": "enhanced",
+						"instructions": [
+							{
+								"do": "damage",
+								"to": "target:0",
+								"amount": 5
+							}
+						]
+					},
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3,
+						"if": {
+							"not": {
+								"bound": "enhanced"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

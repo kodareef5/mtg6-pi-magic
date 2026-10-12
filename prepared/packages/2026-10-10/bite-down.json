@@ -1,0 +1,57 @@
+{
+	"card": "Bite Down",
+	"generated": "2026-10-10",
+	"source": "ba2b9cc4c405db0af898d73e0d321f8575071597ebd3d81afd1d610bc2cb78c3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bite Down",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bite Down",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bite Down",
+				"basis": "Target creature you control deals damage equal to its power to target creature or planeswalker you don't control.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

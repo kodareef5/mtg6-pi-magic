@@ -1,0 +1,97 @@
+{
+	"card": "Moon-Vigil Adherents",
+	"generated": "2026-10-10",
+	"source": "751c510766683ef922b92b8be2e1584f1320a517916a752531db5d56b2cdbcf9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Moon-Vigil Adherents",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "This creature gets +1/+1 for each creature you control and each creature card in your graveyard.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"power": {
+						"sum": [
+							{
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							{
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"types": [
+										"creature"
+									],
+									"owner": "you",
+									"token": false
+								}
+							}
+						]
+					},
+					"toughness": {
+						"sum": [
+							{
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"creature"
+									],
+									"controller": "you"
+								}
+							},
+							{
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"types": [
+										"creature"
+									],
+									"owner": "you",
+									"token": false
+								}
+							}
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"card": "Exsanguinate",
+	"generated": "2026-10-10",
+	"source": "3c66627bdf465c0a53e9976761c5781771cf2fa26f4178eee3be00ca87639fdd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Exsanguinate",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Exsanguinate",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Exsanguinate",
+				"basis": "Each opponent loses X life. You gain life equal to the life lost this way.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": {
+							"negate": {
+								"x": true
+							}
+						},
+						"as": "lost"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"negate": {
+								"bound": "lost"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

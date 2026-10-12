@@ -1,0 +1,64 @@
+{
+	"card": "Skystinger",
+	"generated": "2026-10-10",
+	"source": "14a7989c5f641966871a617a45e355d13f2f1f3106b78528f670d96d7d767dd7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Skystinger",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature blocks a creature with flying, this creature gets +5/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "blocks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"triggerIf": {
+					"is": "event:source",
+					"matches": {
+						"types": [
+							"creature"
+						],
+						"words": [
+							"flying"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 5
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

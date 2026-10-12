@@ -1,0 +1,47 @@
+{
+	"card": "Paranormal Analyst",
+	"generated": "2026-10-10",
+	"source": "a84223e7f7865e0bc30375a79eeb46d1f3f2cc82bd65aa0baaa65e09a579ed7b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Paranormal Analyst",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you manifest dread, put a card you put into your graveyard this way into your hand.",
+				"event": {
+					"on": "keyword",
+					"keyword": "manifest-dread",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"is": "event:objects"
+							},
+							"count": 1,
+							"as": "return-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:return-card",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

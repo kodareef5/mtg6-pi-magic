@@ -1,0 +1,86 @@
+{
+	"card": "Dark Fortress",
+	"generated": "2026-10-10",
+	"source": "ec1b4d010a509dcbcf967a6e478edd2d92caef85139af2894f655763fee25f06",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dark Fortress",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add {B} or {R}. Activate only if this land entered this turn or if you control a basic land.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				],
+				"if": {
+					"any": [
+						{
+							"enteredThisTurn": "this"
+						},
+						{
+							"amount": {
+								"count": {
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {B} or {R}. Activate only if this land entered this turn or if you control a basic land.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				],
+				"if": {
+					"any": [
+						{
+							"enteredThisTurn": "this"
+						},
+						{
+							"amount": {
+								"count": {
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

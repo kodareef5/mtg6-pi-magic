@@ -1,0 +1,64 @@
+{
+	"card": "Agent Phil Coulson",
+	"generated": "2026-10-10",
+	"source": "f3a94d9d98a41b93f4923c42fff6f1a7ed53a895830777a3a3964d392f9e1308",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Agent Phil Coulson",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Agent Phil Coulson",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a +1/+1 counter on each other Hero you control.",
+				"basis": "{T}: Put a +1/+1 counter on each other Hero you control.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Hero"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

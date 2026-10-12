@@ -1,0 +1,105 @@
+{
+	"card": "Giant-Sized Flying Ant",
+	"generated": "2026-10-10",
+	"source": "d4f2bd7be37a4beebdbdb8a977ee8dd1d0f9fcb5f33b9722fa64a17a8d3a35fb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Giant-Sized Flying Ant",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, choose one —\n• Tap target nonland permanent.\n• Untap target nonland permanent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"modes": [
+						{
+							"targets": [
+								{
+									"object": {
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "tap",
+									"what": "target:0"
+								}
+							]
+						},
+						{
+							"targets": [
+								{
+									"object": {
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								}
+							],
+							"instructions": [
+								{
+									"do": "untap",
+									"what": "target:0"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

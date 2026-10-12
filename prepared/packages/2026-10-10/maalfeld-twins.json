@@ -1,0 +1,47 @@
+{
+	"card": "Maalfeld Twins",
+	"generated": "2026-10-10",
+	"source": "5dd0e144020d38adb3b0cea42136da7ff7780c88268254aa5a1a3ceb48cec40a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Maalfeld Twins",
+		"registers": [
+			{
+				"basis": "When this creature dies, create two 2/2 black Zombie creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Zombie",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Zombie"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

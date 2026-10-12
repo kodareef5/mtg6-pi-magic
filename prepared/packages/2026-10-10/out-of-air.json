@@ -1,0 +1,83 @@
+{
+	"card": "Out of Air",
+	"generated": "2026-10-10",
+	"source": "3c1f817b5901394bcd5ca61f3446302d3477d5a11f47150710750080bd5fd432",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Out of Air",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Out of Air",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter target spell, reducing the generic cost by two if the chosen target is a creature spell when the cost is locked",
+				"basis": "This spell costs {2} less to cast if it targets a creature spell. ... Counter target spell.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"sum": [
+							{
+								"count": {
+									"zones": [
+										"stack"
+									],
+									"types": [
+										"creature"
+									],
+									"is": "target:0"
+								}
+							},
+							{
+								"count": {
+									"zones": [
+										"stack"
+									],
+									"types": [
+										"creature"
+									],
+									"is": "target:0"
+								}
+							}
+						]
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

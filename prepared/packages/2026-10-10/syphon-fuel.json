@@ -1,0 +1,53 @@
+{
+	"card": "Syphon Fuel",
+	"generated": "2026-10-10",
+	"source": "65f57b7121ff0d81abb10cb317a3efc36679ddfbeec5ba54533fd0d79875cb96",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Syphon Fuel",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Syphon Fuel",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Target creature gets -6/-6 until end of turn; you gain 2 life.",
+				"basis": "Target creature gets -6/-6 until end of turn. You gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -6,
+							"toughness": -6
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

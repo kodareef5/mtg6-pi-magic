@@ -1,0 +1,62 @@
+{
+	"card": "Potioner's Trove",
+	"generated": "2026-10-10",
+	"source": "d08690b1e6c3b4ec4358f7d4205574bbbe2b1bb8b3b1d3be67fab4b3fe712e01",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Potioner's Trove",
+		"registers": [
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Potioner's Trove",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Gain 2 life after casting an instant or sorcery this turn",
+				"basis": "{T}: You gain 2 life. Activate only if you've cast an instant or sorcery spell this turn.",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"if": {
+					"amount": {
+						"history": "cast",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"instant",
+								"sorcery"
+							]
+						},
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

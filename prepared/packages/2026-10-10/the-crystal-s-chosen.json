@@ -1,0 +1,57 @@
+{
+	"card": "The Crystal's Chosen",
+	"generated": "2026-10-10",
+	"source": "ba26036216728f549026079d70eb5c03aedd8d062ac4bf76cb88934b38dc37f3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Crystal's Chosen",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "The Crystal's Chosen",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Create four Hero tokens, then put a +1/+1 counter on each creature you control.",
+				"basis": "Create four 1/1 colorless Hero creature tokens. Then put a +1/+1 counter on each creature you control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 4,
+						"spec": {
+							"name": "Hero",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Hero"
+							],
+							"colors": [],
+							"power": 1,
+							"toughness": 1
+						}
+					},
+					{
+						"do": "counters",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

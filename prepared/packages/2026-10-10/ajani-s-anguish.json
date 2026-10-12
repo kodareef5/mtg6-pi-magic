@@ -1,0 +1,79 @@
+{
+	"card": "Ajani's Anguish",
+	"generated": "2026-10-10",
+	"source": "36c5fdea1843376bcd76c08a622c30eefc6ad50eae268fbf4319ee2b3979766d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ajani's Anguish",
+		"registers": [
+			{
+				"basis": "When this enchantment enters, it deals X damage to any target.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": {
+								"x": true
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Creatures you control have trample.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ajani's Anguish",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ajani's Anguish with chosen X",
+				"basis": "When this enchantment enters, it deals X damage to any target.",
+				"timing": "spell",
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

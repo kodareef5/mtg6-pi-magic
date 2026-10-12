@@ -1,0 +1,49 @@
+{
+	"card": "Sunshower Druid",
+	"generated": "2026-10-10",
+	"source": "5d3a05156f3c936b1294f1d048362df85266f0ac0d6e8e5cba46ce1cd0d8979c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sunshower Druid",
+		"registers": [
+			{
+				"basis": "When this creature enters, put a +1/+1 counter on target creature and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

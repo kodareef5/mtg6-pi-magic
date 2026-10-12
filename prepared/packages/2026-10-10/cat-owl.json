@@ -1,0 +1,59 @@
+{
+	"card": "Cat-Owl",
+	"generated": "2026-10-10",
+	"source": "1198ed03b9d5e53c07574de2c92b51ff2cf14161d7f05b4a1329ca70598234ee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cat-Owl",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, untap target artifact or creature.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact",
+									"creature"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "untap",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

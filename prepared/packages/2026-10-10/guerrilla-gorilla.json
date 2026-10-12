@@ -1,0 +1,69 @@
+{
+	"card": "Guerrilla Gorilla",
+	"generated": "2026-10-10",
+	"source": "e0d0f4b518930624e1d86182b069116d51075eaacd1a1e1c9df22814f48d61f8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Guerrilla Gorilla",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Reach",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Guerrilla Gorilla",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Guerrilla Gorilla to destroy a noncreature artifact or noncreature enchantment",
+				"basis": "Sacrifice this creature: Destroy target noncreature artifact or noncreature enchantment. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"enchantment"
+							],
+							"not": {
+								"types": [
+									"creature"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,63 @@
+{
+	"card": "Chart a Course",
+	"generated": "2026-10-10",
+	"source": "d7e2b618656761fa940d9ed6210468363c5d27113a01cc43ac223a25fd22f606",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chart a Course",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Chart a Course",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Chart a Course",
+				"basis": "Draw two cards. Then discard a card unless you attacked this turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard-card",
+						"if": {
+							"amount": {
+								"history": "attacked",
+								"by": "you"
+							},
+							"atMost": 0
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:discard-card",
+						"to": "graveyard",
+						"reason": "discard",
+						"if": {
+							"bound": "discard-card"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

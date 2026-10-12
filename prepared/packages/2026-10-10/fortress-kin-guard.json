@@ -1,0 +1,74 @@
+{
+	"card": "Fortress Kin-Guard",
+	"generated": "2026-10-10",
+	"source": "84d13111a0d7f679923515b6dad477e8e716f423d58c46c37c4f7d9786928eb0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fortress Kin-Guard",
+		"registers": [
+			{
+				"basis": "When this creature enters, it endures 1. (Put a +1/+1 counter on it or create a 1/1 white Spirit creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "endure-counters",
+							"if": {
+								"is": "this",
+								"matches": {
+									"zones": [
+										"battlefield"
+									]
+								}
+							},
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "this",
+									"kind": "+1/+1",
+									"amount": 1
+								}
+							]
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Spirit",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spirit"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"not": {
+									"bound": "endure-counters"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

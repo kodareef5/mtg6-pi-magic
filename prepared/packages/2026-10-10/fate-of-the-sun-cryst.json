@@ -1,0 +1,74 @@
+{
+	"card": "Fate of the Sun-Cryst",
+	"generated": "2026-10-10",
+	"source": "dff1e8958b9bde37ceaeb1a4ab1e65e734b96e65296ed9db2dd85112a323c293",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fate of the Sun-Cryst",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fate of the Sun-Cryst",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target nonland permanent, reducing the generic cost by two if it is a tapped creature",
+				"basis": "This spell costs {2} less to cast if it targets a tapped creature. ... Destroy target nonland permanent.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"sum": [
+							{
+								"count": {
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							},
+							{
+								"count": {
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							}
+						]
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

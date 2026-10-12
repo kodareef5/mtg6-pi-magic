@@ -1,0 +1,58 @@
+{
+	"card": "East Wind Avatar",
+	"generated": "2026-10-10",
+	"source": "ee843f030f9a050d5347f05a8b5186c8cc6eeb34e683171718dcaf52ed0d4770",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "East Wind Avatar",
+		"registers": [
+			{
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Alliance — Whenever another creature you control enters, this creature gets +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

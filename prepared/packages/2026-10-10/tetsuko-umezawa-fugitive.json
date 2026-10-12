@@ -1,0 +1,44 @@
+{
+	"card": "Tetsuko Umezawa, Fugitive",
+	"generated": "2026-10-10",
+	"source": "110a7ddaf3d8fc69a584743473b33d9d25b88e02ff2e181ed588f82daf9267ef",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tetsuko Umezawa, Fugitive",
+		"registers": [
+			{
+				"basis": "Creatures you control with power or toughness 1 or less can't be blocked.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"any": [
+							{
+								"power": {
+									"atMost": 1
+								}
+							},
+							{
+								"toughness": {
+									"atMost": 1
+								}
+							}
+						]
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

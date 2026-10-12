@@ -1,0 +1,66 @@
+{
+	"card": "Armaggon, Future Shark",
+	"generated": "2026-10-10",
+	"source": "8d1ed5ff25245edc39d26d0adbb75feb3365413c2d93ef3e13091d7af9f586da",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Armaggon, Future Shark",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "When Armaggon enters, destroy up to three target creatures.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"count": 3,
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

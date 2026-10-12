@@ -1,0 +1,63 @@
+{
+	"card": "Kree Commandos",
+	"generated": "2026-10-10",
+	"source": "03f7c2d28d46ffb09409d1bb143f42000372ea1debdc41ad5e63733521ba7a7c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kree Commandos",
+		"registers": [
+			{
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

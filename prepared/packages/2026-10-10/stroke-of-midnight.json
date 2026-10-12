@@ -1,0 +1,67 @@
+{
+	"card": "Stroke of Midnight",
+	"generated": "2026-10-10",
+	"source": "892bc6c9d4fdb52d4253b83d3f25914da58db72e247538f21d6ebcf1df61197a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stroke of Midnight",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stroke of Midnight",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Stroke of Midnight",
+				"basis": "Destroy target nonland permanent. Its controller creates a 1/1 white Human creature token.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "controller:target:0",
+						"spec": {
+							"name": "Human",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Human"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

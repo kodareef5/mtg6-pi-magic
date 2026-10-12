@@ -1,0 +1,61 @@
+{
+	"card": "Ancestor Dragon",
+	"generated": "2026-10-10",
+	"source": "aeae139d6717fc5bb66fa3d22713f054fed2508254aa8ca92dbfe7d00f07b817",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ancestor Dragon",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever one or more creatures you control attack, you gain 1 life for each attacking creature.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": {
+								"count": {
+									"types": [
+										"creature"
+									],
+									"attacking": true
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

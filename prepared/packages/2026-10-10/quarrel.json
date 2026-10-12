@@ -1,0 +1,56 @@
+{
+	"card": "Quarrel",
+	"generated": "2026-10-10",
+	"source": "d3d61317c23d97b797eb3d5678a4f4b7046738d1d0c9eaacf3cd4994847b7af1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Quarrel",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Quarrel",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Have your creature deal damage equal to its power to an opponent's creature.",
+				"basis": "Target creature you control deals damage equal to its power to target creature an opponent controls.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"from": "target:0",
+						"to": "target:1",
+						"amount": {
+							"power": "target:0"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

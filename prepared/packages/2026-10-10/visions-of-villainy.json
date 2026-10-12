@@ -1,0 +1,98 @@
+{
+	"card": "Visions of Villainy",
+	"generated": "2026-10-10",
+	"source": "33072f74f712633283b8cf821da3534189843ee8ead574c8231ffd918b769cc8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Visions of Villainy",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Visions of Villainy",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Visions of Villainy with its Villain discount",
+				"basis": "This spell costs {1} less to cast if you control a Villain. ... You draw two cards and lose 2 life.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Villain"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Visions of Villainy",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Visions of Villainy without a Villain",
+				"basis": "This spell costs {1} less to cast if you control a Villain. ... You draw two cards and lose 2 life.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Villain"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": -2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

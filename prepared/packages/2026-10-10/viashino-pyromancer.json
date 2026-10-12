@@ -1,0 +1,44 @@
+{
+	"card": "Viashino Pyromancer",
+	"generated": "2026-10-10",
+	"source": "db38d26541e335bf67e725d793ff2dfa4684bb329891be82ae9dd80ce53b726b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Viashino Pyromancer",
+		"registers": [
+			{
+				"basis": "When this creature enters, it deals 2 damage to target player or planeswalker.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any",
+							"object": {
+								"types": [
+									"planeswalker"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

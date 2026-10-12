@@ -1,0 +1,55 @@
+{
+	"card": "Impolite Entrance",
+	"generated": "2026-10-10",
+	"source": "e7821ae942d441478e16e163e376d047d87bd253a8bafcedab2d38a683ac4454",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Impolite Entrance",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Impolite Entrance",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Impolite Entrance",
+				"basis": "Target creature gains trample and haste until end of turn. ... Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"trample",
+								"haste"
+							]
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

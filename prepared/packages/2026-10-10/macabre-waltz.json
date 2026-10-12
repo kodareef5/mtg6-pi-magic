@@ -1,0 +1,69 @@
+{
+	"card": "Macabre Waltz",
+	"generated": "2026-10-10",
+	"source": "b287def225d00eb00fa3d9a0a4ea217b57f4c2aa60208fd39744ce788152763b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Macabre Waltz",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Macabre Waltz",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Macabre Waltz",
+				"basis": "Return up to two target creature cards from your graveyard to your hand, then discard a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

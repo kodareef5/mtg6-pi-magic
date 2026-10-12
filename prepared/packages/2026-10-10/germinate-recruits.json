@@ -1,0 +1,52 @@
+{
+	"card": "Germinate Recruits",
+	"generated": "2026-10-10",
+	"source": "717287f77baba6ff4f700e22824d601d21171c8936ff2709562fd0fdbe9b37ef",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Germinate Recruits",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Germinate Recruits",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Germinate Recruits to create Cadets equal to life gained this turn.",
+				"basis": "Create X 2/2 colorless Wizard Soldier creature tokens named Cadet, where X is the amount of life you gained this turn.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"history": "life-gained",
+							"by": "you"
+						},
+						"spec": {
+							"name": "Cadet",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Wizard",
+								"Soldier"
+							],
+							"colors": [],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

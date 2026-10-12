@@ -1,0 +1,60 @@
+{
+	"card": "Ozai's Cruelty",
+	"generated": "2026-10-10",
+	"source": "02e7fd219ad72d870c18fec79666b58e9fadf372bad081080a24d6712fae3c38",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ozai's Cruelty",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ozai's Cruelty",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ozai's Cruelty",
+				"basis": "Ozai's Cruelty deals 2 damage to target player. That player discards two cards.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					},
+					{
+						"do": "choose",
+						"who": "target:0",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "target:0"
+						},
+						"count": 2,
+						"as": "cards"
+					},
+					{
+						"do": "move",
+						"what": "bound:cards",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

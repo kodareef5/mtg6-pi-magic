@@ -1,0 +1,64 @@
+{
+	"card": "Guardian of the Great Door",
+	"generated": "2026-10-10",
+	"source": "658c7ef3b4a027d1803d71a40ebbbdc7141bcf6f4a5f4cf607de40e96dfd0ad3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Guardian of the Great Door",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Guardian of the Great Door",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Guardian of the Great Door, tapping four distinct untapped artifacts, creatures, and/or lands you control as an additional cost",
+				"basis": "As an additional cost to cast this spell, tap four untapped artifacts, creatures, and/or lands you control.",
+				"timing": "spell",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature",
+								"land"
+							],
+							"tapped": false
+						},
+						"count": 4
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,40 @@
+{
+	"card": "Reassembling Skeleton",
+	"generated": "2026-10-10",
+	"source": "b2833bc30b8ab210c63f8a88f1b7f927c249a95e62edc0912efcdebffa870009",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Reassembling Skeleton",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Reassembling Skeleton",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Reassembling Skeleton from your graveyard to the battlefield tapped",
+				"basis": "{1}{B}: Return this card from your graveyard to the battlefield tapped.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{B}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "battlefield",
+						"controller": "you",
+						"tapped": true,
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

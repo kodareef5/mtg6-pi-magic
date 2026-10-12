@@ -1,0 +1,48 @@
+{
+	"card": "Feldon's Cane",
+	"generated": "2026-10-10",
+	"source": "6273d3de941639c7a39a7bfb604d8bbf1858e273ded7050e5b4a3bdcd07f8aed",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Feldon's Cane",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Feldon's Cane",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Shuffle your graveyard into your library",
+				"basis": "{T}, Exile this artifact: Shuffle your graveyard into your library.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you"
+						},
+						"to": "library",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

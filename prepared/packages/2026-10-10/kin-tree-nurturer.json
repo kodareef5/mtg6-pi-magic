@@ -1,0 +1,96 @@
+{
+	"card": "Kin-Tree Nurturer",
+	"generated": "2026-10-10",
+	"source": "886094df08fed8ec22378e9c36121af6224228a56a6a00eeb1c6397b3581a775",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kin-Tree Nurturer",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, it endures 1. (Put a +1/+1 counter on it or create a 1/1 white Spirit creature token.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"as": "counter-choice",
+							"if": {
+								"is": "this",
+								"matches": {
+									"zones": [
+										"battlefield"
+									]
+								}
+							},
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "this",
+									"kind": "+1/+1",
+									"amount": 1
+								}
+							]
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"not": {
+									"bound": "counter-choice"
+								}
+							},
+							"spec": {
+								"name": "Spirit",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Spirit"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

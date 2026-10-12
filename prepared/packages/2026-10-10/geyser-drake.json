@@ -1,0 +1,47 @@
+{
+	"card": "Geyser Drake",
+	"generated": "2026-10-10",
+	"source": "fed6a05262169eef37105f6078c196845442bb285fb75e12eb830b694575055f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Geyser Drake",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "During turns other than yours, spells you cast cost {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you"
+				},
+				"reduce": 1,
+				"if": {
+					"not": {
+						"turn": "self"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

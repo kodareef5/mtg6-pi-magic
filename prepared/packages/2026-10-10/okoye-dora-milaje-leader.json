@@ -1,0 +1,67 @@
+{
+	"card": "Okoye, Dora Milaje Leader",
+	"generated": "2026-10-10",
+	"source": "43b8e61d1daf1b232276f30c203e9a3672919891e66cd7128b93be6f805cf5d4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Okoye, Dora Milaje Leader",
+		"registers": [
+			{
+				"basis": "When Okoye enters, create two 1/1 white Soldier creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Soldier",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Soldier"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Attacking creature tokens you control have first strike.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"token": true,
+					"controller": "you",
+					"attacking": true
+				},
+				"change": {
+					"words": [
+						"first strike"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

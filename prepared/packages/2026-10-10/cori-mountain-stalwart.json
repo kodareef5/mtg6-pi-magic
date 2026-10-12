@@ -1,0 +1,38 @@
+{
+	"card": "Cori Mountain Stalwart",
+	"generated": "2026-10-10",
+	"source": "95d639265a9e3054c0e39d9fd5d5429f104daf9780324f24afbe8b678df6635e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cori Mountain Stalwart",
+		"registers": [
+			{
+				"basis": "Flurry — Whenever you cast your second spell each turn, this creature deals 2 damage to each opponent and you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"ordinal": 2
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

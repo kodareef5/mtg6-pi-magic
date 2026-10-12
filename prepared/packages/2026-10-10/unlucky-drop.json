@@ -1,0 +1,72 @@
+{
+	"card": "Unlucky Drop",
+	"generated": "2026-10-10",
+	"source": "fc396ac99162c468350f1594c4087005d59b017b80492392b03bb41e8b785b4a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unlucky Drop",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unlucky Drop",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Unlucky Drop; the target's owner chooses top by accepting, or bottom by declining",
+				"basis": "Target artifact or creature's owner puts it on their choice of the top or bottom of their library.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "top-chosen",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "top",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "top-chosen"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

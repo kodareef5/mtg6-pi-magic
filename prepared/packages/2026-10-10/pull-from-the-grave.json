@@ -1,0 +1,56 @@
+{
+	"card": "Pull from the Grave",
+	"generated": "2026-10-10",
+	"source": "e2433e4468400f75d7d287dbeead5611344e06872bd5a3e79ed8fd5536230faf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pull from the Grave",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pull from the Grave",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return up to two creature cards from your graveyard to your hand, then gain 2 life.",
+				"basis": "Return up to two target creature cards from your graveyard to your hand. You gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

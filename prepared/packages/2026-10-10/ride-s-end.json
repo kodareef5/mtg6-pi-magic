@@ -1,0 +1,78 @@
+{
+	"card": "Ride's End",
+	"generated": "2026-10-10",
+	"source": "bf5805d145cdff289251d2061fb195170d3dc7f8cd3553f3ad8e0276e3d454cb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ride's End",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ride's End",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ride's End, reducing its generic cost by three if its target is tapped when the cost is locked",
+				"basis": "This spell costs {3} less to cast if it targets a tapped permanent. ... Exile target creature or Vehicle.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"sum": [
+							{
+								"count": {
+									"is": "target:0",
+									"tapped": true
+								}
+							},
+							{
+								"count": {
+									"is": "target:0",
+									"tapped": true
+								}
+							},
+							{
+								"count": {
+									"is": "target:0",
+									"tapped": true
+								}
+							}
+						]
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Vehicle"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

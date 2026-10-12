@@ -1,0 +1,48 @@
+{
+	"card": "Murmuring Volume",
+	"generated": "2026-10-10",
+	"source": "78df4db4b7cd92cba46ba566767bf019502c843fb2437b076c822fabf8b490c4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Murmuring Volume",
+		"registers": [
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Murmuring Volume",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard a card to draw a card",
+				"basis": "{2}, {T}, Discard a card: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"discard": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

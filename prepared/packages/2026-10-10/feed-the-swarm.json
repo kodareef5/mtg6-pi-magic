@@ -1,0 +1,55 @@
+{
+	"card": "Feed the Swarm",
+	"generated": "2026-10-10",
+	"source": "147f06580663be4c8d3d8a87eeb3d6d76230e4eef85a2b11a8a82a272c684806",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Feed the Swarm",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Feed the Swarm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy an opposing creature or enchantment, then lose life equal to its mana value",
+				"basis": "Destroy target creature or enchantment an opponent controls. You lose life equal to that permanent's mana value.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"enchantment"
+							],
+							"controller": "opponent"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": {
+							"negate": {
+								"manaValue": "target:0"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

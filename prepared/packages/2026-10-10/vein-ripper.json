@@ -1,0 +1,96 @@
+{
+	"card": "Vein Ripper",
+	"generated": "2026-10-10",
+	"source": "95aefdbbec3684bc79c018f2a663feac555bce3341bc04d7648a889fb809384a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vein Ripper",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Ward—Sacrifice a creature.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"sacrifice": {
+										"choose": {
+											"types": [
+												"creature"
+											],
+											"controller": "event:player"
+										},
+										"count": 1
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a creature dies, target opponent loses 2 life and you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "life",
+							"who": "target:0",
+							"amount": -2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

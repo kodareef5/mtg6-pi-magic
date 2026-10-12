@@ -1,0 +1,42 @@
+{
+	"card": "Misty Knight, Hero for Hire",
+	"generated": "2026-10-10",
+	"source": "9e9d96277a20c4811ec72f515c4b9c185c68a523263089d9a1a4691cff272193",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Misty Knight, Hero for Hire",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Misty Knight, Hero for Hire",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card for each card discarded this turn",
+				"basis": "{2}, {T}, Discard a card: Draw a card for each card you've discarded this turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"discard": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"history": "discarded",
+							"by": "you"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

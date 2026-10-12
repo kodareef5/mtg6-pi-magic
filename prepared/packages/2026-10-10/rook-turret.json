@@ -1,0 +1,73 @@
+{
+	"card": "Rook Turret",
+	"generated": "2026-10-10",
+	"source": "cabb198aa97757e095ed71c5add10384a9781fccb71b4f9dfe898ab0edf010ff",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rook Turret",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another artifact you control enters, you may draw a card. If you do, discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"may": true,
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

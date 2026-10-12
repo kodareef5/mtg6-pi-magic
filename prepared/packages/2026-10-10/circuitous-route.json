@@ -1,0 +1,70 @@
+{
+	"card": "Circuitous Route",
+	"generated": "2026-10-10",
+	"source": "ec74a4c689a21911b4d5152e49f7dabc35dca27a2e6cb87d0c919d97110c97dc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Circuitous Route",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Circuitous Route",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Circuitous Route",
+				"basis": "Search your library for up to two basic land cards and/or Gate cards, put them onto the battlefield tapped, then shuffle.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"any": [
+								{
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									]
+								},
+								{
+									"subtypes": [
+										"Gate"
+									]
+								}
+							]
+						},
+						"count": 2,
+						"upTo": true,
+						"as": "lands"
+					},
+					{
+						"do": "move",
+						"what": "bound:lands",
+						"to": "battlefield",
+						"controller": "you",
+						"tapped": true,
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

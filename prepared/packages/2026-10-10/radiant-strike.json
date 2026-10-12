@@ -1,0 +1,58 @@
+{
+	"card": "Radiant Strike",
+	"generated": "2026-10-10",
+	"source": "a8757ff8e46a83be99c12eb4b7a935fa3a296f4b3b4b95ca60e7f341f3cf0e49",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Radiant Strike",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Radiant Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target artifact or tapped creature and gain 3 life.",
+				"basis": "Destroy target artifact or tapped creature. You gain 3 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"artifact"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

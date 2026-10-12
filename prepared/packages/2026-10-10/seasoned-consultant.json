@@ -1,0 +1,48 @@
+{
+	"card": "Seasoned Consultant",
+	"generated": "2026-10-10",
+	"source": "be5df6cbe263f11f1fd6d85487bac15cd4e3b597636dcab7bdb76c56cede9e5d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seasoned Consultant",
+		"registers": [
+			{
+				"basis": "Whenever you attack with three or more creatures, this creature gets +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					},
+					"by": "you"
+				},
+				"triggerIf": {
+					"amount": {
+						"event": "amount"
+					},
+					"atLeast": 3
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

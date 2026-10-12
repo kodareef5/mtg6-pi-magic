@@ -1,0 +1,46 @@
+{
+	"card": "Rimefur Reindeer",
+	"generated": "2026-10-10",
+	"source": "1dd75568da8aa1ffe3c7376fa7bfb6d9be72f944ecba8dda0f3e1827fb1d618c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rimefur Reindeer",
+		"registers": [
+			{
+				"basis": "Whenever an enchantment you control enters, tap target creature an opponent controls.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "tap",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

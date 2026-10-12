@@ -1,0 +1,39 @@
+{
+	"card": "Intrepid Tenderfoot",
+	"generated": "2026-10-10",
+	"source": "cfa23abebe3b3bdafcf87202ed2019736c251c027ca9dd665b2c3666a344f3e0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Intrepid Tenderfoot",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Intrepid Tenderfoot",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a +1/+1 counter on Intrepid Tenderfoot.",
+				"basis": "{3}: Put a +1/+1 counter on this creature. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{3}"
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

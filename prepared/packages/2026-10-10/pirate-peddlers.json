@@ -1,0 +1,55 @@
+{
+	"card": "Pirate Peddlers",
+	"generated": "2026-10-10",
+	"source": "c939bd314e4494b9e1f0dfca81459fce52faab5a1bc112145506a15e173dd05d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pirate Peddlers",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Deathtouch",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you sacrifice another permanent, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

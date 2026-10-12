@@ -1,0 +1,40 @@
+{
+	"card": "Tanufel Rimespeaker",
+	"generated": "2026-10-10",
+	"source": "ef28c16acfe6fbbb99b7c6ef187973a38528309c9902d5639628ecb83ab23d1b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tanufel Rimespeaker",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a spell with mana value 4 or greater, draw a card.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"manaValue": {
+							"atLeast": 4
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

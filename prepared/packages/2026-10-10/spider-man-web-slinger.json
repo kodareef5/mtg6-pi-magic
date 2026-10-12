@@ -1,0 +1,47 @@
+{
+	"card": "Spider-Man, Web-Slinger",
+	"generated": "2026-10-10",
+	"source": "a831a16b4e9d534cef200187b5f58e65753817ec1a1d26295705a88ebff7c354",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider-Man, Web-Slinger",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spider-Man, Web-Slinger",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Spider-Man, Web-Slinger for its web-slinging cost",
+				"basis": "Web-slinging {W} (You may cast this spell for {W} if you also return a tapped creature you control to its owner's hand.)",
+				"timing": "spell",
+				"cost": {
+					"alternative": "web-slinging",
+					"mana": "{W}",
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"tapped": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

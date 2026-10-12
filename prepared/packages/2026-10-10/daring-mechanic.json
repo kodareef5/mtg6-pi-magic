@@ -1,0 +1,51 @@
+{
+	"card": "Daring Mechanic",
+	"generated": "2026-10-10",
+	"source": "ab4c21ea6c952411fc0258c2bcd9f4e49916fdbcd1b466ba5af6e679e3321c24",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Daring Mechanic",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Daring Mechanic",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put a +1/+1 counter on target Mount or Vehicle",
+				"basis": "{3}{W}: Put a +1/+1 counter on target Mount or Vehicle.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{W}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Mount",
+								"Vehicle"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

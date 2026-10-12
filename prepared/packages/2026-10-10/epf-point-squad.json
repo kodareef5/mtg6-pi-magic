@@ -1,0 +1,39 @@
+{
+	"card": "EPF Point Squad",
+	"generated": "2026-10-10",
+	"source": "0386bb79c095d83cfd3edd6f9bfe914d572e243ddac1eb31230cf4acd11a6842",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "EPF Point Squad",
+		"registers": [
+			{
+				"basis": "Alliance — Whenever another creature you control enters, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

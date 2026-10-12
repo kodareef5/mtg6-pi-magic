@@ -1,0 +1,86 @@
+{
+	"card": "Frantic Strength",
+	"generated": "2026-10-10",
+	"source": "77e3d357b802a1a41a7af0b7d4364354892483e9d1278f80862419df212a5394",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Frantic Strength",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Enchanted creature gets +2/+2 and has trample.",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2,
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Frantic Strength",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Frantic Strength enchanting a creature",
+				"basis": "Flash ... Enchant creature",
+				"timing": "spell",
+				"speed": "instant",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

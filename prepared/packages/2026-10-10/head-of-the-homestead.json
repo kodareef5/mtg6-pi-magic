@@ -1,0 +1,47 @@
+{
+	"card": "Head of the Homestead",
+	"generated": "2026-10-10",
+	"source": "c8f8f363fdda9d77d4c7fb6a15880ab3f94ef36a7de33c2bee2a1d99955c1c7d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Head of the Homestead",
+		"registers": [
+			{
+				"basis": "When this creature enters, create two 1/1 white Rabbit creature tokens.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Rabbit",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Rabbit"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

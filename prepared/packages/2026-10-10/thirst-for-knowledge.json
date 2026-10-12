@@ -1,0 +1,88 @@
+{
+	"card": "Thirst for Knowledge",
+	"generated": "2026-10-10",
+	"source": "f3da5418a334ad922da7678334adef9019b2d296526116d7981f6a59dc143bb7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thirst for Knowledge",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thirst for Knowledge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw three cards, then discard an artifact card or two cards",
+				"basis": "Draw three cards. Then discard two cards unless you discard an artifact card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you",
+							"types": [
+								"artifact"
+							]
+						},
+						"count": 1,
+						"may": true,
+						"as": "artifact"
+					},
+					{
+						"do": "move",
+						"what": "bound:artifact",
+						"to": "graveyard",
+						"reason": "discard",
+						"if": {
+							"bound": "artifact"
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 2,
+						"as": "cards",
+						"if": {
+							"not": {
+								"bound": "artifact"
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:cards",
+						"to": "graveyard",
+						"reason": "discard",
+						"if": {
+							"not": {
+								"bound": "artifact"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

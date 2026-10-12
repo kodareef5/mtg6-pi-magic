@@ -1,0 +1,92 @@
+{
+	"card": "Quicksand Whirlpool",
+	"generated": "2026-10-10",
+	"source": "cfa95508792bb01072d1dbaab9d0a7b0a42e6573507102beeedf27b6cdce5d3f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Quicksand Whirlpool",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Quicksand Whirlpool",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Quicksand Whirlpool with its tapped-target discount",
+				"basis": "This spell costs {3} less to cast if it targets a tapped creature. ... Exile target creature.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"sum": [
+							{
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							},
+							{
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							},
+							{
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"is": "target:0",
+									"types": [
+										"creature"
+									],
+									"tapped": true
+								}
+							}
+						]
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

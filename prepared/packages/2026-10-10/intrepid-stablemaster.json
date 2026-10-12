@@ -1,0 +1,58 @@
+{
+	"card": "Intrepid Stablemaster",
+	"generated": "2026-10-10",
+	"source": "446b32da253116416f5d8e4a8877473b202d9bc50a121ed42409d3736080d54d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Intrepid Stablemaster",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add two mana of any one color. Spend this mana only to cast Mount or Vehicle spells.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 2,
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"subtypes": [
+						"Mount",
+						"Vehicle"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

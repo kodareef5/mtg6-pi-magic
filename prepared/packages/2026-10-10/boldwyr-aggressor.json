@@ -1,0 +1,51 @@
+{
+	"card": "Boldwyr Aggressor",
+	"generated": "2026-10-10",
+	"source": "f6de6b950844bcfff7258de47e9b0ce6d16f7afd64f2a9cf73328ca09da40807",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boldwyr Aggressor",
+		"registers": [
+			{
+				"basis": "Double strike",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			},
+			{
+				"basis": "Other Giants you control have double strike.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"subtypes": [
+						"Giant"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

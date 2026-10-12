@@ -1,0 +1,49 @@
+{
+	"card": "Winter's Intervention",
+	"generated": "2026-10-10",
+	"source": "451b41beffb86b553c6770877eb4a051478ac80799a2a97014c0aa031397d9dc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Winter's Intervention",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Winter's Intervention",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Winter's Intervention",
+				"basis": "Winter's Intervention deals 2 damage to target creature. You gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

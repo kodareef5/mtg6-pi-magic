@@ -1,0 +1,58 @@
+{
+	"card": "Boggart Cursecrafter",
+	"generated": "2026-10-10",
+	"source": "293ecbb0fb6951176912eba4691ad8dc65d6d652e7ad2b3be2a75a46f022099c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boggart Cursecrafter",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			},
+			{
+				"basis": "Whenever another Goblin you control dies, this creature deals 1 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"subtypes": [
+							"Goblin"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

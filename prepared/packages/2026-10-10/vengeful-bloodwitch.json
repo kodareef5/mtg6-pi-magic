@@ -1,0 +1,55 @@
+{
+	"card": "Vengeful Bloodwitch",
+	"generated": "2026-10-10",
+	"source": "46104b82eae79ddf81123d89858cca25b3f48e5abd0ee33d26f620cce6c81e42",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vengeful Bloodwitch",
+		"registers": [
+			{
+				"basis": "Whenever this creature or another creature you control dies, target opponent loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "life",
+							"who": "target:0",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

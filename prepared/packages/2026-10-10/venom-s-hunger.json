@@ -1,0 +1,107 @@
+{
+	"card": "Venom's Hunger",
+	"generated": "2026-10-10",
+	"source": "2c8f91e77b8d840b0b97fe787b9647a42359e10e4cd1fe86271b70ec7c13eaa5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Venom's Hunger",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Venom's Hunger",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Venom's Hunger with the Villain discount",
+				"basis": "This spell costs {2} less to cast if you control a Villain. ... Destroy target creature. You gain 2 life.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Villain"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Venom's Hunger",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Venom's Hunger without a Villain",
+				"basis": "This spell costs {2} less to cast if you control a Villain. ... Destroy target creature. You gain 2 life.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Villain"
+							]
+						}
+					},
+					"atMost": 0
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

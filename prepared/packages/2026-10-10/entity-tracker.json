@@ -1,0 +1,83 @@
+{
+	"card": "Entity Tracker",
+	"generated": "2026-10-10",
+	"source": "5c1b45ccb145b1caf377eb4f13ddfcebce42b54272b2e76bdfe0542141372b3b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Entity Tracker",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "Eerie — Whenever an enchantment you control enters and whenever you fully unlock a Room, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"enchantment"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Eerie — Whenever an enchantment you control enters and whenever you fully unlock a Room, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"fully": true,
+					"by": "you",
+					"of": {
+						"subtypes": [
+							"Room"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,126 @@
+{
+	"card": "Azula Always Lies",
+	"generated": "2026-10-10",
+	"source": "69484e7dbfa7d9f929e4b109dd42f8d66403aa18485df965d002c5a7560827dd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Azula Always Lies",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Azula Always Lies",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Azula Always Lies choosing only -1/-1",
+				"basis": "Choose one or both —\n• Target creature gets -1/-1 until end of turn.\n• Put a +1/+1 counter on target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Azula Always Lies",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Azula Always Lies choosing only the +1/+1 counter",
+				"basis": "Choose one or both —\n• Target creature gets -1/-1 until end of turn.\n• Put a +1/+1 counter on target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Azula Always Lies",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Azula Always Lies choosing both modes",
+				"basis": "Choose one or both —\n• Target creature gets -1/-1 until end of turn.\n• Put a +1/+1 counter on target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					},
+					{
+						"do": "counters",
+						"on": "target:1",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

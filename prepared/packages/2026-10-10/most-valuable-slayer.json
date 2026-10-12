@@ -1,0 +1,48 @@
+{
+	"card": "Most Valuable Slayer",
+	"generated": "2026-10-10",
+	"source": "d1252743b667e30512cabdcf53a196533cb28c91efdc720bf9e5930881b4d471",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Most Valuable Slayer",
+		"registers": [
+			{
+				"basis": "Whenever you attack, target attacking creature gets +1/+0 and gains first strike until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"by": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"attacking": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"words": [
+									"first strike"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

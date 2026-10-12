@@ -1,0 +1,57 @@
+{
+	"card": "Capital City",
+	"generated": "2026-10-10",
+	"source": "28d1d035189a2b84e3eb38a7f5166230456560b798b5dd7ed48b6bb9770e74d7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Capital City",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{1}, {T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Capital City",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Capital City",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

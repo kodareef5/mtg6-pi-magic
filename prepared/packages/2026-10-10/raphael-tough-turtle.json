@@ -1,0 +1,43 @@
+{
+	"card": "Raphael, Tough Turtle",
+	"generated": "2026-10-10",
+	"source": "6c5eb8c12a02c121d3ce0a9350a8cf7154351c6178fe44eb5b70370234de9b7c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Raphael, Tough Turtle",
+		"registers": [
+			{
+				"basis": "Alliance — Whenever another creature you control enters, Raphael deals 1 damage to target opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

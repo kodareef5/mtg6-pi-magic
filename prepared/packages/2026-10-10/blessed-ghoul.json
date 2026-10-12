@@ -1,0 +1,55 @@
+{
+	"card": "Blessed Ghoul",
+	"generated": "2026-10-10",
+	"source": "5ba6686c64f8ea2048cac88514cbe4805036f64bc47096bf02175472ecb494b4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blessed Ghoul",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Return Blessed Ghoul to hand",
+				"basis": "{2}{W/B}: Return this card from your graveyard to your hand.",
+				"source": {
+					"card": "Blessed Ghoul",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W/B}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

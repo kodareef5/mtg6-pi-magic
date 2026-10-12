@@ -1,0 +1,41 @@
+{
+	"card": "Tectonic Hazard",
+	"generated": "2026-10-10",
+	"source": "7bb97418b149f5b837059b5202885d59d7c60b35d4a57be4842bc845fb352f3b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tectonic Hazard",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Tectonic Hazard",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Tectonic Hazard",
+				"basis": "Tectonic Hazard deals 1 damage to each opponent and each creature they control.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "opponent",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						},
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

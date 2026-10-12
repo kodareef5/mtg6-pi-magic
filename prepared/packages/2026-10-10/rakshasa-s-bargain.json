@@ -1,0 +1,68 @@
+{
+	"card": "Rakshasa's Bargain",
+	"generated": "2026-10-10",
+	"source": "f9269b9f5680f3fcb8e1e135a804c582eddb68e2bb2ae199faa1f8a36dc8af1f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rakshasa's Bargain",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rakshasa's Bargain",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Rakshasa's Bargain",
+				"basis": "Look at the top four cards of your library. Put two of them into your hand and the rest into your graveyard.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 4,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"count": 2,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"to": "graveyard",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

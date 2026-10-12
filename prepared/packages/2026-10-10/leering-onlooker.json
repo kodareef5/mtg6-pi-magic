@@ -1,0 +1,72 @@
+{
+	"card": "Leering Onlooker",
+	"generated": "2026-10-10",
+	"source": "d8c8439eaaee2952b0b10b87c7783ccf233d97f96767ad0ffed19eca12b1f6e9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Leering Onlooker",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Leering Onlooker",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Leering Onlooker to create two tapped Bats",
+				"basis": "{2}{B}{B}, Exile this card from your graveyard: Create two tapped 1/1 black Bat creature tokens with flying.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{B}{B}",
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"tapped": true,
+						"spec": {
+							"name": "Bat",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Bat"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"flying"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,56 @@
+{
+	"card": "Broken Wings",
+	"generated": "2026-10-10",
+	"source": "1c7496014596966cfd4e2db7b51b56ea2492605493a214933962b83924760443",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Broken Wings",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Broken Wings",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Broken Wings",
+				"basis": "Destroy target artifact, enchantment, or creature with flying.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									],
+									"words": [
+										"flying"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

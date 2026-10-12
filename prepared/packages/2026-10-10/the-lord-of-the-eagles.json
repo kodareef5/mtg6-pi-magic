@@ -1,0 +1,82 @@
+{
+	"card": "The Lord of the Eagles",
+	"generated": "2026-10-10",
+	"source": "007b66b67c7cef77919dd7d1d7e29bbe727dff3c857d13836d8667b786beeb07",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Lord of the Eagles",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "The Lord of the Eagles",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast The Lord of the Eagles with flash and its flying-creature power reduction",
+				"basis": "Flash ... This spell costs {X} less to cast, where X is the total power of creatures you control with flying.",
+				"timing": "spell",
+				"speed": "instant",
+				"cost": {
+					"reduce": {
+						"aggregate": "sum",
+						"of": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"words": [
+								"flying"
+							]
+						},
+						"value": "power"
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

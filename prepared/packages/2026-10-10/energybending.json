@@ -1,0 +1,57 @@
+{
+	"card": "Energybending",
+	"generated": "2026-10-10",
+	"source": "9eecd0bd8711dc33c617b338596c03b7f9dbbdbc2b6c32678a55fa624da4737c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Energybending",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Energybending",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Energybending",
+				"basis": "Lands you control gain all basic land types until end of turn. ... Draw a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"subtypes": {
+								"add": [
+									"Plains",
+									"Island",
+									"Swamp",
+									"Mountain",
+									"Forest"
+								],
+								"of": "land"
+							}
+						}
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

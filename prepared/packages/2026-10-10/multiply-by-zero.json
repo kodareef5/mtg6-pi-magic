@@ -1,0 +1,50 @@
+{
+	"card": "Multiply by Zero",
+	"generated": "2026-10-10",
+	"source": "8936b36c15a686e20a312cac6f912378ad976600d53ddabf2a2f93c79bf585de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Multiply by Zero",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Multiply by Zero",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Set target creature's base power and toughness to 0/0 until end of turn.",
+				"basis": "Target creature has base power and toughness 0/0 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"base": {
+								"power": 0,
+								"toughness": 0
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,38 @@
+{
+	"card": "Project Deathlok Soldier",
+	"generated": "2026-10-10",
+	"source": "86223210eb62bf5da0fd7cb7a9732b434efa27f4392a2b58e42694ab862ce3b2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Project Deathlok Soldier",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Project Deathlok Soldier",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Return Project Deathlok Soldier from your graveyard to your hand",
+				"basis": "{2}{B}: Return this card from your graveyard to your hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{B}"
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

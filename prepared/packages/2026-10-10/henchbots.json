@@ -1,0 +1,49 @@
+{
+	"card": "Henchbots",
+	"generated": "2026-10-10",
+	"source": "d9df4434918ba489f93a8466149d7e6282f1783ca4c1b092767097908a667abe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Henchbots",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, exile target tapped creature an opponent controls until this creature leaves the battlefield.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"tapped": true,
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

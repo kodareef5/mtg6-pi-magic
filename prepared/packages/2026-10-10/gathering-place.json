@@ -1,0 +1,86 @@
+{
+	"card": "Gathering Place",
+	"generated": "2026-10-10",
+	"source": "b35a5d4fc30e0f760c6b8de1aa416bccd99fc9da2c01bd4b4b7b1e752547609a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gathering Place",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add {G} or {W}. Activate only if this land entered this turn or if you control a basic land.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"if": {
+					"any": [
+						{
+							"enteredThisTurn": "this"
+						},
+						{
+							"amount": {
+								"count": {
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {G} or {W}. Activate only if this land entered this turn or if you control a basic land.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				],
+				"if": {
+					"any": [
+						{
+							"enteredThisTurn": "this"
+						},
+						{
+							"amount": {
+								"count": {
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

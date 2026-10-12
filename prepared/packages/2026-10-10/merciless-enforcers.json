@@ -1,0 +1,55 @@
+{
+	"card": "Merciless Enforcers",
+	"generated": "2026-10-10",
+	"source": "7b7bdb21b2e763b79fbc7b5b8e1a6566a5801d59f013ae86a6876882d340bba2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Merciless Enforcers",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Merciless Enforcers",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Deal 1 damage to each opponent",
+				"basis": "{3}{B}: This creature deals 1 damage to each opponent.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{B}"
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "opponent",
+						"amount": 1,
+						"from": "this"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

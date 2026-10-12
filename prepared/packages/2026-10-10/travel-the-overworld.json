@@ -1,0 +1,48 @@
+{
+	"card": "Travel the Overworld",
+	"generated": "2026-10-10",
+	"source": "26287a9f49e99ed32e484f9ccde73540aa35ab759e756d7f0f94b17d03b402bc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Travel the Overworld",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Travel the Overworld",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Travel the Overworld with affinity for Towns and draw four cards",
+				"basis": "Affinity for Towns (This spell costs {1} less to cast for each Town you control.) ... Draw four cards.",
+				"timing": "spell",
+				"cost": {
+					"reduce": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"subtypes": [
+								"Town"
+							],
+							"controller": "you"
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 4
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

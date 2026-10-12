@@ -1,0 +1,76 @@
+{
+	"card": "Highspire Bell-Ringer",
+	"generated": "2026-10-10",
+	"source": "849f6e722c435e80290fd56529343ad4f6a05da90e9e0c67ff7b1b4795dbf9e9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Highspire Bell-Ringer",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "The second spell you cast each turn costs {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"types": [
+						"artifact",
+						"battle",
+						"creature",
+						"enchantment",
+						"instant",
+						"kindred",
+						"planeswalker",
+						"sorcery"
+					]
+				},
+				"reduce": 1,
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					},
+					"atLeast": 1,
+					"atMost": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,44 @@
+{
+	"card": "Thistledown Players",
+	"generated": "2026-10-10",
+	"source": "2c1243f59c8e283d82ce9fb8976403ab4c0e863bf5b37f401bccfbe2f930ef57",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thistledown Players",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, untap target nonland permanent.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "untap",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,67 @@
+{
+	"card": "Firespitter Whelp",
+	"generated": "2026-10-10",
+	"source": "96cd0f0ee8200dce3a4865c7ee73bdee403010da727a3209d1395dfcf345b959",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Firespitter Whelp",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you cast a noncreature or Dragon spell, this creature deals 1 damage to each opponent.",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"any": [
+							{
+								"not": {
+									"types": [
+										"creature"
+									]
+								}
+							},
+							{
+								"subtypes": [
+									"Dragon"
+								]
+							}
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

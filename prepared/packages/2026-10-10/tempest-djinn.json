@@ -1,0 +1,54 @@
+{
+	"card": "Tempest Djinn",
+	"generated": "2026-10-10",
+	"source": "49eb043e67b97edeb11821513e7635f7ccf0f197a4201b3ded1c34693a06b1c6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tempest Djinn",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "This creature gets +1/+0 for each basic Island you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"power": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							],
+							"subtypes": [
+								"Island"
+							],
+							"controller": "you"
+						}
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

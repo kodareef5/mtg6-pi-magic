@@ -1,0 +1,78 @@
+{
+	"card": "Ghalta, Stampede Tyrant",
+	"generated": "2026-10-10",
+	"source": "6541fb07c0b81c9381c0b02a09975bdf7c57b4e0ac307e7a64b35a1639c476e3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ghalta, Stampede Tyrant",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "When Ghalta enters, put any number of creature cards from your hand onto the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you",
+								"types": [
+									"creature"
+								]
+							},
+							"count": {
+								"count": {
+									"zones": [
+										"hand"
+									],
+									"controller": "you",
+									"types": [
+										"creature"
+									]
+								}
+							},
+							"upTo": true,
+							"as": "creatures"
+						},
+						{
+							"do": "move",
+							"what": "bound:creatures",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

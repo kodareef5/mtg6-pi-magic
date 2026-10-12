@@ -1,0 +1,44 @@
+{
+	"card": "Iridescent Tiger",
+	"generated": "2026-10-10",
+	"source": "dfa79ab779636745986878b636d2acb0298383bc8e626a0645022ed9b5f1803a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Iridescent Tiger",
+		"registers": [
+			{
+				"basis": "When this creature enters, if you cast it, add {W}{U}{B}{R}{G}.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"W",
+								"U",
+								"B",
+								"R",
+								"G"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

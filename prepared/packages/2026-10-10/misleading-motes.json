@@ -1,0 +1,67 @@
+{
+	"card": "Misleading Motes",
+	"generated": "2026-10-10",
+	"source": "a1f438b45f57ac0158b0f7a30f2cb6d851e6ff8264d07744c563a70be3c5e4c8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Misleading Motes",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Misleading Motes",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Misleading Motes; the creature's owner chooses top or bottom",
+				"basis": "Target creature's owner puts it on their choice of the top or bottom of their library.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "perform",
+						"who": "owner:target:0",
+						"may": true,
+						"as": "choose-top",
+						"instructions": [
+							{
+								"do": "move",
+								"what": "target:0",
+								"to": "library",
+								"position": "top",
+								"reason": "resolve"
+							}
+						]
+					},
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "library",
+						"position": "bottom",
+						"reason": "resolve",
+						"if": {
+							"not": {
+								"bound": "choose-top"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

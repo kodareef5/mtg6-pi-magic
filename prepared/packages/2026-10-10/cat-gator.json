@@ -1,0 +1,73 @@
+{
+	"card": "Cat-Gator",
+	"generated": "2026-10-10",
+	"source": "3b68684ac6737b925bcfd28b7c86a3c6f150d847ae5f3a6ae7240290001e9a81",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cat-Gator",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, it deals damage equal to the number of Swamps you control to any target.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"from": "this",
+							"amount": {
+								"count": {
+									"types": [
+										"land"
+									],
+									"subtypes": [
+										"Swamp"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

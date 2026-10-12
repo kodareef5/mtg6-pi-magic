@@ -1,0 +1,63 @@
+{
+	"card": "Dragon Mage",
+	"generated": "2026-10-10",
+	"source": "cc2c3ed0ad545783eed1b7b483f0add6e48aaf6d3714a02bc05c739a560d5ce0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragon Mage",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature deals combat damage to a player, each player discards their hand, then draws seven cards.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"hand"
+								],
+								"owner": "any"
+							},
+							"to": "graveyard",
+							"reason": "discard"
+						},
+						{
+							"do": "draw",
+							"who": "each-player",
+							"count": 7
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

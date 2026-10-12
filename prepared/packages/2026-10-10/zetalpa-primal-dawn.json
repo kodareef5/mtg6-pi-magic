@@ -1,0 +1,35 @@
+{
+	"card": "Zetalpa, Primal Dawn",
+	"generated": "2026-10-10",
+	"source": "4b858435f1c12a97f9f95021a34e305985435b0984273961c062b97bf70f4032",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zetalpa, Primal Dawn",
+		"registers": [
+			{
+				"basis": "Flying, double strike, vigilance, trample, indestructible",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"double strike",
+						"vigilance",
+						"trample",
+						"indestructible"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

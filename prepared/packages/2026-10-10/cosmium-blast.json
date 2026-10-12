@@ -1,0 +1,52 @@
+{
+	"card": "Cosmium Blast",
+	"generated": "2026-10-10",
+	"source": "bbf4d4262c5cbb855ad2e65f3e4f8e6023d77d5c94e5b154f0b3a79fd17ed12c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cosmium Blast",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cosmium Blast",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cosmium Blast",
+				"basis": "Cosmium Blast deals 4 damage to target attacking or blocking creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"any": [
+								{
+									"attacking": true
+								},
+								{
+									"blocking": true
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

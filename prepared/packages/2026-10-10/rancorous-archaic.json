@@ -1,0 +1,41 @@
+{
+	"card": "Rancorous Archaic",
+	"generated": "2026-10-10",
+	"source": "bf7826f6ab1ea5ad5f7be166d05b7103927be719ccad1b550791653e2f8267f0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rancorous Archaic",
+		"registers": [
+			{
+				"basis": "Reach, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "Converge — This creature enters with a +1/+1 counter on it for each color of mana spent to cast it.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": {
+						"colorsSpent": "this"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

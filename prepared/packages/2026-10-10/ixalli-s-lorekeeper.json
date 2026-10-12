@@ -1,0 +1,38 @@
+{
+	"card": "Ixalli's Lorekeeper",
+	"generated": "2026-10-10",
+	"source": "4cc9d05b18c23406aa093bce5a7bebdcee1438aee1dca4341b5ead6d4475c617",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ixalli's Lorekeeper",
+		"registers": [
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast a Dinosaur spell or activate an ability of a Dinosaur source.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack",
+						"battlefield",
+						"hand",
+						"graveyard",
+						"exile",
+						"command",
+						"library",
+						"outside"
+					],
+					"subtypes": [
+						"Dinosaur"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

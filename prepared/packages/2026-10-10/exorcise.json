@@ -1,0 +1,58 @@
+{
+	"card": "Exorcise",
+	"generated": "2026-10-10",
+	"source": "170638bd60b09a01f7c5460944e59e4da6dfcfc21f356ff000cd3392e9531c8b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Exorcise",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Exorcise",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Exorcise to exile a target artifact, enchantment, or creature with power 4 or greater.",
+				"basis": "Exile target artifact, enchantment, or creature with power 4 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"artifact",
+										"enchantment"
+									]
+								},
+								{
+									"types": [
+										"creature"
+									],
+									"power": {
+										"atLeast": 4
+									}
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

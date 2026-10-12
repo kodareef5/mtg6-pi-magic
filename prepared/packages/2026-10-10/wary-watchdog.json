@@ -1,0 +1,55 @@
+{
+	"card": "Wary Watchdog",
+	"generated": "2026-10-10",
+	"source": "98078b59592295a6cc0aff0940cd210d8bcf8bc95d890b55572b8f010d6c944a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wary Watchdog",
+		"registers": [
+			{
+				"basis": "When this creature enters or dies, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters or dies, surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "keyword",
+							"name": "surveil",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,64 @@
+{
+	"card": "Voracious Varmint",
+	"generated": "2026-10-10",
+	"source": "f6eb6babac02e42e4b33f6e35222ef34fe1e0eb48577a16bf4d9d49fcbb676a0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Voracious Varmint",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Voracious Varmint",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Voracious Varmint to destroy target artifact or enchantment",
+				"basis": "{1}, Sacrifice this creature: Destroy target artifact or enchantment.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,71 @@
+{
+	"card": "Blanchwood Armor",
+	"generated": "2026-10-10",
+	"source": "15a959ee57210681ad1558130a1e62a33d3974844fa71b90fc4dff7af48ba7a8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blanchwood Armor",
+		"registers": [
+			{
+				"basis": "Enchanted creature gets +1/+1 for each Forest you control.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached"
+				},
+				"change": {
+					"power": {
+						"count": {
+							"subtypes": [
+								"Forest"
+							],
+							"controller": "you"
+						}
+					},
+					"toughness": {
+						"count": {
+							"subtypes": [
+								"Forest"
+							],
+							"controller": "you"
+						}
+					}
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Blanchwood Armor",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Blanchwood Armor enchanting a creature",
+				"basis": "Enchant creature",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "attach",
+						"what": "this",
+						"to": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

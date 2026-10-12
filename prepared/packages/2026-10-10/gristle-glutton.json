@@ -1,0 +1,73 @@
+{
+	"card": "Gristle Glutton",
+	"generated": "2026-10-10",
+	"source": "de7b9f8f99e72cfadfb93e6c99aeab2c780870f531c642156de95502cf6c1a5d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gristle Glutton",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gristle Glutton",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap and blight 1 to discard a card, then draw if discarded",
+				"basis": "{T}, Blight 1: Discard a card. If you do, draw a card. (To blight 1, put a -1/-1 counter on a creature you control.)",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"counters": {
+						"kind": "-1/-1",
+						"count": 1,
+						"put": true,
+						"on": {
+							"choose": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"count": 1
+						}
+					}
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "chosen"
+					},
+					{
+						"do": "move",
+						"what": "bound:chosen",
+						"to": "graveyard",
+						"reason": "discard",
+						"as": "discarded"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"bound": "discarded"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

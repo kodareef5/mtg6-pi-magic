@@ -1,0 +1,76 @@
+{
+	"card": "Splitskin Doll",
+	"generated": "2026-10-10",
+	"source": "3539aa31fbd5093fed47d526b1650d6127d11aaa98a64a063dfbdf7401d59ee5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Splitskin Doll",
+		"registers": [
+			{
+				"basis": "When this creature enters, draw a card. Then discard a card unless you control another creature with power 2 or less.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "perform",
+							"who": "you",
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										],
+										"controller": "you",
+										"other": true,
+										"power": {
+											"atMost": 2
+										}
+									}
+								},
+								"atMost": 0
+							},
+							"instructions": [
+								{
+									"do": "choose",
+									"who": "you",
+									"from": {
+										"zones": [
+											"hand"
+										],
+										"controller": "you"
+									},
+									"count": 1,
+									"as": "discard"
+								},
+								{
+									"do": "move",
+									"what": "bound:discard",
+									"to": "graveyard",
+									"reason": "discard"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

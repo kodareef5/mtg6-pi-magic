@@ -1,0 +1,46 @@
+{
+	"card": "Skeleton Archer",
+	"generated": "2026-10-10",
+	"source": "7201f58f4ea4c1242f7735e53a13dcba84d87ca9823a8458b27f75396bd9a069",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Skeleton Archer",
+		"registers": [
+			{
+				"basis": "When this creature enters, it deals 1 damage to any target.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

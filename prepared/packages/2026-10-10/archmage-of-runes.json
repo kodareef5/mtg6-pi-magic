@@ -1,0 +1,56 @@
+{
+	"card": "Archmage of Runes",
+	"generated": "2026-10-10",
+	"source": "2830fe85e65eb7aced70e79207b3717cc880508083828ba22ca8913be1277274",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Archmage of Runes",
+		"registers": [
+			{
+				"basis": "Instant and sorcery spells you cast cost {1} less to cast.",
+				"kind": "cost",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"types": [
+						"instant",
+						"sorcery"
+					]
+				},
+				"reduce": 1
+			},
+			{
+				"basis": "Whenever you cast an instant or sorcery spell, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

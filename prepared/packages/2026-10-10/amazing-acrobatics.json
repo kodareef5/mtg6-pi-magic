@@ -1,0 +1,138 @@
+{
+	"card": "Amazing Acrobatics",
+	"generated": "2026-10-10",
+	"source": "183b7c7626d9cd903a4f0130f63ff622e0657f73466e5f062901dab920157b37",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Amazing Acrobatics",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Amazing Acrobatics",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Amazing Acrobatics choosing counter only",
+				"basis": "Choose one or both —\n• Counter target spell.\n• Tap one or two target creatures.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Amazing Acrobatics",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Amazing Acrobatics choosing tap only",
+				"basis": "Choose one or both —\n• Counter target spell.\n• Tap one or two target creatures.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"atLeast": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Amazing Acrobatics",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Amazing Acrobatics choosing both modes",
+				"basis": "Choose one or both —\n• Counter target spell.\n• Tap one or two target creatures.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"atLeast": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					},
+					{
+						"do": "tap",
+						"what": "target:1"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

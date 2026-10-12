@@ -1,0 +1,54 @@
+{
+	"card": "Seymour Flux",
+	"generated": "2026-10-10",
+	"source": "84b7068c695e8b8081e74252e691227b0feaec7886cdf82c00c2ae42be719502",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seymour Flux",
+		"registers": [
+			{
+				"basis": "At the beginning of your upkeep, you may pay 1 life. If you do, draw a card and put a +1/+1 counter on Seymour Flux.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"life": 1
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "paid"
+							}
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

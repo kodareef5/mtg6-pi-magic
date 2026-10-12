@@ -1,0 +1,75 @@
+{
+	"card": "Pterafractyl",
+	"generated": "2026-10-10",
+	"source": "9ab98b65b66d980fb4cf65502a9b7af6fcfca2abf6c39c596df7e799df5afc50",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pterafractyl",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "enters",
+				"basis": "This creature enters with X +1/+1 counters on it.",
+				"counters": {
+					"+1/+1": {
+						"x": true
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, you gain 2 life.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"claim": "Cast Pterafractyl with X",
+				"basis": "This creature enters with X +1/+1 counters on it.",
+				"source": {
+					"card": "Pterafractyl",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

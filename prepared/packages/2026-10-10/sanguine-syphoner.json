@@ -1,0 +1,39 @@
+{
+	"card": "Sanguine Syphoner",
+	"generated": "2026-10-10",
+	"source": "090df67ff3dcecede37c8b5e8e396a84f973e3073ac2b0666e3029ea67c7bdc8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sanguine Syphoner",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, each opponent loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

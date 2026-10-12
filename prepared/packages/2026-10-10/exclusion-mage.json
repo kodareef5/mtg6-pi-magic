@@ -1,0 +1,45 @@
+{
+	"card": "Exclusion Mage",
+	"generated": "2026-10-10",
+	"source": "6d1440567ff38530c21dfc87fa68eb5ff56375ecf5bb7706d64939bf4ed738a6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Exclusion Mage",
+		"registers": [
+			{
+				"basis": "When this creature enters, return target creature an opponent controls to its owner's hand.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

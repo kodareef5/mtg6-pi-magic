@@ -1,0 +1,50 @@
+{
+	"card": "Minecart Daredevil // Ride the Rails",
+	"generated": "2026-10-10",
+	"source": "235f4b5edf727d34c364058b8b878ec3c47c6ebeecf3abaffab790de31763fa8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Minecart Daredevil // Ride the Rails",
+		"registers": [],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Minecart Daredevil // Ride the Rails",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ride the Rails",
+				"basis": "Target creature gets +2/+1 until end of turn. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

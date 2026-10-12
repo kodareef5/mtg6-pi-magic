@@ -1,0 +1,39 @@
+{
+	"card": "Grand Abolisher",
+	"generated": "2026-10-10",
+	"source": "d6006f77294d61b7746cdaf1e424298c26bb5b48298c28af3b63dff16705f0f1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Grand Abolisher",
+		"registers": [
+			{
+				"kind": "prohibit",
+				"basis": "During your turn, your opponents can't cast spells or activate abilities of artifacts, creatures, or enchantments.",
+				"cast": "opponent",
+				"during": "you"
+			},
+			{
+				"kind": "prohibit",
+				"basis": "During your turn, your opponents can't cast spells or activate abilities of artifacts, creatures, or enchantments.",
+				"activate": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "opponent",
+					"types": [
+						"artifact",
+						"creature",
+						"enchantment"
+					]
+				},
+				"if": {
+					"turn": "self"
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

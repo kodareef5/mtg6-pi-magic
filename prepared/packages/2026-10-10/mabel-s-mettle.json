@@ -1,0 +1,68 @@
+{
+	"card": "Mabel's Mettle",
+	"generated": "2026-10-10",
+	"source": "c55c120c15ce2f2e632675a090184130e67567f78919f2bfe9411ab40febb5d2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mabel's Mettle",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mabel's Mettle",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give one creature +2/+2 and up to one different creature +1/+1 until end of turn",
+				"basis": "Target creature gets +2/+2 until end of turn. Up to one other target creature gets +1/+1 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"not": {
+								"is": "target:0"
+							}
+						},
+						"upTo": true
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2
+						}
+					},
+					{
+						"do": "modify",
+						"what": "target:1",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

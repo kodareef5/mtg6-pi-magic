@@ -1,0 +1,51 @@
+{
+	"card": "Oreplate Pangolin",
+	"generated": "2026-10-10",
+	"source": "30a90f0109baeea25a61982b1536a41dcdb8ddc1ad3f6e9526b50eb142d199c1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Oreplate Pangolin",
+		"registers": [
+			{
+				"basis": "Whenever another artifact you control enters, you may pay {1}. If you do, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{1}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

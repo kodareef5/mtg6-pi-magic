@@ -1,0 +1,61 @@
+{
+	"card": "Angel of Finality",
+	"generated": "2026-10-10",
+	"source": "8dadcf4545f3649d1409c791231387b2cd4d087f82860115821fbde98fb4d612",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Angel of Finality",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, exile target player's graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "target:0"
+							},
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

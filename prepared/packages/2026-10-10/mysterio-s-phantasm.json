@@ -1,0 +1,51 @@
+{
+	"card": "Mysterio's Phantasm",
+	"generated": "2026-10-10",
+	"source": "4dc4844d7f3d5a00969d65ffdf6e24ba16d4ce6ca2e090a305e8ab36de6f3443",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mysterio's Phantasm",
+		"registers": [
+			{
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, mill a card. (Put the top card of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,52 @@
+{
+	"card": "Adaptive Gemguard",
+	"generated": "2026-10-10",
+	"source": "6992f7c77e2943a627961fc86a8bb3fa14800a44c52e0b2e52729074c64cc202",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Adaptive Gemguard",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Adaptive Gemguard",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap two artifacts and/or creatures to put a +1/+1 counter on Adaptive Gemguard",
+				"basis": "Tap two untapped artifacts and/or creatures you control: Put a +1/+1 counter on this creature. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"tap": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							],
+							"tapped": false
+						},
+						"count": 2
+					}
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

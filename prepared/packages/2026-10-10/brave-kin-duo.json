@@ -1,0 +1,52 @@
+{
+	"card": "Brave-Kin Duo",
+	"generated": "2026-10-10",
+	"source": "65e67985dd2bcc374adbd6fc09f55e23adb414852ea3199dc400d0c9ea6630ed",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brave-Kin Duo",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Brave-Kin Duo",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give target creature +1/+1 until end of turn.",
+				"basis": "{1}, {T}: Target creature gets +1/+1 until end of turn. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

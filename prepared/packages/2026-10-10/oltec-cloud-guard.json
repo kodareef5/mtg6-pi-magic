@@ -1,0 +1,62 @@
+{
+	"card": "Oltec Cloud Guard",
+	"generated": "2026-10-10",
+	"source": "3b9c066075d221bf56965e19b045543ec73b8751885010680d6c2feb5ea878c2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Oltec Cloud Guard",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, create a 1/1 colorless Gnome artifact creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Gnome",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Gnome"
+								],
+								"colors": [],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

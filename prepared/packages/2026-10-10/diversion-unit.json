@@ -1,0 +1,73 @@
+{
+	"card": "Diversion Unit",
+	"generated": "2026-10-10",
+	"source": "8f039ba541f0a96167b1b2f73e18c4f121e2bb6fc6f1e821beb9c838fe612dcf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Diversion Unit",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Diversion Unit",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Diversion Unit to counter an instant or sorcery unless its controller pays {3}",
+				"basis": "{U}, Sacrifice this creature: Counter target instant or sorcery spell unless its controller pays {3}.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{U}",
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"instant",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{3}"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

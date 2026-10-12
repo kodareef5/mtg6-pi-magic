@@ -1,0 +1,67 @@
+{
+	"card": "Ruinous Rampage",
+	"generated": "2026-10-10",
+	"source": "49b049eb34101c151c98daba6160406b0914ec9f98eeeeb844d3c8c5e4f37f4d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ruinous Rampage",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ruinous Rampage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ruinous Rampage: deal 3 damage to each opponent",
+				"basis": "Choose one —\n• Ruinous Rampage deals 3 damage to each opponent.\n• Exile all artifacts with mana value 3 or less.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "opponent",
+						"amount": 3
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Ruinous Rampage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Ruinous Rampage: exile all artifacts with mana value 3 or less",
+				"basis": "Choose one —\n• Ruinous Rampage deals 3 damage to each opponent.\n• Exile all artifacts with mana value 3 or less.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						},
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,52 @@
+{
+	"card": "Suspicious Shambler",
+	"generated": "2026-10-10",
+	"source": "152427d8bb40fe39b793b3c72599192c7044347bd2816cedcdac3c1e20aa9644",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Suspicious Shambler",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Suspicious Shambler",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Suspicious Shambler from your graveyard to create two Zombies",
+				"basis": "{4}{B}{B}, Exile this card from your graveyard: Create two 2/2 black Zombie creature tokens. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{4}{B}{B}",
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Zombie",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Zombie"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 2,
+							"toughness": 2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

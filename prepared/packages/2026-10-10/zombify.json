@@ -1,0 +1,50 @@
+{
+	"card": "Zombify",
+	"generated": "2026-10-10",
+	"source": "0948ca00f32a9f8c4fab05b05ad256e6b650c27403d094a0b49090bdd733f4de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zombify",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Zombify",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return target creature card from your graveyard to the battlefield.",
+				"basis": "Return target creature card from your graveyard to the battlefield.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

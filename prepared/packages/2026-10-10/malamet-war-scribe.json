@@ -1,0 +1,43 @@
+{
+	"card": "Malamet War Scribe",
+	"generated": "2026-10-10",
+	"source": "53b15870ee503c74e926a2305c3c6c6cc507e77c16c957465213c04679bc538a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Malamet War Scribe",
+		"registers": [
+			{
+				"basis": "When this creature enters, creatures you control get +2/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,65 @@
+{
+	"card": "Velvetwing Butterflies // Gaze in Wonder",
+	"generated": "2026-10-10",
+	"source": "168e9c0a6d87d3f39942bb5ebe189d0a11ba6bb2c25786a3b2518ad79a353673",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Velvetwing Butterflies // Gaze in Wonder",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"face": 1,
+				"source": {
+					"card": "Velvetwing Butterflies // Gaze in Wonder",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gaze in Wonder",
+				"basis": "Tap one or two target creatures. (Then exile this card. You may cast the creature later from exile.)",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 2,
+						"atLeast": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

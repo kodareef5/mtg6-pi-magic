@@ -1,0 +1,48 @@
+{
+	"card": "Think Twice",
+	"generated": "2026-10-10",
+	"source": "5c25fb0b9db9883a6d0fb608a5706ab756e590ea0ef8026f964a1fabfc3d36cd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Think Twice",
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {2}{U} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{2}{U}",
+					"leavesStack": "exile"
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Think Twice",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Think Twice at its printed cost or through an earned casting permission, including flashback, and draw a card",
+				"basis": "Draw a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

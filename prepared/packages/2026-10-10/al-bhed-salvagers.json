@@ -1,0 +1,56 @@
+{
+	"card": "Al Bhed Salvagers",
+	"generated": "2026-10-10",
+	"source": "1b4008cb6acffaf5798dacc7c8781a62314817e8905d1f5cad8977d6b59e7c8c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Al Bhed Salvagers",
+		"registers": [
+			{
+				"basis": "Whenever this creature or another creature or artifact you control dies, target opponent loses 1 life and you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"any": [
+							{
+								"is": "this"
+							},
+							{
+								"types": [
+									"creature",
+									"artifact"
+								],
+								"controller": "you",
+								"other": true
+							}
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "life",
+							"who": "target:0",
+							"amount": -1
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

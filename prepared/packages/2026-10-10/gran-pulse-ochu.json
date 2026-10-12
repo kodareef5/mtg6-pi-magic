@@ -1,0 +1,88 @@
+{
+	"card": "Gran Pulse Ochu",
+	"generated": "2026-10-10",
+	"source": "6eceff7c5a3ad14de4d73abe81f41be1f3cde8d37e7c60f71734c570af18e6a7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gran Pulse Ochu",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gran Pulse Ochu",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give this creature +1/+1 per permanent card in your graveyard until end of turn",
+				"basis": "{8}: Until end of turn, this creature gets +1/+1 for each permanent card in your graveyard.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{8}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"land",
+										"planeswalker"
+									]
+								}
+							},
+							"toughness": {
+								"count": {
+									"zones": [
+										"graveyard"
+									],
+									"owner": "you",
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"land",
+										"planeswalker"
+									]
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

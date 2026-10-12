@@ -1,0 +1,62 @@
+{
+	"card": "Attuned Hunter",
+	"generated": "2026-10-10",
+	"source": "0ca8a09f1c90f3bf814d982dc8bed955cbd581cfd7376b08e65f7cfb4d1cee30",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Attuned Hunter",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever one or more cards leave your graveyard during your turn, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "leaves",
+					"from": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"token": false
+					},
+					"batch": true
+				},
+				"triggerIf": {
+					"turn": "self"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

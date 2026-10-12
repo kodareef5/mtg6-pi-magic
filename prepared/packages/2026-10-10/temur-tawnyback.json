@@ -1,0 +1,52 @@
+{
+	"card": "Temur Tawnyback",
+	"generated": "2026-10-10",
+	"source": "249070e350303325472814ca4cf563ea0d66deabda36c6e3e6a577735af19bf1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Temur Tawnyback",
+		"registers": [
+			{
+				"basis": "When this creature enters, draw a card, then discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

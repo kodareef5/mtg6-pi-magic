@@ -1,0 +1,63 @@
+{
+	"card": "Gravpack Monoist",
+	"generated": "2026-10-10",
+	"source": "5cb175748265d7899c3150c52c56af2fdeb9a7971703b82eb161d7054628ab84",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gravpack Monoist",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, create a tapped 2/2 colorless Robot artifact creature token.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"tapped": true,
+							"spec": {
+								"name": "Robot",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Robot"
+								],
+								"colors": [],
+								"power": 2,
+								"toughness": 2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

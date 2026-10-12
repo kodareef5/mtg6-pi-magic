@@ -1,0 +1,39 @@
+{
+	"card": "Vampire Spawn",
+	"generated": "2026-10-10",
+	"source": "2de31bc2cb34c4daf9e071e06b40d8fe87d8a298365515ad7d634c8e8c42109e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vampire Spawn",
+		"registers": [
+			{
+				"basis": "When this creature enters, each opponent loses 2 life and you gain 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -2
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

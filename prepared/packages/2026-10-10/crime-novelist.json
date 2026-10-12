@@ -1,0 +1,48 @@
+{
+	"card": "Crime Novelist",
+	"generated": "2026-10-10",
+	"source": "7ef5001963ce67cf7c75a66b1f44c010f9726809478933805e6cf2c4d0535e19",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Crime Novelist",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you sacrifice an artifact, put a +1/+1 counter on this creature and add {R}.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"artifact"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

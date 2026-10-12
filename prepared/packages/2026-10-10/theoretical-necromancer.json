@@ -1,0 +1,53 @@
+{
+	"card": "Theoretical Necromancer",
+	"generated": "2026-10-10",
+	"source": "1f94332ade3c371a0b17577f3835614b8a4a0993725856c2802cf7ceb3251f6d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Theoretical Necromancer",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Theoretical Necromancer",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Theoretical Necromancer to return another creature card to hand",
+				"basis": "{3}{B}, Exile this card from your graveyard: Return another target creature card from your graveyard to your hand.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{B}",
+					"exile": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

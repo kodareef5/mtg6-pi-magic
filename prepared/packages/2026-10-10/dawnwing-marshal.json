@@ -1,0 +1,63 @@
+{
+	"card": "Dawnwing Marshal",
+	"generated": "2026-10-10",
+	"source": "e9f7a4643d9749bd12551ef1a4f09de73951de431568ecd456a5f56bc80f596e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dawnwing Marshal",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dawnwing Marshal",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give creatures you control +1/+1 until end of turn.",
+				"basis": "{4}{W}: Creatures you control get +1/+1 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{W}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"until": "end-of-turn",
+						"change": {
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

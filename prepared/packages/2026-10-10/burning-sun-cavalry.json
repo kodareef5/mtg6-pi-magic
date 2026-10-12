@@ -1,0 +1,83 @@
+{
+	"card": "Burning Sun Cavalry",
+	"generated": "2026-10-10",
+	"source": "d772c68b0d916a86be152451a5cf4e8341e66673ebbeaa84698f0ed48a1b3c16",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Burning Sun Cavalry",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks or blocks while you control a Dinosaur, this creature gets +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Dinosaur"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks or blocks while you control a Dinosaur, this creature gets +1/+1 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "blocks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"triggerIf": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Dinosaur"
+							]
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,42 @@
+{
+	"card": "Guttersnipe",
+	"generated": "2026-10-10",
+	"source": "58fc2aa13496f4af3a904789c64dd4fee7ee82ee9275d8bd461f4fa3440889f9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Guttersnipe",
+		"registers": [
+			{
+				"basis": "Whenever you cast an instant or sorcery spell, this creature deals 2 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 2,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

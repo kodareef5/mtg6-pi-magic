@@ -1,0 +1,72 @@
+{
+	"card": "Locust Spray",
+	"generated": "2026-10-10",
+	"source": "a7487701cf2808905d2b7d70752b967389278bf0751bb79b6593b5814f6247a2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Locust Spray",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Locust Spray",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Locust Spray",
+				"basis": "Target creature gets -1/-1 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -1,
+							"toughness": -1
+						}
+					}
+				]
+			},
+			{
+				"source": {
+					"card": "Locust Spray",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Locust Spray",
+				"basis": "Cycling {B} ({B}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{B}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

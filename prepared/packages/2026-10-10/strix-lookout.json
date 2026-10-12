@@ -1,0 +1,74 @@
+{
+	"card": "Strix Lookout",
+	"generated": "2026-10-10",
+	"source": "68ae74a187238f9c99a439b54127366927d22c8da3c8bc649582da8180a8a8d5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Strix Lookout",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance (Attacking doesn't cause this creature to tap.)",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Strix Lookout",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw a card, then discard a card",
+				"basis": "{1}{U}, {T}: Draw a card, then discard a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{U}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

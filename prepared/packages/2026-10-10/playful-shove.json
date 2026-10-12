@@ -1,0 +1,52 @@
+{
+	"card": "Playful Shove",
+	"generated": "2026-10-10",
+	"source": "3afa6f7b0985d9194e3ca702f17a9187c793364e81ed86fb88bf8dbc59f89602",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Playful Shove",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Playful Shove",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Playful Shove",
+				"basis": "Playful Shove deals 1 damage to any target. ... Draw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

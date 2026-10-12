@@ -1,0 +1,53 @@
+{
+	"card": "Corrupt Court Official",
+	"generated": "2026-10-10",
+	"source": "596459a53c850bc8ddf2c7e648a36b0ac49cb88e819294276ad45799cd430437",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Corrupt Court Official",
+		"registers": [
+			{
+				"basis": "When this creature enters, target opponent discards a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "target:0",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"owner": "target:0",
+								"controller": "target:0"
+							},
+							"count": 1,
+							"as": "discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

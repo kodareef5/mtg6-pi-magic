@@ -1,0 +1,36 @@
+{
+	"card": "Dragonstorm Globe",
+	"generated": "2026-10-10",
+	"source": "1b3a6e5cdf9ed350fe4b8f57b67653b93d8ab3cc36d5d9fd025052d834cfbbcb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragonstorm Globe",
+		"registers": [
+			{
+				"basis": "Each Dragon you control enters with an additional +1/+1 counter on it.",
+				"kind": "enters",
+				"affects": {
+					"subtypes": [
+						"Dragon"
+					],
+					"controller": "you"
+				},
+				"counters": {
+					"+1/+1": 1
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

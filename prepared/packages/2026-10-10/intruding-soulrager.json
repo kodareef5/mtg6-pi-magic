@@ -1,0 +1,72 @@
+{
+	"card": "Intruding Soulrager",
+	"generated": "2026-10-10",
+	"source": "ef353fc4c7a1fdf1b9fc2f9a7c9354e73280ff2f8af22ea81890b111264234e4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Intruding Soulrager",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Intruding Soulrager",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice a Room to damage each opponent and draw a card",
+				"basis": "{T}, Sacrifice a Room: This creature deals 2 damage to each opponent. Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Room"
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "opponent",
+						"amount": 2,
+						"from": "this"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

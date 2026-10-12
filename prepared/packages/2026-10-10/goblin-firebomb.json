@@ -1,0 +1,75 @@
+{
+	"card": "Goblin Firebomb",
+	"generated": "2026-10-10",
+	"source": "5633e9aac80ee2ec842f9114bad5af13f440e184c6d06e879124a0cabddb4c85",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goblin Firebomb",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Goblin Firebomb",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Goblin Firebomb to destroy target permanent",
+				"basis": "{7}, {T}, Sacrifice this artifact: Destroy target permanent.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{7}",
+					"tap": true,
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"land",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

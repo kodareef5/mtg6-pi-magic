@@ -1,0 +1,50 @@
+{
+	"card": "Deadly Riposte",
+	"generated": "2026-10-10",
+	"source": "7203fccaa206a32a1be4730923201ceefe1a96cab2190ab00516a09c7da09fd9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deadly Riposte",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Deadly Riposte",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Deadly Riposte",
+				"basis": "Deadly Riposte deals 3 damage to target tapped creature and you gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"tapped": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

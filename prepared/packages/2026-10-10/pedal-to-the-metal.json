@@ -1,0 +1,52 @@
+{
+	"card": "Pedal to the Metal",
+	"generated": "2026-10-10",
+	"source": "7ad35dcae878b3110332d2c11bd2575fef144afadfe0f82dd9316c7062581cbe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pedal to the Metal",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pedal to the Metal",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pedal to the Metal",
+				"basis": "Target creature gets +X/+0 and gains first strike until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": {
+								"x": true
+							},
+							"words": [
+								"first strike"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,52 @@
+{
+	"card": "Death Begets Life",
+	"generated": "2026-10-10",
+	"source": "dd8b0e996d7ec68f6320c0362f541aff56cbbd4d1f51969712c40ad0a3c42b8a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Death Begets Life",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Death Begets Life",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Death Begets Life",
+				"basis": "Destroy all creatures and enchantments. Draw a card for each permanent destroyed this way.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "destroy",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature",
+								"enchantment"
+							]
+						},
+						"as": "destroyed"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"bound": "destroyed"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

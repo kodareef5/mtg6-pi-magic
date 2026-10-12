@@ -1,0 +1,58 @@
+{
+	"card": "Fear of Isolation",
+	"generated": "2026-10-10",
+	"source": "f5efec1ed09e368e1d544dde9a9b5624ff7fd67165226f1969813e3ccd66ced4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fear of Isolation",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fear of Isolation",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fear of Isolation, returning a permanent you control as an additional cost",
+				"basis": "As an additional cost to cast this spell, return a permanent you control to its owner's hand.",
+				"timing": "spell",
+				"cost": {
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,43 @@
+{
+	"card": "Lightless Evangel",
+	"generated": "2026-10-10",
+	"source": "f4d6860a78efcfe0ad1873f8b8423286c7496ab186485ad626b27d3e8312279e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lightless Evangel",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you sacrifice another creature or artifact, put a +1/+1 counter on this creature.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature",
+							"artifact"
+						],
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

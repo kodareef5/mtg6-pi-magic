@@ -1,0 +1,47 @@
+{
+	"card": "Alania's Pathmaker",
+	"generated": "2026-10-10",
+	"source": "b37a5c1105750a1d4dcac5edadcfdff3167de535cd92adaa3c8117ba88faf372",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Alania's Pathmaker",
+		"registers": [
+			{
+				"basis": "When this creature enters, exile the top card of your library. Until the end of your next turn, you may play that card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

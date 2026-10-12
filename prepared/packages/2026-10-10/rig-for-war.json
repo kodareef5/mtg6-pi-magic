@@ -1,0 +1,51 @@
+{
+	"card": "Rig for War",
+	"generated": "2026-10-10",
+	"source": "bda92a9461e0f83365055ab4be8b791b0e0a18e53b25dcf3be4b0a4a23d16e66",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rig for War",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rig for War",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +3/+0, reach, and first strike until end of turn.",
+				"basis": "Target creature gets +3/+0 and gains reach and first strike until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"words": [
+								"reach",
+								"first strike"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

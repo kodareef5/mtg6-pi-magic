@@ -1,0 +1,53 @@
+{
+	"card": "Driver of the Dead",
+	"generated": "2026-10-10",
+	"source": "1a6d0a89f1265720a984341b953ceee83ee5b9b1f162f365a998b988c77f4212",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Driver of the Dead",
+		"registers": [
+			{
+				"basis": "When this creature dies, return target creature card with mana value 2 or less from your graveyard to the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"manaValue": {
+									"atMost": 2
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

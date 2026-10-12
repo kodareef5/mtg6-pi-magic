@@ -1,0 +1,31 @@
+{
+	"card": "Skyraker Giant",
+	"generated": "2026-10-10",
+	"source": "6c711f415218fa981ab11349c5bbff2d92caae895e7cbb0647a223a01666ee33",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Skyraker Giant",
+		"registers": [
+			{
+				"basis": "Reach (This creature can block creatures with flying.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

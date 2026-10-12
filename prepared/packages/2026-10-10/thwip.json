@@ -1,0 +1,64 @@
+{
+	"card": "Thwip!",
+	"generated": "2026-10-10",
+	"source": "99d5a330998887b847b9b9c03f6e2e678e13d5b517a9ea868fd7c299672e5220",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thwip!",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Thwip!",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Thwip!",
+				"basis": "Target creature gets +2/+2 and gains flying until end of turn. If it's a Spider, you gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 2,
+							"toughness": 2,
+							"words": [
+								"flying"
+							]
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2,
+						"if": {
+							"is": "target:0",
+							"matches": {
+								"subtypes": [
+									"Spider"
+								]
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

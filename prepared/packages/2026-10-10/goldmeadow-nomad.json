@@ -1,0 +1,53 @@
+{
+	"card": "Goldmeadow Nomad",
+	"generated": "2026-10-10",
+	"source": "d6bf550addbeb0d80ca38bfa582abff3595cf0dc22102d409911619a3cc30e72",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goldmeadow Nomad",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Goldmeadow Nomad",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"claim": "Exile Goldmeadow Nomad from your graveyard to create a Kithkin token",
+				"basis": "{W}, Exile this card from your graveyard: Create a 1/1 green and white Kithkin creature token. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{W}",
+					"exile": "this"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Kithkin",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Kithkin"
+							],
+							"colors": [
+								"G",
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

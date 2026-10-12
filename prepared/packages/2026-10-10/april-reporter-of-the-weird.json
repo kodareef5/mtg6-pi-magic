@@ -1,0 +1,55 @@
+{
+	"card": "April, Reporter of the Weird",
+	"generated": "2026-10-10",
+	"source": "5a8a4a3a21a6f9cac37db9ded665e87b4fa0213907e8f46a4b43d6e830dabec7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "April, Reporter of the Weird",
+		"registers": [
+			{
+				"basis": "Whenever April deals combat damage to a player, draw that many cards, then discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"event": "amount"
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard-card",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

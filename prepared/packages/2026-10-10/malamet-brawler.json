@@ -1,0 +1,50 @@
+{
+	"card": "Malamet Brawler",
+	"generated": "2026-10-10",
+	"source": "4f1f6231745086e30617d2b5c5e1957929b6d41b16804d416ee80f0aa9b53f25",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Malamet Brawler",
+		"registers": [
+			{
+				"basis": "Whenever this creature attacks, target attacking creature gains trample until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"attacking": true
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"words": [
+									"trample"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

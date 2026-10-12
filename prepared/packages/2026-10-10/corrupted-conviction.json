@@ -1,0 +1,49 @@
+{
+	"card": "Corrupted Conviction",
+	"generated": "2026-10-10",
+	"source": "bf49573986f13a76ecca6e11825c26a3f0d5c85458a9e864af484b9f3092f86b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Corrupted Conviction",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Corrupted Conviction",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Corrupted Conviction, sacrificing a creature to draw two cards",
+				"basis": "As an additional cost to cast this spell, sacrifice a creature. ... Draw two cards.",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"card": "Grapple with Death",
+	"generated": "2026-10-10",
+	"source": "dd263b826569795d133500868eeed234b3844de217c0535ecb616d5adb207b54",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Grapple with Death",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Grapple with Death",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target artifact or creature and gain 1 life.",
+				"basis": "Destroy target artifact or creature. You gain 1 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 1
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,62 @@
+{
+	"card": "Jeskai Brushmaster",
+	"generated": "2026-10-10",
+	"source": "ea10b9933055c3e3768e4f81eebccfa8cd8efe684065b0a3a1c96587ad43a666",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jeskai Brushmaster",
+		"registers": [
+			{
+				"basis": "Double strike",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			},
+			{
+				"basis": "Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

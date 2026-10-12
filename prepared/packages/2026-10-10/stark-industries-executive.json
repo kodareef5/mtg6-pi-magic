@@ -1,0 +1,58 @@
+{
+	"card": "Stark Industries Executive",
+	"generated": "2026-10-10",
+	"source": "52cc6f208a637f4eaa496ed52fb396edc40fd8562e6a565dcebc345668201156",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stark Industries Executive",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stark Industries Executive",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Create a Treasure token",
+				"basis": "{2}, {T}: Create a Treasure token. (It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\")",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Treasure",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Treasure"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

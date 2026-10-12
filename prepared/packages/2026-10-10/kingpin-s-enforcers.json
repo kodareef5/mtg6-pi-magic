@@ -1,0 +1,67 @@
+{
+	"card": "Kingpin's Enforcers",
+	"generated": "2026-10-10",
+	"source": "4b9dbeb9acc69adda3624de1ff3e94a77af1fcdb9fe2ab357c4a347bbb9b0f4b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kingpin's Enforcers",
+		"registers": [
+			{
+				"basis": "Lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Kingpin's Enforcers",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice an artifact or creature to draw a card",
+				"basis": "{2}{B}, Sacrifice an artifact or creature: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{B}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							]
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

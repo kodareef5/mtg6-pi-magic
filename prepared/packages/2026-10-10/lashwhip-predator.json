@@ -1,0 +1,93 @@
+{
+	"card": "Lashwhip Predator",
+	"generated": "2026-10-10",
+	"source": "441bdbaa85d44c71bc3166c03b116fe32c8a550a75e9bf9c7ba109fb5406a25e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lashwhip Predator",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Reach",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lashwhip Predator",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Lashwhip Predator with its conditional reduction",
+				"basis": "This spell costs {2} less to cast if your opponents control three or more creatures.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					},
+					"atLeast": 3
+				},
+				"cost": {
+					"reduce": 2
+				},
+				"instructions": []
+			},
+			{
+				"source": {
+					"card": "Lashwhip Predator",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Lashwhip Predator without its conditional reduction",
+				"basis": "This spell costs {2} less to cast if your opponents control three or more creatures.",
+				"timing": "spell",
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "opponent"
+						}
+					},
+					"atMost": 2
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,88 @@
+{
+	"card": "Thirst for Identity",
+	"generated": "2026-10-10",
+	"source": "ac1696b8cc77422a3db2484b58c4104f29f7b65888bfb3c07bdd1712dc24be8e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thirst for Identity",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Draw three cards, then discard a creature card or two cards",
+				"basis": "Draw three cards. Then discard two cards unless you discard a creature card.",
+				"source": {
+					"card": "Thirst for Identity",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							]
+						},
+						"count": 1,
+						"may": true,
+						"as": "creature"
+					},
+					{
+						"do": "move",
+						"what": "bound:creature",
+						"to": "graveyard",
+						"reason": "discard",
+						"if": {
+							"bound": "creature"
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 2,
+						"as": "cards",
+						"if": {
+							"not": {
+								"bound": "creature"
+							}
+						}
+					},
+					{
+						"do": "move",
+						"what": "bound:cards",
+						"to": "graveyard",
+						"reason": "discard",
+						"if": {
+							"not": {
+								"bound": "creature"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

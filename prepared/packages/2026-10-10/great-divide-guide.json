@@ -1,0 +1,46 @@
+{
+	"card": "Great Divide Guide",
+	"generated": "2026-10-10",
+	"source": "8242c9800cbbc5f5f3f1070578cc44c31de368c2f84e9a5aaec696808ee95ffc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Great Divide Guide",
+		"registers": [
+			{
+				"basis": "Each land and Ally you control has \"{T}: Add one mana of any color.\"",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"any": [
+						{
+							"types": [
+								"land"
+							]
+						},
+						{
+							"subtypes": [
+								"Ally"
+							]
+						}
+					]
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Each land and Ally you control has \"{T}: Add one mana of any color.\"",
+							"kind": "mana",
+							"cost": {
+								"tap": true
+							},
+							"any": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

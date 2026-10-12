@@ -1,0 +1,37 @@
+{
+	"card": "Jumbo Cactuar",
+	"generated": "2026-10-10",
+	"source": "3e6306910229482d7e831e457e29f9646321720c30bb3102487373d601dd1e4a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jumbo Cactuar",
+		"registers": [
+			{
+				"basis": "10,000 Needles — Whenever this creature attacks, it gets +9999/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 9999
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

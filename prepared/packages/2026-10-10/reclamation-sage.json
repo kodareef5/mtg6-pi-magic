@@ -1,0 +1,44 @@
+{
+	"card": "Reclamation Sage",
+	"generated": "2026-10-10",
+	"source": "d4fca3617a824df4422dde7f037ae8c8819e036eb0f76ea8707c7a70bd1b2155",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Reclamation Sage",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may destroy target artifact or enchantment.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"may": true,
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact",
+									"enchantment"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

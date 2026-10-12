@@ -1,0 +1,69 @@
+{
+	"card": "Ahriman",
+	"generated": "2026-10-10",
+	"source": "e1908de9cdd506215a8a20bb061e68ae81a5b281c779be5fe06ea5f572ee900e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ahriman",
+		"registers": [
+			{
+				"basis": "Flying, deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ahriman",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice another creature or artifact to draw a card",
+				"basis": "{3}, Sacrifice another creature or artifact: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature",
+								"artifact"
+							],
+							"other": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

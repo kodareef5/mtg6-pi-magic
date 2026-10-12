@@ -1,0 +1,46 @@
+{
+	"card": "Abyssal Gorestalker",
+	"generated": "2026-10-10",
+	"source": "6907a7887e8ccf344c389a3c639c2d3116d5a4f501aa97ccfd0ff2b0f366813a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Abyssal Gorestalker",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, each player sacrifices two creatures of their choice.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose-actions",
+							"who": "each-player",
+							"count": 2,
+							"actions": [
+								{
+									"sacrifice": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature"
+										]
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

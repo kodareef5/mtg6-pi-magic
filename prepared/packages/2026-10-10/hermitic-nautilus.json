@@ -1,0 +1,58 @@
+{
+	"card": "Hermitic Nautilus",
+	"generated": "2026-10-10",
+	"source": "be9c57eef9157e2d6e4ad446a5b7ecdc2ee5a26f6360dc65318f8e3516fcdd35",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hermitic Nautilus",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hermitic Nautilus",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Hermitic Nautilus +3/-3 until end of turn",
+				"basis": "{1}{U}: This creature gets +3/-3 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{U}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 3,
+							"toughness": -3
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

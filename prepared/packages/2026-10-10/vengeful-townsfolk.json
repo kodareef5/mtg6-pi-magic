@@ -1,0 +1,40 @@
+{
+	"card": "Vengeful Townsfolk",
+	"generated": "2026-10-10",
+	"source": "50cc66bdfed734c735c56ce7eb18fc70a3aaf79378aa34763e17f3d0a65d5161",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vengeful Townsfolk",
+		"registers": [
+			{
+				"basis": "Whenever one or more other creatures you control die, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					},
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

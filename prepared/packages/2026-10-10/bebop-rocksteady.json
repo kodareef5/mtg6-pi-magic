@@ -1,0 +1,117 @@
+{
+	"card": "Bebop & Rocksteady",
+	"generated": "2026-10-10",
+	"source": "4966e0145e86822f762517c850c00f858ef396a786893c31246d66f1436cefc0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bebop & Rocksteady",
+		"registers": [
+			{
+				"basis": "Whenever Bebop & Rocksteady attack or block, sacrifice a permanent unless you discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "sacrifice-choice",
+							"if": {
+								"not": {
+									"bound": "discarded"
+								}
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:sacrifice-choice",
+							"to": "graveyard",
+							"reason": "sacrifice",
+							"if": {
+								"not": {
+									"bound": "discarded"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Bebop & Rocksteady attack or block, sacrifice a permanent unless you discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "blocks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "sacrifice-choice",
+							"if": {
+								"not": {
+									"bound": "discarded"
+								}
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:sacrifice-choice",
+							"to": "graveyard",
+							"reason": "sacrifice",
+							"if": {
+								"not": {
+									"bound": "discarded"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

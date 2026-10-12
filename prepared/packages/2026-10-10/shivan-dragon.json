@@ -1,0 +1,57 @@
+{
+	"card": "Shivan Dragon",
+	"generated": "2026-10-10",
+	"source": "95f756d1baf66e34a8e6e7ef7532ea3eaa852903b422ca2b3afee187fd1752a6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shivan Dragon",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Shivan Dragon",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Give Shivan Dragon +1/+0 until end of turn",
+				"basis": "{R}: This creature gets +1/+0 until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{R}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "end-of-turn",
+						"change": {
+							"power": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

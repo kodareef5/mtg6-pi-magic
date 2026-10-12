@@ -1,0 +1,53 @@
+{
+	"card": "Moment of Craving",
+	"generated": "2026-10-10",
+	"source": "b77c5968ae0cbabfa90414b604aeb8cf994efa67ad3005be9644c57b181b9579",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Moment of Craving",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Moment of Craving",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature -2/-2 until end of turn and gain 2 life.",
+				"basis": "Target creature gets -2/-2 until end of turn. You gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -2,
+							"toughness": -2
+						}
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

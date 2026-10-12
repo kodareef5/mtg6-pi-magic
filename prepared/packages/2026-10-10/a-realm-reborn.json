@@ -1,0 +1,38 @@
+{
+	"card": "A Realm Reborn",
+	"generated": "2026-10-10",
+	"source": "2215c56fa28f95af1c98d24636eaec17729eee207df5ac0c70c8ec9147c0ee8d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "A Realm Reborn",
+		"registers": [
+			{
+				"basis": "Other permanents you control have \"{T}: Add one mana of any color.\"",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Other permanents you control have \"{T}: Add one mana of any color.\"",
+							"kind": "mana",
+							"cost": {
+								"tap": true
+							},
+							"any": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

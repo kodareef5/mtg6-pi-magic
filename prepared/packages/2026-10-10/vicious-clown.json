@@ -1,0 +1,45 @@
+{
+	"card": "Vicious Clown",
+	"generated": "2026-10-10",
+	"source": "f22b6f1a337fa58c7e0a41525f143e8658ec37f4c44a524e3accb087343d2449",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vicious Clown",
+		"registers": [
+			{
+				"basis": "Whenever another creature you control with power 2 or less enters, this creature gets +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true,
+						"power": {
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

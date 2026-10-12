@@ -1,0 +1,59 @@
+{
+	"card": "Gaelicat",
+	"generated": "2026-10-10",
+	"source": "983b2d59087014fa13c25261cc041179306779822f5d4713d51a80a38b2b6721",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gaelicat",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "As long as you control two or more artifacts, this creature gets +2/+0.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"zones": [
+								"battlefield"
+							]
+						}
+					},
+					"atLeast": 2
+				},
+				"change": {
+					"power": 2
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

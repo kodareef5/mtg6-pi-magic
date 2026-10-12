@@ -1,0 +1,72 @@
+{
+	"card": "Embrace Oblivion",
+	"generated": "2026-10-10",
+	"source": "b1fa75b671d931535a0e9261c2b9e2c8edabc399e0151f9ec0ae193120cad0ec",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Embrace Oblivion",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Embrace Oblivion",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Embrace Oblivion, sacrificing an artifact or creature to destroy a creature or Spacecraft",
+				"basis": "As an additional cost to cast this spell, sacrifice an artifact or creature. ... Destroy target creature or Spacecraft.",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"artifact",
+								"creature"
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Spacecraft"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

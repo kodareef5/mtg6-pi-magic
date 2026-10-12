@@ -1,0 +1,38 @@
+{
+	"card": "Spitfire Lagac",
+	"generated": "2026-10-10",
+	"source": "9b47d7a02008f0fdac9b65068506b9c71d39551b8c1cb7428de22a52f57c6462",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spitfire Lagac",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, this creature deals 1 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "opponent",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

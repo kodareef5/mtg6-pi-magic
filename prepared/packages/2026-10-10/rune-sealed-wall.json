@@ -1,0 +1,55 @@
+{
+	"card": "Rune-Sealed Wall",
+	"generated": "2026-10-10",
+	"source": "e6ac7f6690dbb523d278e5c8a2722c477a4313cca4fc998f21bfbeee1fac857c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rune-Sealed Wall",
+		"registers": [
+			{
+				"basis": "Defender",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"defender"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Rune-Sealed Wall",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap to surveil 1",
+				"basis": "{T}: Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"timing": "stack",
+				"cost": {
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "keyword",
+						"name": "surveil",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

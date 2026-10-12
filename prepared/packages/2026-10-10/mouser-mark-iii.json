@@ -1,0 +1,45 @@
+{
+	"card": "Mouser Mark III",
+	"generated": "2026-10-10",
+	"source": "e86d4785b7addbb0b3bac2f23b6d963d98de32e64d6561b2a74cbf30db327a14",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mouser Mark III",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "This creature can't attack unless you control another artifact.",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"can't attack"
+					]
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						}
+					},
+					"atMost": 0
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

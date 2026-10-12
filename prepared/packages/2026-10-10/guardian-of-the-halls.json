@@ -1,0 +1,55 @@
+{
+	"card": "Guardian of the Halls",
+	"generated": "2026-10-10",
+	"source": "98f7624a18674e93c299b3c5ea72e0c9a7f821e52045c44d7df0b2724e227e29",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Guardian of the Halls",
+		"registers": [
+			{
+				"basis": "Trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Guardian of the Halls",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Put three +1/+1 counters on Guardian of the Halls.",
+				"basis": "{5}{G}{G}: Put three +1/+1 counters on this creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}{G}{G}"
+				},
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "this",
+						"kind": "+1/+1",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

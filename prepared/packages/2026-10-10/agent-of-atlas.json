@@ -1,0 +1,46 @@
+{
+	"card": "Agent of Atlas",
+	"generated": "2026-10-10",
+	"source": "6762358e8da8538db78ddfd258fef9dc2a21888c6ef32ac183a1cc461d65bafe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Agent of Atlas",
+		"registers": [
+			{
+				"basis": "Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}
