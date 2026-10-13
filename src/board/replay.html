@@ -295,6 +295,8 @@ function seat() {
   const current = () => !!board && board.latest() && G.moments.at(-1)?.views[0].board === state?.question?.board;
   const note = (text) => { $("seat-note").textContent = text || ""; };
   async function send(body) {
+    // A control keeps focus once clicked, and Enter on it would press it again rather than take the AI's pick.
+    if (document.activeElement?.closest?.("#seat")) document.activeElement.blur();
     try {
       const said = await (await fetch("../api/seat", { method: "POST", headers: { ...auth, "content-type": "application/json" }, body: JSON.stringify(body) })).json();
       note(said.ok ? "" : said.message);

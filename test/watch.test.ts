@@ -181,7 +181,12 @@ test("a seat's code opens that seat alone: its state, its actions and its own bo
 		const now = await (await ask("/api/seat", codes[0])).json();
 		assert.equal(now.board.full.moments.at(-1).views[0].board, boardKey(boardSnapshot(project(table, 0), table.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck.name })), 0)),
 			"the newest board's key is the key of the seat's view of the table now");
+		const held = now.board.full.version;
+		await through(table, 3, () => watched.take(table));
 		watched.finish();
+		await new Promise((go) => setTimeout(go, 200));
+		const last = await (await ask(`/api/seat?game=seated-1&version=${held}&moments=${now.board.full.moments.length}&deck=${now.board.full.deck.length}&images=0&art=0`, codes[0])).json();
+		assert.ok(last.board?.since.version > held, "a page asking after the game is over still gets its last board");
 	} finally { await server.close(); }
 });
 

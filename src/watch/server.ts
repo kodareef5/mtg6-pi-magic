@@ -34,6 +34,8 @@ import { audienceOnly, playByPlay } from "../board/series.ts";
 import { dressOf, GAME_ID, gameIndex, journalReader, momentsOf, resultName, runOf, searchGames } from "./games.ts";
 
 const HOLD_MS = 25_000;
+/** How long a finished game's seats keep their boards for pages still asking. */
+const ENDED_MS = 10 * 60_000;
 /** How long a live board waits for new cards' art before it is published without it. */
 const ART_WAIT = 3_000;
 /** Replays kept built, the most recently asked for first. */
@@ -69,7 +71,10 @@ export async function watchServer(options: Watching) {
 	// The journal reader starts once the server is listening, so a port in use leaves no worker behind.
 	let reader: ReturnType<typeof journalReader>, index = gameIndex(options.dir);
 	const built = new Map<string, { stamp: string; script: string }>();
-	const live = new Map<string, { take(table: Table): void; finish(): void; script(): string; since(query: URLSearchParams, signal: AbortSignal): Promise<unknown>; seat(viewer: SeatId): SeatFeed | undefined }>();
+	type Live = { take(table: Table): void; finish(): void; script(): string; since(query: URLSearchParams, signal: AbortSignal): Promise<unknown>; seat(viewer: SeatId): SeatFeed | undefined };
+	const live = new Map<string, Live>();
+	// A finished game's seats keep their boards a while, so a page asking after the end still gets the last one.
+	const ended = new Map<string, Live>();
 	// Seats' pages wait on this: anything a seat may see changed, at the table or on its board.
 	let seatSerial = 0;
 	const seatWaiters = new Set<() => void>();
@@ -135,7 +140,7 @@ export async function watchServer(options: Watching) {
 			return json(response, problem ? 400 : 200, problem ? { ok: false, message: problem } : { ok: true });
 		}
 		const number = (name: string) => Number(url.searchParams.get(name) ?? 0) || 0, after = Number(url.searchParams.get("after") ?? -1);
-		const board = (desk: Desk) => desk.game && desk.viewer !== undefined ? live.get(desk.game)?.seat(desk.viewer) : undefined;
+		const board = (desk: Desk) => desk.game && desk.viewer !== undefined ? (live.get(desk.game) ?? ended.get(desk.game))?.seat(desk.viewer) : undefined;
 		const behind = (desk: Desk) => { const feed = board(desk); return !!feed && (url.searchParams.get("game") !== desk.game || feed.version !== number("version")); };
 		if (seatSerial <= after && !behind(found)) {
 			const gone = new AbortController();
@@ -231,7 +236,16 @@ export async function watchServer(options: Watching) {
 					const one = own.get(viewer);
 					return one && { version: one.replay.version, data: () => one.replay.data({ live: true, seat: true }), since: (have) => one.replay.since(have) };
 				},
-				finish() { finished = true; void queue.then(() => { live.delete(id); wake(); }); },
+				finish() {
+					finished = true;
+					void queue.then(() => {
+						live.delete(id);
+						ended.set(id, watched);
+						setTimeout(() => { if (ended.get(id) === watched) ended.delete(id); }, ENDED_MS).unref();
+						wake();
+						seatsChanged();
+					});
+				},
 				script: () => gameScript(replay.data({ live: true })),
 				async since(query: URLSearchParams, signal: AbortSignal) {
 					const have = (name: string) => Number(query.get(name) ?? 0) || 0;
