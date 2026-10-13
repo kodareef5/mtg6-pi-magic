@@ -23,7 +23,8 @@ import { basename, dirname, join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Container, Image, Text } from "@earendil-works/pi-tui";
 import { boardFeed } from "./src/board/feed.ts";
-import { artIds, boardPng, type BoardRenderer } from "./src/board/render.ts";
+import { artIds, boardPng, type BoardRenderer, type Dress } from "./src/board/render.ts";
+import { choose, defaults, named, type Art, type Look } from "./src/board/looks.ts";
 import { boardSnapshot } from "./src/board/snapshot.ts";
 import { menu, person, type Mode, type Person } from "./src/seating/person.ts";
 import { panel } from "./src/seating/panel.ts";
@@ -149,7 +150,14 @@ export default function (pi: ExtensionAPI) {
 			if (ctx.hasUI) ctx.ui.setWidget("magic-board", (_tui, theme) => new Image(Buffer.from(png).toString("base64"), "image/png",
 				{ fallbackColor: (text) => theme.fg("dim", text) }, { maxWidthCells: 120, filename: path }));
 		},
-		(message) => ctx.ui.notify(message, "warning"));
+		(message) => ctx.ui.notify(message, "warning"), () => dressFor(game));
+	/** What the host's pictures wear: the looks the host's table set, or those the game's journal recorded. */
+	function dressFor(game: Table): Dress {
+		const setting = host && table === game ? host.lobby : undefined, header = games.get(game)?.header;
+		const avatars = setting ? setting.seats.map((one) => one.look.avatar) : header?.seats.map((one) => one.avatar) ?? [];
+		const background = setting?.background ?? header?.background;
+		return { avatars: Object.fromEntries(avatars.flatMap((avatar, at) => avatar ? [[at, avatar]] : [])), ...(background ? { background } : {}) };
+	}
 
 	/**
 	 * Deal a table, give every seat a model, and run the pregame.
@@ -171,7 +179,7 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(
 		ctx: ExtensionContext,
-		from: { seed: string; decks?: string[]; alpha?: true; setAs?: SeatId[]; remote?: Record<SeatId, Player>; clock?: number | null } | { resume: string },
+		from: { seed: string; decks?: string[]; alpha?: true; setAs?: SeatId[]; remote?: Record<SeatId, Player>; clock?: number | null; looks?: Look[]; background?: string } | { resume: string },
 	): Promise<{ opened: Table; sitting: Seated }> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
@@ -210,8 +218,9 @@ export default function (pi: ExtensionAPI) {
 				id: from.seed,
 				format: standard.name,
 				seed: from.seed,
-				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck, ...(from.setAs ? { setAs: from.setAs[at.id]! } : {}) })),
+				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck, ...(from.setAs ? { setAs: from.setAs[at.id]! } : {}), ...from.looks?.[at.id] })),
 				...(from.clock ? { clock: from.clock } : {}),
+				...(from.background ? { background: from.background } : {}),
 				cards: { path: cards.path, generated: cards.generated, ...(cards.faces ? { faces: cards.faces } : {}), ...(cards.names ? { names: cards.names } : {}) },
 				rules: { path: RULES, effective: rules.effective },
 				created: new Date().toISOString(),
@@ -366,8 +375,9 @@ export default function (pi: ExtensionAPI) {
 			const moved = one.setAs !== undefined && one.setAs !== at ? ` (set up as seat ${one.setAs})` : "";
 			const guest = one.by === "remote" ? host!.wire?.guest(one.setAs ?? at) : undefined;
 			const who = one.by === "ai" ? "model" : guest ? `guest ${guest.name}` : "open, waiting for a guest";
-			lines.push(`  Seat ${at}${moved}  ${table?.seats[at]?.name ?? one.deck}  ${who}${life !== undefined ? `  life ${life}` : ""}`);
+			lines.push(`  Seat ${at}${moved}  ${table?.seats[at]?.name ?? one.deck}  ${who}${life !== undefined ? `  life ${life}` : ""}${setup.stage === "setting" ? `  · ${named(one.look.avatar)} on ${named(one.look.background)}` : ""}`);
 		});
+		if (setup.stage === "setting") lines.push(`  The host's pictures: ${named(setup.background)}. /magic seat <n> avatar|background, /magic background <name|url|random>`);
 		if (view?.window.kind === "turn") lines.push(`  Turn ${view.window.turn}, ${table!.seats[view.window.active]?.name}'s ${view.window.step.replace(/-/g, " ")}. Version ${table!.ledger.length}.`);
 		const asking = holding?.asking();
 		if (asking) lines.push(`  Waiting on seat ${asking.seat} for ${Math.round((Date.now() - asking.since) / 1000)}s${asking.clock ? ` of its ${asking.clock}s` : ""}.`);
@@ -389,7 +399,10 @@ export default function (pi: ExtensionAPI) {
 		over: "/magic host sets a new table. /magic rollback <version> rewinds this one; /magic resume seats it again.",
 	};
 
-	/** Admitted alpha decks: legal main decks whose cards all have standing assessments. */
+	/** The defaults a look can take, for a command given no value. */
+const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"}: ${defaults(kind).join(", ")}. Or random, or an http(s) image URL.`;
+
+/** Admitted alpha decks: legal main decks whose cards all have standing assessments. */
 	const pool = (ctx: ExtensionContext) =>
 		admittedAlpha(universe(standard.name), { notice: (message) => ctx.ui.notify(message, "warning") }).map((one) => one.name);
 
@@ -450,7 +463,8 @@ export default function (pi: ExtensionAPI) {
 			stage: ours.lobby.stage, ...(ours.hold?.paused() ? { paused: true as const } : {}),
 			...(ours.lobby.clock ? { clock: ours.lobby.clock } : {}),
 			...((asking) => asking?.clock && asking.seat === seat && !ours.hold?.paused() ? { remaining: Math.max(0, asking.since + asking.clock * 1000 - Date.now()) } : {})(ours.hold?.asking()),
-			...(seat !== undefined && seat >= 0 ? { seat, seats: game?.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck })) ?? decks.map((name, at) => ({ id: at, name: names[at]!, deck: alpha(deck(name)) })) } : {}),
+			...(seat !== undefined && seat >= 0 ? { seat, seats: (game?.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck })) ?? decks.map((name, at) => ({ id: at, name: names[at]!, deck: alpha(deck(name)) })))
+	.map((one) => ({ ...one, ...ours.lobby.seats[one.id]?.look })) } : {}),
 			recaps: (host === ours ? seated?.chronicle.recaps ?? [] : []).map((one) => ({ ...one })),
 			// Known once preparation has seated the table's roles.
 			...(game && host === ours && seated ? { judge: !!seated.judge } : {}),
@@ -512,7 +526,8 @@ export default function (pi: ExtensionAPI) {
 			ctx.ui.notify(`Every seat agreed to prepare. ${by === "coin" ? "The coin flip" : "The host"} put ${decks[0]} on the play. Preparing ${id}.`, "info");
 			const remote = Object.fromEntries(setup.seats.flatMap((one, at) => one.by === "remote" ? [[at, ours.wire!.open(one.setAs!, one.deck).chair.player]] : []));
 			try {
-				const { opened, sitting } = await open(ctx, { seed: id, decks, alpha: true, setAs: order, remote, ...(Object.keys(remote).length ? { clock: setup.clock } : {}) });
+				const { opened, sitting } = await open(ctx, { seed: id, decks, alpha: true, setAs: order, remote, ...(Object.keys(remote).length ? { clock: setup.clock } : {}),
+	looks: setup.seats.map((one) => one.look), background: setup.background });
 				// A table replaced while this one prepared keeps its own game: this preparation is closed, not installed.
 				if (host !== ours) { await Promise.all(Object.values(sitting.players).map((player) => player.close())); return; }
 				table = opened; seated = sitting;
@@ -620,9 +635,13 @@ export default function (pi: ExtensionAPI) {
 		const { opened, sitting } = await open(ctx, { resume: id });
 		await Promise.all(Object.values(seated?.players ?? {}).map((player) => player.close()));
 		table = opened; seated = sitting;
-		const setAs = games.get(opened)?.header.seats;
+		const header = games.get(opened)?.header;
 		const setup = lobby(opened.seats.map((one) => one.deck.name));
-		host = { lobby: { ...setup, seats: setup.seats.map((one, at) => ({ ...one, setAs: setAs?.[at]?.setAs ?? at })), stage: "prepared" }, feed: [] };
+		// A game saved before tables had looks is dealt new ones for this session.
+		host = { lobby: { ...setup, seats: setup.seats.map((one, at) => {
+			const saved = header?.seats[at];
+			return { ...one, setAs: saved?.setAs ?? at, look: { avatar: saved?.avatar ?? one.look.avatar, background: saved?.background ?? one.look.background } };
+		}), background: header?.background ?? setup.background, stage: "prepared" }, feed: [] };
 		showTable(ctx);
 		ctx.ui.notify(`Resumed ${id} at version ${opened.ledger.length}. ${opened.ledger.length ? `/magic begin asks every seat to play on from version ${opened.ledger.length}.` : NEXT.prepared}`, "info");
 	}
@@ -635,7 +654,9 @@ export default function (pi: ExtensionAPI) {
 	 */
 	type Seating = { client: Guest; leaving: AbortController; state?: State; player?: Player; preparing?: Promise<boolean>; spend: ReturnType<typeof newTally>; gaps: string[];
 		/** A person at this seat, with the autopilot behind them; absent while the seat prepares. */
-		person?: Person; mode: Mode; pictured?: string };
+		person?: Person; mode: Mode; pictured?: string;
+	/** This Pi's own choice of background for the seat's pictures, over the host's. */
+	background?: string };
 	let guest: Seating | null = null;
 
 	// A component rather than lines: Pi cuts a text widget at ten lines, and a person's seat needs the whole question.
@@ -656,9 +677,11 @@ export default function (pi: ExtensionAPI) {
 		if (!ctx.hasUI || !frame || seat === undefined || !at || ours.pictured === at) return;
 		ours.pictured = at;
 		const seats = (state.seats ?? []).map((one) => ({ id: one.id, name: one.name, deck: one.deck.name }));
+		const background = ours.background ?? state.seats?.find((one) => one.id === seat)?.background;
+		const dress: Dress = { avatars: Object.fromEntries((state.seats ?? []).flatMap((one) => one.avatar ? [[one.id, one.avatar]] : [])), ...(background ? { background } : {}) };
 		void (renderer ??= cardboardRenderer(artIds(), join(CACHE, "art"))).then(async (drawing) => {
 			if (!drawing) return;
-			const png = await boardPng(drawing, boardSnapshot(frame.view, seats, seat));
+			const png = await boardPng(drawing, boardSnapshot(frame.view, seats, seat), dress);
 			const path = join(GAMES, `guest-${ours.client.welcome.table}-seat-${seat}`, `${at}.png`);
 			mkdirSync(dirname(path), { recursive: true });
 			writeFileSync(path, png);
@@ -828,8 +851,9 @@ export default function (pi: ExtensionAPI) {
 		},
 	});
 
-	const VERBS = ["host", "seat", "first", "clock", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
-	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | first <coin|n> | clock <seconds|off> | start | begin | " +
+	const VERBS = ["host", "seat", "first", "clock", "background", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
+	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | seat <n> avatar|background <name|url|random> | " +
+	"first <coin|n> | clock <seconds|off> | background <name|url|random> | start | begin | " +
 		"join <invite> [suggest|auto|manual] | pick <n> | ok | pass [turn] | stops <smart|all> | show <n> | tell <words> | mode <suggest|auto|manual> | concede | leave | " +
 		"pause | continue | rollback <version> [why] | end [why] | status | resume <game> | clone <game> <version> <new-id> | " +
 		"models [why|<role> <pattern> [seat]] | board | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
@@ -932,6 +956,18 @@ export default function (pi: ExtensionAPI) {
 					if (words[2] === "open") return openSeat(ctx, at);
 					if (host.wire?.guest(at)) { ctx.ui.notify(`A guest holds seat ${at}. Set a new table to change who answers it.`, "warning"); return; }
 					host.lobby.seats[at] = { ...host.lobby.seats[at]!, by: "ai" };
+				} else if (words[2] === "avatar" || words[2] === "background") {
+					const at = Number(words[1]), part = words[2], kind: Art = part === "avatar" ? "avatars" : "backgrounds", one = host.lobby.seats[at];
+					if (!one) { ctx.ui.notify("/magic seat <n> avatar|background <name|url|random>", "warning"); return; }
+					if (!words[3]) { ctx.ui.notify(choices(kind), "info"); return; }
+					try {
+						const seats = host.lobby.seats, chosen = choose(kind, words[3], part === "avatar" ? seats.filter((_, other) => other !== at).map((other) => other.look.avatar) : []);
+						seats[at] = { ...one, look: { ...one.look, [part]: chosen } };
+						// A portrait named for this seat leaves any other seat that had it, which is dealt another.
+						if (part === "avatar") seats.forEach((other, there) => {
+							if (there !== at && other.look.avatar === chosen) seats[there] = { ...other, look: { ...other.look, avatar: choose("avatars", "random", seats.map((seat) => seat.look.avatar)) } };
+						});
+					} catch (error) { ctx.ui.notify(error instanceof Error ? error.message : String(error), "warning"); return; }
 				} else {
 					const at = Number(words[1]), name = words.slice(3).join(" "), decks = pool(ctx);
 					if (!host.lobby.seats[at] || words[2] !== "deck" || !name) { ctx.ui.notify("/magic seat <n> deck <name|random>", "warning"); return; }
@@ -940,6 +976,23 @@ export default function (pi: ExtensionAPI) {
 					host.lobby.seats[at] = { ...host.lobby.seats[at]!, deck: chosen };
 				}
 				showTable(ctx);
+				return;
+			}
+
+			// The background of this Pi's own pictures: the host's view of the table, or a guest's view of its seat. Any time.
+			if (verb === "background") {
+				if (!words[1]) { ctx.ui.notify(choices("backgrounds"), "info"); return; }
+				let chosen: string;
+				try { chosen = choose("backgrounds", words[1]); } catch (error) { ctx.ui.notify(error instanceof Error ? error.message : String(error), "warning"); return; }
+				if (guest) {
+					guest.background = chosen;
+					delete guest.pictured;
+					if (guest.state) pictureSeat(ctx, guest, guest.state);
+				} else if (host) {
+					host.lobby.background = chosen;
+					showTable(ctx);
+				} else { ctx.ui.notify("No table. /magic host sets one.", "warning"); return; }
+				ctx.ui.notify(`${guest ? "This seat's" : "The host's"} pictures are on ${named(chosen)}.`, "info");
 				return;
 			}
 

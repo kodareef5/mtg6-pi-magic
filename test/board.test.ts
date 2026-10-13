@@ -1,4 +1,4 @@
-/** Board pictures: the snapshot shows what its viewer may see, the scene mapping keeps it, and SVG becomes PNG without a browser. */
+/** Board pictures: the snapshot shows what its viewer may see, the scene mapping keeps it, the table wears its looks, and SVG becomes PNG without a browser. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
@@ -6,8 +6,11 @@ import { commit } from "../src/core/commit.ts";
 import { project } from "../src/core/view.ts";
 import type { Table } from "../src/core/table.ts";
 import { boardSnapshot } from "../src/board/snapshot.ts";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import { artIds, svgToPng } from "../src/board/render.ts";
-import { cardboardScene } from "../src/board/cardboard.ts";
+import { cardboardRenderer, cardboardScene, underlay } from "../src/board/cardboard.ts";
+import { choose, deal, defaults, imageOf } from "../src/board/looks.ts";
 import { announce, establish, example, main, matchup, place, quiet } from "./play.ts";
 
 const seats = (table: Table) => table.seats.map((seat) => ({ id: seat.id, name: seat.name, deck: seat.deck.name }));
@@ -106,4 +109,51 @@ test("a board with nothing visible yet is still a scene", async () => {
 test("an SVG becomes a PNG with no browser", async () => {
 	const png = await svgToPng('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8" fill="#123456"/></svg>');
 	assert.deepEqual([...png.slice(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+});
+
+test("looks are a default by name, an image URL, or random, and seats are dealt different portraits", () => {
+	assert.ok(defaults("avatars").length >= 7 && defaults("backgrounds").length >= 5);
+	assert.equal(choose("avatars", "noir-karn"), "noir-karn");
+	assert.equal(choose("backgrounds", "https://example.com/table.png"), "https://example.com/table.png");
+	assert.throws(() => choose("avatars", "Karn"), /Choose .*noir-karn.*random, or an http\(s\) image URL/);
+	assert.throws(() => choose("avatars", "file:///etc/passwd"));
+	const looks = deal(4);
+	assert.equal(new Set(looks.map((one) => one.avatar)).size, 4, "a different portrait for each seat while the defaults last");
+	assert.ok(looks.every((one) => defaults("backgrounds").includes(one.background)));
+	assert.equal(choose("avatars", "random", defaults("avatars").slice(1)), defaults("avatars")[0], "random avoids portraits taken");
+	assert.match(imageOf("avatars", "noir-karn")!, /^data:image\/jpeg;base64,/);
+	assert.equal(imageOf("avatars", "https://example.com/me.png"), "https://example.com/me.png");
+	assert.equal(imageOf("avatars", "gone-from-this-version"), undefined, "a name this version lacks draws nothing");
+});
+
+test("a scene wears each seat's portrait, and a background goes under the table", async () => {
+	const table = matchup("board-looks");
+	const scene = cardboardScene(snap(table, 0), artIds(), { width: 800, height: 600 }, { 1: "https://example.com/them.png" });
+	assert.deepEqual(scene.players.map((one) => (one as { avatarUrl?: string }).avatarUrl), [undefined, "https://example.com/them.png"]);
+	assert.equal(scene.view.mtg.background, "none", "the preset's own backgrounds are not drawn; ours goes underneath");
+	await accepted(scene);
+	const plain = '<svg><rect width="1920" height="1080" fill="#133d33"/><rect fill="url(#mtg-vignette)"/></svg>';
+	assert.equal(underlay(plain, 'https://x/"a"&b'), '<svg><rect width="1920" height="1080" fill="#133d33"/><image href="https://x/&quot;a&quot;&amp;b" width="1920" height="1080" preserveAspectRatio="xMidYMid slice"/><rect fill="url(#mtg-vignette)"/></svg>');
+	const drawer = await cardboardRenderer(new Map());
+	if (!drawer) return;
+	const svg = await drawer.svg(snap(table, 0), { width: 800, height: 600 }, { avatars: { 0: "noir-karn" }, background: "dragonforge-arena" });
+	assert.ok(svg.includes(`<image href="${imageOf("backgrounds", "dragonforge-arena")}"`), "the background is drawn, on the preset's table rectangle");
+	assert.ok(svg.includes(imageOf("avatars", "noir-karn")!), "the portrait is drawn");
+});
+
+test("an image URL in a picture is fetched for it; one that fails is left out", async () => {
+	const red = await svgToPng('<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="#ff0000"/></svg>');
+	const server = createServer((request, response) => {
+		if (request.url === "/red.png") { response.writeHead(200, { "content-type": "image/png" }); response.end(red); }
+		else { response.writeHead(404); response.end(); }
+	});
+	await new Promise<void>((done) => server.listen(0, "127.0.0.1", done));
+	try {
+		const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+		const picture = (href: string) => svgToPng(`<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="#0000ff"/><image href="${href}" width="4" height="4"/></svg>`);
+		const { Resvg } = await import("@resvg/resvg-js");
+		const pixel = async (png: Uint8Array) => [...new Resvg(`<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><image href="data:image/png;base64,${Buffer.from(png).toString("base64")}" width="4" height="4"/></svg>`).render().pixels.slice(0, 3)];
+		assert.deepEqual(await pixel(await picture(`${base}/red.png`)), [255, 0, 0], "the fetched image is drawn");
+		assert.deepEqual(await pixel(await picture(`${base}/missing.png`)), [0, 0, 255], "a missing image leaves what is under it");
+	} finally { server.close(); }
 });

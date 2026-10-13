@@ -46,11 +46,11 @@ machine, and the remote-seat plan puts an email check in front of the invite.
 | `POST /v1/work` | equipment edits with their revision and actionId | ok, or a refusal; only while the game waits |
 | `POST /v1/brief` | the seat's pregame brief | ok, or a refusal; kept in the host's journal before the first decision |
 
-A state carries the stage, the chair's seat and every seat's public list once
-the table is ordered, whether a judge was seated once it is prepared, an
-agreement the host is asking for, the chair's latest
-frame, the ask when the frame wants an answer, the rollback count, the turn
-recaps, and the outcome when the game is over.
+A state carries the stage, the chair's seat and every seat's public list and
+look in pictures once the table is ordered, whether a judge was seated once it
+is prepared, an agreement the host is asking for, the chair's latest frame, the
+ask when the frame wants an answer, the rollback count, the turn recaps, and
+the outcome when the game is over.
 
 An answer is any answer a seat can give: a listed pick, a plan or package
 edit, an objection, table talk. The same set the model seats use. The host's

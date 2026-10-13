@@ -1,6 +1,6 @@
 /**
- * A table before its game: the seats, their decks, who plays first, and the
- * two agreements.
+ * A table before its game: the seats, their decks and looks, who plays first,
+ * and the two agreements.
  *
  * The host sets the table and is never a seat. Nothing is dealt until every
  * seat has agreed twice: first to prepare, when decks register, card
@@ -10,13 +10,15 @@
  */
 
 import type { SeatId } from "../core/types.ts";
+import { choose, deal, type Look } from "../board/looks.ts";
 
 /**
  * Who answers a seat: a model in the host's Pi, or a guest over the wire who
  * brings its own player and models. `setAs` is the seat it was set up as before
- * the table was ordered: its roster, keys and chair follow it.
+ * the table was ordered: its roster, keys, chair and look follow it. The look is
+ * the seat's portrait in every picture and the background of its own.
  */
-export type SeatSetup = { deck: string; by: "ai" | "remote"; setAs?: SeatId };
+export type SeatSetup = { deck: string; by: "ai" | "remote"; setAs?: SeatId; look: Look };
 export type Agreement = "prepare" | "begin";
 export type Stage = "setting" | "preparing" | "prepared" | "playing" | "over";
 
@@ -27,6 +29,8 @@ export type Lobby = {
 	first: "coin" | SeatId;
 	/** Seconds a guest seat has to answer each decision before it concedes, or null for no clock. */
 	clock: number | null;
+	/** The background of the host's pictures, which show the table as a spectator sees it. */
+	background: string;
 	stage: Stage;
 	agreed: Record<Agreement, SeatId[]>;
 };
@@ -40,7 +44,9 @@ export const GAME_TYPES = {
 
 export function lobby(decks: readonly string[], game: keyof typeof GAME_TYPES = "standard-alpha"): Lobby {
 	if (decks.length !== GAME_TYPES[game].seats) throw new Error(`${GAME_TYPES[game].name} seats ${GAME_TYPES[game].seats} players, not ${decks.length}.`);
-	return { game, seats: decks.map((deck) => ({ deck, by: "ai" as const })), first: "coin", clock: CLOCK, stage: "setting", agreed: { prepare: [], begin: [] } };
+	const looks = deal(decks.length);
+	return { game, seats: decks.map((deck, at) => ({ deck, by: "ai" as const, look: looks[at]! })), first: "coin", clock: CLOCK, background: choose("backgrounds", "random"),
+		stage: "setting", agreed: { prepare: [], begin: [] } };
 }
 
 /**

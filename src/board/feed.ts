@@ -8,19 +8,19 @@ import { join } from "node:path";
 import { project } from "../core/view.ts";
 import type { Table } from "../core/table.ts";
 import { boardSnapshot } from "./snapshot.ts";
-import { boardPng, type BoardRenderer } from "./render.ts";
+import { boardPng, type BoardRenderer, type Dress } from "./render.ts";
 
 export function boardFeed(table: Table, renderer: Promise<BoardRenderer | null>, dir: string,
-	show: (png: Uint8Array, path: string, label: string) => void, problem: (message: string) => void) {
+	show: (png: Uint8Array, path: string, label: string) => void, problem: (message: string) => void, dress: () => Dress = () => ({})) {
 	let queue: Promise<void> = Promise.resolve(), told = false;
 	const once = (message: string) => { if (!told) { told = true; problem(message); } };
 	return {
 		take(label: string): void {
-			const snapshot = boardSnapshot(project(table, "spectator"), table.seats.map((seat) => ({ id: seat.id, name: seat.name, deck: seat.deck.name })), "spectator");
+			const snapshot = boardSnapshot(project(table, "spectator"), table.seats.map((seat) => ({ id: seat.id, name: seat.name, deck: seat.deck.name })), "spectator"), dressed = dress();
 			queue = queue.then(async () => {
 				const drawer = await renderer;
 				if (!drawer) return once("No board renderer is installed (optional dependency cardboard-api); playing without pictures.");
-				const png = await boardPng(drawer, snapshot);
+				const png = await boardPng(drawer, snapshot, dressed);
 				mkdirSync(dir, { recursive: true });
 				const path = join(dir, `${label}.png`);
 				writeFileSync(path, png);

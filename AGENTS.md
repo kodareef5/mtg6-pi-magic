@@ -264,6 +264,15 @@ the game. The concession is a ledger row with the reason `timeout`, never
 `chosen`, and replay applies it. Pausing stops the clock. The host's own model
 seats are not on it; their call limits bound them.
 
+Pictures dress the table when cardboard-api is installed. Each seat has a
+look: its portrait in every picture and the background of its own pictures.
+The host's pictures have their own background. All are dealt at random, a
+different portrait for each seat, and set before the start with
+`/magic seat <n> avatar|background <name|url|random>`; `/magic background`
+changes this Pi's own view at any time, the host's or a guest's. The defaults
+are the files in `assets/`, named by file; adding one is adding a file, and
+any http(s) image URL stands in for one. The journal header records the looks.
+
 A seat can carry its own key for a provider, named as an environment variable
 under `keys` in the roster file (`"keys": {"1": {"openrouter": "$OPENROUTER_SEAT_1"}}`).
 That seat's own calls use it. The judge and the commentator are the table's and
@@ -634,6 +643,7 @@ src/board/             board pictures: no game logic, never read by a seat
   snapshot.ts          the board as one viewer may see it, renderer-neutral and pure
   render.ts            the renderer seam, the art map, and SVG to PNG through resvg
   cardboard.ts         the interim renderer: a snapshot as a cardboard-api MTG 26 scene (optional dependency)
+  looks.ts             seat portraits and table backgrounds: the defaults in assets/, or image URLs
   feed.ts              one picture per turn and at the end, drawn off the game loop and saved
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/card-names.ts    build the Oracle name companion from a matching cached bulk snapshot

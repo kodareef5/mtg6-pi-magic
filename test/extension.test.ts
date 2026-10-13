@@ -21,6 +21,7 @@ writeFileSync(join(home, "magic", "roster.json"), JSON.stringify({
 	keys: { 1: { fake: "$SEAT_ONE_KEY" } },
 }));
 const { default: extension } = await import("../index.ts");
+const { join: joinTable } = await import("../src/seating/guest.ts");
 
 const classifier = (id: string) => ({ type: "classifier" as const, id, name: id, api: "typesafe-system-one", provider: "fake", baseUrl: "https://example.invalid/",
 	input: ["text" as const], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 64000 });
@@ -248,4 +249,34 @@ test("a person playing manual needs no decision model", async () => {
 		await hostPi.shutdown();
 		await personPi.shutdown();
 	}
+});
+
+test("a table's looks are set before the start, recorded with the game, and sent to its guests", async () => {
+	const hostPi = fakePi();
+	try {
+		await hostPi.magic("host Mardu Discard vs Jund Sacrifice");
+		await hostPi.magic("first 0");
+		await hostPi.magic("seat 1 avatar Karn");
+		assert.match(hostPi.notes.at(-1)!, /No avatar named Karn\. Choose .*noir-karn/);
+		await hostPi.magic("seat 0 avatar noir-karn");
+		await hostPi.magic("seat 1 avatar noir-karn");
+		await hostPi.magic("seat 1 background https://example.com/table.png");
+		await hostPi.magic("background");
+		assert.match(hostPi.notes.at(-1)!, /^Backgrounds: .*sunken-citadel/);
+		await hostPi.magic("background sunken-citadel");
+		assert.match((await hostPi.status()), /Seat 1 .*noir-karn on https:\/\/example\.com\/table\.png[^]*The host's pictures: sunken-citadel/);
+		await hostPi.magic("seat 1 open");
+		const client = await joinTable(/\/magic join (\S+)/.exec(hostPi.notes.findLast((note) => note.includes("/magic join"))!)![1]!, "a guest");
+		await hostPi.magic("start");
+		let state = await client.state(-1);
+		while (!state.agreement) state = await client.state(state.serial);
+		await client.agree({ what: "prepare", yes: true });
+		await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
+		while (!state.seats) state = await client.state(state.serial);
+		assert.deepEqual(state.seats.map((one) => [one.id, one.avatar === "noir-karn", one.background]).at(1), [1, true, "https://example.com/table.png"], "the guest receives every seat's look");
+		const id = /^Prepared (\S+)\./.exec(hostPi.notes.find((note) => note.startsWith("Prepared "))!)![1]!;
+		const header = JSON.parse(readFileSync(join(home, "magic", "games", `${id}.jsonl`), "utf8").split("\n")[0]!).header;
+		assert.deepEqual([header.seats[1].avatar, header.seats[1].background, header.background], ["noir-karn", "https://example.com/table.png", "sunken-citadel"], "the game records its looks");
+		assert.ok(header.seats[0].avatar && header.seats[0].avatar !== "noir-karn", "a portrait named for one seat is no other seat's");
+	} finally { await hostPi.shutdown(); }
 });
