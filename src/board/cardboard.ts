@@ -20,14 +20,31 @@ const cardId = (prefix: string, name: string) => {
 	return plain.length <= 100 ? plain : `${plain.slice(0, 88)}-${createHash("sha256").update(name).digest("hex").slice(0, 10)}`;
 };
 const cardName = (name: string) => name.length <= 150 ? name : `${name.slice(0, 149)}…`;
-type Place = { playerId: string; zoneId: string; index: number };
+export type Place = { playerId: string; zoneId: string; index: number };
+
+/**
+ * Where each card a snapshot shows sits in its scene: the player, the zone and
+ * the place in it, as cardboard names a card. A seat's page finds a card by
+ * these, never by its engine id, which names the card's place in its deck's
+ * registered list even while it is face down.
+ */
+export function boardPlaces(snapshot: BoardSnapshot): Map<string, Place> {
+	const where = new Map<string, Place>(), land = (one: BoardCard) => one.types.includes("land");
+	for (const seat of snapshot.seats) {
+		const playerId = `p${seat.id}`;
+		const zones: [string, { id: string }[]][] = [["battlefield", [...seat.battlefield.filter((one) => !land(one)), ...seat.battlefield.filter(land)]],
+			["graveyard", seat.graveyard], ["exile", seat.exile], ["hand", seat.handCards ?? []], ["stack", snapshot.stack.filter((item) => item.controller === seat.id)]];
+		for (const [zoneId, cards] of zones) cards.forEach((one, index) => where.set(one.id, { playerId, zoneId, index }));
+	}
+	return where;
+}
 
 /** The cardboard request for a snapshot, with each seat's portrait and the background as image URLs, and the frame colours. Pure, so the mapping is testable without the package. */
 export function cardboardScene(snapshot: BoardSnapshot, art: ReadonlyMap<string, string>, size: BoardSize,
 	images: { avatars?: Partial<Record<SeatId, string>>; background?: string; colors?: Colors } = {}) {
 	const avatars = images.avatars ?? {};
 	const definitions = new Map<string, Record<string, string>>(), annotations: Record<string, unknown>[] = [], highlights: Record<string, unknown>[] = [];
-	const where = new Map<string, Place>();
+	const where = boardPlaces(snapshot);
 	const define = (one: BoardCard) => {
 		const id = one.name ? cardId(one.token ? "t" : "c", one.name) : "hidden";
 		const scryfallId = !one.token && one.name ? art.get(one.name) : undefined;
@@ -38,7 +55,6 @@ export function cardboardScene(snapshot: BoardSnapshot, art: ReadonlyMap<string,
 	const zone = (playerId: string, id: string, name: string, layout: string, cards: BoardCard[], visibility = "public") => {
 		cards.forEach((one, index) => {
 			const target = { playerId, zoneId: id, index };
-			where.set(one.id, target);
 			const tags = [...(one.token ? ["Token"] : []), ...(one.attacking ? ["Attacking"] : []), ...(one.blocking ? ["Blocking"] : []), ...(one.words ?? [])].slice(0, 6);
 			const counters = Object.entries(one.counters ?? {}).map(([kind, count]) => ({ id: slug(kind), name: kind, count }));
 			const badge = one.power !== undefined ? `${one.power} / ${one.toughness}${one.damage ? ` (${one.damage} dmg)` : ""}` : undefined;

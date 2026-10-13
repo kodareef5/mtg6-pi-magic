@@ -28,7 +28,8 @@ import { artIds, type BoardRenderer, type Dress } from "./src/board/render.ts";
 import { choose, chooseColors, defaults, named, type Art, type Colors } from "./src/board/looks.ts";
 import { menu, person, type Person } from "./src/seating/person.ts";
 import { panel, type Sitting } from "./src/seating/panel.ts";
-import { cardboardArt, cardboardRenderer } from "./src/board/cardboard.ts";
+import { boardPlaces, cardboardArt, cardboardRenderer } from "./src/board/cardboard.ts";
+import { boardSnapshot } from "./src/board/snapshot.ts";
 import { Type } from "typebox";
 
 import {
@@ -740,13 +741,17 @@ export default function (pi: ExtensionAPI) {
 		return { ...(journal ? { game: basename(journal.path, ".jsonl"), viewer: at } : {}), state: () => deskState(ours, at, code), act: (post) => deskAct(ctx, ours, at, code, post) };
 	}
 
-	/** The question as the seat's page shows it: the folded menu, what each line shows, the objects it names, and the AI's pick. */
-	const question = (asking: NonNullable<ReturnType<Person["asking"]>>) => ({
-		ask: asking.ask, text: asking.frame.decision?.question ?? "Choose.", ...(asking.frame.refused?.length ? { refused: asking.frame.refused.at(-1) } : {}),
-		...(asking.frame.decision?.options.some((one) => one.id === "pass") ? { pass: true } : {}),
-		options: menu(asking).map((line) => ({ label: line.label, ...(line.option.shows ? { shows: line.option.shows } : {}),
-			objects: (line.option.objects ?? []).map((one) => one.id), ...(asking.suggestion?.option === line.option.id ? { suggested: true } : {}) })),
-	});
+	/**
+	 * The question as the seat's page shows it: the folded menu, what each line
+	 * shows, where on the seat's board the cards it names sit, and the AI's pick.
+	 */
+	function question(asking: NonNullable<ReturnType<Person["asking"]>>, seats: { id: SeatId; name: string; deck: string }[]) {
+		const places = boardPlaces(boardSnapshot(asking.frame.view, seats, asking.frame.seat));
+		return { ask: asking.ask, text: asking.frame.decision?.question ?? "Choose.", ...(asking.frame.refused?.length ? { refused: asking.frame.refused.at(-1) } : {}),
+			...(asking.frame.decision?.options.some((one) => one.id === "pass") ? { pass: true } : {}),
+			options: menu(asking).map((line) => ({ label: line.label, ...(line.option.shows ? { shows: line.option.shows } : {}),
+				at: (line.option.objects ?? []).flatMap((one) => places.get(one.id) ?? []), ...(asking.suggestion?.option === line.option.id ? { suggested: true } : {}) })) };
+	}
 
 	function deskState(ours: Hosting, at: number, code: string) {
 		const setup = ours.lobby, mine = setup.seats[at]!, pilot = ours.pilots?.[at], asking = pilot?.asking(), clock = ours.hold?.asking(), crew = loadCrew(ROSTER);
@@ -762,7 +767,7 @@ export default function (pi: ExtensionAPI) {
 			...(ours.agreeing.has(code) ? { agreement: ours.agreeing.get(code)!.what } : {}),
 			...(setup.stage === "setting" && ours.models ? { choices: ours.models } : {}),
 			...(pilot ? { mode: pilot.mode(), stops: pilot.stops() } : {}),
-			...(asking ? { question: question(asking) } : {}),
+			...(asking && game ? { question: question(asking, game.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck.name }))) } : {}),
 			...(clock?.seat === at && clock.clock && !ours.hold?.paused() ? { remaining: Math.max(0, clock.since + clock.clock * 1000 - Date.now()) } : {}),
 			...(plan ? { plan } : {}),
 			...(game?.outcome ? { result: game.outcome.results[at] ?? "draw" } : {}),

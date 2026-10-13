@@ -157,11 +157,15 @@ function start(G) {
     one.decks = [deck]; one.activeDeckId = "board";
     for (const player of one.players) if (player.avatarUrl) player.avatarUrl = image(player.avatarUrl);
     if (one.view.mtg.backgroundUrl) one.view.mtg.backgroundUrl = image(one.view.mtg.backgroundUrl);
-    one.extras = { ...one.extras, focus };
+    // A seat's page marks the cards its question names, on the newest board only, and only cards that board shows.
+    const shown = (place) => one.players.find((player) => player.id === place.playerId)?.zones.find((zone) => zone.id === place.zoneId)?.cardIds.length > place.index;
+    const marks = (G.marks?.(at === moments.length - 1) ?? []).filter((mark) => shown(mark.target));
+    one.extras = { ...one.extras, focus, highlights: [...(one.extras.highlights ?? []), ...marks] };
     return one;
   }
   const draw = () => { $("stage").innerHTML = T.renderDetailed(T.normalize(scene()), { assets }).svg; };
 
+  const place = (card) => ({ playerId: card.getAttribute("data-player"), zoneId: card.getAttribute("data-zone"), index: Number(card.getAttribute("data-card-index")) });
   // A card's printed text and its state now, beside the pointer.
   function tip(event) {
     const card = event.target.closest?.("[data-card-id]"), box = $("tip");
@@ -185,6 +189,7 @@ function start(G) {
   // Click a card to bring it forward; click again, or Escape, to put it back.
   $("stage").addEventListener("click", (event) => {
     const card = event.target.closest?.("[data-card-id]");
+    if (card && G.picked?.(place(card))) { $("tip").style.display = "none"; return; }
     focus = focus || !card ? null : { target: { playerId: card.getAttribute("data-player"), zoneId: card.getAttribute("data-zone"), index: Number(card.getAttribute("data-card-index")) }, layout: "spotlight" };
     $("tip").style.display = "none"; draw();
   });
@@ -270,7 +275,7 @@ function start(G) {
       } catch { await new Promise((wait) => setTimeout(wait, 2000)); }
     }
   })();
-  return { apply };
+  return { apply, redraw: () => { if (moments[at]) draw(); }, place };
 }
 
 // A seat's page. The code after the # is the seat's: sent as a bearer token, never in an address.
@@ -279,7 +284,10 @@ function seat() {
   const closed = (message) => { $("seat").hidden = true; $("replay").hidden = true; $("open").hidden = false; $("open").replaceChildren(el("h1", "Magic seat"), el("p", message)); };
   if (!code) return closed("This page opens a seat from its link, with the seat's code after the #. Ask the host for it.");
   $("desk").hidden = false; $("seat").hidden = false; $("desk").append($("seat"));
-  let state = null, deadline = null, G = null, board = null, shownAsk = null;
+  let state = null, deadline = null, G = null, board = null, shownAsk = null, narrowed = null;
+  // A card on the board, by where it sits; the question's options name the cards they use the same way.
+  const spot = (place) => place.playerId + "/" + place.zoneId + "/" + place.index;
+  const touching = (asked, key) => asked.options.flatMap((one, i) => (one.at ?? []).some((place) => spot(place) === key) ? [i] : []);
   const note = (text) => { $("seat-note").textContent = text || ""; };
   async function send(body) {
     try {
@@ -321,17 +329,20 @@ function seat() {
         (() => { const row = el("div", undefined, "row"); row.append(button(now.agreement === "prepare" ? "Agree" : "Begin", () => send({ do: "agree", what: now.agreement, yes: true })), button("Decline", () => send({ do: "agree", what: now.agreement, yes: false }))); return row; })());
       return box; })()] : []));
     // The question, its options folded as the seat's menu, and the AI's pick.
-    if (asked?.ask !== shownAsk) { shownAsk = asked?.ask ?? null; if (asked) note(""); }
+    if (asked?.ask !== shownAsk) { shownAsk = asked?.ask ?? null; narrowed = null; if (asked) note(""); }
+    const only = asked && narrowed ? touching(asked, narrowed) : null;
     deadline = now.remaining !== undefined ? Date.now() + now.remaining : null;
     $("seat-question").replaceChildren(...(asked ? [
       (() => { const row = el("div", undefined, "row"); row.append(el("span", asked.options.some((one) => one.suggested) ? "Your AI suggests a choice." : "Your choice.", "count"), el("span", "", "clock")); return row; })(),
       el("div", asked.text, "question"), ...(asked.refused ? [el("div", "Refused: " + asked.refused, "note")] : []),
-      (() => { const list = el("ol", undefined, "options"); asked.options.forEach((one, i) => { const item = el("li"), choice = button("", () => send({ do: "choose", ask: asked.ask, n: i + 1 }), one.shows);
+      ...(only ? [(() => { const row = el("div", undefined, "row"); row.append(el("span", "The options that use that card.", "count grow"), button("Every option", () => { narrowed = null; render(state); })); return row; })()] : []),
+      (() => { const list = el("ol", undefined, "options"); asked.options.forEach((one, i) => { if (only && !only.includes(i)) return; const item = el("li"), choice = button("", () => send({ do: "choose", ask: asked.ask, n: i + 1 }), one.shows);
         choice.append(el("span", (i + 1) + ".", "n"), el("span", one.label), ...(one.suggested ? [el("span", "AI", "badge")] : [])); if (one.suggested) choice.classList.add("suggested"); item.append(choice); list.append(item); }); return list; })(),
       (() => { const row = el("div", undefined, "row"); row.append(...(asked.options.some((one) => one.suggested) ? [button("OK: the AI's pick", () => send({ do: "accept", ask: asked.ask }), "Enter")] : []),
         ...(asked.pass ? [button("Pass", () => send({ do: "pass", ask: asked.ask, rest: "now" }), "P"), button("Pass the turn", () => send({ do: "pass", ask: asked.ask, rest: "turn" }), "Pass the rest of this turn unless another seat puts something on the stack")] : [])); return row; })(),
     ] : playing && !now.result ? [el("div", now.mode === "auto" ? "Your seat's AI is playing it. Suggest or manual takes it back." : "Waiting for the table.", "count")] : []));
     tick();
+    board?.redraw();
     // The pilot's controls while the game plays.
     $("seat-play").hidden = !playing || !!now.result;
     if (playing) {
@@ -384,6 +395,27 @@ function seat() {
       if (got.board?.full) {
         if (G) { location.reload(); return; }
         G = { ...got.board.full, game: got.board.game };
+        // Cards the question can use glow; the one chosen to narrow it glows warmer.
+        G.marks = (latest) => {
+          const asked = state?.question, seen = new Map();
+          if (!latest || !asked) return [];
+          for (const one of asked.options) for (const place of one.at ?? []) seen.set(spot(place), place);
+          return [...seen.entries()].map(([key, target]) => ({ target, preset: key === narrowed ? "ember" : "frost" }));
+        };
+        // A click on a card the question can use shows only its options, and another click shows them all again.
+        // Two quick clicks on a card with one option take it. Counted here: each click redraws the board, so the
+        // browser sees two different cards and never calls it a double click.
+        let last = { key: null, at: 0 };
+        G.picked = (place) => {
+          const asked = state?.question, key = spot(place), options = asked ? touching(asked, key) : [];
+          if (!options.length) return false;
+          const twice = last.key === key && Date.now() - last.at < 450;
+          last = { key, at: Date.now() };
+          if (twice && options.length === 1) { send({ do: "choose", ask: asked.ask, n: options[0] + 1 }); return true; }
+          narrowed = narrowed === key && !twice ? null : key;
+          render(state);
+          return true;
+        };
         board = start(G);
         $("desk").hidden = true;
         $("side").prepend($("seat"));

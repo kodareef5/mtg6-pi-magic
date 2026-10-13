@@ -9,7 +9,7 @@ import { boardSnapshot } from "../src/board/snapshot.ts";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { artIds, rasterize, svgToPng } from "../src/board/render.ts";
-import { cardboardRenderer, cardboardScene } from "../src/board/cardboard.ts";
+import { boardPlaces, cardboardRenderer, cardboardScene } from "../src/board/cardboard.ts";
 import { choose, chooseColors, colorsFor, deal, defaults, imageOf } from "../src/board/looks.ts";
 import { announce, establish, example, main, matchup, place, quiet } from "./play.ts";
 
@@ -97,6 +97,24 @@ test("the cardboard scene keeps hidden zones as counts and carries art ids and a
 	assert.ok(own.cardIds.includes("c-llanowar-elves"), "the seat's picture shows its own hand");
 	assert.equal(mine.players[1]!.zones.find((zone) => zone.id === "hand")!.visibility, "hidden");
 	await accepted(scene); await accepted(mine);
+});
+
+test("a card's place names that card in the scene a seat's page draws, and a hidden card has none", () => {
+	const table = matchup("board-places");
+	main(table, 0, 3);
+	place(table, 0, "battlefield", "Llanowar Elves");
+	place(table, 0, "battlefield", "Forest");
+	place(table, 0, "battlefield", "Mossborn Hydra");
+	place(table, 0, "hand", "Forest");
+	const view = project(table, 0), snapshot = boardSnapshot(view, seats(table), 0), places = boardPlaces(snapshot);
+	const scene = cardboardScene(snapshot, artIds(), { width: 800, height: 600 }), named = new Map(scene.decks[0]!.cards.map((card) => [card.id, card.name]));
+	const shown = (view.objects ?? []).filter((one) => one.card && ["battlefield", "hand", "graveyard", "exile", "stack"].includes(one.zone));
+	assert.ok(shown.length >= 4);
+	for (const one of shown) {
+		const at = places.get(one.id)!, zone = scene.players.find((player) => player.id === at.playerId)!.zones.find((zone) => zone.id === at.zoneId)!;
+		assert.equal(named.get(zone.cardIds[at.index]!), one.card, `${one.card} in ${one.zone} is where its place says`);
+	}
+	assert.ok(snapshot.seats[1]!.hand > 0 && ![...places.values()].some((at) => at.playerId === "p1" && at.zoneId === "hand"), "the other seat's hand has no places to give away");
 });
 
 test("a board with nothing visible yet is still a scene", async () => {

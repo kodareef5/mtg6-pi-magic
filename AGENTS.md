@@ -249,9 +249,12 @@ chooses their seat's models, gives their own OpenRouter key, and agrees. The
 key is held in memory, never written, and never sent back. During play the
 page draws the seat's own board, live, beside its question: the folded menu
 with the AI's pick marked, numbers to choose, Enter for the AI's pick, pass,
-the pilot's mode and stops, tell and concede. Every question is numbered, so
-an answer meant for one never lands on the next. The host's table shows
-whether each player's page is open.
+the pilot's mode and stops, tell and concede. The cards the question can use
+glow on the board; a click on one shows only its options, and two quick clicks
+on a card with one option take it. An option names its cards by where they
+sit on the board (`boardPlaces` in `src/board/cardboard.ts`), never by engine
+id. Every question is numbered, so an answer meant for one never lands on the
+next. The host's table shows whether each player's page is open.
 
 A seat's pilot sits over its AI as the autopilot (`src/seating/person.ts`).
 In suggest mode the autopilot proposes each choice and the person types a
@@ -789,6 +792,5 @@ verify every carried field against the source and refuse to pass on a mismatch.
   replies and errors, including the recaps each call received. The trace is
   private seat data. The forced ratio is evidence about cost, not decision
   quality; a comparison harness and version attribution remain unfinished.
-- Clicking cards on a seat's board to choose, and the MCP adapter over the
-  seat API, are next in `design-ref/pi-ux-plan-20261012.md`.
+- The MCP adapter over the seat API is next in `design-ref/pi-ux-plan-20261012.md`.
 - Any format but Standard, and any seat count but two.

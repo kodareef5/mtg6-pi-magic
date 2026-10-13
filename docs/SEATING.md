@@ -47,7 +47,10 @@ Before play the page shows the table as set, every seat's models and whose
 key pays. The player chooses their own seat's models, gives their OpenRouter
 key, and agrees when asked; the table's config holds still while it is being
 agreed to. During play the page draws the seat's own board, beside the
-question its pilot is asked, and the player answers from there. Each question
+question its pilot is asked, and the player answers from there, or from the
+board: the cards the question can use glow, and a click on one shows its
+options. An option names a card by where it sits, never by the engine's id,
+which would name a face-down card's place in its deck list. Each question
 is numbered, and an answer to an older one is refused, so two tabs or a late
 click never answer the wrong question. The page asks the host again as soon as
 it is answered, and the host holds the request until something the seat may
