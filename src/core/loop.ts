@@ -257,9 +257,10 @@ export async function play(
 				const announcement = state?.announcements?.find((choice) => choice.option.id === answer.option);
 				const procedure = state?.procedures.find((choice) => choice.option.id === answer.option);
 				const carried = state ? execution(state, answer.option) : undefined;
-				if (announcement) beginAnnouncement(table, announcement.announcement, { picked: answer.option, offered: recordMenu(offered.options.map((option) => option.id), true), by: "model", why: "chosen", ...(carried ? { execution: carried } : {}) });
-				else if (procedure) activate(table, procedure.activation, { picked: answer.option, offered: recordMenu(offered.options.map((option) => option.id), true), by: "model", why: "chosen", ...(carried ? { execution: carried } : {}) });
-				else apply(table, answer.option, "model", "chosen", carried);
+				const by = answer.by ?? "model";
+				if (announcement) beginAnnouncement(table, announcement.announcement, { picked: answer.option, offered: recordMenu(offered.options.map((option) => option.id), true), by, why: "chosen", ...(carried ? { execution: carried } : {}) });
+				else if (procedure) activate(table, procedure.activation, { picked: answer.option, offered: recordMenu(offered.options.map((option) => option.id), true), by, why: "chosen", ...(carried ? { execution: carried } : {}) });
+				else apply(table, answer.option, by, "chosen", carried);
 				break;
 			}
 			case "declare":
@@ -272,7 +273,7 @@ export async function play(
 				table.said.push({ seat: decision.seat, message: answer.message, at: table.ledger.length });
 				break;
 			case "concede":
-				concede(table, decision.seat);
+				concede(table, decision.seat, "chosen", answer.by ?? "model");
 				break;
 			case "ask":
 			case "delegate":

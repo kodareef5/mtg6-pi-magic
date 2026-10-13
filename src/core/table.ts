@@ -369,7 +369,8 @@ export type LedgerRow = {
 	seat: SeatId;
 	offered: import("./offered.ts").Offered;
 	picked: string;
-	by: "engine" | "model" | "judge";
+	/** Who answered: the rules, a model, the judge, or a person at the seat. */
+	by: "engine" | "model" | "judge" | "person";
 	/**
 	 * Why it went this way, and the five stay apart because they are different
 	 * claims. `forced`: the rules left no alternative. `delegated`: the seat

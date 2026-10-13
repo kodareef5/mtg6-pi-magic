@@ -121,7 +121,7 @@ export function nextDecision(table: Table): Decision | null {
 export function apply(
 	table: Table,
 	optionId: string,
-	by: "engine" | "model" | "judge",
+	by: LedgerRow["by"],
 	why: "forced" | "delegated" | "chosen" | "declared" | "fallback",
 	execution?: LedgerRow["execution"],
 	/** On replay, what the recorded row says entering permanents registered. */
@@ -145,7 +145,7 @@ function take(
 	table: Table,
 	p: Pending,
 	move: Move,
-	by: "engine" | "model" | "judge",
+	by: LedgerRow["by"],
 	why: "forced" | "delegated" | "chosen" | "declared" | "fallback",
 	execution?: LedgerRow["execution"],
 	registered?: Record<string, Registration[]>,

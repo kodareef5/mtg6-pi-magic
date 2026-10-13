@@ -16,14 +16,17 @@
  */
 
 import { claudeCli } from "./src/context/claude-cli.ts";
-import { existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { Image } from "@earendil-works/pi-tui";
+import { Container, Image, Text } from "@earendil-works/pi-tui";
 import { boardFeed } from "./src/board/feed.ts";
-import { artIds, type BoardRenderer } from "./src/board/render.ts";
+import { artIds, boardPng, type BoardRenderer } from "./src/board/render.ts";
+import { boardSnapshot } from "./src/board/snapshot.ts";
+import { person, type Mode, type Person } from "./src/seating/person.ts";
+import { panel } from "./src/seating/panel.ts";
 import { cardboardRenderer } from "./src/board/cardboard.ts";
 import { Type } from "typebox";
 
@@ -630,14 +633,46 @@ export default function (pi: ExtensionAPI) {
 	 * plays with this Pi's models and keys, under the seat the host set it up as;
 	 * the host never runs them and never pays for them.
 	 */
-	type Seating = { client: Guest; leaving: AbortController; state?: State; player?: Player; preparing?: Promise<boolean>; spend: ReturnType<typeof newTally>; gaps: string[] };
+	type Seating = { client: Guest; leaving: AbortController; state?: State; player?: Player; preparing?: Promise<boolean>; spend: ReturnType<typeof newTally>; gaps: string[];
+		/** A person at this seat, with the autopilot behind them; absent while the seat prepares. */
+		person?: Person; mode: Mode; pictured?: string };
 	let guest: Seating | null = null;
 
+	// A component rather than lines: Pi cuts a text widget at ten lines, and a person's seat needs the whole question.
 	function showSeat(ctx: ExtensionContext) {
-		if (ctx.hasUI) ctx.ui.setWidget("magic-seat", guest ? seatLines() : undefined);
+		if (!ctx.hasUI) return;
+		if (!guest) { ctx.ui.setWidget("magic-seat", undefined); return; }
+		const lines = seatLines();
+		ctx.ui.setWidget("magic-seat", (_tui, theme) => {
+			const box = new Container();
+			for (const line of lines) box.addChild(new Text(line.startsWith("  ") ? line : theme.fg("accent", line), 1, 0));
+			return box;
+		});
+	}
+
+	/** The seat's own picture, once a turn and at the end, drawn from its own frame: what this seat may see. */
+	function pictureSeat(ctx: ExtensionContext, ours: Seating, state: State) {
+		const frame = state.frame, seat = state.seat, at = frame?.view.window.kind === "turn" ? `turn-${frame.view.window.turn}` : state.outcome ? "final" : undefined;
+		if (!ctx.hasUI || !frame || seat === undefined || !at || ours.pictured === at) return;
+		ours.pictured = at;
+		const seats = (state.seats ?? []).map((one) => ({ id: one.id, name: one.name, deck: one.deck.name }));
+		void (renderer ??= cardboardRenderer(artIds(), join(CACHE, "art"))).then(async (drawing) => {
+			if (!drawing) return;
+			const png = await boardPng(drawing, boardSnapshot(frame.view, seats, seat));
+			const path = join(GAMES, `guest-${ours.client.welcome.table}-seat-${seat}`, `${at}.png`);
+			mkdirSync(dirname(path), { recursive: true });
+			writeFileSync(path, png);
+			ctx.ui.setWidget("magic-board", (_tui, theme) => new Image(Buffer.from(png).toString("base64"), "image/png",
+				{ fallbackColor: (text) => theme.fg("dim", text) }, { maxWidthCells: 120, filename: path }));
+		}).catch((error) => ctx.ui.notify(`The seat's picture failed: ${error instanceof Error ? error.message : String(error)}`, "warning"));
 	}
 
 	function seatLines(): string[] {
+		if (guest?.person && guest.state?.frame) {
+			const header = `Magic · seat ${guest.state.seat} at ${guest.client.welcome.game}${guest.state.paused ? " · paused by the host" : ""}${guest.state.judge ? " · a judge hears objections" : ""}`;
+			return [header, ...panel(guest.state, guest.person.mode(), guest.person.asking()).map((line) => line.startsWith("  ") ? line : `  ${line}`),
+				"  /magic mode suggest|auto|manual · /magic concede · /magic leave"];
+		}
 		if (!guest) return ["Not seated. /magic join <invite> takes a chair at another Pi's table."];
 		const state = guest.state, me = state?.seats?.find((one) => one.id === state.seat);
 		const lines = [`Magic · a guest at ${guest.client.welcome.game} · ${state?.stage ?? "joining"}${state?.paused ? " · paused by the host" : ""}`];
@@ -651,11 +686,15 @@ export default function (pi: ExtensionAPI) {
 		return lines;
 	}
 
-	/** Take a chair at another Pi's table, and play it with this Pi's models. */
-	async function joinSeat(ctx: ExtensionContext, invite: string) {
+	/**
+	 * Take a chair at another Pi's table. A person plays it, with this Pi's
+	 * models as the autopilot behind them; `auto` hands the seat to the
+	 * autopilot from the start, and `manual` plays it without one.
+	 */
+	async function joinSeat(ctx: ExtensionContext, invite: string, mode: Mode = "suggest") {
 		if (host || guest) { ctx.ui.notify(host ? "This Pi is hosting a table. A host is never a seat; join from another Pi." : "This Pi already has a chair. /magic leave first.", "warning"); return; }
 		const client = await joinTable(invite, process.env.USER ?? "guest");
-		const ours: Seating = { client, leaving: new AbortController(), spend: newTally(), gaps: [] };
+		const ours: Seating = { client, leaving: new AbortController(), spend: newTally(), gaps: [], mode };
 		guest = ours;
 		const { setAs } = client.welcome;
 		const chronicle: Chronicle = { briefs: {}, recaps: [] };
@@ -704,12 +743,14 @@ export default function (pi: ExtensionAPI) {
 					if (!done.ok) { ctx.ui.notify(`The host refused this seat's setup: ${done.message ?? done.refused}`, "warning"); return false; }
 					work = { ...work, revision: (work?.revision ?? 0) + 1 } as typeof work;
 				}
-				ours.player = made.player;
+				ours.person = person(me.name, made.player, ours.mode, () => showSeat(ctx));
+				ours.player = ours.person.player;
 				return true;
 			},
 			player: () => ours.player,
 			seen(state) {
 				ours.state = state;
+				pictureSeat(ctx, ours, state);
 				chronicle.recaps.splice(0, chronicle.recaps.length, ...state.recaps.map((one) => ({ ...one })));
 				if (state.stage === "preparing" && state.seat !== undefined) ours.preparing ??= prepare(state);
 				showSeat(ctx);
@@ -724,9 +765,9 @@ export default function (pi: ExtensionAPI) {
 		});
 	}
 
-	const VERBS = ["host", "seat", "first", "clock", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
+	const VERBS = ["host", "seat", "first", "clock", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
 	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | first <coin|n> | clock <seconds|off> | start | begin | " +
-		"join <invite> | leave | " +
+		"join <invite> [suggest|auto|manual] | pick <n> | ok | show <n> | mode <suggest|auto|manual> | concede | leave | " +
 		"pause | continue | rollback <version> [why] | end [why] | status | resume <game> | clone <game> <version> <new-id> | " +
 		"models [why|<role> <pattern> [seat]] | board | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
 
@@ -764,8 +805,27 @@ export default function (pi: ExtensionAPI) {
 			if (verb === "begin") return beginTable(ctx);
 			if (verb === "status") { ctx.ui.notify((guest ? seatLines() : tableLines()).join("\n"), "info"); return; }
 			if (verb === "join") {
-				if (!words[1]) { ctx.ui.notify("/magic join <invite>, as the host's Pi printed it.", "warning"); return; }
-				try { await joinSeat(ctx, words[1]); } catch (error) { ctx.ui.notify(`Could not join: ${error instanceof Error ? error.message : String(error)}`, "error"); }
+				const mode = (["suggest", "auto", "manual"] as const).find((one) => one === words[2]);
+				if (!words[1] || (words[2] && !mode)) { ctx.ui.notify("/magic join <invite> [suggest|auto|manual], with the invite as the host's Pi printed it.", "warning"); return; }
+				try { await joinSeat(ctx, words[1], mode); } catch (error) { ctx.ui.notify(`Could not join: ${error instanceof Error ? error.message : String(error)}`, "error"); }
+				return;
+			}
+			if (["pick", "ok", "show", "mode", "concede"].includes(verb)) {
+				const seat = guest?.person;
+				if (!seat) { ctx.ui.notify("This Pi has no seat to play. /magic join <invite> takes one.", "warning"); return; }
+				if (verb === "mode") {
+					const mode = (["suggest", "auto", "manual"] as const).find((one) => one === words[1]);
+					const problem = mode ? await seat.switch(mode) : "/magic mode suggest|auto|manual";
+					ctx.ui.notify(problem ?? `This seat is in ${mode} mode.`, problem ? "warning" : "info");
+				} else if (verb === "concede") seat.concede();
+				else if (verb === "show") {
+					const option = seat.asking()?.frame.decision?.options[Number(words[1]) - 1];
+					ctx.ui.notify(option ? [option.label, option.shows ?? "Nothing more to show for this option."].join("\n") : "/magic show <n>, for an option of the question being asked.", option ? "info" : "warning");
+				} else {
+					const problem = verb === "ok" ? seat.accept() : seat.choose(Number(words[1]));
+					if (problem) ctx.ui.notify(problem, "warning");
+				}
+				showSeat(ctx);
 				return;
 			}
 			if (verb === "leave") {
@@ -937,6 +997,16 @@ export default function (pi: ExtensionAPI) {
 
 			ctx.ui.notify(USAGE, "info");
 		},
+	});
+
+	// A person answers the open question by typing its number, or ok for the autopilot's choice. Anything else is chat.
+	pi.on("input", async (event, ctx) => {
+		const seat = guest?.person, text = event.text.trim().toLowerCase();
+		if (!seat?.asking() || !/^(\d{1,3}|ok|y|yes)$/.test(text)) return { action: "continue" };
+		const problem = /^\d/.test(text) ? seat.choose(Number(text)) : seat.accept();
+		if (problem) ctx.ui.notify(problem, "warning");
+		showSeat(ctx);
+		return { action: "handled" };
 	});
 
 	// A closing Pi leaves a game in play resumable: it stops the run and writes no end.

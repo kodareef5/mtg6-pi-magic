@@ -27,8 +27,8 @@ export class PlayerUnavailable extends Error {}
 export class TableHalted extends Error {}
 
 export type Answer =
-	/** Take one of the moves the table listed. The cheap path, and the common one. */
-	| { kind: "pick"; option: string; actionId: string }
+	/** Take one of the moves the table listed. The cheap path, and the common one. `by` says a person chose it, for the ledger. */
+	| { kind: "pick"; option: string; actionId: string; by?: "person" }
 	/** Edit private equipment atomically. It neither answers priority nor moves cards. A writer may object to another seat's action beside its edits. */
 	| { kind: "work"; tools: WorkCommand[]; revision: number; actionId: string; objection?: Objection }
 	/**
@@ -62,7 +62,7 @@ export type Answer =
 	 * chess player resigns. Not to avoid the work of a hard position: another
 	 * seat can still play badly, and a game given away was not lost.
 	 */
-	| { kind: "concede" };
+	| { kind: "concede"; by?: "person" };
 
 /** What a seat objects to: another seat's recorded action, by its ledger row, the rule it breaks, and why. */
 export type Objection = { row: number; claim: string; rule?: string };

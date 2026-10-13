@@ -15,12 +15,12 @@ import { offered } from "./offered.ts";
 import type { Table } from "./table.ts";
 import type { SeatId } from "./types.ts";
 
-export function concede(table: Table, seat: SeatId, why: "chosen" | "timeout" = "chosen"): void {
+export function concede(table: Table, seat: SeatId, why: "chosen" | "timeout" = "chosen", by: "model" | "person" = "model"): void {
 	if (table.outcome) throw new Error("The game is already over.");
 	const decision = nextDecision(table);
 	if (decision?.seat !== seat) throw new Error(`Seat ${seat} concedes when it is asked; the table is asking ${decision ? `seat ${decision.seat}` : "nobody"}.`);
 	table.ledger.push({ seq: table.ledger.length, clock: table.cursor.clock + 1, situation: decision.situation, seat,
-		offered: offered(decision.options.map((option) => option.id)), picked: "concede", by: why === "timeout" ? "engine" : "model", why });
+		offered: offered(decision.options.map((option) => option.id)), picked: "concede", by: why === "timeout" ? "engine" : by, why });
 	commit(table, [{ do: "end-game", who: seat, result: "lose" }], "concede");
 	// With more than two seats, 800.4a also takes the seat's objects out of the game and moves priority on. Not built.
 	if (!table.outcome) table.gaps.push(`Seat ${seat} conceded with more than one seat left; leaving the game is not built for more than two seats.`);

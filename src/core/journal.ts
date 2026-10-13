@@ -332,7 +332,7 @@ export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry
 			);
 		}
 		observe?.(table, decision, row);
-		if (row.picked === "concede") { concede(table, row.seat, row.why === "timeout" ? "timeout" : "chosen"); continue; }
+		if (row.picked === "concede") { concede(table, row.seat, row.why === "timeout" ? "timeout" : "chosen", row.by === "person" ? "person" : "model"); continue; }
 		if (row.why === "timeout") throw new Error(`Record ${row.seq}: only a concession runs out of time.`);
 		const planned = !Array.isArray(row.offered) && row.offered.planned
 			? planState({ seat: decision.seat, version: table.cursor.clock, view: project(table, decision.seat), decision }) : null;

@@ -5,7 +5,7 @@
  * coin flip, and a bad rollback leaves the game playing.
  */
 import { strict as assert } from "node:assert";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
@@ -52,7 +52,7 @@ function fakePi(gone = false) {
 			streamSimple: () => ({ result: () => new Promise(() => {}) }),
 		},
 	};
-	const commands = new Map<string, { handler(args: string, context: unknown): Promise<void> }>(), events = new Map<string, () => Promise<void>>();
+	const commands = new Map<string, { handler(args: string, context: unknown): Promise<void> }>(), events = new Map<string, (...args: unknown[]) => Promise<unknown>>();
 	extension({ registerProvider() {}, registerTool() {}, registerCommand: (name: string, spec: never) => void commands.set(name, spec),
 		on: (name: string, handler: never) => void events.set(name, handler), exec: async () => ({}) } as never);
 	const magic = (args: string) => commands.get("magic")!.handler(args, ctx);
@@ -61,6 +61,8 @@ function fakePi(gone = false) {
 		said: (pattern: RegExp) => notes.some((note) => pattern.test(note)),
 		status: async () => { await magic("status"); return notes.at(-1)!; },
 		shutdown: () => events.get("session_shutdown")?.(),
+		/** Type a line into this Pi's editor: an extension may take it before the chat does. */
+		type: (text: string) => events.get("input")?.({ type: "input", text, source: "interactive" }, ctx) as Promise<{ action: string } | undefined>,
 	};
 }
 async function until(done: () => boolean, what: string, notes: string[] = []) {
@@ -120,32 +122,33 @@ test("a seat's models and keys follow it through the coin flip, and a bad rollba
 
 test("a guest's Pi takes an open seat and plays it with its own models and keys", async () => {
 	const hostPi = fakePi();
-	await hostPi.magic("host Mardu Discard vs Jund Sacrifice");
-	await hostPi.magic("first 0");
-	await hostPi.magic("seat 1 open");
-	const invite = /\/magic join (\S+)/.exec(hostPi.notes.at(-1)!)?.[1];
-	assert.ok(invite, "the host prints a join line for the open seat");
-	await guestPi.magic(`join ${invite}`);
-	await guestPi.magic("join " + invite);
-	assert.ok(guestPi.said(/already has a chair/), "one chair per Pi");
-	assert.match(await hostPi.status(), /Seat 1\s+Jund Sacrifice\s+guest /);
+	try {
+		await hostPi.magic("host Mardu Discard vs Jund Sacrifice");
+		await hostPi.magic("first 0");
+		await hostPi.magic("seat 1 open");
+		const invite = /\/magic join (\S+)/.exec(hostPi.notes.at(-1)!)?.[1];
+		assert.ok(invite, "the host prints a join line for the open seat");
+		await guestPi.magic(`join ${invite} auto`);
+		await guestPi.magic("join " + invite);
+		assert.ok(guestPi.said(/already has a chair/), "one chair per Pi");
+		assert.match(await hostPi.status(), /Seat 1\s+Jund Sacrifice\s+guest /);
 
-	await hostPi.magic("start");
-	await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
-	await hostPi.magic("begin");
-	await until(() => hostPi.calls.length > 0 && guestPi.calls.length > 0, "both seats to be asked", hostPi.notes);
-	assert.match(await guestPi.status(), /A judge hears objections/, "the guest learns of the judge the table seated");
-	const journal = readdirSync(join(home, "magic", "games")).find((name) => name.startsWith("mardu-discard-vs-jund-sacrifice") && name.endsWith(".jsonl"))!;
-	const prepared = readFileSync(join(home, "magic", "games", journal), "utf8").split("\n").filter((line) => line.includes('"prepared"')).map((line) => JSON.parse(line).prepared.seat);
-	assert.deepEqual(prepared.sort(), [0, 1], "the host journals the guest's brief beside its own seat's");
-	assert.ok(hostPi.calls.every((call) => call.model === "jev-a" && call.key === undefined), "the host's Pi answers only its own seat");
-	assert.ok(guestPi.calls.every((call) => call.model === "jev-b" && call.key === "key-for-seat-one"), "the guest's Pi answers its seat with its own model and key");
-	assert.match(await hostPi.status(), /Seat 1\s+Jund-Sacrifice\s+guest /);
+		await hostPi.magic("start");
+		await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
+		await hostPi.magic("begin");
+		await until(() => hostPi.calls.length > 0 && guestPi.calls.length > 0, "both seats to be asked", hostPi.notes);
+		assert.match(await guestPi.status(), /judge hears objections/i, "the guest learns of the judge the table seated");
+		const journal = readdirSync(join(home, "magic", "games")).find((name) => name.startsWith("mardu-discard-vs-jund-sacrifice") && name.endsWith(".jsonl"))!;
+		const prepared = readFileSync(join(home, "magic", "games", journal), "utf8").split("\n").filter((line) => line.includes('"prepared"')).map((line) => JSON.parse(line).prepared.seat);
+		assert.deepEqual(prepared.sort(), [0, 1], "the host journals the guest's brief beside its own seat's");
+		assert.ok(hostPi.calls.every((call) => call.model === "jev-a" && call.key === undefined), "the host's Pi answers only its own seat");
+		assert.ok(guestPi.calls.every((call) => call.model === "jev-b" && call.key === "key-for-seat-one"), "the guest's Pi answers its seat with its own model and key");
+		assert.match(await hostPi.status(), /Seat 1\s+Jund-Sacrifice\s+guest /);
 
-	await hostPi.magic("end Test over.");
-	await until(() => guestPi.said(/The game is over: this seat's result is draw/), "the guest to hear the end", guestPi.notes);
-	await until(() => /· over/.test(hostPi.notes.filter((note) => note.startsWith("Magic ·")).at(-1) ?? "") || hostPi.said(/finished, turn/), "the host's report", hostPi.notes);
-	await hostPi.shutdown();
+		await hostPi.magic("end Test over.");
+		await until(() => guestPi.said(/The game is over: this seat's result is draw/), "the guest to hear the end", guestPi.notes);
+		await until(() => /· over/.test(hostPi.notes.filter((note) => note.startsWith("Magic ·")).at(-1) ?? "") || hostPi.said(/finished, turn/), "the host's report", hostPi.notes);
+	} finally { await hostPi.shutdown(); }
 });
 
 test("a guest that stops answering runs out of time on the table's clock and concedes", async () => {
@@ -156,7 +159,7 @@ test("a guest that stops answering runs out of time on the table's clock and con
 		await hostPi.magic("seat 1 open");
 		await hostPi.magic("clock 1");
 		assert.match(hostPi.notes.at(-1)!, /1s for each decision/);
-		await silent.magic(`join ${/\/magic join (\S+)/.exec(hostPi.notes.findLast((note) => note.includes("/magic join"))!)![1]}`);
+		await silent.magic(`join ${/\/magic join (\S+)/.exec(hostPi.notes.findLast((note) => note.includes("/magic join"))!)![1]} auto`);
 		await hostPi.magic("start");
 		await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
 		await hostPi.magic("begin");
@@ -167,5 +170,38 @@ test("a guest that stops answering runs out of time on the table's clock and con
 	} finally {
 		await hostPi.shutdown();
 		await silent.shutdown();
+	}
+});
+
+test("a person at a guest seat answers by number, and the ledger says the person chose", async () => {
+	const hostPi = fakePi(), personPi = fakePi();
+	try {
+		await hostPi.magic("host Mardu Discard vs Jund Sacrifice");
+		await hostPi.magic("first 0");
+		await hostPi.magic("seat 1 open");
+		await personPi.magic(`join ${/\/magic join (\S+)/.exec(hostPi.notes.findLast((note) => note.includes("/magic join"))!)![1]}`);
+		assert.deepEqual(await personPi.type("1"), { action: "continue" }, "with nothing asked, a typed number is chat");
+		await hostPi.magic("start");
+		await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
+		await hostPi.magic("begin");
+		let panel = "";
+		for (const begun = Date.now(); !/Type a number/.test(panel); await new Promise((go) => setTimeout(go, 50))) {
+			if (Date.now() - begun > 20_000) throw new Error(`The person was never asked. Panel: ${panel}`);
+			panel = await personPi.status();
+		}
+		assert.match(panel, /suggest mode/);
+		assert.match(panel, /Your hand: /, "the panel shows the seat its own hand");
+		assert.match(panel, /1\. .*<- autopilot/, "and marks the autopilot's choice");
+		assert.deepEqual(await personPi.type("1"), { action: "handled" }, "a typed number answers the question");
+		await until(() => hostPi.calls.length > 1, "play to go on", hostPi.notes);
+		await hostPi.magic("end Person check done.");
+		await until(() => personPi.said(/this seat's result is draw/), "the person to hear the end", personPi.notes);
+		const journal = readdirSync(join(home, "magic", "games")).filter((name) => name.startsWith("mardu-discard-vs-jund-sacrifice") && name.endsWith(".jsonl"))
+			.map((name) => join(home, "magic", "games", name)).sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)[0]!;
+		const rows = readFileSync(journal, "utf8").split("\n").filter((line) => line.includes('"row"')).map((line) => JSON.parse(line).row);
+		assert.ok(rows.some((row) => row.seat === 1 && row.by === "person" && row.situation === "pregame"), "the person's mulligan decision is the person's row");
+	} finally {
+		await hostPi.shutdown();
+		await personPi.shutdown();
 	}
 });
