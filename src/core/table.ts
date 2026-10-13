@@ -376,12 +376,13 @@ export type LedgerRow = {
 	 * handed this kind of step to the table. `chosen`: the seat picked it.
 	 * `declared`: the seat moved the cards itself. `fallback`: no usable answer
 	 * arrived, so the table took the terminating option and wrote a gap.
+	 * `timeout`: the table's clock ran out on the seat, which conceded.
 	 *
 	 * A shortlist of one is not proof of force, so nothing writes `forced` on
 	 * the strength of a short list. A fallback is not a choice and is never
 	 * counted as one.
 	 */
-	why?: "forced" | "delegated" | "chosen" | "declared" | "fallback";
+	why?: "forced" | "delegated" | "chosen" | "declared" | "fallback" | "timeout";
 };
 
 /**

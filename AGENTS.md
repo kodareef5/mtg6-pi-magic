@@ -36,8 +36,9 @@ adapters will use the same core interface without loading decision-model
 context.
 
 The player interface is intended to offer the same capabilities to every seat.
-Listed picks, table talk, prepared procedures and objections work today. Raw
-declarations, free-form delegation and concession handling still need handlers.
+Listed picks, table talk, prepared procedures, objections and conceding when
+asked work today. Raw declarations and free-form delegation still need
+handlers.
 Context supplies decision facts and guidance; the player chooses.
 
 ## What the table enforces, and what it only offers
@@ -236,6 +237,13 @@ remote seats, people at a seat and the assistant.
 starts and prints one invite, and another Pi takes the seat with
 `/magic join <invite>`. That Pi plays the seat with its own models and keys,
 writes its own brief, and agrees for itself; `docs/SEATING.md` is the wire.
+
+The table has a clock for guest seats: 120 seconds a decision by default,
+`/magic clock <seconds|off>` before the start. A guest seat that does not
+answer in time concedes, which is also how a guest who disconnected leaves
+the game. The concession is a ledger row with the reason `timeout`, never
+`chosen`, and replay applies it. Pausing stops the clock. The host's own model
+seats are not on it; their call limits bound them.
 
 A seat can carry its own key for a provider, named as an environment variable
 under `keys` in the roster file (`"keys": {"1": {"openrouter": "$OPENROUTER_SEAT_1"}}`).
@@ -440,9 +448,13 @@ rather than adding a test for each branch.
   and, played on, is the game it would have been. The host's rollback and end
   are journal lines that replay honors; a clone before either, or a rollback
   past an end, is the game without it. A direction the table refuses changes
-  nothing and play goes on. Through the extension itself: a table replaced
+  nothing and play goes on. A clocked seat that does not answer concedes as a
+  timeout, paused time does not count, and replay concedes where the clock
+  did. Through the extension itself: a table replaced
   while another prepared keeps its own game, and a seat's models and keys
   follow it through the coin flip, journaled as `setAs` so a resume keeps them.
+  A guest Pi plays its seat with its own models and keys, and one that stops
+  answering loses on the clock and hears that it lost.
 - **Alone.** A finished game reports and returns with nothing else keeping the
   process alive. Stated in a child process, since a test runner keeps the event
   loop awake and hides it.
@@ -510,7 +522,8 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   announce.ts          the announcement options a seat's packages and plan offer
   targeting.ts         target counts and the division fixed before payment
   knowledge.ts, odds.ts what a seat knows and the odds it may work out; transitions unfinished
-  derived.ts, declare.ts, concede.ts, say.ts  unwritten derived facts and raw declarations; conceding; table talk
+  derived.ts, declare.ts, say.ts  unwritten derived facts and raw declarations; table talk
+  concede.ts         a concession as a ledger row, chosen or on the clock's timeout, that replay applies
   syntax.ts, names.ts  zone, reason, change and layer types; seat names
   combat-facts.ts      block conflicts and strike order facts for the pilot
   readiness.ts, assessment.ts, purpose.ts, moves.ts  which uses have sources, assessment coverage, a stack object's purpose

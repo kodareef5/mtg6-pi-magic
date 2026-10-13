@@ -136,3 +136,37 @@ test("the host's end gives no winner, replay honors it, and a clone before it or
 		assert.throws(() => rollbackByHost(table, table.ledger.length + 1, "Too far.", dealt), /Roll back to a version/);
 	});
 });
+
+test("a seat on the clock that does not answer concedes as a timeout, paused time does not count, and replay reaches the same end", async () => {
+	const dir = mkdtempSync(join(tmpdir(), "magic-clock-"));
+	const table = dealt(), holding = hold(dealt), journal = open(join(dir, "clock.jsonl"), made);
+	const gone: Player = { name: "B", observe() {}, close() {}, answer: () => new Promise(() => {}) };
+	const players = { 0: holding.seat(steady("A"), 0), 1: holding.seat(gone, 1, 0.3) };
+	const running = (async () => {
+		for (;;) {
+			try { await play(table, players, {}, { checkpoint: holding.checkpoint }); break; }
+			catch (error) { if (!(error instanceof TableHalted)) throw error; if (!holding.halted(table)) break; }
+		}
+		save(journal, table);
+	})();
+	for (const begun = Date.now(); holding.asking()?.seat !== 1; await new Promise((go) => setTimeout(go, 5)))
+		if (Date.now() - begun > 5_000) throw new Error("seat 1 was never asked");
+	holding.pause();
+	await new Promise((go) => setTimeout(go, 600));
+	const outcome = () => table.outcome;
+	assert.equal(outcome(), null, "a paused clock does not run out");
+	holding.resume();
+	await running;
+	assert.deepEqual(outcome()?.results, { 0: "win", 1: "lose" });
+	const last = table.ledger.at(-1)!;
+	assert.deepEqual([last.seat, last.picked, last.why, last.by], [1, "concede", "timeout", "engine"]);
+	assert.equal(physical(replay(journal.path, dealt).table), physical(table), "replay concedes where the clock did");
+});
+
+test("a seat that concedes when asked loses, and the row says it chose to", async () => {
+	const table = dealt();
+	const quitter: Player = { name: "B", observe() {}, close() {}, async answer() { return { kind: "concede" }; } };
+	await play(table, { 0: steady("A"), 1: quitter }, {});
+	assert.deepEqual(table.outcome?.results, { 0: "win", 1: "lose" });
+	assert.deepEqual([table.ledger.at(-1)!.picked, table.ledger.at(-1)!.why], ["concede", "chosen"]);
+});

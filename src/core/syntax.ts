@@ -57,7 +57,9 @@ export type Reason =
 	| "combat"
 	| "game-setup"
 	/** The host's own direction, never a seat's: a game the host ended. */
-	| "host";
+	| "host"
+	/** A seat gave up, or its time on the table's clock ran out (104.3a). */
+	| "concede";
 
 /**
  * The motions this milestone needs. design-ref/archive/SYNTAX.md section 2 lists all of

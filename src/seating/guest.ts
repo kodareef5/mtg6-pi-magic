@@ -40,22 +40,31 @@ export async function join(invite: string, name: string) {
  * `agree` decides what this seat says to each agreement, and may wait, as a
  * seat preparing its own models does before it agrees to begin. `player` is
  * the seat's player once it has one.
+ *
+ * While the player chooses, the guest keeps reading its chair. An ask the host
+ * closes in the meantime, because the clock ran out, the host rolled back or
+ * the game ended, is dropped unanswered and the newer state is followed.
  */
 export async function follow(guest: Guest, seat: {
 	agree(what: Agreement, state: State): Promise<boolean>;
 	player(state: State): Player | undefined;
 	seen?(state: State): void;
 }, signal?: AbortSignal): Promise<Outcome | undefined> {
-	let after = -1, answered = 0, resets = 0, version = -1;
+	let after = -1, answered = 0, resets = 0, version = -1, next: State | undefined;
+	const read = async (at: number, stop?: AbortSignal): Promise<State> => {
+		for (;;) {
+			try { return await guest.state(at, stop); }
+			catch (error) {
+				if (stop?.aborted) throw error;
+				// A dropped poll is asked again; the host keeps the chair and its ask.
+				await new Promise((wait) => setTimeout(wait, 1_000));
+			}
+		}
+	};
 	while (!signal?.aborted) {
 		let state: State;
-		try { state = await guest.state(after, signal); }
-		catch (error) {
-			if (signal?.aborted) break;
-			// A dropped poll is asked again; the host keeps the chair and its ask.
-			await new Promise((wait) => setTimeout(wait, 1_000));
-			continue;
-		}
+		if (next) { state = next; next = undefined; }
+		else try { state = await read(after, signal); } catch { break; }
 		after = state.serial;
 		seat.seen?.(state);
 		if (state.agreement) { await guest.agree({ what: state.agreement, yes: await seat.agree(state.agreement, state) }); continue; }
@@ -65,10 +74,25 @@ export async function follow(guest: Guest, seat: {
 		if (state.outcome || state.stage === "over") { await player?.close(); return state.outcome; }
 		if (!player || !state.frame) continue;
 		if (state.ask !== undefined && state.ask > answered) {
-			answered = state.ask;
+			const ask = state.ask, watching = new AbortController(), stop = AbortSignal.any([watching.signal, ...(signal ? [signal] : [])]);
+			answered = ask;
 			version = state.frame.version;
+			const thinking = player.answer(state.frame).then((answer) => ({ answer }));
+			const moved = (async () => {
+				for (let at = after; ;) {
+					const seen = await read(at, stop);
+					at = seen.serial;
+					seat.seen?.(seen);
+					if (seen.ask !== ask || seen.outcome || seen.stage === "over") return { moved: seen };
+				}
+			})();
+			thinking.catch(() => {});
+			moved.catch(() => {});
+			const first = await Promise.race([thinking, moved]);
+			watching.abort();
 			// Stale means the table moved on; the next state carries the newer ask.
-			await guest.answer({ ask: state.ask, answer: await player.answer(state.frame) });
+			if ("answer" in first) await guest.answer({ ask, answer: first.answer });
+			else next = first.moved;
 		} else if (state.frame.version !== version) {
 			version = state.frame.version;
 			player.observe(state.frame);

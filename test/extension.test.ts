@@ -28,7 +28,8 @@ const planner = { id: "planner", name: "planner", api: "openai-completions", pro
 	cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, reasoning: true, contextWindow: 100000, maxTokens: 10000 };
 
 /** One Pi with the extension loaded: what it said, and every classifier call with the key it carried. */
-function fakePi() {
+/** `gone` is a Pi whose models never answer: from the host's side, a guest that disconnected mid-decision. */
+function fakePi(gone = false) {
 	const notes: string[] = [], calls: { model: string; key?: string }[] = [];
 	// The next roster read waits for `release`: a preparation that finishes late.
 	const gate = { hold: false, release: () => {} };
@@ -43,6 +44,7 @@ function fakePi() {
 			},
 			async classify(model: { id: string }, request: { questions: Record<string, { criteria: Record<string, string> }> }, options?: { apiKey?: string }) {
 				calls.push({ model: model.id, ...(options?.apiKey ? { key: options.apiKey } : {}) });
+				if (gone) await new Promise(() => {});
 				const choice = Object.keys(request.questions.pick!.criteria)[0]!;
 				return { api: "typesafe-system-one", provider: "fake", model: model.id, answers: { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } }, stopReason: "stop", timestamp: 0 };
 			},
@@ -140,4 +142,26 @@ test("a guest's Pi takes an open seat and plays it with its own models and keys"
 	await until(() => guestPi.said(/The game is over: this seat's result is draw/), "the guest to hear the end", guestPi.notes);
 	await until(() => /· over/.test(hostPi.notes.filter((note) => note.startsWith("Magic ·")).at(-1) ?? "") || hostPi.said(/finished, turn/), "the host's report", hostPi.notes);
 	await hostPi.shutdown();
+});
+
+test("a guest that stops answering runs out of time on the table's clock and concedes", async () => {
+	const hostPi = fakePi(), silent = fakePi(true);
+	try {
+		await hostPi.magic("host Mardu Discard vs Jund Sacrifice");
+		await hostPi.magic("first 0");
+		await hostPi.magic("seat 1 open");
+		await hostPi.magic("clock 1");
+		assert.match(hostPi.notes.at(-1)!, /1s for each decision/);
+		await silent.magic(`join ${/\/magic join (\S+)/.exec(hostPi.notes.findLast((note) => note.includes("/magic join"))!)![1]}`);
+		await hostPi.magic("start");
+		await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
+		await hostPi.magic("begin");
+		await until(() => hostPi.said(/did not answer within 1s and conceded/), "the clock", hostPi.notes);
+		await until(() => hostPi.said(/Mardu-Discard win, Jund-Sacrifice lose/), "the result", hostPi.notes);
+		assert.ok(hostPi.said(/timeout 1/), "the report counts the timeout");
+		await until(() => silent.said(/this seat's result is lose/), "the guest to hear it lost", silent.notes);
+	} finally {
+		await hostPi.shutdown();
+		await silent.shutdown();
+	}
 });

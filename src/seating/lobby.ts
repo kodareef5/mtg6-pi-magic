@@ -25,9 +25,14 @@ export type Lobby = {
 	seats: SeatSetup[];
 	/** A coin flip decides who plays first unless the host names a seat. */
 	first: "coin" | SeatId;
+	/** Seconds a guest seat has to answer each decision before it concedes, or null for no clock. */
+	clock: number | null;
 	stage: Stage;
 	agreed: Record<Agreement, SeatId[]>;
 };
+
+/** Two minutes a decision, as a table setting: long enough for a person or a guest's models, short enough that a guest who left does not hold the table. */
+export const CLOCK = 120;
 
 export const GAME_TYPES = {
 	"standard-alpha": { name: "Standard alpha: main decks only, one on one", seats: 2 },
@@ -35,7 +40,7 @@ export const GAME_TYPES = {
 
 export function lobby(decks: readonly string[], game: keyof typeof GAME_TYPES = "standard-alpha"): Lobby {
 	if (decks.length !== GAME_TYPES[game].seats) throw new Error(`${GAME_TYPES[game].name} seats ${GAME_TYPES[game].seats} players, not ${decks.length}.`);
-	return { game, seats: decks.map((deck) => ({ deck, by: "ai" as const })), first: "coin", stage: "setting", agreed: { prepare: [], begin: [] } };
+	return { game, seats: decks.map((deck) => ({ deck, by: "ai" as const })), first: "coin", clock: CLOCK, stage: "setting", agreed: { prepare: [], begin: [] } };
 }
 
 /**

@@ -64,7 +64,17 @@ Each ask has a number, and an answer names the one it answers.
 - A pick that names no listed option: `unknown-option`.
 
 Those five answers are the whole concurrency story. There is no lock and no
-lease. A turn clock is a table rule, not part of the wire.
+lease.
+
+## The clock
+
+The table's clock is a table rule, 120 seconds a decision unless the host sets
+another with `/magic clock`. A state carries the clock and, for an open ask,
+the time left when it was sent. A guest seat that does not answer in time
+concedes, and the guest hears it on its next read: it keeps reading its chair
+while its seat chooses, and drops an ask the host has closed. A guest that
+disconnected therefore loses instead of holding the table. Pausing stops the
+clock, and continuing gives the seat its full time again.
 
 ## What a state deliberately does not carry
 

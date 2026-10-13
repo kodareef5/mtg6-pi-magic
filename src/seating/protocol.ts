@@ -50,6 +50,10 @@ export type State = {
 	frame?: Frame;
 	/** Present when the frame asks for an answer. Answer each ask once. */
 	ask?: number;
+	/** The table's clock: seconds a seat has for each decision before it concedes. */
+	clock?: number;
+	/** Milliseconds left on this seat's clock for the open ask, when the state was sent. Paused, the clock stops. */
+	remaining?: number;
 	/** Rollbacks so far. A change means private work begun before it is stale. */
 	resets: number;
 	/** Turn recaps, written from the spectator view: the turn, its active seat, the line, and the log range it covers. */

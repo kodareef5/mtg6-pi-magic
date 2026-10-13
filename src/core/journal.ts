@@ -28,6 +28,7 @@ import { activate } from "./procedures.ts";
 import type { Deck } from "./decks.ts";
 import type { Ruled, Case, Ruling } from "./judge.ts";
 import { ended } from "./host.ts";
+import { concede } from "./concede.ts";
 
 export type Header = {
 	/** Missing on historical flat-menu journals. A later version preserves the old prefix. */
@@ -50,6 +51,8 @@ export type Header = {
 	 * seat's roster and keys follow it, not the chair it ended up in.
 	 */
 	seats: { id: SeatId; name: string; deck: Deck; setAs?: SeatId }[];
+	/** Seconds a guest seat had to answer each decision before it conceded, when the table had a clock. */
+	clock?: number;
 	/**
 	 * The data files this game was played against, with their dates. A set
 	 * release changes oracle text, and a replay against different text is a
@@ -329,6 +332,8 @@ export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry
 			);
 		}
 		observe?.(table, decision, row);
+		if (row.picked === "concede") { concede(table, row.seat, row.why === "timeout" ? "timeout" : "chosen"); continue; }
+		if (row.why === "timeout") throw new Error(`Record ${row.seq}: only a concession runs out of time.`);
 		const planned = !Array.isArray(row.offered) && row.offered.planned
 			? planState({ seat: decision.seat, version: table.cursor.clock, view: project(table, decision.seat), decision }) : null;
 		const menu = planned

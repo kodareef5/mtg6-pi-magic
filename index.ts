@@ -167,7 +167,7 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(
 		ctx: ExtensionContext,
-		from: { seed: string; decks?: string[]; alpha?: true; setAs?: SeatId[]; remote?: Record<SeatId, Player> } | { resume: string },
+		from: { seed: string; decks?: string[]; alpha?: true; setAs?: SeatId[]; remote?: Record<SeatId, Player>; clock?: number | null } | { resume: string },
 	): Promise<{ opened: Table; sitting: Seated }> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
@@ -207,6 +207,7 @@ export default function (pi: ExtensionAPI) {
 				format: standard.name,
 				seed: from.seed,
 				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck, ...(from.setAs ? { setAs: from.setAs[at.id]! } : {}) })),
+				...(from.clock ? { clock: from.clock } : {}),
 				cards: { path: cards.path, generated: cards.generated, ...(cards.faces ? { faces: cards.faces } : {}), ...(cards.names ? { names: cards.names } : {}) },
 				rules: { path: RULES, effective: rules.effective },
 				created: new Date().toISOString(),
@@ -365,7 +366,8 @@ export default function (pi: ExtensionAPI) {
 		});
 		if (view?.window.kind === "turn") lines.push(`  Turn ${view.window.turn}, ${table!.seats[view.window.active]?.name}'s ${view.window.step.replace(/-/g, " ")}. Version ${table!.ledger.length}.`);
 		const asking = holding?.asking();
-		if (asking) lines.push(`  Waiting on seat ${asking.seat} for ${Math.round((Date.now() - asking.since) / 1000)}s.`);
+		if (asking) lines.push(`  Waiting on seat ${asking.seat} for ${Math.round((Date.now() - asking.since) / 1000)}s${asking.clock ? ` of its ${asking.clock}s` : ""}.`);
+		else if (setup.stage === "setting" && setup.seats.some((one) => one.by === "remote")) lines.push(`  Clock: ${setup.clock ? `${setup.clock}s a decision for guest seats, then they concede` : "off"}. /magic clock <seconds|off>`);
 		else if (host.asking) lines.push(`  ${host.asking}`);
 		// Pi shows ten lines of a text widget: the status, the last few public lines, and what the host can do next.
 		if (setup.stage === "playing") lines.push(...host.feed.slice(-FEED).map((line) => `  · ${line.length > 110 ? `${line.slice(0, 107)}...` : line}`));
@@ -442,6 +444,8 @@ export default function (pi: ExtensionAPI) {
 		const game = host === ours ? table : null;
 		return {
 			stage: ours.lobby.stage, ...(ours.hold?.paused() ? { paused: true as const } : {}),
+			...(ours.lobby.clock ? { clock: ours.lobby.clock } : {}),
+			...((asking) => asking?.clock && asking.seat === seat && !ours.hold?.paused() ? { remaining: Math.max(0, asking.since + asking.clock * 1000 - Date.now()) } : {})(ours.hold?.asking()),
 			...(seat !== undefined && seat >= 0 ? { seat, seats: game?.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck })) ?? decks.map((name, at) => ({ id: at, name: names[at]!, deck: alpha(deck(name)) })) } : {}),
 			recaps: (host === ours ? seated?.chronicle.recaps ?? [] : []).map((one) => ({ ...one })),
 			...(game?.outcome ? { outcome: game.outcome } : {}),
@@ -490,7 +494,7 @@ export default function (pi: ExtensionAPI) {
 			ctx.ui.notify(`Every seat agreed to prepare. ${by === "coin" ? "The coin flip" : "The host"} put ${decks[0]} on the play. Preparing ${id}.`, "info");
 			const remote = Object.fromEntries(setup.seats.flatMap((one, at) => one.by === "remote" ? [[at, ours.wire!.open(one.setAs!, one.deck).chair.player]] : []));
 			try {
-				const { opened, sitting } = await open(ctx, { seed: id, decks, alpha: true, setAs: order, remote });
+				const { opened, sitting } = await open(ctx, { seed: id, decks, alpha: true, setAs: order, remote, ...(Object.keys(remote).length ? { clock: setup.clock } : {}) });
 				// A table replaced while this one prepared keeps its own game: this preparation is closed, not installed.
 				if (host !== ours) { await Promise.all(Object.values(sitting.players).map((player) => player.close())); return; }
 				table = opened; seated = sitting;
@@ -512,13 +516,20 @@ export default function (pi: ExtensionAPI) {
 			if (!await askSeats(ctx, ours, "begin") || ours.lobby.stage !== "prepared") return showTable(ctx);
 			const holding = hold(restartOf(game, universe(standard.name)), (direction, now, refused) => {
 				if (refused) { ctx.ui.notify(`The table refused ${direction.do}: ${refused} Play goes on.`, "warning"); return; }
+				if (direction.do === "timeout") {
+					ours.feed.push(`Seat ${direction.seat} ran out of time on the clock and conceded.`);
+					ctx.ui.notify(`Seat ${direction.seat} did not answer within ${ours.lobby.clock}s and conceded.`, "warning");
+					return;
+				}
 				if (direction.do !== "rollback") return;
 				ours.feed.push(`The host rolled the game back to version ${direction.to}: ${direction.note}`);
 				ctx.ui.notify(`Rolled back to version ${direction.to}. Every seat plans again.`, "info");
 				const board = feedFor(ctx, now);
 				board.take(`rolled-back-to-${direction.to}`);
 			});
-			sitting.players = Object.fromEntries(Object.entries(sitting.players).map(([id, player]) => [id, holding.seat(player, Number(id))]));
+			// The clock is for guest seats: the host's own models are bounded by their call limits.
+			const clocked = (at: number) => ours.lobby.seats[at]?.by === "remote" && ours.lobby.clock ? ours.lobby.clock : undefined;
+			sitting.players = Object.fromEntries(Object.entries(sitting.players).map(([id, player]) => [id, holding.seat(player, Number(id), clocked(Number(id)))]));
 			Object.assign(ours, { hold: holding, ticker: setInterval(() => showTable(ctx), 5_000) });
 			ours.lobby.stage = "playing";
 			told(ctx);
@@ -619,7 +630,7 @@ export default function (pi: ExtensionAPI) {
 		const view = state?.frame?.view;
 		if (view?.window.kind === "turn") lines.push(`  Turn ${view.window.turn}, ${view.window.step.replace(/-/g, " ")}. Life ${(view.players ?? []).map((one) => `${state!.seats?.[one.id]?.name ?? one.id} ${one.life}`).join(", ")}.`);
 		if (state?.agreement) lines.push(`  The host asks every seat to ${state.agreement}.`);
-		else if (state?.ask) lines.push("  Your seat is choosing.");
+		else if (state?.ask) lines.push(`  Your seat is choosing.${state.remaining !== undefined ? ` About ${Math.round(state.remaining / 1000)}s left on the clock when asked; then it concedes.` : ""}`);
 		lines.push("  /magic leave gives up the chair.");
 		return lines;
 	}
@@ -686,8 +697,8 @@ export default function (pi: ExtensionAPI) {
 		});
 	}
 
-	const VERBS = ["host", "seat", "first", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
-	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | first <coin|n> | start | begin | " +
+	const VERBS = ["host", "seat", "first", "clock", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
+	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | first <coin|n> | clock <seconds|off> | start | begin | " +
 		"join <invite> | leave | " +
 		"pause | continue | rollback <version> [why] | end [why] | status | resume <game> | clone <game> <version> <new-id> | " +
 		"models [why|<role> <pattern> [seat]] | board | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
@@ -738,6 +749,15 @@ export default function (pi: ExtensionAPI) {
 			if (verb === "rollback" || verb === "end") return direct(ctx, words);
 			if (verb === "resume") return resumeGame(ctx, seed);
 
+			if (verb === "clock") {
+				if (!host || host.lobby.stage !== "setting") { ctx.ui.notify("The clock is set before /magic start.", "warning"); return; }
+				const seconds = words[1] === "off" ? null : Number(words[1]);
+				if (seconds !== null && (!Number.isFinite(seconds) || seconds <= 0)) { ctx.ui.notify("/magic clock <seconds|off>. A guest seat that does not answer within it concedes.", "warning"); return; }
+				host.lobby.clock = seconds;
+				ctx.ui.notify(seconds ? `Guest seats have ${seconds}s for each decision, then concede.` : "No clock: the table waits for every seat however long it takes.", "info");
+				showTable(ctx);
+				return;
+			}
 			if (verb === "seat" || verb === "first") {
 				if (!host || host.lobby.stage !== "setting") { ctx.ui.notify("Seats and who plays first are set before /magic start.", "warning"); return; }
 				if (verb === "first") {
