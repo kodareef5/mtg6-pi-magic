@@ -16,7 +16,7 @@
  */
 
 import { claudeCli } from "./src/context/claude-cli.ts";
-import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, dirname, join } from "node:path";
 
@@ -78,6 +78,7 @@ import { load as loadRules, search as searchRules } from "./src/core/rules.ts";
 import type { Table } from "./src/core/table.ts";
 import type { SeatId, Viewer } from "./src/core/types.ts";
 import { drawSeries, playByPlay } from "./src/board/series.ts";
+import { gameStats, type Run } from "./src/board/viewer.ts";
 import { project, render } from "./src/core/view.ts";
 import { CommandsSchema, commands } from "./src/core/work-language.ts";
 import { editWork, workFrame } from "./src/core/work-tools.ts";
@@ -169,6 +170,17 @@ export default function (pi: ExtensionAPI) {
 			...(background ? { background } : {}), ...(mine?.colors ? { colors: mine.colors } : {}) };
 	}
 
+	/** What a game's run took, from its newest saved result, when one was saved with model usage. */
+	function runOf(game: string): Run | undefined {
+		const named = new RegExp(`^${game.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-\\d+\\.result\\.json$`);
+		const newest = readdirSync(GAMES).filter((name) => named.test(name)).sort().at(-1);
+		if (!newest) return undefined;
+		const result = JSON.parse(readFileSync(join(GAMES, newest), "utf8")) as { elapsedMs?: number; llm?: { total?: { calls: number; input: number; output: number; cost: number }; roles?: { role: string; calls: number; cost: number }[] } };
+		const total = result.llm?.total;
+		return total && result.elapsedMs !== undefined ? { elapsedMs: result.elapsedMs, calls: total.calls, input: total.input, output: total.output, cost: total.cost,
+			roles: (result.llm?.roles ?? []).map(({ role, calls, cost }) => ({ role, calls, cost })) } : undefined;
+	}
+
 	/**
 	 * A saved game as a play-by-play picture series, drawn beside the session:
 	 * its journal replays, calling no models, and every moment something visible
@@ -191,10 +203,11 @@ export default function (pi: ExtensionAPI) {
 		if (viewer !== "spectator" && !back.header.seats[viewer]) { ctx.ui.notify(`${game} has no seat ${viewer}.`, "warning"); return; }
 		series!.take(back.table);
 		const seen = viewer === "spectator" ? "spectator" : `seat-${viewer}`, dir = join(GAMES, `${game}-pictures`, seen), moments = series!.moments;
+		const stats = gameStats(back.table, back.header.created, runOf(game)), title = back.table.seats.map((one) => one.name).join(" vs ");
 		ctx.ui.notify(`Drawing ${moments.length} pictures of ${game} as ${viewer === "spectator" ? "the spectator" : `seat ${viewer}`} saw it, into ${dir}.`, "info");
-		void drawSeries(moments, drawer, dir, `${game}: play by play, ${seen}`, { dress: dressOf(back.header, viewer),
+		void drawSeries(moments, drawer, dir, title, { subtitle: `${game} · play by play as ${viewer === "spectator" ? "the spectator" : `seat ${viewer}`} saw it`, stats, dress: dressOf(back.header, viewer),
 			progress: (done, total) => { if (ctx.hasUI) ctx.ui.setWidget("magic-pictures", done < total ? [`Drawing ${game}: ${done} of ${total} pictures.`] : undefined); } })
-			.then(({ files, failed }) => ctx.ui.notify(`Drew ${files.length} pictures of ${game}${failed ? `; ${failed} failed and are noted in the index` : ""}. ${join(dir, "index.md")} lists what happened in each.`, failed ? "warning" : "info"),
+			.then(({ files, failed }) => ctx.ui.notify(`Drew ${files.length} pictures of ${game}${failed ? `; ${failed} failed and are noted in the index` : ""}. Open ${join(dir, "index.html")} to flip through them.`, failed ? "warning" : "info"),
 				(error) => { if (ctx.hasUI) ctx.ui.setWidget("magic-pictures", undefined); ctx.ui.notify(`The pictures stopped: ${error instanceof Error ? error.message : String(error)}`, "error"); });
 	}
 

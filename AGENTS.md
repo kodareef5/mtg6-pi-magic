@@ -281,8 +281,10 @@ records the looks.
 play-by-play picture series (`src/board/series.ts`). The journal replays,
 calling no models, and each moment something visible happened becomes a
 numbered picture as that viewer saw it; a moment that leaves the board as it
-was joins the one before. `index.md` beside the pictures lists what happened
-in each. A full game is about 150 to 200 pictures at 1920 × 1080, drawn in
+was joins the one before. `index.html` beside the pictures flips through them
+(`src/board/viewer.ts`): what happened, each seat's counts at that moment, life
+over the game, per-seat totals counted from the game's log and ledger, and the
+run's time and cost when its result was saved. `index.md` lists the same lines. A full game is about 150 to 200 pictures at 1920 × 1080, drawn in
 about a minute.
 
 Saved pictures are WebP (jSquash's libwebp build, quality 85), about a tenth
@@ -662,6 +664,7 @@ src/board/             board pictures: no game logic, never read by a seat
   cardboard.ts         the interim renderer: a snapshot as a cardboard-api MTG 26 scene (optional dependency)
   looks.ts             seat portraits and table backgrounds: the defaults in assets/, or image URLs
   series.ts            a saved game as a play-by-play picture series, with an index of what happened
+  viewer.ts            the series' page: flip through it with each moment's counts and the game's totals
   feed.ts              one picture per turn and at the end, drawn off the game loop and saved
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/card-names.ts    build the Oracle name companion from a matching cached bulk snapshot
