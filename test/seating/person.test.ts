@@ -110,13 +110,25 @@ test("a person's menu folds equal payments, leads a trigger with its target, and
 		{ id: "p1", label: "Add to payment: tap Gene Pollinator (1-21) and Azog (1-0) for {W}" },
 		{ id: "p2", label: "Add to payment: tap Gene Pollinator (1-21) and Azog (1-0) for {B}" },
 		{ id: "p3", label: "Add to payment: tap Blood Crypt (1-8) for {B}" },
+		{ id: "land:1-9", label: "Play Blooming Marsh" }, { id: "land:1-10", label: "Play Blooming Marsh" },
 		{ id: "t1", label: "Put on the stack: Azog: When Azog enters, destroy a creature. Target 1: Inti (0-32@5, opponent's, 2/2).",
 			trigger: { id: "x", name: "Azog (1-0@3)", text: "When Azog enters, destroy a creature.", targets: [] } },
 		{ id: "b1", label: "Block Hardened Academic with Gene Pollinator", shows: "Conflicts with flying: needs flying or reach. In normal combat damage..." },
 	] } } as unknown as Frame;
 	const lines = menu({ frame });
-	assert.deepEqual(lines.map((line) => line.option.id), ["p2", "p3", "t1", "b1"], "colour variants are one line, kept on the colour the cost needs");
+	assert.deepEqual(lines.map((line) => line.option.id), ["p2", "p3", "land:1-9", "t1", "b1"], "colour variants and copies are one line, kept on the colour the cost needs");
 	assert.equal(lines[0]!.label, "Add to payment: tap Gene Pollinator and Azog for {B}");
-	assert.equal(lines[2]!.label, "Put Azog's trigger on the stack: Target 1: Inti (0-32@5, opponent's, 2/2).");
-	assert.match(lines[3]!.label, /\(Conflicts with flying: needs flying or reach\)$/);
+	assert.equal(lines[3]!.label, "Put Azog's trigger on the stack: Target 1: Inti (0-32@5, opponent's, 2/2).");
+	assert.match(lines[4]!.label, /\(Conflicts with flying: needs flying or reach\)$/);
+});
+
+test("payments that fold into one line need no person", async () => {
+	const seat = person("B", undefined, "manual", () => {});
+	const frame = { ...ask(1), decision: { situation: "priority", seat: 1, question: "Choose a complete payment.", options: [
+		{ id: "announce:payment:a", label: "Confirm and pay: tap Blood Crypt (1-8) for {B}; tap Verge (1-6) for {R}" },
+		{ id: "announce:payment:b", label: "Confirm and pay: tap Blood Crypt (1-8) for {R}; tap Verge (1-6) for {B}" },
+		{ id: "announce:individual", label: "Choose mana sources individually; spend nothing yet" },
+		{ id: "announce:cancel", label: "Cancel this use and return to priority; spend nothing" },
+	] } } as unknown as Frame;
+	assert.equal((await seat.player.answer(frame) as { option: string }).option, "announce:payment:a");
 });

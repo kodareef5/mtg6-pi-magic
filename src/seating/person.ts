@@ -36,18 +36,19 @@ const ESCAPES = new Set(["announce:back", "announce:cancel", "payment:cancel", "
 export const escape = (option: Option) => ESCAPES.has(option.id) || /^(announce:unpay|announce:remove-target|payment:remove):/.test(option.id);
 
 /**
- * The question as a person reads it, numbered from 1. Payments that tap the
- * same permanents are one line, whatever colour pays the generic part or
- * whichever copy of a card taps; the line keeps the autopilot's choice, or the
- * colour the cost still needs. A trigger leads with its card and target, and a
- * listed move that breaks a rule says so.
+ * The question as a person reads it, numbered from 1. Options a person cannot
+ * tell apart are one line: two copies of a land to play, or payments that tap
+ * the same permanents, whatever colour pays the generic part or whichever copy
+ * of a card taps. The line keeps the autopilot's choice, or the colour the
+ * cost still needs. A trigger leads with its card and target, and a listed
+ * move that breaks a rule says so.
  */
 export function menu(asking: Asking): { option: Option; label: string }[] {
 	const options = asking.frame.decision?.options ?? [], needs = new Set(/Still needs[^.]*/.exec(asking.frame.decision?.question ?? "")?.[0].match(/\{[WUBRG]\}/g) ?? []);
 	const lines = new Map<string, Option[]>();
 	for (const option of options) {
 		const paying = /^(Confirm and pay|Add to payment):/.test(option.label);
-		const key = paying ? option.label.replace(/ \((?:\d+-\d+|token-[\d-]+)\)/g, "").replace(/\{[WUBRG]\}/g, "{*}") : option.id;
+		const key = paying ? option.label.replace(/ \((?:\d+-\d+|token-[\d-]+)\)/g, "").replace(/\{[WUBRG]\}/g, "{*}") : option.label;
 		lines.set(key, [...(lines.get(key) ?? []), option]);
 	}
 	return [...lines.values()].map((same) => {
@@ -85,9 +86,10 @@ export function person(name: string, autopilot: Player | undefined, start: Mode,
 			latest = frame;
 			if (passingTurn !== undefined && (passingTurn !== turnOf(frame) || answerable(frame))) passingTurn = undefined;
 			if (conceding) return { kind: "concede", by: "person" };
-			const options = frame.decision?.options ?? [], real = options.filter((one) => !escape(one));
+			// One real line left once options a person cannot tell apart are folded: nothing to choose.
+			const real = menu({ frame }).filter((line) => !escape(line.option));
 			if (mode === "auto" && autopilot) return autopilot.answer(frame);
-			if (real.length === 1 && !frame.refused?.length) return pick(frame, real[0]!.id, "person");
+			if (real.length === 1 && !frame.refused?.length) return pick(frame, real[0]!.option.id, "person");
 			let suggestion: Asking["suggestion"];
 			if (mode === "suggest" && autopilot) {
 				const proposed = await autopilot.answer(frame);
