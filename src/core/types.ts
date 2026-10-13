@@ -145,6 +145,8 @@ export type SeatView = {
 	announcementPlan?: import("./language.ts").Plan;
 	/** The steps of this seat's current plan its actions have carried out, read from the ledger. */
 	done?: number[];
+	/** Of those, the steps this seat's attack picks carried out in the declaration still under way. */
+	declaring?: number[];
 	/** Mana is public. Stable ids distinguish individual units in a payment. */
 	pools?: { seat: SeatId; mana: Mana[] }[];
 	/** The remaining instruction cursor, without any hidden library identities. */

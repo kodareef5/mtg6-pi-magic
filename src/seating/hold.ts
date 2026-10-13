@@ -18,8 +18,11 @@ export type Direction = { do: "rollback"; to: number; note: string } | { do: "en
 
 export type Hold = ReturnType<typeof hold>;
 
-/** `applied` hears each direction once the stopped table carries it. */
-export function hold(restart: () => Table, applied?: (direction: Direction, table: Table) => void) {
+/**
+ * `applied` hears each direction once the stopped table carries it, or why the
+ * table refused it. A refused direction changes nothing and play goes on.
+ */
+export function hold(restart: () => Table, applied?: (direction: Direction, table: Table, refused?: string) => void) {
 	let paused = false, direction: Direction | null = null, waiting: (() => void)[] = [];
 	let asking: { seat: SeatId; since: number } | null = null;
 	const halting = () => {
@@ -43,8 +46,13 @@ export function hold(restart: () => Table, applied?: (direction: Direction, tabl
 		halted(table: Table): boolean {
 			const next = direction;
 			direction = null; halt = halting();
-			if (next?.do === "end") endByHost(table, next.note);
-			else if (next?.do === "rollback") rollbackByHost(table, next.to, next.note, restart);
+			try {
+				if (next?.do === "end") endByHost(table, next.note);
+				else if (next?.do === "rollback") rollbackByHost(table, next.to, next.note, restart);
+			} catch (error) {
+				applied?.(next!, table, error instanceof Error ? error.message : String(error));
+				return true;
+			}
 			if (next) applied?.(next, table);
 			return next?.do !== "end" && next?.do !== "leave";
 		},

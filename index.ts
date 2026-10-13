@@ -130,7 +130,8 @@ export default function (pi: ExtensionAPI) {
 	// Board pictures: one after each turn and one at the end, saved beside the game and shown above the
 	// editor where the terminal draws images; elsewhere the widget names the file.
 	let renderer: Promise<BoardRenderer | null> | undefined;
-	const feedFor = (ctx: ExtensionContext, game: Table) => boardFeed(game, renderer ??= cardboardRenderer(artIds(), join(CACHE, "art")),
+	// Without a terminal to show them in there are no pictures: a headless Pi draws nothing and fetches no art.
+	const feedFor = (ctx: ExtensionContext, game: Table) => !ctx.hasUI ? { take() {}, settled: async () => {} } : boardFeed(game, renderer ??= cardboardRenderer(artIds(), join(CACHE, "art")),
 		join(GAMES, `${basename(games.get(game)?.path ?? "table", ".jsonl")}-boards`),
 		(png, path) => {
 			if (ctx.hasUI) ctx.ui.setWidget("magic-board", (_tui, theme) => new Image(Buffer.from(png).toString("base64"), "image/png",
@@ -158,8 +159,8 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(
 		ctx: ExtensionContext,
-		from: { seed: string; decks?: string[]; alpha?: true } | { resume: string },
-	): Promise<Table> {
+		from: { seed: string; decks?: string[]; alpha?: true; setAs?: SeatId[] } | { resume: string },
+	): Promise<{ opened: Table; sitting: Seated }> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
 		const resuming = "resume" in from;
@@ -197,7 +198,7 @@ export default function (pi: ExtensionAPI) {
 				id: from.seed,
 				format: standard.name,
 				seed: from.seed,
-				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
+				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck, ...(from.setAs ? { setAs: from.setAs[at.id]! } : {}) })),
 				cards: { path: cards.path, generated: cards.generated, ...(cards.faces ? { faces: cards.faces } : {}), ...(cards.names ? { names: cards.names } : {}) },
 				rules: { path: RULES, effective: rules.effective },
 				created: new Date().toISOString(),
@@ -206,11 +207,13 @@ export default function (pi: ExtensionAPI) {
 		}
 
 		const began = Date.now();
-		seated = await seatTable(opened, (at) => roster(ctx, at), inference(ctx), cards, {
+		// A seat's roster and keys belong to the seat the host set up, which a coin flip may have moved.
+		const setAs = (at: SeatId) => header.seats[at]?.setAs ?? at;
+		const sitting = await seatTable(opened, (at) => roster(ctx, setAs(at)), inference(ctx), cards, {
 			format: standard.name,
 			reusePackages: !resuming,
 			packageNotice: (message) => ctx.ui.notify(message, "warning"),
-			seatInference: (at) => inference(ctx, seatKeys(loadCrew(ROSTER), at)),
+			seatInference: (at) => inference(ctx, seatKeys(loadCrew(ROSTER), setAs(at))),
 			journal,
 			// The rules are already loaded for the replay check, so the dialer costs
 			// nothing to switch on: a seat may look a rule up mid decision.
@@ -223,9 +226,8 @@ export default function (pi: ExtensionAPI) {
 			ctx.ui.notify([...report(result), ...paths].join("\n"), "warning");
 			throw error;
 		});
-		table = opened;
 		games.set(opened, journal);
-		return opened;
+		return { opened, sitting };
 	}
 
 	pi.registerTool({
@@ -311,8 +313,10 @@ export default function (pi: ExtensionAPI) {
 		];
 		const keys = loadCrew(ROSTER).keys ?? {};
 		for (const at of seats) {
-			lines.push("", `Seat ${at.id}, ${at.name}:`, ...mine(await roster(ctx, at.id), "seat"));
-			for (const [provider, named] of Object.entries(keys[String(at.id)] ?? {}))
+			// The roster file names seats as the host set them up; a coin flip may have moved one to another chair.
+			const setAs = (table && games.get(table)?.header.seats[at.id]?.setAs) ?? at.id;
+			lines.push("", `Seat ${at.id}, ${at.name}${setAs !== at.id ? ` (set up as seat ${setAs})` : ""}:`, ...mine(await roster(ctx, setAs), "seat"));
+			for (const [provider, named] of Object.entries(keys[String(setAs)] ?? {}))
 				lines.push(`  ${provider} calls use this seat's key from ${named}${process.env[named.replace(/^\$/, "")] ? "" : ", which is not set"}.`);
 		}
 		lines.push("", "The table:", ...mine(await roster(ctx), "table"));
@@ -339,7 +343,8 @@ export default function (pi: ExtensionAPI) {
 		const view = table && setup.stage !== "setting" ? project(table, "spectator") : undefined;
 		setup.seats.forEach((one, at) => {
 			const life = view?.players?.find((facts) => facts.id === at)?.life;
-			lines.push(`  Seat ${at}  ${table?.seats[at]?.name ?? one.deck}  ${one.by === "ai" ? "model" : one.by}${life !== undefined ? `  life ${life}` : ""}`);
+			const moved = one.setAs !== undefined && one.setAs !== at ? ` (set up as seat ${one.setAs})` : "";
+			lines.push(`  Seat ${at}${moved}  ${table?.seats[at]?.name ?? one.deck}  ${one.by === "ai" ? "model" : one.by}${life !== undefined ? `  life ${life}` : ""}`);
 		});
 		if (view?.window.kind === "turn") lines.push(`  Turn ${view.window.turn}, ${table!.seats[view.window.active]?.name}'s ${view.window.step.replace(/-/g, " ")}. Version ${table!.ledger.length}.`);
 		const asking = holding?.asking();
@@ -399,16 +404,24 @@ export default function (pi: ExtensionAPI) {
 		const declined = await agree(setup, "prepare", async () => true);
 		if (declined.length) { ctx.ui.notify(`Seat ${declined.join(", ")} did not agree to prepare.`, "warning"); return; }
 		const { order, by } = seatOrder(setup);
-		setup.seats = order.map((at) => setup.seats[at]!);
+		setup.seats = order.map((at) => ({ ...setup.seats[at]!, setAs: at }));
 		const decks = setup.seats.map((one) => one.deck);
-		const id = `${slug(decks[0]!)}-vs-${slug(decks[1]!)}-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "")}`;
+		const base = `${slug(decks[0]!)}-vs-${slug(decks[1]!)}-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "")}`;
+		let id = base;
+		for (let n = 2; existsSync(join(GAMES, `${id}.jsonl`)); n++) id = `${base}-${n}`;
 		setup.stage = "preparing";
 		showTable(ctx);
 		ctx.ui.notify(`Every seat agreed to prepare. ${by === "coin" ? "The coin flip" : "The host"} put ${decks[0]} on the play. Preparing ${id}.`, "info");
 		const ours = host;
-		void open(ctx, { seed: id, decks, alpha: true }).then(
-			() => { ours.lobby.stage = "prepared"; ctx.ui.notify(`Prepared ${id}. ${NEXT.prepared}`, "info"); },
-			(error) => { ours.lobby.stage = "setting"; ctx.ui.notify(`Preparation failed: ${error instanceof Error ? error.message : String(error)}`, "error"); },
+		void open(ctx, { seed: id, decks, alpha: true, setAs: order }).then(
+			async ({ opened, sitting }) => {
+				// A table replaced while this one prepared keeps its own game: this preparation is closed, not installed.
+				if (host !== ours) { await Promise.all(Object.values(sitting.players).map((player) => player.close())); return; }
+				table = opened; seated = sitting;
+				ours.lobby.stage = "prepared";
+				ctx.ui.notify(`Prepared ${id}. ${NEXT.prepared}`, "info");
+			},
+			(error) => { ours.lobby.stage = "setting"; if (host === ours) ctx.ui.notify(`Preparation failed: ${error instanceof Error ? error.message : String(error)}`, "error"); },
 		).finally(() => showTable(ctx));
 	}
 
@@ -417,7 +430,8 @@ export default function (pi: ExtensionAPI) {
 		if (!host || host.lobby.stage !== "prepared" || !table || !seated) { ctx.ui.notify(host ? `The table is ${host.lobby.stage}, not prepared.` : "No table. /magic host sets one.", "warning"); return; }
 		const declined = await agree(host.lobby, "begin", async () => true);
 		if (declined.length) { ctx.ui.notify(`Seat ${declined.join(", ")} did not agree to begin.`, "warning"); return; }
-		const holding = hold(restartOf(table, universe(standard.name)), (direction, now) => {
+		const holding = hold(restartOf(table, universe(standard.name)), (direction, now, refused) => {
+			if (refused) { ctx.ui.notify(`The table refused ${direction.do}: ${refused} Play goes on.`, "warning"); return; }
 			if (direction.do !== "rollback") return;
 			host?.feed.push(`The host rolled the game back to version ${direction.to}: ${direction.note}`);
 			ctx.ui.notify(`Rolled back to version ${direction.to}. Every seat plans again.`, "info");
@@ -468,7 +482,8 @@ export default function (pi: ExtensionAPI) {
 		const journal = games.get(table);
 		if (verb === "rollback") {
 			const to = Number(at), note = why.join(" ") || "The host rolled the game back.";
-			if (!Number.isInteger(to)) { ctx.ui.notify(`/magic rollback <version> [why]. The game is at version ${table.ledger.length}.`, "warning"); return; }
+			// Checked before the game is interrupted: a bad version must not stop play.
+			if (!Number.isInteger(to) || to < 0 || to >= table.ledger.length) { ctx.ui.notify(`/magic rollback <version> [why], from 0 to ${table.ledger.length - 1}. The game is at version ${table.ledger.length}.`, "warning"); return; }
 			if (running && host?.hold) { host.hold.direct({ do: "rollback", to, note }); ctx.ui.notify(`Rolling back to version ${to}.${host.hold.paused() ? " Still paused: /magic continue." : ""}`, "info"); return; }
 			rollbackByHost(table, to, note, restartOf(table, universe(standard.name)));
 			if (journal) saveGame(journal, table);
@@ -492,8 +507,12 @@ export default function (pi: ExtensionAPI) {
 
 	async function resumeGame(ctx: ExtensionContext, id: string) {
 		if (running) { ctx.ui.notify("A game is in play. /magic end it, or let it finish, first.", "warning"); return; }
-		const opened = await open(ctx, { resume: id });
-		host = { lobby: { ...lobby(opened.seats.map((one) => one.deck.name)), stage: "prepared" }, feed: [] };
+		const { opened, sitting } = await open(ctx, { resume: id });
+		await Promise.all(Object.values(seated?.players ?? {}).map((player) => player.close()));
+		table = opened; seated = sitting;
+		const setAs = games.get(opened)?.header.seats;
+		const setup = lobby(opened.seats.map((one) => one.deck.name));
+		host = { lobby: { ...setup, seats: setup.seats.map((one, at) => ({ ...one, setAs: setAs?.[at]?.setAs ?? at })), stage: "prepared" }, feed: [] };
 		showTable(ctx);
 		ctx.ui.notify(`Resumed ${id} at version ${opened.ledger.length}. ${NEXT.prepared}`, "info");
 	}
@@ -583,7 +602,8 @@ export default function (pi: ExtensionAPI) {
 			// One decision at a time, shown as the seat about to answer it reads
 			// it. The point is to read the rails, not to watch a result.
 			if (verb === "step") {
-				const open_ = table ?? (await open(ctx, { seed }));
+				if (!table) { const made = await open(ctx, { seed }); table = made.opened; seated = made.sitting; }
+				const open_ = table;
 				const decision = nextDecision(open_);
 				const seat = decision?.seat ?? open_.cursor.active;
 				ctx.ui.notify(

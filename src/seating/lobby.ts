@@ -11,8 +11,11 @@
 
 import type { SeatId } from "../core/types.ts";
 
-/** Who answers a seat. Only model seats run in the host's Pi so far. */
-export type SeatSetup = { deck: string; by: "ai" };
+/**
+ * Who answers a seat. Only model seats run in the host's Pi so far. `setAs` is
+ * the seat it was set up as before the table was ordered: its roster and keys.
+ */
+export type SeatSetup = { deck: string; by: "ai"; setAs?: SeatId };
 export type Agreement = "prepare" | "begin";
 export type Stage = "setting" | "preparing" | "prepared" | "playing" | "over";
 

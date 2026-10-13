@@ -434,7 +434,10 @@ rather than adding a test for each branch.
 - **Hosted.** Nothing deals until every seat agrees. A paused game asks nobody
   and, played on, is the game it would have been. The host's rollback and end
   are journal lines that replay honors; a clone before either, or a rollback
-  past an end, is the game without it.
+  past an end, is the game without it. A direction the table refuses changes
+  nothing and play goes on. Through the extension itself: a table replaced
+  while another prepared keeps its own game, and a seat's models and keys
+  follow it through the coin flip, journaled as `setAs` so a resume keeps them.
 - **Alone.** A finished game reports and returns with nothing else keeping the
   process alive. Stated in a child process, since a test runner keeps the event
   loop awake and hides it.

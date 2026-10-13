@@ -240,8 +240,13 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		...(declaration ? { blockDeclaration: { ...declaration, current, conflicts: [] } } : {}),
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history, castings,
 		...(at.kind === "turn" ? { visit: table.cursor.visit, remainingSteps: [...cursor.steps], stepDone: cursor.stepDone, turnBegan: cursor.began[cursor.active] } : {}),
-		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
-			!withdrawn.has(row.seq) && row.seat === viewer && row.execution?.plan === (table.announcement?.controller === viewer ? table.announcement.plan : table.work[viewer]!.planned) && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
+		...(viewer !== "spectator" && table.work[viewer] ? (() => {
+			const credited = table.ledger.filter((row) => !withdrawn.has(row.seq) && row.seat === viewer && row.execution?.step !== undefined &&
+				row.execution.plan === (table.announcement?.controller === viewer ? table.announcement.plan : table.work[viewer]!.planned));
+			// An attack declaration in progress belongs to this turn: only its own picks can hold an attack step open.
+			const declaring = table.combat?.choosing.length && cursor.active === viewer ? credited.filter((row) => row.picked.startsWith("attack:") && (row.clock ?? 0) >= (cursor.began[viewer] ?? 0)) : [];
+			return { work: structuredClone(table.work[viewer]), done: credited.map((row) => row.execution!.step!), ...(declaring.length ? { declaring: declaring.map((row) => row.execution!.step!) } : {}) };
+		})() : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer), worked: worked(table, viewer, withdrawn) } : {}),
 		since: table.log.slice(since).map((r) => describe(table, r, viewer)).filter(Boolean), ...(at.kind === "turn" ? { recent: recent(table, viewer) } : {}) };
 	if (declaration && view.blockDeclaration) {

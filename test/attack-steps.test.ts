@@ -8,6 +8,8 @@ import { annotate, execution, planState } from "../src/core/planning.ts";
 import type { Table } from "../src/core/table.ts";
 import type { PlanOption } from "../src/core/language.ts";
 import { establish, matchup, quiet } from "./play.ts";
+import { focus } from "../src/context/packet.ts";
+import { startingIntent } from "../src/context/plan.ts";
 
 function reach(table: Table, turn: number) {
 	for (let guard = 0; guard < 3000; guard++) {
@@ -38,6 +40,8 @@ test("an attack step naming three creatures stays open until all three are picke
 	take(`attack:${elves[0]!.id}`);
 	assert.deepEqual(open()!.candidates.map((one) => one.id).sort(), elves.slice(1).map((one) => `attack:${one.id}`).sort(), "the first Elf does not close the set");
 	assert.match(finishNote(), /Finishing now leaves available plan steps unfinished: step 1/);
+	const script = () => focus({ ...workFrame(table, 0), decision: nextDecision(table)! }, startingIntent(0)).plan?.script?.steps ?? [];
+	assert.ok(script().some((line) => line.startsWith("Now: ")) && !script().some((line) => line.startsWith("Done: ")), "the pilot reads the open set as now, not done");
 	assert.ok(!open()!.candidates.some((one) => one.id === `attack:${chocobo.id}`), "a creature the step does not name stays outside it");
 	take(`attack:${elves[1]!.id}`); take(`attack:${elves[2]!.id}`);
 	assert.equal(open()!.candidates.length, 0, "every named Elf is picked");
@@ -59,4 +63,7 @@ test("a finished declaration closes the set; a later turn's declaration does not
 	const later = planState(workFrame(table, 0));
 	assert.ok(later, "the plan is still installed");
 	assert.ok(!later.due.some((one) => one.at === 0), "the step carried out on turn 3 stays done on turn 5");
+	const elf = later.attacks[0]?.objects[0] ?? workFrame(table, 0).view.objects!.find((one) => one.card === "Llanowar Elves" && one.zone === "battlefield")!;
+	apply(table, `attack:${elf.id}`, "model", "chosen");
+	assert.ok(!planState(workFrame(table, 0))!.due.some((one) => one.at === 0), "picking one of its Elves on turn 5 does not reopen it");
 });

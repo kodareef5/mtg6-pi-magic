@@ -214,16 +214,17 @@ export function planState(frame: Frame): PlanState | null {
 		return { at, label: option.label, candidates: found.options,
 			...(option.waitFor === "empty-stack" && frame.view.objects?.some((one) => one.zone === "stack") ? { waiting: true as const } : {}) };
 	};
-	// An attack step names a set: once one of its creatures is picked, it stays open through this declaration
-	// until each creature it names has been picked or can no longer attack. Finished declarations close it.
+	// An attack step names a set: once this declaration has carried it out with one of its creatures, it stays open
+	// until each creature it names has been picked or can no longer attack. Finished declarations close it, and a
+	// later declaration that picks one of those creatures without the step does not reopen it.
 	const picked = (frame.view.combat?.choosing ?? []).flatMap((pick) => "blocker" in pick ? [] : [pick.attacker]);
-	const declaring = (step: PlanOption) => picked.length > 0 && !("procedure" in step.action) && step.action.prefix === "attack:" && !!step.action.objects &&
+	const declaring = (step: PlanOption, at: number) => !!frame.view.declaring?.includes(at) && !("procedure" in step.action) && step.action.prefix === "attack:" && !!step.action.objects &&
 		select(step.action.objects, frame).some((one) => picked.some((ref) => ref.id === one.id && ref.incarnation === one.incarnation));
 	const due: Fit[] = [], waiting: PlanState["waiting"] = [];
 	plan.steps.forEach((step, at) => {
 		if (done.has(at)) {
 			// Reopened for its remaining creatures only: finishing the declaration is a later step's action, not this one's.
-			if (declaring(step) && open(step)) { const reopened = fit(step, at, "s"); due.push({ ...reopened, candidates: reopened.candidates.filter((one) => one.id !== "attack:done") }); }
+			if (declaring(step, at) && open(step)) { const reopened = fit(step, at, "s"); due.push({ ...reopened, candidates: reopened.candidates.filter((one) => one.id !== "attack:done") }); }
 			return;
 		}
 		if (open(step)) due.push(fit(step, at, "s"));

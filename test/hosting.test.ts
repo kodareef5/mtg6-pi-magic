@@ -98,6 +98,22 @@ test("the host's rollback is a journal line: seats are told, play goes on, and r
 	assert.equal(physical(replay(journal.path, dealt).table), physical(table));
 });
 
+test("a direction the table refuses changes nothing, and play goes on", async () => {
+	const refused: string[] = [];
+	const table = dealt(), holding = hold(dealt, (_direction, _table, why) => { if (why) refused.push(why); });
+	holding.pause();
+	const running = hosted(table, holding, 3);
+	await settle();
+	const before = physical(table);
+	holding.direct({ do: "rollback", to: 999, note: "Too far." });
+	await settle();
+	assert.match(refused.join(" "), /Roll back to a version/);
+	assert.equal(physical(table), before, "the table is as it was");
+	holding.resume();
+	await running;
+	assert.ok(table.cursor.turn > 3, "and the game played on");
+});
+
 test("the host's end gives no winner, replay honors it, and a clone before it or a rollback past it plays on", () => {
 	const dir = mkdtempSync(join(tmpdir(), "magic-ended-"));
 	const table = dealt(), journal = open(join(dir, "hosted.jsonl"), made);
