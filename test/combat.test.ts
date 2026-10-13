@@ -1,9 +1,10 @@
 /**
  * Fought. Attacks and blocks are declared one creature at a time and finished as
  * one group; conflicts with registered words are marked, never removed; damage is
- * divided as its controller chooses, trample only past lethal, and all of it is
- * dealt at once; first and double strike add a damage step; an empty attack
- * skips the rest. Positions come from the pinned lists.
+ * divided as its controller chooses, a recipient at a time so no menu outgrows
+ * the damage, trample only past lethal, and all of it is dealt at once; first
+ * and double strike add a damage step; an empty attack skips the rest.
+ * Positions come from the pinned lists.
  */
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
@@ -229,6 +230,45 @@ test("blocks a word forbids are listed and marked, and menace is checked at done
 	commit(realms, [{ do: "note", note: { kind: "label", by: 0, on: { id: spirit.id, incarnation: spirit.incarnation }, until: "end-of-turn", text: "Spirit loses abilities fixture", change: { loseAbilities: true } } }], "resolve");
 	assert.deepEqual(conflicts(spirit, miner), []); assert.deepEqual(conflicts(miner, spirit), []);
 
+});
+
+test("a big trampler's damage is divided a recipient at a time: every menu is short, every division reachable, lethal first, and replay is exact", () => {
+	const table = matchup("staged-division");
+	table.assignmentsFrom = 0;
+	const hydra = establish(table, 0, "Mossborn Hydra");
+	commit(table, [{ do: "counters", what: hydra.id, kind: "+1/+1", amount: 15 }], "game-setup");
+	const walls = [...table.things.values()].filter((one) => one.owner === 1 && one.zone === "library").slice(0, 7);
+	commit(table, walls.map((one) => ({ do: "move" as const, what: one.id, to: "battlefield" as const, faceDown: "manifest" as const, reason: "game-setup" as const })), "game-setup");
+	reach(table, "declare-attackers", 3);
+	pick(table, `attack:${hydra.id}`); pick(table, "attack:done");
+	reach(table, "declare-blockers", 3);
+	for (const wall of walls) pick(table, `block:${wall.id}:${hydra.id}`);
+	pick(table, "block:done");
+	const before = structuredClone(table), from = table.ledger.length;
+	let divide = reach(table, "combat-damage", 3);
+	assert.equal(characteristics(table, hydra)!.power, 16);
+	assert.deepEqual(divide.options.map((one) => one.id), Array.from({ length: 17 }, (_, amount) => `assign:${hydra.id}:0=${amount}`), "the first blocker's share: none to all sixteen");
+	pick(table, `assign:${hydra.id}:0=1`);
+	divide = nextDecision(table)!;
+	assert.ok(divide.options.some((one) => one.id === `assign:${hydra.id}:over`) && divide.options.length === 17, "fifteen left, and a way to start over");
+	pick(table, `assign:${hydra.id}:over`);
+	for (let at = 0; at < 6; at++) { divide = nextDecision(table)!; assert.ok(divide.options.length <= 18); pick(table, `assign:${hydra.id}:${at}=${at ? 2 : 1}`); }
+	divide = nextDecision(table)!;
+	assert.deepEqual(divide.options.filter((one) => !one.id.endsWith(":over")).map((one) => one.id), [`assign:${hydra.id}:6=5`],
+		"the first blocker has less than lethal, so with trample the last blocker takes all that is left and the player none");
+	pick(table, `assign:${hydra.id}:over`);
+	for (let at = 0; at < 6; at++) pick(table, `assign:${hydra.id}:${at}=2`);
+	divide = nextDecision(table)!;
+	assert.deepEqual(divide.options.filter((one) => !one.id.endsWith(":over")).map((one) => one.id), [2, 3, 4].map((amount) => `assign:${hydra.id}:6=${amount}`),
+		"with every blocker at lethal, the rest may trample over");
+	assert.match(divide.options[0]!.label, /assigns 2 to .*, 2 to seat 1$/);
+	pick(table, `assign:${hydra.id}:6=2`);
+	pick(table, "damage");
+	assert.equal(table.seats[1]!.life, 18);
+	assert.ok(walls.every((wall) => table.things.get(wall.id)!.damage === 2), "every blocker took its lethal 2");
+	assert.deepEqual(relive(before, table.ledger.slice(from)), table, "replay makes the same division");
+	const old = matchup("whole-division");
+	assert.equal(old.assignmentsFrom, undefined, "a game from before staged division keeps offering whole divisions, as its journal recorded them");
 });
 
 test("trample assigns lethal to the blocker before the player, counting marked damage", () => {

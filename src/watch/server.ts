@@ -29,9 +29,9 @@ import type { Rules } from "../core/rules.ts";
 import type { Table } from "../core/table.ts";
 import type { Header } from "../core/journal.ts";
 import type { SeatId } from "../core/types.ts";
-import { cardboardScript, gameScript, gameStats, replayBuilder, replayPage, type ReplayOptions } from "../board/replay.ts";
+import { cardboardScript, gameScript, gameStats, replayBuilder, replayPage, type ReplayOptions, type Stats } from "../board/replay.ts";
 import { audienceOnly, playByPlay } from "../board/series.ts";
-import { dressOf, GAME_ID, gameIndex, journalReader, momentsOf, resultName, runOf, searchGames } from "./games.ts";
+import { dressOf, GAME_ID, gameIndex, journalReader, momentsOf, resultName, runOf, searchGames, type Replayed } from "./games.ts";
 
 const HOLD_MS = 25_000;
 /** How long a finished game's seats keep their boards for pages still asking. */
@@ -70,7 +70,10 @@ type SeatFeed = { version: number; data(): unknown; since(have: { moments: numbe
 export async function watchServer(options: Watching) {
 	// The journal reader starts once the server is listening, so a port in use leaves no worker behind.
 	let reader: ReturnType<typeof journalReader>, index = gameIndex(options.dir);
-	const built = new Map<string, { stamp: string; script: string }>();
+	const built = new Map<string, { stamp: string; script: string }>(), building = new Map<string, { stamp: string; script: Promise<string> }>();
+	// The card list is read once: reading it is not free, and the games and seats share it.
+	let universe: Universe | undefined;
+	const cards = () => universe ??= options.cards();
 	type Live = { take(table: Table): void; finish(): void; script(): string; since(query: URLSearchParams, signal: AbortSignal): Promise<unknown>; seat(viewer: SeatId): SeatFeed | undefined };
 	const live = new Map<string, Live>();
 	// A finished game's seats keep their boards a while, so a page asking after the end still gets the last one.
@@ -87,24 +90,39 @@ export async function watchServer(options: Watching) {
 		signal.addEventListener("abort", done, { once: true });
 	});
 	/** A game still playing has no totals yet; its page shows them once it is over. Its boards wait a moment for art, never longer. */
-	const replayOptions = (id: string, header: Header, table: Table, totals: boolean): ReplayOptions => ({
-		title: header.seats.map((one) => one.name).join(" vs "), subtitle: `${id} · ${totals ? "play by play" : "live"}`,
-		...(totals ? { stats: gameStats(table, header.created, runOf(options.dir, id)) } : { artWait: ART_WAIT }),
-		dress: (viewer) => dressOf(header, viewer), art: options.art, cards: options.cards(), resolveArt: options.resolveArt,
+	const replayOptions = (id: string, header: Header, stats?: Stats): ReplayOptions => ({
+		title: header.seats.map((one) => one.name).join(" vs "), subtitle: `${id} · ${stats ? "play by play" : "live"}`,
+		...(stats ? { stats } : { artWait: ART_WAIT }),
+		dress: (viewer) => dressOf(header, viewer), art: options.art, cards: cards(), resolveArt: options.resolveArt,
 	});
 
-	/** A saved game's data, built once for each version of its journal. */
-	async function saved(id: string): Promise<string> {
+	/**
+	 * A saved game's data, built once for each version of its journal. The journal
+	 * is replayed on the worker thread, never on the thread a live table plays on,
+	 * and requests for the same version while it is built wait for that one build.
+	 */
+	function saved(id: string): Promise<string> {
 		const path = join(options.dir, `${id}.jsonl`), file = statSync(path), stamp = `${file.mtimeMs}:${file.size}:${resultName(options.dir, id) ?? ""}`, kept = built.get(id);
-		if (kept?.stamp === stamp) { built.delete(id); built.set(id, kept); return kept.script; }
-		const { moments, viewers, table, header } = momentsOf(path, options.cards(), options.rules()), finished = !!table.outcome;
-		const shown = finished ? moments : audienceOnly(moments), seen = finished ? viewers : ["spectator" as const];
-		const replay = await replayBuilder(table.seats, seen, replayOptions(id, header, table, true));
-		await replay.sync(shown);
-		const script = gameScript(replay.data({ finished }));
-		built.set(id, { stamp, script });
-		while (built.size > KEPT) built.delete(built.keys().next().value!);
+		if (kept?.stamp === stamp) { built.delete(id); built.set(id, kept); return Promise.resolve(kept.script); }
+		const pending = building.get(id);
+		if (pending?.stamp === stamp) return pending.script;
+		const script = (async () => {
+			const back = reader ? await reader.replay(path, runOf(options.dir, id)) : replayHere(path, id);
+			const replay = await replayBuilder(back.seats, back.viewers, replayOptions(id, back.header, back.stats));
+			await replay.sync(back.moments);
+			const made = gameScript(replay.data({ finished: back.finished }));
+			built.set(id, { stamp, script: made });
+			while (built.size > KEPT) built.delete(built.keys().next().value!);
+			return made;
+		})().finally(() => { if (building.get(id)?.stamp === stamp) building.delete(id); });
+		building.set(id, { stamp, script });
 		return script;
+	}
+	/** Where no worker can run this repository's TypeScript, the replay runs here. */
+	function replayHere(path: string, id: string): Replayed {
+		const back = momentsOf(path, cards(), options.rules()), finished = !!back.table.outcome;
+		return { header: back.header, finished, seats: back.table.seats, stats: gameStats(back.table, back.header.created, runOf(options.dir, id)),
+			viewers: finished ? back.viewers : ["spectator"], moments: finished ? back.moments : audienceOnly(back.moments) };
 	}
 
 	const send = (response: ServerResponse, status: number, type: string, body: string | Buffer) => {
@@ -214,10 +232,10 @@ export async function watchServer(options: Watching) {
 		async live(id: string, header: Header, table: Table) {
 			const seats = table.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck.name }));
 			const series = playByPlay(seats, ["spectator"]);
-			const replay = await replayBuilder(table.seats, ["spectator"], replayOptions(id, header, table, false));
+			const replay = await replayBuilder(table.seats, ["spectator"], replayOptions(id, header));
 			// Each seat's own board, as that seat sees it, for its page alone.
 			const own = new Map(await Promise.all(table.seats.map(async (one) => [one.id, { series: playByPlay(seats, [one.id]),
-				replay: await replayBuilder(table.seats, [one.id], replayOptions(id, header, table, false)) }] as const)));
+				replay: await replayBuilder(table.seats, [one.id], replayOptions(id, header)) }] as const)));
 			const waiting = new Set<() => void>();
 			let queue = Promise.resolve(), finished = false;
 			const wake = () => { for (const go of [...waiting]) go(); };

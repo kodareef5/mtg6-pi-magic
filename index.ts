@@ -81,9 +81,10 @@ import { editWork, workFrame } from "./src/core/work-tools.ts";
 import { planState } from "./src/core/planning.ts";
 
 /**
- * A table set without naming decks, where no menu can ask, seats two practice
- * decks from decks/collection. Setup registers them against the card universe,
- * as it would any tournament list.
+ * Two practice decks from decks/collection, for `/magic step` on a fresh table.
+ * Setup registers them against the card universe, as it would any tournament
+ * list. A hosted table takes only admitted decks, so one set without naming
+ * decks, where no menu can ask, takes the first two of those.
  */
 const PLAY = ["Green Stompy", "Red Burn"];
 
@@ -286,9 +287,9 @@ export default function (pi: ExtensionAPI) {
 			}
 		} else {
 			const chosen = from.decks ?? PLAY, names = seatLabels(chosen);
-			opened = start(standard, chosen.map((name, at) => ({ name: names[at]!, deck: from.alpha ? alpha(deck(name)) : deck(name) })), from.seed, cards, { announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0, discardsFrom: 0 });
+			opened = start(standard, chosen.map((name, at) => ({ name: names[at]!, deck: from.alpha ? alpha(deck(name)) : deck(name) })), from.seed, cards, { announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0, discardsFrom: 0, assignmentsFrom: 0 });
 			header = {
-				announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0, discardsFrom: 0,
+				announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0, discardsFrom: 0, assignmentsFrom: 0,
 				id: from.id ?? from.seed,
 				format: standard.name,
 				seed: from.seed,
@@ -297,7 +298,7 @@ export default function (pi: ExtensionAPI) {
 					return { id: at.id, name: at.name, deck: at.deck, ...setup && { setAs: setup.setAs ?? at.id, ...setup.look, pilot: setup.pilot, key: setup.key,
 						...Object.keys(setup.models).length ? { models: setup.models } : {} } };
 				}),
-				...(from.clock ? { clock: from.clock } : {}),
+				...(from.clock !== undefined ? { clock: from.clock } : {}),
 				...(from.background ? { background: from.background } : {}),
 				...(from.colors ? { colors: from.colors } : {}),
 				cards: { path: cards.path, generated: cards.generated, ...(cards.faces ? { faces: cards.faces } : {}), ...(cards.names ? { names: cards.names } : {}) },
@@ -339,6 +340,9 @@ export default function (pi: ExtensionAPI) {
 		async execute(actionId, params) {
 			if (!table) throw new Error("No table. /magic step opens one for inspection.");
 			if (!table.seats.some((seat) => seat.id === params.seat)) throw new Error(`No seat ${params.seat}.`);
+			// Any seat's equipment, hand and all, is the host's to inspect; the agent at a piloted seat reads that seat alone, through magic_seat.
+			const at = pilotedAt();
+			if (at !== undefined) throw new Error(`This terminal pilots seat ${at}, so its agent reads that seat alone, with magic_seat. /magic pilot off returns to inspecting every seat.`);
 			if (params.commands) {
 				if (running) throw new Error("The play loop is active. Edit equipment when the game is waiting.");
 				if (table.outcome) throw new Error("The game is finished. Clone an unfinished position to continue working on it.");
@@ -556,7 +560,7 @@ export default function (pi: ExtensionAPI) {
 				if (!picked) return;
 				chosen.push(picked === "Random" ? random() : picked);
 			}
-		} else chosen = [...PLAY];
+		} else chosen = decks.slice(0, 2);
 		const unknown = chosen.filter((name) => !decks.includes(name));
 		if (unknown.length) { ctx.ui.notify(`Not an admitted deck: ${unknown.join(", ")}. The decks are: ${decks.join(", ")}.`, "warning"); return; }
 		await Promise.all(Object.values(seated?.players ?? {}).map((player) => player.close()));
@@ -873,7 +877,7 @@ export default function (pi: ExtensionAPI) {
 			const saved = header?.seats[at];
 			return { ...one, setAs: saved?.setAs ?? at, pilot: saved?.pilot ?? "ai", models: saved?.models ?? {}, key: (saved?.key ?? "game") as KeyFrom,
 				look: { avatar: saved?.avatar ?? one.look.avatar, background: saved?.background ?? one.look.background, ...(saved?.colors ? { colors: saved.colors } : {}) } };
-		}), clock: header?.clock ?? setup.clock, background: header?.background ?? setup.background, ...(header?.colors ? { colors: header.colors } : {}), stage: "prepared" });
+		}), clock: header?.clock === undefined ? setup.clock : header.clock, background: header?.background ?? setup.background, ...(header?.colors ? { colors: header.colors } : {}), stage: "prepared" });
 		seatTools(false);
 		showTable(ctx);
 		showSeat(ctx);
@@ -924,8 +928,9 @@ export default function (pi: ExtensionAPI) {
 	 * autopilot, and answers the open question when the person names a choice.
 	 * The tools are active only while this terminal pilots a seat.
 	 */
-	const SEAT_TOOLS = ["magic_seat", "magic_choose", "magic_tell"];
-	const seatTools = (on: boolean) => pi.setActiveTools([...new Set([...pi.getActiveTools().filter((name) => !SEAT_TOOLS.includes(name)), ...(on ? SEAT_TOOLS : [])])]);
+	const SEAT_TOOLS = ["magic_seat", "magic_choose", "magic_tell"], HOST_TOOLS = ["magic_work"];
+	// The agent at a piloted seat has that seat's tools in place of the host's, which read every seat.
+	const seatTools = (on: boolean) => pi.setActiveTools([...new Set([...pi.getActiveTools().filter((name) => !SEAT_TOOLS.includes(name) && !HOST_TOOLS.includes(name)), ...(on ? SEAT_TOOLS : HOST_TOOLS)])]);
 	const seatedPerson = (): Person => {
 		const seat = piloted();
 		if (!seat) throw new Error(pilotedAt() === undefined ? "This terminal pilots no Magic seat. /magic pilot <n> takes one." : "The seat this terminal pilots has no game in play yet.");

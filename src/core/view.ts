@@ -323,6 +323,8 @@ function actions(table: Table, viewer: SeatId): NonNullable<SeatView["actions"]>
  */
 export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spectator"): string {
 	const parts: string[] = [];
+	// An object as the group found it, never as it is now: a later reveal or departure does not rewrite what happened.
+	const then = (id: string) => receipt.before[id] ?? table.things.get(id);
 	for (const change of receipt.changes) {
 		switch (change.do) {
 			case "opening":
@@ -439,12 +441,12 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				parts.push(`${change.unlocked ? "unlocked" : "locked"} door ${change.face} of ${publicName(receipt.before[change.what])}`);
 				break;
 			case "attach":
-				parts.push(change.to ? `attached ${publicName(receipt.before[change.what])} to ${publicName(table.things.get(change.to.id) ?? receipt.before[change.to.id])}` : `unattached ${publicName(receipt.before[change.what])}`);
+				parts.push(change.to ? `attached ${publicName(receipt.before[change.what])} to ${publicName(then(change.to.id))}` : `unattached ${publicName(receipt.before[change.what])}`);
 				break;
 			case "note":
-				if (change.note.kind === "label") parts.push(`labelled ${publicName(table.things.get(change.note.on.id) ?? receipt.before[change.note.on.id])}: ${change.note.text}`);
-				if (change.note.kind === "register") parts.push(`${publicName(table.things.get(change.note.on.id) ?? receipt.before[change.note.on.id])} registered: ${change.note.registration.basis}`);
-				if (change.note.kind === "rule") parts.push(`Rule for ${publicName(table.things.get(change.note.on.id) ?? receipt.before[change.note.on.id])}: ${change.note.text} (${change.note.until})`);
+				if (change.note.kind === "label") parts.push(`labelled ${publicName(then(change.note.on.id))}: ${change.note.text}`);
+				if (change.note.kind === "register") parts.push(`${publicName(then(change.note.on.id))} registered: ${change.note.registration.basis}`);
+				if (change.note.kind === "rule") parts.push(`Rule for ${publicName(then(change.note.on.id))}: ${change.note.text} (${change.note.until})`);
 				if (change.note.kind === "cast-words") parts.push(`${seat(table, change.note.who).name}'s ${change.note.next ? "next matching spell" : "matching spells"}: ${change.note.words.join(", ")} (${change.note.until})`);
 				if (change.note.kind === "activation-timing") parts.push(`${seat(table, change.note.who).name} may activate matching loyalty abilities at instant speed (${change.note.until})`);
 				if (change.note.kind === "damage-rule") parts.push(`${change.note.combat === undefined ? "All" : change.note.combat ? "Combat" : "Noncombat"} damage ${change.note.mode === "prevent" ? "is prevented" : "can't be prevented"} (${change.note.until})`);
@@ -456,7 +458,7 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				parts.push(change.attackers.length ? `attacking: ${change.attackers.map((one) => `${publicName(receipt.before[one.id] ?? table.things.get(one.id))}${one.to ? ` at ${publicName(receipt.before[one.to.id] ?? table.things.get(one.to.id))}` : ""}`).join(", ")}` : "no attackers");
 				break;
 			case "block":
-				parts.push(change.blockers.length ? `blocking: ${change.blockers.map((one) => `${publicName(table.things.get(one.id))} blocks ${one.blocking.map((aimed) => publicName(table.things.get(aimed.id))).join(", ")}`).join("; ")}` : "no blockers");
+				parts.push(change.blockers.length ? `blocking: ${change.blockers.map((one) => `${publicName(then(one.id))} blocks ${one.blocking.map((aimed) => publicName(then(aimed.id))).join(", ")}`).join("; ")}` : "no blockers");
 				break;
 			case "end-game":
 				parts.push(`${seat(table, change.who).name} ${change.result}s the game`);

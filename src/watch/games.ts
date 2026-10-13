@@ -17,7 +17,7 @@ import type { Table } from "../core/table.ts";
 import type { Viewer } from "../core/types.ts";
 import { defaults } from "../board/looks.ts";
 import type { Dress } from "../board/render.ts";
-import type { Run } from "../board/replay.ts";
+import type { Run, Stats } from "../board/stats.ts";
 import { playByPlay, type Moment } from "../board/series.ts";
 
 /** A game id is its journal's file name: letters, digits and dashes, so no request can name another file. */
@@ -32,20 +32,28 @@ export type Summary = {
 /** What a replay of a journal says about its game. */
 export type Facts = { outcome: Record<string, "win" | "lose" | "draw"> | null; turn: number; decisions: number };
 
+/** A saved game replayed for its page: the moments to show, from the perspectives it may be shown from, and its numbers. */
+export type Replayed = { header: Header; finished: boolean; seats: { id: number; name: string }[]; stats: Stats; viewers: Viewer[]; moments: Moment[] };
+
 /**
  * A worker thread that replays journals, or undefined where Node cannot load
- * this repository's TypeScript in a worker. The list then keeps to saved results.
+ * this repository's TypeScript in a worker. The list then keeps to saved
+ * results, and a saved game's page is replayed where it is asked for.
  */
-export function journalReader(paths: { cards: string; rules: string }): { facts(path: string): Promise<Facts | undefined>; close(): void } | undefined {
+export function journalReader(paths: { cards: string; rules: string }) {
 	if (!(process.features as { typescript?: unknown }).typescript) return undefined;
 	const worker = new Worker(new URL("./outcomes.ts", import.meta.url), { workerData: paths });
 	worker.unref();
-	const waiting = new Map<string, (facts: Facts | undefined) => void>();
+	const waiting = new Map<string, (reply: { error?: string } & Record<string, unknown>) => void>();
 	let asked = 0;
-	worker.on("message", ({ id, error, ...facts }: Facts & { id: string; error?: string }) => { waiting.get(id)?.(error ? undefined : facts); waiting.delete(id); });
-	worker.on("error", () => { for (const done of waiting.values()) done(undefined); waiting.clear(); });
+	worker.on("message", ({ id, ...reply }: { id: string; error?: string }) => { waiting.get(id)?.(reply); waiting.delete(id); });
+	worker.on("error", (error) => { for (const done of waiting.values()) done({ error: String(error) }); waiting.clear(); });
+	const ask = (message: Record<string, unknown>) => new Promise<{ error?: string } & Record<string, unknown>>((done) => {
+		const id = String(++asked); waiting.set(id, done); worker.postMessage({ ...message, id });
+	});
 	return {
-		facts: (path) => new Promise((done) => { const id = String(++asked); waiting.set(id, done); worker.postMessage({ id, path }); }),
+		facts: async (path: string): Promise<Facts | undefined> => { const { error, ...facts } = await ask({ path }); return error ? undefined : facts as Facts; },
+		replay: async (path: string, run?: Run): Promise<Replayed> => { const { error, ...back } = await ask({ path, moments: true, ...(run ? { run } : {}) }); if (error) throw new Error(error); return back as Replayed; },
 		close: () => void worker.terminate(),
 	};
 }

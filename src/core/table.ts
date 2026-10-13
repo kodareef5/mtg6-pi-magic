@@ -256,6 +256,8 @@ export type Combat = {
 	first?: ObjectRef[];
 	/** Damage divided so far in this damage step, before it is all dealt at once (510.1-2). */
 	assigned: { source: ObjectRef; to: Chosen; amount: number }[];
+	/** One attacker's division under way, a recipient at a time; it becomes `assigned` when the last amount is chosen. */
+	dividing?: { source: ObjectRef; to: Chosen; amount: number }[];
 };
 
 /**
@@ -439,6 +441,8 @@ export type Table = {
 	deathtouchFrom?: number;
 	/** Ledger version at which cleanup collects a simultaneous discard group. */
 	discardsFrom?: number;
+	/** Ledger version at which an attacker's combat damage is divided a recipient at a time, not offered as every whole division. */
+	assignmentsFrom?: number;
 	/** The game type. One table runs one. */
 	format: Format;
 	/** Printed characteristics for every registered name. Public, pinned with the card file. */

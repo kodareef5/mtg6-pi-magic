@@ -276,11 +276,14 @@ panel shows the board in words from the seat's own view. `/magic tell <words>`
 passes the person's instruction to the autopilot's strategy as a plan request.
 While this terminal pilots a seat, the Pi chat agent is the seat assistant, with
 `magic_seat` (this seat's view and the text of the cards it can see),
-`magic_choose` and `magic_tell`. The ledger records the person's own picks as
-`by: person`.
+`magic_choose` and `magic_tell`, in place of the host's `magic_work`, which
+reads any seat's hand and equipment and refuses while a seat is piloted. The
+ledger records the person's own picks as `by: person`. A question handed to the
+AI can be taken back before it answers, and its late answer is dropped.
 
 The table has a clock for players: 120 seconds a decision by default,
-`/magic clock <seconds|off>` before the start. It runs while a player is shown
+`/magic clock <seconds|off>` before the start, recorded with the game, off
+included, so a resume keeps it. It runs while a player is shown
 a question, never while the AI works out its suggestion. A player who does not
 answer in time concedes their seat, which is also how a player who left leaves
 the game; the AI never answers in their place. The concession is a ledger row
@@ -321,7 +324,9 @@ games page, searched, sorted and paged on the server, and each game's replay
 page. Whether a game is over, who won and in how many turns come from
 replaying its journal on a worker thread (`src/watch/outcomes.ts`), so a Pi
 playing a game never stops for it; until a journal is replayed, its saved
-result stands, marked as checking. A rollback a spectator was watching is a
+result stands, marked as checking. A saved game's page is replayed on the same
+worker, once for requests that come together, and its scenes are built in
+turns with whatever else the thread serves. A rollback a spectator was watching is a
 moment of its own, the position play went back to.
 A game with a result is served from every perspective. Any other, live or
 stopped short, is served as the audience saw it, since it may yet be played
@@ -489,7 +494,9 @@ rather than adding a test for each branch.
   visibility, so a later reveal cannot expose an earlier action. No frame a
   game hands a seat, and no view the audience gets, names by id a card the
   viewer cannot identify, a face-down creature in play included; play goes on
-  through the aliases. A hosted game's seed is secret.
+  through the aliases. A hosted game's seed is secret. What happened is told as
+  it was seen then: a later reveal or departure does not rewrite a block or a
+  note.
 - **Replay.** The same seed and the same recorded decisions give the same log,
   change for change, and rebuild the cards, the cursor, the ledger and the
   outcome. `relive` drives from the ledger with each row's own reason, so a
@@ -555,7 +562,11 @@ rather than adding a test for each branch.
   a seat from its terminal, and its picks are the person's rows. A player on
   the seat's page chooses its models and key, agrees, and answers; the key is
   never sent back or journaled. A seat's code opens that seat alone, with its
-  own hand face up and no other, and nothing is changed without one.
+  own hand face up and no other, and nothing is changed without one. The agent
+  at a piloted seat cannot read the other seat. A clock, off included, holds
+  through a resume. A question taken back from a thinking AI is the person's at
+  once. A host with no menu and no decks named takes two it admits. A saved
+  game's page does not hold the thread a live table plays on.
 - **Alone.** A finished game reports and returns with nothing else keeping the
   process alive. Stated in a child process, since a test runner keeps the event
   loop awake and hides it.
@@ -660,7 +671,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   manifest.ts         face-down creature characteristics, private identity and paid face-up actions
   speed.ts            player speed, its state-based start and source-less inherent trigger
   triggers.ts        events read from each group, watches matched, the trigger window
-  combat.ts          declaring attackers and blockers, dividing and dealing combat damage
+  combat.ts          declaring attackers and blockers, dividing combat damage a recipient at a time, and dealing it
   permits.ts         extra land plays, lands from other zones, flash, "you may play that card"
   sacrifice-costs.ts optional casting sacrifices and affordability without subset enumeration
   funding.ts         paying a cost: floating mana and mana abilities while paying

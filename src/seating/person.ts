@@ -94,6 +94,8 @@ export function person(name: string, autopilot: Player | undefined, start: Mode,
 	const deciding = !!autopilot && decides;
 	let mode: Mode = deciding ? start : "manual", stops: Stops = "smart", asking: (Asking & { settle(answer: Answer): void }) | null = null;
 	let conceding = false, picks = 0, asks = 0, passingTurn: number | undefined, latest: Frame | undefined, told: string | undefined;
+	// A question handed to the autopilot while it works the answer out; the person can take it back before it does.
+	let handed: { open: Asking & { settle(answer: Answer): void } } | null = null;
 	// Each ask, rewind and close moves `serial`: an answer worked out for an older one is never shown.
 	let serial = 0;
 	const pick = (frame: Frame, option: string, by?: "person"): Extract<Answer, { kind: "pick" }> => ({ kind: "pick", option, actionId: `${name}-${frame.version}-${++picks}`, ...(by ? { by } : {}) });
@@ -147,8 +149,8 @@ export function person(name: string, autopilot: Player | undefined, start: Mode,
 		},
 		// In manual mode the autopilot is not asked, and does not prepare in the background either.
 		observe(frame) { latest = frame; if (mode !== "manual") autopilot?.observe(frame); },
-		reset() { serial++; asking = null; shown(null); autopilot?.reset?.(); },
-		async close() { serial++; asking = null; await autopilot?.close(); },
+		reset() { serial++; asking = null; handed = null; shown(null); autopilot?.reset?.(); },
+		async close() { serial++; asking = null; handed = null; await autopilot?.close(); },
 	};
 
 	return {
@@ -193,18 +195,28 @@ export function person(name: string, autopilot: Player | undefined, start: Mode,
 		async switch(next: Mode): Promise<string | null> {
 			if (next !== "manual" && !deciding) return autopilot ? "This seat's autopilot has no decision model; it only prepares cards." : "This seat has no autopilot.";
 			mode = next;
+			if (next !== "auto") {
+				// Taken back while the autopilot thinks: the question is the person's again at once, and its late answer is dropped.
+				const back = handed;
+				handed = null;
+				if (back && !asking) { asking = back.open; shown(asking); }
+				return null;
+			}
 			const open = asking, mine = serial;
-			if (next !== "auto" || !open) return null;
+			if (!open) return null;
+			const handoff = { open };
+			handed = handoff;
 			asking = null;
 			shown(null);
 			let answer: Answer | undefined;
 			try { answer = open.suggestion ?? await autopilot!.answer(open.frame); } catch { answer = undefined; }
-			// Withdrawn while it thought: nothing is owed. Taken back, or not answered: the person is asked again.
-			if (serial !== mine) return null;
-			if (answer && mode === "auto") { open.settle(answer); return null; }
+			// Taken back or withdrawn while it thought: nothing is owed from here.
+			if (handed !== handoff || serial !== mine) return null;
+			handed = null;
+			if (answer) { open.settle(answer); return null; }
 			asking = open;
 			shown(open);
-			return answer ? null : "The autopilot could not answer; the question is yours again.";
+			return "The autopilot could not answer; the question is yours again.";
 		},
 		/**
 		 * Tell the seat how to play, in words. The autopilot's strategy plans

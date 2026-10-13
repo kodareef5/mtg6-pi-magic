@@ -200,7 +200,8 @@ export function combatDamage(table: Table): Pending | null {
 		if (walls.length === 1 && (!trample || !to)) { dealt.push({ source: attacker, to: ref(walls[0]!), amount: total }); continue; }
 		const chosen = combat.assigned.filter((one) => same(one.source, attacker));
 		if (chosen.length) { dealt.push(...chosen.map((one) => ({ source: attacker, to: one.to, amount: one.amount }))); continue; }
-		return assign(table, attacker, walls, to, total, trample && !!to);
+		const staged = table.assignmentsFrom !== undefined && table.ledger.length >= table.assignmentsFrom;
+		return (staged ? divide : assign)(table, attacker, walls, to, total, trample && !!to);
 	}
 	// A blocker blocks one attacker here, so its damage needs no division (510.1d).
 	for (const { object: blocker, blocking } of blockers) {
@@ -218,7 +219,43 @@ export function combatDamage(table: Table): Pending | null {
 			changes, reason: "combat" }] };
 }
 
-/** One attacker's divisions among its blockers and, with trample, the recipient it attacks. */
+/**
+ * One attacker's division a recipient at a time (510.1c): the amount for the
+ * next blocker, from none to all that is left, and the last recipient takes
+ * the rest. Every legal division is reachable, and no menu is longer than the
+ * damage plus two, however many blockers there are. With trample, the attacked
+ * player or planeswalker gets damage only if every blocker has lethal damage.
+ */
+function divide(table: Table, attacker: Thing, walls: Thing[], to: Chosen | undefined, total: number, trample: boolean): Pending {
+	const recipients: Chosen[] = [...walls.map(ref), ...(trample && to ? [to] : [])];
+	const parts = (table.combat?.dividing ?? []).filter((one) => same(one.source, attacker)), at = parts.length;
+	const left = total - parts.reduce((sum, one) => sum + one.amount, 0), next = recipients[at]!, rest = recipients.at(-1)!, last = at === recipients.length - 2;
+	const describe = (one: Chosen) => "player" in one ? `seat ${one.player}` : name(table.things.get(one.id)!);
+	// Before a trampled player, the last blocker takes all that is left unless every blocker then has lethal damage.
+	const lethalAll = (amount: number) => walls.every((wall, index) => (index < at ? parts[index]!.amount : amount) >= lethal(table, attacker, wall));
+	const amounts = Array.from({ length: left + 1 }, (_, amount) => amount).filter((amount) => !(last && trample) || amount === left || lethalAll(amount));
+	const shows = walls.map((wall) => `${name(wall)} ${body(traitsOf(table, wall))}, ${wall.damage} marked, lethal ${lethal(table, attacker, wall)}.`).join(" ");
+	const moves: Move[] = amounts.map((amount) => {
+		const division = [...parts.map(({ to: one, amount: share }) => ({ to: one, amount: share })), { to: next, amount }, ...(last ? [{ to: rest, amount: left - amount }] : [])];
+		return {
+			option: { id: `assign:${attacker.id}:${at}=${amount}`,
+				label: last ? `${name(attacker)} assigns ${division.map((one) => `${one.amount} to ${describe(one.to)}`).join(", ")}`
+					: `${name(attacker)} assigns ${amount} to ${describe(next)}, leaving ${left - amount} for ${recipients.slice(at + 1).map(describe).join(" and ")}`,
+				parameters: { [`Damage to ${describe(next)}${"id" in next ? ` (${next.id}@${next.incarnation})` : ""}`]: amount }, shows,
+				objects: [ref(attacker), ...("id" in next ? [next] : [])] },
+			changes: last ? [{ do: "combat", action: "assign", source: ref(attacker), division: division.filter((one) => one.amount > 0) }]
+				: [{ do: "combat", action: "divide", part: { source: ref(attacker), to: next, amount } }],
+			reason: "combat",
+		};
+	});
+	if (at) moves.push({ option: { id: `assign:${attacker.id}:over`, label: `Start ${name(attacker)}'s division over`, objects: [ref(attacker)] },
+		changes: [{ do: "combat", action: "redivide", source: ref(attacker) }], reason: "combat" });
+	return { situation: "turn-based", seat: attacker.controller, moves,
+		question: `Divide ${name(attacker)}'s ${total} combat damage a recipient at a time (510.1c): how much to ${describe(next)}? ${left} left` +
+			`${parts.length ? `, after ${parts.map((one) => `${one.amount} to ${describe(one.to)}`).join(", ")}` : ""}${trample ? `; with trample, ${describe(rest)} only after every blocker has lethal damage` : ""}.` };
+}
+
+/** One attacker's divisions among its blockers and, with trample, the recipient it attacks: every whole division at once, as journals before assignmentsFrom recorded them. */
 function assign(table: Table, attacker: Thing, walls: Thing[], to: Chosen | undefined, total: number, trample: boolean): Pending {
 	const recipients: Chosen[] = [...walls.map(ref), ...(trample && to ? [to] : [])];
 	const legal = divisions(total, recipients.length).filter((parts) => !trample || parts.at(-1) === 0 || walls.every((wall, at) => parts[at]! >= lethal(table, attacker, wall)));

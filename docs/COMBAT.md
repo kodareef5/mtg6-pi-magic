@@ -98,7 +98,17 @@ the same for blockers.
 
 The menu must show power, marked damage and any abilities that affect assignment.
 For example, a four-power attacker facing two blockers can divide its four
-damage between them. The player chooses among the offered divisions.
+damage between them.
+
+The division is chosen a recipient at a time: how much to the first blocker,
+from none to all of it, then to the next, and the last recipient takes the
+rest. With trample, the attacked player or planeswalker gets damage only once
+every blocker has lethal damage, so before it the last blocker takes all that
+is left unless every blocker then has lethal. Every legal division is reachable
+and no menu is longer than the damage plus two, however many blockers there
+are; offering every whole division at once grew past what memory holds on a
+big board. A division can be started over before its last amount. Journals
+from before `assignmentsFrom` recorded whole divisions and replay with them.
 
 ### Dealing it, 510.2
 

@@ -93,6 +93,35 @@ test("handing an open question to the autopilot takes it from the person at once
 	assert.equal((await second as { option: string }).option, "land:7");
 });
 
+test("a question handed to a thinking autopilot can be taken back at once, and its late answer changes nothing", async () => {
+	for (const back of ["manual", "suggest"] as const) {
+		const thinking: ((answer: Answer) => void)[] = [];
+		const pilot: Player = { name: "pilot", observe() {}, close() {}, answer: () => new Promise<Answer>((settle) => { thinking.push(settle); }) };
+		const { seen, show } = shown(), seat = person("B", pilot, "manual", show);
+		const first = seat.player.answer(ask(1, "pass", "land:7"));
+		await new Promise((go) => setTimeout(go, 0));
+		const asked = seen.at(-1)!.ask;
+		const handing = seat.switch("auto");
+		assert.equal(seat.asking(), null, "the autopilot has it");
+		assert.equal(await seat.switch(back), null);
+		assert.equal(seat.asking()?.ask, asked, `taken back to ${back} before the autopilot answers, the question is the person's again`);
+		assert.equal(seen.at(-1)?.ask, asked, "and shown, so the clock runs again");
+		assert.equal(seat.choose(2, asked), null);
+		assert.equal((await first as { option: string }).option, "land:7");
+		const second = seat.player.answer(ask(2, "pass", "land:7"));
+		await new Promise((go) => setTimeout(go, 0));
+		// In suggest mode the next question waits for the autopilot's suggestion first.
+		if (back === "suggest") { thinking[1]!({ kind: "pick", option: "land:7", actionId: "suggested" }); await new Promise((go) => setTimeout(go, 0)); }
+		const next = seat.asking();
+		assert.ok(next);
+		thinking[0]!({ kind: "pick", option: "pass", actionId: "late" });
+		assert.equal(await handing, null);
+		assert.equal(seat.asking(), next, "the late answer neither settles nor replaces the question asked now");
+		assert.equal(seat.choose(1, next!.ask), null);
+		assert.equal((await second as { option: string; by?: string }).by, "person");
+	}
+});
+
 test("a question with one real option is answered at once, and stepping back is not a real option", async () => {
 	const pilot = autopilot(() => ({ kind: "pick", option: "announce:cost:0", actionId: "pilot" }));
 	const seat = person("B", pilot, "suggest", () => {});

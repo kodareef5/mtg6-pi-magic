@@ -28,7 +28,7 @@ import { project } from "../src/core/view.ts";
 import { gameStats, replayBuilder } from "../src/board/replay.ts";
 import { playByPlay } from "../src/board/series.ts";
 import { boardKey, boardSnapshot } from "../src/board/snapshot.ts";
-import { searchGames, type Summary } from "../src/watch/games.ts";
+import { momentsOf, searchGames, type Summary } from "../src/watch/games.ts";
 import { watchServer } from "../src/watch/server.ts";
 import { quickTunnel } from "../src/watch/tunnel.ts";
 
@@ -205,6 +205,23 @@ test("a seat's link replaced while a request is still arriving leaves that reque
 		});
 		assert.equal(status, 401, "the code opens no seat by the time its request has arrived");
 		assert.deepEqual(acted, [], "and the seat does nothing");
+	} finally { await server.close(); }
+});
+
+test("a saved game's page is replayed off the thread a live table plays on, once for requests that come together", async () => {
+	const dir = mkdtempSync(join(tmpdir(), "watch-long-")), made = header("long-1", ["Green Stompy", "Dimir Control"]), table = dealt(made), journal = open(join(dir, "long-1.jsonl"), made);
+	await through(table, 12); save(journal, table);
+	const begun = performance.now();
+	momentsOf(join(dir, "long-1.jsonl"), cards, rules);
+	const here = performance.now() - begun, server = await serve(dir);
+	try {
+		let last = performance.now(), held = 0;
+		const timer = setInterval(() => { const now = performance.now(); held = Math.max(held, now - last); last = now; }, 2);
+		const [one, two] = await Promise.all([1, 2].map(async () => (await fetch(`${server.base}/games/long-1/game.js`)).text()));
+		clearInterval(timer);
+		assert.equal(one, two, "requests that come together get the same build");
+		assert.ok(data(one!).moments.length > 10);
+		assert.ok(held < here / 2, `a replay that holds this thread ${Math.round(here)}ms held the server's thread ${Math.round(held)}ms`);
 	} finally { await server.close(); }
 });
 

@@ -164,11 +164,14 @@ export type Change =
 	| { do: "block"; blockers: Combat["blockers"] }
 	/**
 	 * Bookkeeping inside a combat step: one pick toward a declaration, one
-	 * creature's damage division, or the first-strike step beginning, which adds
-	 * a second damage step after it.
+	 * creature's damage division or one recipient's share of it, starting that
+	 * division over, or the first-strike step beginning, which adds a second
+	 * damage step after it.
 	 */
 	| { do: "combat"; action: "choose" | "remove"; pick: Combat["choosing"][number] }
 	| { do: "combat"; action: "assign"; source: ObjectRef; division: { to: Chosen; amount: number }[] }
+	| { do: "combat"; action: "divide"; part: { source: ObjectRef; to: Chosen; amount: number } }
+	| { do: "combat"; action: "redivide"; source: ObjectRef }
 	| { do: "combat"; action: "strike"; first: ObjectRef[] }
 	/**
 	 * A counter or flag that belongs to a seat rather than a card: poison,

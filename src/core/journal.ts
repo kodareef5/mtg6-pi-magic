@@ -42,6 +42,8 @@ export type Header = {
 	deathtouchFrom?: number;
 	/** Ledger version at which cleanup collects a simultaneous discard group. */
 	discardsFrom?: number;
+	/** Ledger version at which combat damage is divided a recipient at a time. */
+	assignmentsFrom?: number;
 	/** The game id. Also the directory a published game lives in. */
 	id: string;
 	format: string;
@@ -57,8 +59,8 @@ export type Header = {
 	 */
 	seats: { id: SeatId; name: string; deck: Deck; setAs?: SeatId; avatar?: string; background?: string; colors?: { primary: string; secondary: string };
 		pilot?: "ai" | "player"; models?: Record<string, string>; key?: string }[];
-	/** Seconds a player had to answer each decision before their seat conceded, when the table had a clock. */
-	clock?: number;
+	/** Seconds a player had to answer each decision before their seat conceded, or null for a table set with no clock. Absent in journals from before it was recorded. */
+	clock?: number | null;
 	/** The background and frame colours of the host's pictures. */
 	background?: string;
 	colors?: { primary: string; secondary: string };
@@ -449,6 +451,8 @@ export function replay(
 	else delete initial.deathtouchFrom;
 	if (header.discardsFrom !== undefined) initial.discardsFrom = header.discardsFrom;
 	else delete initial.discardsFrom;
+	if (header.assignmentsFrom !== undefined) initial.assignmentsFrom = header.assignmentsFrom;
+	else delete initial.assignmentsFrom;
 	// A catalog cannot change the options of a journal that never pinned it.
 	if (!header.cards.names) delete initial.cardNames;
 	else if (initial.cardNames?.sha256 !== header.cards.names.sha256) throw new Error(`${path} cannot be replayed here: Oracle name data differs from the game's pinned source`);

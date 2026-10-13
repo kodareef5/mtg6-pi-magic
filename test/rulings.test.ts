@@ -176,7 +176,7 @@ test("the writer objects only to an action the opponent took since its last plan
 	assert.match(verdicts[1]!, /999\.99.*not an entry/, "a rule that is not on disk is refused");
 	assert.deepEqual(ruling, { legal: false, rule: "614.1c", remedy: "rollback", because: "It enters tapped." });
 
-	// The recorded menace block has no receipt snapshots. Replay supplies event-time evidence.
+	// The recorded menace block snapshots only what narration names: the blocker and what it blocks. Replay supplies the judge's event-time evidence.
 	const dir = mkdtempSync(join(tmpdir(), "magic-declaration-case-")), path = join(dir, "block.jsonl");
 	writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/menace-partial-block.jsonl.gz")));
 	const source = replay(path, (header) => matchTable(header.seed));
@@ -185,7 +185,8 @@ test("the writer objects only to an action the opponent took since its last plan
 	const row = blocked.ledger.at(-1)!.seq;
 	const journal = reopen(path, source.header, replay(path, (header) => matchTable(header.seed)).table);
 	save(journal, blocked);
-	assert.deepEqual(blocked.log.at(-1)!.before, {});
+	const declared = blocked.log.at(-1)!, named = declared.changes.flatMap((change) => change.do === "block" ? change.blockers.flatMap((one) => [one.id, ...one.blocking.map((aimed) => aimed.id)]) : []);
+	assert.deepEqual(Object.keys(declared.before).sort(), [...new Set(named)].sort());
 	const immediate = project(blocked, 1).blockDeclaration!;
 	assert.equal(immediate.row, row); assert.match(immediate.conflicts.join(" "), /menace/);
 	while (!nextDecision(blocked)) advance(blocked);

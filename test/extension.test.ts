@@ -55,7 +55,9 @@ function fakePi() {
 	const commands = new Map<string, { handler(args: string, context: unknown): Promise<void> }>(), events = new Map<string, (...args: unknown[]) => Promise<unknown>>();
 	const tools = new Map<string, { execute(id: string, params: unknown): Promise<{ content: { text: string }[] }> }>();
 	let active = new Set(["read", "bash"]);
-	extension({ registerProvider() {}, registerTool: (tool: { name: string }) => void tools.set(tool.name, tool as never), registerCommand: (name: string, spec: never) => void commands.set(name, spec),
+	// As Pi does, a tool is active once registered unless it says otherwise.
+	extension({ registerProvider() {}, registerTool: (tool: { name: string; defaultActive?: boolean }) => { tools.set(tool.name, tool as never); if (tool.defaultActive !== false) active.add(tool.name); },
+		registerCommand: (name: string, spec: never) => void commands.set(name, spec),
 		on: (name: string, handler: never) => void events.set(name, handler), exec: async () => ({}),
 		getActiveTools: () => [...active], setActiveTools: (names: string[]) => { active = new Set(names); } } as never);
 	const magic = (args: string) => commands.get("magic")!.handler(args, ctx);
@@ -82,6 +84,11 @@ test("nothing starts by itself, and a table replaced while another prepared keep
 	assert.ok(said(/opens the menu/), "with no menu to show, /magic says what it can do");
 	assert.ok(!readdirSync(home, { recursive: true }).map(String).some((name) => name.endsWith(".jsonl")), "and no game exists");
 
+	await magic("host");
+	assert.match(notes.at(-1)!, /^Table set: \S.* vs \S/, "with no menu to ask, the host takes two decks it admits");
+	await magic("start");
+	await until(() => said(/^Prepared /) || said(/Preparation failed/), "the default table to prepare", notes);
+	assert.ok(!said(/Preparation failed/), "and they prepare");
 	await magic("host Izzet Spellementals vs Mardu Discard");
 	await magic("first 0");
 	one.gate.hold = true;
@@ -185,8 +192,10 @@ test("the host pilots a seat from its terminal: it answers by number, its assist
 		await hostPi.magic("host Mardu Discard vs Jund Sacrifice");
 		await hostPi.magic("first 0");
 		await hostPi.magic("seat 1 player");
+		assert.ok(hostPi.active().includes("magic_work") && !hostPi.active().includes("magic_seat"), "the host's agent inspects every seat");
 		await hostPi.magic("pilot 1");
 		assert.ok(["magic_seat", "magic_choose", "magic_tell"].every((name) => hostPi.active().includes(name)) && hostPi.active().includes("bash"), "the seat tools join the chat agent's own");
+		assert.ok(!hostPi.active().includes("magic_work"), "and the host's inspection of every seat leaves it");
 		assert.deepEqual(await hostPi.type("1"), { action: "continue" }, "with nothing asked, a typed number is chat");
 		await hostPi.magic("start");
 		await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
@@ -204,6 +213,7 @@ test("the host pilots a seat from its terminal: it answers by number, its assist
 		assert.match(panel, /suggest mode/);
 		assert.match(panel, /Your hand: /, "the panel shows the seat its own hand");
 		assert.match(panel, /1\. .*<- autopilot/, "and marks the autopilot's choice");
+		await assert.rejects(hostPi.tool("magic_work", { seat: 0 }), /pilots seat 1, so its agent reads that seat alone/, "the agent at seat 1 cannot read the other seat's hand");
 		const reading = await hostPi.tool("magic_seat");
 		assert.match(reading, /Cards this seat can see:/);
 		assert.match(reading, /Mulligan/, "the assistant reads the open question");
@@ -217,7 +227,7 @@ test("the host pilots a seat from its terminal: it answers by number, its assist
 		const rows = readFileSync(journal, "utf8").split("\n").filter((line) => line.includes('"row"')).map((line) => JSON.parse(line).row);
 		assert.ok(rows.some((row) => row.seat === 1 && row.by === "person" && row.situation === "pregame"), "the person's mulligan decision is the person's row");
 		await hostPi.magic("pilot off");
-		assert.ok(!hostPi.active().includes("magic_seat"), "the seat tools go with the seat");
+		assert.ok(!hostPi.active().includes("magic_seat") && hostPi.active().includes("magic_work"), "the seat tools go with the seat, and the host's come back");
 	} finally { await hostPi.shutdown(); }
 });
 
@@ -278,6 +288,37 @@ test("a player plays their seat from its page: they choose its models and key, a
 		assert.ok(rows.some((row) => row.seat === 1 && row.by === "person"), "the player's pick is the person's row");
 		assert.ok(!readFileSync(journal, "utf8").includes("aaaa"), "and the key is nowhere in the journal");
 	} finally { await hostPi.magic("watch off"); await hostPi.shutdown(); }
+});
+
+test("a table's clock, on or off, is recorded with the game and holds through a resume", async () => {
+	const hostPi = fakePi(), header = (id: string) => JSON.parse(readFileSync(join(home, "magic", "games", `${id}.jsonl`), "utf8").split("\n")[0]!).header;
+	try {
+		await hostPi.magic("host Mardu Discard vs Jund Sacrifice");
+		await hostPi.magic("first 0");
+		await hostPi.magic("clock 90");
+		await hostPi.magic("start");
+		await until(() => hostPi.notes.filter((note) => note.startsWith("Prepared ")).length === 1, "the first preparation", hostPi.notes);
+		assert.equal(header(/^Prepared (\S+)\./.exec(hostPi.notes.findLast((note) => note.startsWith("Prepared "))!)![1]!).clock, 90);
+		await hostPi.magic("host Mardu Discard vs Jund Sacrifice");
+		await hostPi.magic("first 0");
+		await hostPi.magic("seat 1 player");
+		await hostPi.magic("clock off");
+		await hostPi.magic("pilot 1");
+		await hostPi.magic("start");
+		await until(() => hostPi.notes.filter((note) => note.startsWith("Prepared ")).length === 2, "the second preparation", hostPi.notes);
+		const id = /^Prepared (\S+)\./.exec(hostPi.notes.findLast((note) => note.startsWith("Prepared "))!)![1]!;
+		assert.equal(header(id).clock, null, "no clock is recorded as no clock");
+		await hostPi.magic(`resume ${id}`);
+		await hostPi.magic("pilot 1");
+		await hostPi.magic("begin");
+		let status = "";
+		for (const begun = Date.now(); !/Waiting on seat 1/.test(status); await new Promise((go) => setTimeout(go, 50))) {
+			if (Date.now() - begun > 20_000) throw new Error(`Seat 1 was never asked. Status: ${status}`);
+			status = await hostPi.status();
+		}
+		assert.doesNotMatch(status, /of its player's/, "the resumed table has no clock either");
+		await hostPi.magic("end Clock check done.");
+	} finally { await hostPi.shutdown(); }
 });
 
 test("a table's looks are set before the start and recorded with the game", async () => {

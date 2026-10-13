@@ -61,7 +61,7 @@ export type Entrant = {
  * library and its sideboard outside the game. Printed facts come from the
  * pinned card file, the shipped Standard file by default.
  */
-export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped(), options: { announcementsFrom?: number; excessManaFrom?: number; searchesFrom?: number; deathtouchFrom?: number; discardsFrom?: number } = {}): Table {
+export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped(), options: { announcementsFrom?: number; excessManaFrom?: number; searchesFrom?: number; deathtouchFrom?: number; discardsFrom?: number; assignmentsFrom?: number } = {}): Table {
 	if (entrants.length < format.seats.min || entrants.length > format.seats.max) {
 		throw new Error(
 			`${format.name} seats ${format.seats.min} to ${format.seats.max}, not ${entrants.length}`,
@@ -76,6 +76,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 		...(options.searchesFrom !== undefined ? { searchesFrom: options.searchesFrom } : {}),
 		...(options.deathtouchFrom !== undefined ? { deathtouchFrom: options.deathtouchFrom } : {}),
 		...(options.discardsFrom !== undefined ? { discardsFrom: options.discardsFrom } : {}),
+		...(options.assignmentsFrom !== undefined ? { assignmentsFrom: options.assignmentsFrom } : {}),
 		...(universe.names ? { cardNames: { ...universe.names } } : {}),
 		printed: printedFacts(universe, decks.flatMap((deck) => [...listed(deck.main), ...listed(deck.sideboard)])),
 		seats: [],
@@ -255,6 +256,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		if (change.do === "order") for (const ref of change.cards) {
 			const was = table.things.get(ref.id); if (was) before[was.id] = structuredClone(was);
 		}
+		// Narration names what a group was about as it was then: blockers and what they block, what is attached to, what a note is on.
+		const about = change.do === "block" ? change.blockers.flatMap((one) => [one, ...one.blocking]) : change.do === "attach" && change.to ? [change.to]
+			: change.do === "note" && "on" in change.note && change.note.on ? [change.note.on] : [];
+		for (const ref of about) { const was = table.things.get(ref.id); if (was) before[was.id] ??= structuredClone(was); }
 		if (change.do === "damage") {
 			const source = damage.get(change)?.source;
 			if (source) { before[source.object.id] = structuredClone(source.object) as Thing; if (source.traits) known[source.object.id] = structuredClone(source.traits); }
@@ -576,7 +581,11 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				else if (change.action === "remove") combat.choosing = combat.choosing.filter((pick) =>
 					pick.attacker.id !== change.pick.attacker.id || pick.attacker.incarnation !== change.pick.attacker.incarnation ||
 					("blocker" in pick ? !("blocker" in change.pick) || pick.blocker.id !== change.pick.blocker.id || pick.blocker.incarnation !== change.pick.blocker.incarnation : "blocker" in change.pick));
-				else if (change.action === "assign") combat.assigned.push(...change.division.map((part) => ({ source: structuredClone(change.source), ...structuredClone(part) })));
+				else if (change.action === "assign") {
+					combat.assigned.push(...change.division.map((part) => ({ source: structuredClone(change.source), ...structuredClone(part) })));
+					delete combat.dividing;
+				} else if (change.action === "divide") (combat.dividing ??= []).push(structuredClone(change.part));
+				else if (change.action === "redivide") delete combat.dividing;
 				else if (change.action === "strike") {
 					combat.first = structuredClone(change.first);
 					table.cursor.steps.splice(1, 0, "combat-damage");
@@ -843,7 +852,7 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 			// 511.3: everything is removed from combat as the end of combat step ends.
 			if (step === "end-of-combat") { table.notes = table.notes.filter((note) => note.until !== "end-of-combat"); table.combat = null; }
 			// Each damage step divides afresh.
-			if (step === "combat-damage" && table.combat) table.combat.assigned = [];
+			if (step === "combat-damage" && table.combat) { table.combat.assigned = []; delete table.combat.dividing; }
 			cursor.stepDone = false;
 			cursor.priority = null;
 			cursor.passes = 0;

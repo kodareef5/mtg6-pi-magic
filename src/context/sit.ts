@@ -346,7 +346,7 @@ export function judgeFor(table: Table, seated: Seated, journal?: Journal): Judge
 /** A fresh table for the same seats, decks, seed and journal boundaries: where a rollback rebuilds from. */
 export function restartOf(table: Table, universe: Universe): () => Table {
 	const entrants = table.seats.map((at) => ({ name: at.name, deck: at.deck }));
-	return () => start(table.format, entrants, table.rng.seed, universe, { announcementsFrom: table.announcementsFrom, excessManaFrom: table.excessManaFrom, searchesFrom: table.searchesFrom, deathtouchFrom: table.deathtouchFrom, discardsFrom: table.discardsFrom });
+	return () => start(table.format, entrants, table.rng.seed, universe, { announcementsFrom: table.announcementsFrom, excessManaFrom: table.excessManaFrom, searchesFrom: table.searchesFrom, deathtouchFrom: table.deathtouchFrom, discardsFrom: table.discardsFrom, assignmentsFrom: table.assignmentsFrom });
 }
 
 /**

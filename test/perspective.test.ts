@@ -14,8 +14,8 @@ import { perspective } from "../src/core/perspective.ts";
 import type { Player } from "../src/core/player.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import type { Frame, Viewer } from "../src/core/types.ts";
-import { project, sight } from "../src/core/view.ts";
-import { main, matchup } from "./play.ts";
+import { describe, project, sight } from "../src/core/view.ts";
+import { main, matchup, place } from "./play.ts";
 
 /** The ids of every object this viewer cannot identify, and whether a text names any of them. */
 function unknown(table: Table, viewer: Viewer) {
@@ -78,4 +78,19 @@ test("no frame a game hands a seat names a card that seat cannot identify, and p
 	assert.ok(raw > 0 && table.ledger.some((row) => row.picked.includes(hidden.id)), "the engine's own view named the face-down creature, and play used it");
 	assert.deepEqual(leaks, []);
 	assert.equal(table.gaps.filter((gap) => /refused|not offered|No option/i.test(gap)).length, 0, "every answer was the table's own option");
+});
+
+test("what happened is told as it was seen then: a later reveal or departure does not rewrite a block or a note", () => {
+	const { table, hidden } = faceDown(), [elf] = place(table, 0, "battlefield", "Llanowar Elves"), on = { id: hidden.id, incarnation: hidden.incarnation };
+	commit(table, [{ do: "attack", attackers: [{ id: elf!.id, incarnation: elf!.incarnation, defending: 1 }] }], "combat");
+	commit(table, [{ do: "block", blockers: [{ ...on, blocking: [{ id: elf!.id, incarnation: elf!.incarnation }] }] }], "combat");
+	const block = table.log.at(-1)!;
+	commit(table, [{ do: "note", note: { kind: "label", by: 1, on, until: "end-of-turn", text: "Fixture label", change: { loseAbilities: true } } }], "resolve");
+	const note = table.log.at(-1)!, told = () => [describe(table, block), describe(table, note)];
+	const then = told();
+	assert.deepEqual(then, ["blocking: an unknown card blocks Llanowar Elves", "labelled an unknown card: Fixture label"]);
+	commit(table, [{ do: "turn-face-up", what: hidden.id }], "resolve");
+	assert.deepEqual(told(), then, "turning it face up later does not name it in what it did face down");
+	commit(table, [{ do: "move", what: elf!.id, to: "graveyard", reason: "destroy" }], "resolve");
+	assert.deepEqual(told(), then, "and the Elves leaving does not unname them in what they did");
 });
