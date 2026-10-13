@@ -85,7 +85,8 @@ test("a replay holds every moment's scene for each perspective, its art and look
 	assert.equal(new Set(game.perspectives.map((one: { theme: { accent: string } }) => one.theme.accent)).size, 3);
 	assert.equal(game.moments.length, moments.length);
 	assert.equal(new Set(asked).size, asked.length, "each card definition's art is asked for once");
-	assert.ok(game.deck.every((one: { id: string }) => asked.includes(one.id)) && game.deck.length === asked.length);
+	const pictured = game.deck.filter((one: { scryfallId?: string }) => one.scryfallId).map((one: { id: string }) => one.id);
+	assert.deepEqual([...asked].sort(), pictured.sort(), "the art of every card that has a printing, and nothing else");
 	// Scenes name shared images rather than repeat them.
 	const scenes = game.moments.flatMap((one: { views: { scene: { players: { avatarUrl?: string }[]; view: { mtg: { backgroundUrl?: string; colors?: unknown } } } }[] }) => one.views.map((view) => view.scene));
 	const named = new Set(scenes.flatMap((one: { players: { avatarUrl?: string }[]; view: { mtg: { backgroundUrl?: string } } }) => [one.view.mtg.backgroundUrl, ...one.players.map((player) => player.avatarUrl)]).filter(Boolean));

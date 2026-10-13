@@ -10,11 +10,11 @@
  *   GET /api/games?q&status&sort&dir&page&size   a page of game summaries
  *   GET /games/<id>/                         the replay page
  *   GET /games/<id>/game.js                  the game's data, as the page reads it
- *   GET /games/<id>/live.json?version&moments&deck&images
+ *   GET /games/<id>/live.json?version&moments&deck&images&art
  *                                            what a live page lacks, held until there is something new
  *   GET /games/<id>/cardboard/<name>.js      cardboard-api's browser scripts
  *   GET /seat/                               a seat's page, its code after the #
- *   GET /api/seat?after&game&version&moments&deck&images
+ *   GET /api/seat?after&game&version&moments&deck&images&art
  *                                            the seat's state and what its board lacks, held until there is something new
  *   POST /api/seat                           one action from the seat's page
  *
@@ -34,6 +34,8 @@ import { audienceOnly, playByPlay } from "../board/series.ts";
 import { dressOf, GAME_ID, gameIndex, journalReader, momentsOf, resultName, runOf, searchGames } from "./games.ts";
 
 const HOLD_MS = 25_000;
+/** How long a live board waits for new cards' art before it is published without it. */
+const ART_WAIT = 3_000;
 /** Replays kept built, the most recently asked for first. */
 const KEPT = 6;
 
@@ -61,7 +63,7 @@ export type Watching = {
 
 export type Watch = Awaited<ReturnType<typeof watchServer>>;
 /** One seat's board as the game plays: all of it, or what a client holding some of it lacks. */
-type SeatFeed = { version: number; data(): unknown; since(have: { moments: number; deck: number; images: number }): unknown };
+type SeatFeed = { version: number; data(): unknown; since(have: { moments: number; deck: number; images: number; art: number }): unknown };
 
 export async function watchServer(options: Watching) {
 	// The journal reader starts once the server is listening, so a port in use leaves no worker behind.
@@ -79,10 +81,10 @@ export async function watchServer(options: Watching) {
 		waiters.add(done);
 		signal.addEventListener("abort", done, { once: true });
 	});
-	/** A game still playing has no totals yet; its page shows them once it is over. */
+	/** A game still playing has no totals yet; its page shows them once it is over. Its boards wait a moment for art, never longer. */
 	const replayOptions = (id: string, header: Header, table: Table, totals: boolean): ReplayOptions => ({
 		title: header.seats.map((one) => one.name).join(" vs "), subtitle: `${id} · ${totals ? "play by play" : "live"}`,
-		...(totals ? { stats: gameStats(table, header.created, runOf(options.dir, id)) } : {}),
+		...(totals ? { stats: gameStats(table, header.created, runOf(options.dir, id)) } : { artWait: ART_WAIT }),
 		dress: (viewer) => dressOf(header, viewer), art: options.art, cards: options.cards(), resolveArt: options.resolveArt,
 	});
 
@@ -125,7 +127,10 @@ export async function watchServer(options: Watching) {
 		if (request.method === "POST") {
 			let post: Record<string, unknown>;
 			try { post = await body(request); } catch (error) { return json(response, 400, { ok: false, message: error instanceof Error ? error.message : String(error) }); }
-			const problem = await found.act(post);
+			// The link may have been replaced while the request came in: only a seat the code still opens acts.
+			const now = options.seats?.(code);
+			if (!now) return json(response, 401, { ok: false, message: "That code opens no seat at this table any more. Ask the host for the seat's link." });
+			const problem = await now.act(post);
 			seatsChanged();
 			return json(response, problem ? 400 : 200, problem ? { ok: false, message: problem } : { ok: true });
 		}
@@ -139,7 +144,7 @@ export async function watchServer(options: Watching) {
 		}
 		const desk = options.seats?.(code);
 		if (!desk) return json(response, 401, { message: "That code opens no seat at this table any more. Ask the host for the seat's link." });
-		const feed = board(desk), have = { moments: number("moments"), deck: number("deck"), images: number("images") };
+		const feed = board(desk), have = { moments: number("moments"), deck: number("deck"), images: number("images"), art: number("art") };
 		return json(response, 200, { serial: seatSerial, state: desk.state(),
 			...(feed && url.searchParams.get("game") !== desk.game ? { board: { game: desk.game, full: feed.data() } } : feed && feed.version !== number("version") ? { board: { game: desk.game, since: feed.since(have) } } : {}) });
 	}
@@ -231,7 +236,7 @@ export async function watchServer(options: Watching) {
 				async since(query: URLSearchParams, signal: AbortSignal) {
 					const have = (name: string) => Number(query.get(name) ?? 0) || 0;
 					if (replay.version === have("version") && !finished && !signal.aborted) await held(waiting, signal);
-					return { ...replay.since({ moments: have("moments"), deck: have("deck"), images: have("images") }), finished };
+					return { ...replay.since({ moments: have("moments"), deck: have("deck"), images: have("images"), art: have("art") }), finished };
 				},
 			};
 			live.set(id, watched);

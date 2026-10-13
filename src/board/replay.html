@@ -152,15 +152,18 @@ function start(G) {
 
   // The board itself: this moment's scene for this viewer, drawn by cardboard. Images the scenes share are named, not repeated.
   const image = (value) => value?.startsWith("@") ? G.images[value.slice(1)] : value;
+  // A card whose art has not come is drawn by its name, not as a blank card still loading.
+  const drawable = () => ({ ...deck, cards: G.deck.map((one) => one.scryfallId && !assets.has(T.scryfallAssetKey(one)) ? { id: one.id, name: one.name } : one) });
   function scene() {
     const one = structuredClone(moments[at].views[seen].scene);
-    one.decks = [deck]; one.activeDeckId = "board";
+    one.decks = [drawable()]; one.activeDeckId = "board";
     for (const player of one.players) if (player.avatarUrl) player.avatarUrl = image(player.avatarUrl);
     if (one.view.mtg.backgroundUrl) one.view.mtg.backgroundUrl = image(one.view.mtg.backgroundUrl);
     // A seat's page marks the cards its question names, on the newest board only, and only cards that board shows.
     const shown = (place) => one.players.find((player) => player.id === place.playerId)?.zones.find((zone) => zone.id === place.zoneId)?.cardIds.length > place.index;
     const marks = (G.marks?.(at === moments.length - 1) ?? []).filter((mark) => shown(mark.target));
-    one.extras = { ...one.extras, focus, highlights: [...(one.extras.highlights ?? []), ...marks] };
+    // cardboard draws at most 64 highlights; the board's own come first.
+    one.extras = { ...one.extras, focus, highlights: [...(one.extras.highlights ?? []), ...marks].slice(0, 64) };
     return one;
   }
   const draw = () => { $("stage").innerHTML = T.renderDetailed(T.normalize(scene()), { assets }).svg; };
@@ -258,7 +261,7 @@ function start(G) {
     for (const [name, value] of update.images) G.images[name] = value;
     for (const one of update.deck) { G.deck.push(one); byId.set(one.id, one); }
     Object.assign(G.cards, update.cards);
-    for (const [name, value] of Object.entries(update.art)) assets.set(name, value);
+    for (const [name, value] of Object.entries(update.art)) { assets.set(name, value); G.art[name] = value; }
     moments.splice(update.from, Infinity, ...update.moments);
     reindex();
     show(following ? moments.length - 1 : at);
@@ -268,14 +271,14 @@ function start(G) {
   if (G.live && !G.seat) (async () => {
     for (;;) {
       try {
-        const query = "version=" + G.version + "&moments=" + moments.length + "&deck=" + G.deck.length + "&images=" + Object.keys(G.images).length;
+        const query = "version=" + G.version + "&moments=" + moments.length + "&deck=" + G.deck.length + "&images=" + Object.keys(G.images).length + "&art=" + Object.keys(G.art).length;
         const update = await (await fetch("live.json?" + query, { cache: "no-store" })).json();
         if (update.finished) { location.reload(); return; }
         apply(update);
       } catch { await new Promise((wait) => setTimeout(wait, 2000)); }
     }
   })();
-  return { apply, redraw: () => { if (moments[at]) draw(); }, place };
+  return { apply, redraw: () => { if (moments[at]) draw(); }, place, latest: () => at === moments.length - 1 };
 }
 
 // A seat's page. The code after the # is the seat's: sent as a bearer token, never in an address.
@@ -284,10 +287,12 @@ function seat() {
   const closed = (message) => { $("seat").hidden = true; $("replay").hidden = true; $("open").hidden = false; $("open").replaceChildren(el("h1", "Magic seat"), el("p", message)); };
   if (!code) return closed("This page opens a seat from its link, with the seat's code after the #. Ask the host for it.");
   $("desk").hidden = false; $("seat").hidden = false; $("desk").append($("seat"));
-  let state = null, deadline = null, G = null, board = null, shownAsk = null, narrowed = null;
+  let state = null, deadline = null, G = null, board = null, shownAsk = null, narrowed = null, last = { key: null, at: 0 };
   // A card on the board, by where it sits; the question's options name the cards they use the same way.
   const spot = (place) => place.playerId + "/" + place.zoneId + "/" + place.index;
   const touching = (asked, key) => asked.options.flatMap((one, i) => (one.at ?? []).some((place) => spot(place) === key) ? [i] : []);
+  // The board answers only while it shows the board the question was asked on: the newest moment, and caught up.
+  const current = () => !!board && board.latest() && G.moments.at(-1)?.views[0].board === state?.question?.board;
   const note = (text) => { $("seat-note").textContent = text || ""; };
   async function send(body) {
     try {
@@ -329,7 +334,7 @@ function seat() {
         (() => { const row = el("div", undefined, "row"); row.append(button(now.agreement === "prepare" ? "Agree" : "Begin", () => send({ do: "agree", what: now.agreement, yes: true })), button("Decline", () => send({ do: "agree", what: now.agreement, yes: false }))); return row; })());
       return box; })()] : []));
     // The question, its options folded as the seat's menu, and the AI's pick.
-    if (asked?.ask !== shownAsk) { shownAsk = asked?.ask ?? null; narrowed = null; if (asked) note(""); }
+    if (asked?.ask !== shownAsk) { shownAsk = asked?.ask ?? null; narrowed = null; last = { key: null, at: 0 }; if (asked) note(""); }
     const only = asked && narrowed ? touching(asked, narrowed) : null;
     deadline = now.remaining !== undefined ? Date.now() + now.remaining : null;
     $("seat-question").replaceChildren(...(asked ? [
@@ -386,7 +391,8 @@ function seat() {
     for (;;) {
       let got, reply;
       try {
-        const query = new URLSearchParams({ after: String(serial), ...(G ? { game: G.game, version: String(G.version), moments: String(G.moments.length), deck: String(G.deck.length), images: String(Object.keys(G.images).length) } : {}) });
+        const query = new URLSearchParams({ after: String(serial), ...(G ? { game: G.game, version: String(G.version), moments: String(G.moments.length), deck: String(G.deck.length),
+          images: String(Object.keys(G.images).length), art: String(Object.keys(G.art).length) } : {}) });
         reply = await fetch("../api/seat?" + query, { headers: auth, cache: "no-store" });
         got = await reply.json();
       } catch { await wait(2000); continue; }
@@ -398,16 +404,15 @@ function seat() {
         // Cards the question can use glow; the one chosen to narrow it glows warmer.
         G.marks = (latest) => {
           const asked = state?.question, seen = new Map();
-          if (!latest || !asked) return [];
+          if (!latest || !asked || !current()) return [];
           for (const one of asked.options) for (const place of one.at ?? []) seen.set(spot(place), place);
           return [...seen.entries()].map(([key, target]) => ({ target, preset: key === narrowed ? "ember" : "frost" }));
         };
         // A click on a card the question can use shows only its options, and another click shows them all again.
         // Two quick clicks on a card with one option take it. Counted here: each click redraws the board, so the
         // browser sees two different cards and never calls it a double click.
-        let last = { key: null, at: 0 };
         G.picked = (place) => {
-          const asked = state?.question, key = spot(place), options = asked ? touching(asked, key) : [];
+          const asked = state?.question, key = spot(place), options = asked && current() ? touching(asked, key) : [];
           if (!options.length) return false;
           const twice = last.key === key && Date.now() - last.at < 450;
           last = { key, at: Date.now() };

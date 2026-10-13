@@ -3,6 +3,7 @@
  * so a hidden card never enters it: other hands are counts, face-down cards have no name.
  * Renderer-neutral and pure. A renderer decides layout and look; nothing here draws.
  */
+import { createHash } from "node:crypto";
 import type { SeatId, SeatView as View } from "../core/types.ts";
 import type { SeenObject } from "../core/work.ts";
 
@@ -41,6 +42,15 @@ export type BoardSnapshot = {
 	/** Who attacks whom and what blocks each attacker, by object id, from declaration to the end of combat. */
 	combat?: { attacker: string; defending: SeatId; blockers: string[] }[];
 };
+
+/**
+ * What a viewer's board shows, as a short key: the same board, card for card,
+ * has the same key. Engine ids are left out, so the key says nothing the board
+ * does not: an id names a card's place in its registered list even face down.
+ */
+export const boardKey = (snapshot: BoardSnapshot): string => createHash("sha256")
+	.update(JSON.stringify([snapshot.seats, snapshot.stack], (key, value) => key === "id" || key === "attachedTo" || key === "targets" ? undefined : value))
+	.digest("base64url").slice(0, 16);
 
 /** `seats` names each seat and its deck; the view supplies everything else. */
 export function boardSnapshot(view: View, seats: readonly { id: SeatId; name: string; deck?: string }[], viewer: SeatId | "spectator"): BoardSnapshot {

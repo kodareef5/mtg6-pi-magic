@@ -231,7 +231,7 @@ test("a player plays their seat from its page: they choose its models and key, a
 		await hostPi.magic("seat 1 link");
 		const link = /(http:\/\/127\.0\.0\.1:\d+)\/seat\/#(\S+)/.exec(hostPi.notes.at(-1)!)!, [base, code] = [link[1]!, link[2]!];
 		const seat = (body?: object, query = "") => fetch(`${base}/api/seat${query}`, { headers: { authorization: `Bearer ${code}` }, ...(body ? { method: "POST", body: JSON.stringify(body) } : {}) }).then((one) => one.json());
-		type Seen = { agreement?: string; question?: { ask: number; options: { suggested?: true; at: unknown[] }[] }; stage: string; mode?: string; key: string; seats: { pilot: string; models: Record<string, string> }[] };
+		type Seen = { agreement?: string; question?: { ask: number; board: string; options: { suggested?: true; at: unknown[] }[] }; stage: string; mode?: string; key: string; seats: { pilot: string; models: Record<string, string> }[] };
 		const awaiting = async (done: (state: Seen) => boolean, what: string): Promise<Seen> => {
 			let got = await seat();
 			for (const begun = Date.now(); !done(got.state); got = await seat(undefined, `?after=${got.serial}`))
@@ -259,6 +259,11 @@ test("a player plays their seat from its page: they choose its models and key, a
 		assert.equal(now.mode, "suggest");
 		assert.ok(now.question!.options.some((one) => one.suggested), "the AI's pick is marked");
 		assert.ok(now.question!.options.every((one) => Array.isArray(one.at) && !("objects" in one)), "an option names its cards by where they sit, never by engine id");
+		for (const begun = Date.now(); ; await new Promise((go) => setTimeout(go, 100))) {
+			const got = await seat();
+			if (got.board?.full.moments.at(-1)?.views[0].board === got.state.question?.board) break;
+			if (Date.now() - begun > 20_000) throw new Error("The page's newest board never matched the board its question was asked on.");
+		}
 		assert.match((await seat({ do: "choose", ask: now.question!.ask + 1, n: 1 })).message, /answered or withdrawn/, "an answer meant for another question is refused");
 		assert.deepEqual(await seat({ do: "choose", ask: now.question!.ask, n: 1 }), { ok: true });
 		const board = (await seat()).board;

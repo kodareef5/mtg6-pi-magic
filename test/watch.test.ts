@@ -15,7 +15,7 @@ import { load } from "../src/core/cards.ts";
 import { start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { createServer } from "node:http";
+import { createServer, request } from "node:http";
 import type { AddressInfo } from "node:net";
 import { endByHost, rollbackByHost } from "../src/core/host.ts";
 import { open, save, type Header } from "../src/core/journal.ts";
@@ -27,6 +27,7 @@ import type { Frame } from "../src/core/types.ts";
 import { project } from "../src/core/view.ts";
 import { gameStats, replayBuilder } from "../src/board/replay.ts";
 import { playByPlay } from "../src/board/series.ts";
+import { boardKey, boardSnapshot } from "../src/board/snapshot.ts";
 import { searchGames, type Summary } from "../src/watch/games.ts";
 import { watchServer } from "../src/watch/server.ts";
 import { quickTunnel } from "../src/watch/tunnel.ts";
@@ -173,7 +174,32 @@ test("a seat's code opens that seat alone: its state, its actions and its own bo
 		await through(table, 2, () => watched.take(table));
 		const later = await next;
 		assert.ok(later.board.since.version > full.version && !later.board.full, "then only what the page lacks");
+		const keyed = data(await (await fetch(`${server.base}/games/seated-1/game.js`)).text());
+		assert.ok(keyed.moments.every((one: { views: { board: string }[] }) => /^[\w-]{16}$/.test(one.views[0]!.board)), "every board has its key");
+		watched.take(table);
+		await new Promise((go) => setTimeout(go, 100));
+		const now = await (await ask("/api/seat", codes[0])).json();
+		assert.equal(now.board.full.moments.at(-1).views[0].board, boardKey(boardSnapshot(project(table, 0), table.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck.name })), 0)),
+			"the newest board's key is the key of the seat's view of the table now");
 		watched.finish();
+	} finally { await server.close(); }
+});
+
+test("a seat's link replaced while a request is still arriving leaves that request nothing to do", async () => {
+	const { dir } = await games(), first = "a".repeat(43), acted: unknown[] = [];
+	let live = first;
+	const server = await watchServer({ dir, cards: () => cards, rules: () => rules, art: new Map(), resolveArt: async () => ({}),
+		seats: (code) => code === live ? { state: () => ({}), act: async (post) => { acted.push(post); return null; } } : undefined });
+	try {
+		const url = new URL(`${server.base}/api/seat`);
+		const status = await new Promise<number>((done) => {
+			const sending = request({ host: url.hostname, port: url.port, path: url.pathname, method: "POST", headers: { authorization: `Bearer ${first}` } },
+				(response) => { response.resume(); done(response.statusCode!); });
+			sending.write('{"do": "concede"');
+			setTimeout(() => { live = "b".repeat(43); sending.end("}"); }, 100);
+		});
+		assert.equal(status, 401, "the code opens no seat by the time its request has arrived");
+		assert.deepEqual(acted, [], "and the seat does nothing");
 	} finally { await server.close(); }
 });
 
@@ -231,7 +257,7 @@ test("a rollback is a moment of its own, showing the position play went back to"
 	assert.equal(lands(now.snapshot), 0, "the board as it stands after the rollback");
 });
 
-test("no client is sent a card before its art and text, and custom images are kept in the replay", async () => {
+test("a board is published with its cards' text at once, their art follows to a client that holds them, a failing art service holds nothing back, and custom images are kept", async () => {
 	const made = header("drawn", ["Green Stompy", "Dimir Control"]), table = dealt(made), seen = playByPlay(table.seats.map((one) => ({ id: one.id, name: one.name })));
 	await through(table, 2, () => seen.take(table));
 	const portrait = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
@@ -241,17 +267,23 @@ test("no client is sent a card before its art and text, and custom images are ke
 	try {
 		let release!: () => void;
 		const later = new Promise<void>((go) => { release = go; });
-		const built = await replayBuilder(table.seats, seen.viewers, { title: "t", subtitle: "s", art: new Map([["Forest", "f"]]), cards,
+		const built = await replayBuilder(table.seats, seen.viewers, { title: "t", subtitle: "s", art: new Map([["Forest", "f"]]), cards, artWait: 50,
 			dress: () => ({ avatars: { 0: `${at}/me.png` }, background: `${at}/table.png` }),
 			resolveArt: async (definitions) => { await later; return Object.fromEntries(definitions.filter((one) => one.scryfallId).map((one) => [`${one.scryfallId}:front`, { image: "data:image/jpeg;base64,AA==" }])); } });
-		const syncing = built.sync(seen.moments);
-		const early = built.data() as { deck: unknown[]; moments: unknown[] };
-		assert.deepEqual([early.deck.length, early.moments.length], [0, 0], "nothing is published while the art is coming");
+		assert.equal(await built.sync(seen.moments), true);
+		const early = built.data() as unknown as { deck: { id: string; name: string; scryfallId?: string }[]; moments: unknown[]; art: Record<string, unknown>; cards: Record<string, unknown> };
+		const forest = early.deck.find((one) => one.name === "Forest")!;
+		assert.ok(early.moments.length && forest && early.cards[forest.id] && !Object.keys(early.art).length, "the board and its cards' text are published while the art is coming");
 		release();
-		await syncing;
-		const late = built.since({ moments: 0, deck: early.deck.length, images: 0 }) as unknown as { deck: { id: string; scryfallId?: string; name: string }[]; art: Record<string, unknown>; cards: Record<string, unknown> };
-		const forest = late.deck.find((one) => one.name === "Forest")!;
-		assert.ok(forest && late.art[`${forest.scryfallId}:front`] && late.cards[forest.id], "the card arrives with its art and text");
+		await new Promise((go) => setTimeout(go, 20));
+		assert.equal(await built.sync(seen.moments), true, "art that came late is news");
+		const late = built.since({ moments: early.moments.length, deck: early.deck.length, images: 0, art: 0 }) as unknown as { deck: unknown[]; art: Record<string, unknown> };
+		assert.ok(!late.deck.length && late.art[`${forest.scryfallId}:front`], "a client holding the card is sent its art");
+		assert.deepEqual(Object.keys((built.since({ moments: early.moments.length, deck: early.deck.length, images: 0, art: Object.keys(late.art).length }) as { art: object }).art), [], "and only once");
+		const down = await replayBuilder(table.seats, seen.viewers, { title: "t", subtitle: "s", art: new Map([["Forest", "f"]]), cards, dress: () => ({}),
+			resolveArt: async () => { throw new Error("Scryfall is down."); } });
+		assert.equal(await down.sync(seen.moments), true, "an art service that fails holds no board back");
+		assert.ok((down.data() as { moments: unknown[] }).moments.length);
 		const all = JSON.stringify(built.data());
 		assert.ok(!all.includes(at), "no scene names the image server");
 		assert.ok(Object.values((built.data() as { images: Record<string, string> }).images).some((one) => one.startsWith("data:image/png;base64,")), "the custom portrait is kept in the replay");

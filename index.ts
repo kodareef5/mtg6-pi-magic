@@ -29,7 +29,7 @@ import { choose, chooseColors, defaults, named, type Art, type Colors } from "./
 import { menu, person, type Person } from "./src/seating/person.ts";
 import { panel, type Sitting } from "./src/seating/panel.ts";
 import { boardPlaces, cardboardArt, cardboardRenderer } from "./src/board/cardboard.ts";
-import { boardSnapshot } from "./src/board/snapshot.ts";
+import { boardKey, boardSnapshot } from "./src/board/snapshot.ts";
 import { Type } from "typebox";
 
 import {
@@ -744,10 +744,12 @@ export default function (pi: ExtensionAPI) {
 	/**
 	 * The question as the seat's page shows it: the folded menu, what each line
 	 * shows, where on the seat's board the cards it names sit, and the AI's pick.
+	 * `board` is the key of the board it was asked on: a page lets a card on its
+	 * board answer only while it shows that board.
 	 */
 	function question(asking: NonNullable<ReturnType<Person["asking"]>>, seats: { id: SeatId; name: string; deck: string }[]) {
-		const places = boardPlaces(boardSnapshot(asking.frame.view, seats, asking.frame.seat));
-		return { ask: asking.ask, text: asking.frame.decision?.question ?? "Choose.", ...(asking.frame.refused?.length ? { refused: asking.frame.refused.at(-1) } : {}),
+		const snapshot = boardSnapshot(asking.frame.view, seats, asking.frame.seat), places = boardPlaces(snapshot);
+		return { ask: asking.ask, board: boardKey(snapshot), text: asking.frame.decision?.question ?? "Choose.", ...(asking.frame.refused?.length ? { refused: asking.frame.refused.at(-1) } : {}),
 			...(asking.frame.decision?.options.some((one) => one.id === "pass") ? { pass: true } : {}),
 			options: menu(asking).map((line) => ({ label: line.label, ...(line.option.shows ? { shows: line.option.shows } : {}),
 				at: (line.option.objects ?? []).flatMap((one) => places.get(one.id) ?? []), ...(asking.suggestion?.option === line.option.id ? { suggested: true } : {}) })) };
@@ -778,6 +780,7 @@ export default function (pi: ExtensionAPI) {
 	/** One action from a seat's page. The table's config changes only while it is set and nobody is being asked to agree. */
 	async function deskAct(ctx: ExtensionContext, ours: Hosting, at: number, code: string, post: Record<string, unknown>): Promise<string | null> {
 		if (host !== ours) return "This table was replaced.";
+		if (seatOf(ours.lobby, code) !== at) return "This seat's link was replaced. Ask the host for the new one.";
 		const setup = ours.lobby, mine = setup.seats[at]!, pilot = ours.pilots?.[at], ask = typeof post.ask === "number" ? post.ask : undefined, setAs = mine.setAs ?? at;
 		const settable = setup.stage === "setting" && !ours.asking ? null : setup.stage !== "setting" ? "A seat's models and key are set before the table starts." : "The table is asking every seat to agree; decline first to change your seat.";
 		switch (post.do) {

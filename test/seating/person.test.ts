@@ -69,6 +69,30 @@ test("handing an open question to the autopilot answers it; manual needs none; a
 	assert.deepEqual(await alone.player.answer(ask(2, "pass", "land:7")), { kind: "concede", by: "person" }, "a concession stands for the next ask too");
 });
 
+test("handing an open question to the autopilot takes it from the person at once, and gives it back if the autopilot fails", async () => {
+	let think!: (answer: Answer) => void, fail!: (error: Error) => void;
+	const pilot: Player = { name: "pilot", observe() {}, close() {}, answer: () => new Promise<Answer>((settle, refuse) => { think = settle; fail = refuse; }) };
+	const { seen, show } = shown(), seat = person("B", pilot, "manual", show);
+	const first = seat.player.answer(ask(1, "pass", "land:7"));
+	await new Promise((go) => setTimeout(go, 0));
+	assert.ok(seen.at(-1), "the person is asked, and their clock runs");
+	const handing = seat.switch("auto");
+	assert.equal(seen.at(-1), null, "the moment the autopilot takes it, the person is no longer asked: their clock stops");
+	assert.equal(seat.asking(), null);
+	think({ kind: "pick", option: "land:7", actionId: "pilot" });
+	assert.equal(await handing, null);
+	assert.deepEqual(await first, { kind: "pick", option: "land:7", actionId: "pilot" }, "and the autopilot's answer is the seat's");
+	await seat.switch("manual");
+	const second = seat.player.answer(ask(2, "pass", "land:7"));
+	await new Promise((go) => setTimeout(go, 0));
+	const asked = seen.at(-1)!.ask, failing = seat.switch("auto");
+	fail(new Error("The provider is down."));
+	assert.match((await failing)!, /could not answer; the question is yours again/);
+	assert.equal(seen.at(-1)?.ask, asked, "the same question comes back to the person");
+	assert.equal(seat.choose(2, asked), null);
+	assert.equal((await second as { option: string }).option, "land:7");
+});
+
 test("a question with one real option is answered at once, and stepping back is not a real option", async () => {
 	const pilot = autopilot(() => ({ kind: "pick", option: "announce:cost:0", actionId: "pilot" }));
 	const seat = person("B", pilot, "suggest", () => {});

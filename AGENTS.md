@@ -253,8 +253,13 @@ the pilot's mode and stops, tell and concede. The cards the question can use
 glow on the board; a click on one shows only its options, and two quick clicks
 on a card with one option take it. An option names its cards by where they
 sit on the board (`boardPlaces` in `src/board/cardboard.ts`), never by engine
-id. Every question is numbered, so an answer meant for one never lands on the
-next. The host's table shows whether each player's page is open.
+id, and carries the key of the board it was asked on (`boardKey`): the board
+answers only while the page shows that board, its newest moment caught up.
+Every question is numbered, so an answer meant for one never lands on the
+next. A seat's code is checked again just before an action is taken, so a
+link replaced while a request was coming in does nothing. Handing an open
+question to the AI takes it from the player at once and stops their clock. The
+host's table shows whether each player's page is open.
 
 A seat's pilot sits over its AI as the autopilot (`src/seating/person.ts`).
 In suggest mode the autopilot proposes each choice and the person types a
@@ -323,7 +328,10 @@ stopped short, is served as the audience saw it, since it may yet be played
 on. A game this Pi is playing is watched live: the loop's checkpoint hands the
 table to it before each decision, its page receives each new moment as it
 comes and follows the newest unless the viewer stepped back, and it loads again
-when the game is over. Local serves on 127.0.0.1:4747; public puts a Cloudflare
+when the game is over. A live board waits at most three seconds for its new
+cards' art and never fails for it: a card without art is drawn by its name,
+and its art follows whenever Scryfall answers, asked again at most every 15
+seconds. Local serves on 127.0.0.1:4747; public puts a Cloudflare
 quick tunnel in front, whose address changes each time. The host's table shows
 the address.
 

@@ -186,16 +186,25 @@ export function person(name: string, autopilot: Player | undefined, start: Mode,
 			return null;
 		},
 		setStops(next: Stops) { stops = next; },
-		/** Switch modes. Handing an open question to the autopilot answers it now. */
+		/**
+		 * Switch modes. Handing an open question to the autopilot takes it from the
+		 * person at once, so their clock stops while it thinks, and answers it.
+		 */
 		async switch(next: Mode): Promise<string | null> {
 			if (next !== "manual" && !deciding) return autopilot ? "This seat's autopilot has no decision model; it only prepares cards." : "This seat has no autopilot.";
 			mode = next;
-			const open = asking;
+			const open = asking, mine = serial;
 			if (next !== "auto" || !open) return null;
-			const answer = open.suggestion ?? await autopilot!.answer(open.frame);
-			// The question may have been withdrawn while the autopilot thought; a newer one stays open.
-			if (asking === open && mode === "auto") settle(answer);
-			return null;
+			asking = null;
+			shown(null);
+			let answer: Answer | undefined;
+			try { answer = open.suggestion ?? await autopilot!.answer(open.frame); } catch { answer = undefined; }
+			// Withdrawn while it thought: nothing is owed. Taken back, or not answered: the person is asked again.
+			if (serial !== mine) return null;
+			if (answer && mode === "auto") { open.settle(answer); return null; }
+			asking = open;
+			shown(open);
+			return answer ? null : "The autopilot could not answer; the question is yours again.";
 		},
 		/**
 		 * Tell the seat how to play, in words. The autopilot's strategy plans
