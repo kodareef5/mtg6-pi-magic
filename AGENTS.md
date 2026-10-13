@@ -291,6 +291,20 @@ ledger, and the run's time and cost when its result was saved. The page wears
 the frame colours of the board being looked at. A 16-turn game writes in
 seconds.
 
+`/magic watch local|public|off` shows this Pi's games (`src/watch/`), and the
+setting holds across sessions in `settings.json` beside the roster. A
+read-only server, apart from the seats' wire and needing no token, serves a
+games page, searched, sorted and paged on the server from each journal's
+header and decisions and its newest saved result, and each game's replay page.
+A game with a result is served from every perspective. Any other, live or
+stopped short, is served as the audience saw it, since it may yet be played
+on. A game this Pi is playing is watched live: the loop's checkpoint hands the
+table to it before each decision, its page receives each new moment as it
+comes and follows the newest unless the viewer stepped back, and it loads again
+when the game is over. Local serves on 127.0.0.1:4747; public puts a Cloudflare
+quick tunnel in front, whose address changes each time. The host's table shows
+the address.
+
 Saved pictures are WebP (jSquash's libwebp build, quality 85), about a tenth
 the size of PNG: the host's picture after each turn and a guest seat's own. The terminal widget is shown PNG, which every terminal image
 protocol takes.
@@ -661,6 +675,11 @@ src/seating/           who answers a seat
   chair.ts             a seat answered over the wire: holds each ask and judges each answer
   person.ts, panel.ts  a person at a seat over the autopilot, its stops and menu; the seat in words
   host.ts, guest.ts    the server that hands out chairs; claiming a chair and following it
+src/watch/             showing games to spectators and rewatchers: read-only, never a seat
+  games.ts             saved games: summaries, search and paging, moments, looks and run cost
+  server.ts            the watching server: the games page, replays, and a live game as it plays
+  games.html           the games page
+  tunnel.ts            a Cloudflare quick tunnel's public address
 src/board/             board pictures: no game logic, never read by a seat
   snapshot.ts          the board as one viewer may see it, renderer-neutral and pure
   render.ts            the renderer seam, the art map, and SVG to PNG or WebP through resvg and jSquash

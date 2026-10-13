@@ -18,8 +18,8 @@ export type Moment = { views: View[] };
 /** A viewer's folder name: the audience, or a seat by number. */
 export const viewerKey = (viewer: Viewer) => viewer === "spectator" ? "audience" : `seat-${viewer}`;
 
-export function playByPlay(seats: { id: number; name: string; deck?: string }[]) {
-	const viewers: Viewer[] = ["spectator", ...seats.map((one) => one.id)];
+/** `viewers` defaults to the audience and every seat; a live game shows the audience alone. */
+export function playByPlay(seats: { id: number; name: string; deck?: string }[], viewers: Viewer[] = ["spectator", ...seats.map((one) => one.id)]) {
 	const moments: Moment[] = [];
 	let seen = 0, boards = "";
 	return {
@@ -47,3 +47,22 @@ export function playByPlay(seats: { id: number; name: string; deck?: string }[])
 export const when = (snapshot: BoardSnapshot) => snapshot.finished ? "Game over"
 	: snapshot.turn ? `Turn ${snapshot.turn}, ${snapshot.seats.find((one) => one.id === snapshot.active)?.name ?? "?"}'s ${snapshot.step?.replace(/-/g, " ") ?? "turn"}`
 	: "Opening hands";
+
+/**
+ * The moments as the audience alone saw them, for a game whose hands are not
+ * yet everyone's to see: a moment only a seat noticed goes, and one that leaves
+ * the audience's board as it was joins the one before.
+ */
+export function audienceOnly(moments: Moment[]): Moment[] {
+	const shown: Moment[] = [];
+	let board = "";
+	for (const moment of moments) {
+		const view = moment.views[0]!;
+		if (!view.lines.length) continue;
+		const { step: _step, ...rest } = view.snapshot, same = JSON.stringify(rest), last = shown.at(-1);
+		if (last && same === board) { last.views[0] = { snapshot: view.snapshot, lines: [...last.views[0]!.lines, ...view.lines] }; continue; }
+		board = same;
+		shown.push({ views: [{ snapshot: view.snapshot, lines: [...view.lines] }] });
+	}
+	return shown;
+}

@@ -88,24 +88,30 @@ const theme = (colors: Colors) => ({ bg: tone(colors.primary, 1, 0.045, 1.9), pa
 /** cardboard-api's browser scripts the page loads, in order. */
 const SCRIPTS = ["engine", "extras", "perspective", "layout", "scryfall", "renderer", "mtg-layout", "mtg-renderer"];
 
-/**
- * Write the replay into `dir`: `index.html`, `game.js` with every scene, and
- * cardboard's scripts. `art` maps card names to printings; `resolveArt` turns
- * scene card definitions into image data, from the renderer's cache.
- */
-export async function writeReplay(dir: string, moments: Moment[], viewers: Viewer[], options: {
+export type ReplayOptions = {
 	title: string; subtitle: string; stats?: Stats; dress(viewer: Viewer): Dress; art: ReadonlyMap<string, string>; cards: Universe;
-	resolveArt(definitions: Record<string, string>[]): Promise<Record<string, string> | null>;
-}): Promise<{ scenes: number; bytes: number }> {
+	/** Card art for scene definitions, keyed as cardboard looks it up. */
+	resolveArt(definitions: Record<string, string>[]): Promise<Record<string, unknown> | null>;
+};
+/** A moment as the page shows it: a scene per viewer, what each saw, and every seat's counts. */
+type Shown = { when: string; turn: number; counts: number[][]; views: { lines: string[]; scene: unknown }[] };
+
+/**
+ * The page's data, built a moment at a time: a file writes it whole, and a
+ * live game sends what is new as it plays. Images and card definitions go in
+ * once, in the order they appear, so a client that has the first n of each
+ * needs only the rest. The last moment can still grow while play stays in it,
+ * so an update always sends it again.
+ */
+export async function replayBuilder(seats: { id: number; name: string }[], viewers: Viewer[], options: ReplayOptions) {
 	// Images go in once, by content; scenes name them, so a background is not repeated in every scene.
-	const images: Record<string, string> = {};
+	const images = new Map<string, string>(), definitions = new Map<string, Record<string, string>>(), art: Record<string, unknown> = {}, cards: Record<string, unknown> = {};
 	const image = (value: string | undefined) => {
 		if (!value?.startsWith("data:")) return value;
 		const key = createHash("sha256").update(value).digest("hex").slice(0, 16);
-		images[key] = value;
+		images.set(key, value);
 		return `@${key}`;
 	};
-	const seats = moments[0]?.views[0]?.snapshot.seats ?? [], definitions = new Map<string, Record<string, string>>();
 	const looks = await Promise.all(viewers.map(async (viewer) => {
 		const dress = options.dress(viewer), background = image(imageOf("backgrounds", dress.background));
 		const avatars = Object.fromEntries(await Promise.all(seats.map(async (seat) => [seat.id, image(await portrait(dress.avatars?.[seat.id], seat.id))] as const)));
@@ -114,28 +120,66 @@ export async function writeReplay(dir: string, moments: Moment[], viewers: Viewe
 	const scene = (view: Moment["views"][number], at: number) => {
 		const look = looks[at]!, { decks, ...rest } = cardboardScene(view.snapshot, options.art, { width: 1920, height: 1080 },
 			{ avatars: look.avatars, ...(look.background ? { background: look.background } : {}), ...(look.colors ? { colors: look.colors } : {}) });
-		for (const card of decks[0]!.cards) definitions.set(card.id!, card as Record<string, string>);
+		for (const card of decks[0]!.cards) if (!definitions.has(card.id!)) definitions.set(card.id!, card as Record<string, string>);
 		return rest;
 	};
-	const shown = moments.map((moment) => ({ when: when(moment.views[0]!.snapshot), turn: moment.views[0]!.snapshot.turn ?? 0,
-		counts: moment.views[0]!.snapshot.seats.map((one) => [one.life, one.hand, one.library, one.battlefield.length, one.graveyard.length, one.exile.length]),
-		views: moment.views.map((view, at) => ({ lines: view.lines, scene: scene(view, at) })) }));
-	const deck = [...definitions.values()];
-	const cards = Object.fromEntries(deck.flatMap((one) => {
-		const card = options.cards.cards.get(one.name!);
-		return one.id === "hidden" ? [] : [[one.id!, card ? { name: card.name, cost: card.mana, type: card.type, text: card.oracle, stats: card.stats } : { name: one.name }]];
-	}));
-	const data = {
-		title: options.title, subtitle: options.subtitle, stats: options.stats ?? null, colors: COLORS, seats: seats.map((one) => one.name),
-		perspectives: viewers.map((viewer, at) => ({ key: viewerKey(viewer), label: viewer === "spectator" ? "Audience" : seats.find((one) => one.id === viewer)?.name ?? `Seat ${viewer}`,
-			theme: theme(looks[at]!.colors ?? ORIGINAL) })),
-		images, art: await options.resolveArt(deck) ?? {}, cards, deck, moments: shown,
+	const shown: Shown[] = [];
+	let version = 0, resolved = 0;
+	const perspectives = viewers.map((viewer, at) => ({ key: viewerKey(viewer), label: viewer === "spectator" ? "Audience" : seats.find((one) => one.id === viewer)?.name ?? `Seat ${viewer}`,
+		theme: theme(looks[at]!.colors ?? ORIGINAL) }));
+	return {
+		/** Bring the shown moments up to `moments`: the last shown one again, since it may have grown, and every one after it. */
+		async sync(moments: Moment[]): Promise<boolean> {
+			const from = Math.max(0, shown.length - 1);
+			if (moments.length === shown.length && moments.length && JSON.stringify(shown.at(-1)!.views.map((one) => one.lines)) === JSON.stringify(moments.at(-1)!.views.map((one) => one.lines))) return false;
+			for (let at = from; at < moments.length; at++) {
+				const moment = moments[at]!, first = moment.views[0]!.snapshot;
+				shown[at] = { when: when(first), turn: first.turn ?? 0,
+					counts: first.seats.map((one) => [one.life, one.hand, one.library, one.battlefield.length, one.graveyard.length, one.exile.length]),
+					views: moment.views.map((view, index) => ({ lines: view.lines, scene: scene(view, index) })) };
+			}
+			const fresh = [...definitions.values()].slice(resolved);
+			resolved = definitions.size;
+			Object.assign(art, await options.resolveArt(fresh) ?? {});
+			for (const one of fresh) {
+				const card = options.cards.cards.get(one.name!);
+				if (one.id !== "hidden") cards[one.id!] = card ? { name: card.name, cost: card.mana, type: card.type, text: card.oracle, stats: card.stats } : { name: one.name };
+			}
+			version++;
+			return true;
+		},
+		/** Everything, as a file holds it. */
+		data(extra: Record<string, unknown> = {}) {
+			return { title: options.title, subtitle: options.subtitle, stats: options.stats ?? null, colors: COLORS, seats: seats.map((one) => one.name), perspectives,
+				images: Object.fromEntries(images), art, cards, deck: [...definitions.values()], moments: shown, version, ...extra };
+		},
+		/** What a client holding `moments` moments, `deck` definitions and `images` images lacks, from its last moment on. */
+		since(have: { moments: number; deck: number; images: number }) {
+			const deck = [...definitions.values()].slice(have.deck), from = Math.max(0, Math.min(have.moments, shown.length) - 1);
+			return { version, from, moments: shown.slice(from), deck, images: [...images].slice(have.images),
+				cards: Object.fromEntries(deck.flatMap((one) => cards[one.id!] ? [[one.id!, cards[one.id!]]] : [])),
+				art: Object.fromEntries(Object.entries(art).filter(([key]) => deck.some((one) => key.startsWith(`${one.scryfallId}:`)))) };
+		},
+		get version() { return version; },
 	};
+}
+
+/** The page's data as `game.js` sets it. */
+export const gameScript = (data: unknown) => `window.GAME = ${JSON.stringify(data).replace(/</g, "\\u003c")};\n`;
+
+/** The files a replay folder holds beside `game.js`: the page, and cardboard's scripts by name. */
+export const replayPage = () => join(import.meta.dirname, "replay.html");
+export const cardboardScript = (name: string) => SCRIPTS.includes(name)
+	? join(dirname(createRequire(import.meta.url).resolve("cardboard-api/package.json")), "js", `${name}.js`) : undefined;
+
+/** Write a whole replay into `dir`: `index.html`, `game.js` with every scene, and cardboard's scripts. */
+export async function writeReplay(dir: string, moments: Moment[], viewers: Viewer[], options: ReplayOptions): Promise<{ scenes: number; bytes: number }> {
+	const built = await replayBuilder(moments[0]?.views[0]?.snapshot.seats ?? [], viewers, options);
+	await built.sync(moments);
 	mkdirSync(join(dir, "cardboard"), { recursive: true });
-	const cardboard = join(dirname(createRequire(import.meta.url).resolve("cardboard-api/package.json")), "js");
-	for (const script of SCRIPTS) copyFileSync(join(cardboard, `${script}.js`), join(dir, "cardboard", `${script}.js`));
-	copyFileSync(join(import.meta.dirname, "replay.html"), join(dir, "index.html"));
-	const game = `window.GAME = ${JSON.stringify(data).replace(/</g, "\\u003c")};\n`;
+	for (const script of SCRIPTS) copyFileSync(cardboardScript(script)!, join(dir, "cardboard", `${script}.js`));
+	copyFileSync(replayPage(), join(dir, "index.html"));
+	const game = gameScript(built.data());
 	writeFileSync(join(dir, "game.js"), game);
-	return { scenes: shown.length * viewers.length, bytes: Buffer.byteLength(game) };
+	return { scenes: moments.length * viewers.length, bytes: Buffer.byteLength(game) };
 }

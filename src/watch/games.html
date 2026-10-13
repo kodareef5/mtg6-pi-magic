@@ -1,0 +1,94 @@
+<!doctype html>
+<!--
+  The games this Pi has played or is playing, searched, sorted and paged by the
+  server at /api/games. Each opens its replay; a live one opens as it plays.
+-->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magic games</title>
+<style>
+:root { --ink: #f4edda; --bg: #061a16; --panel: #0d2a24; --raised: #133d33; --line: #2b4a42; --muted: #a9b8b0; --accent: #d9bf84; --live: #e8a066; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+main { max-width: 1200px; margin: 0 auto; padding: 22px 18px; }
+h1 { margin: 0 0 14px; font: 600 22px Georgia, serif; letter-spacing: .5px; color: var(--accent); }
+.bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+input, select, button { background: var(--raised); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 7px 11px; font: inherit; }
+input { flex: 1; min-width: 220px; }
+button { cursor: pointer; } button:hover:not(:disabled), select:hover { border-color: var(--accent); } button:disabled { opacity: .4; cursor: default; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+th { color: var(--muted); font-weight: normal; font-size: 12px; letter-spacing: .5px; }
+th[data-sort] { cursor: pointer; user-select: none; } th[data-sort]:hover { color: var(--ink); }
+th.sorted { color: var(--accent); } th.sorted::after { content: " ▾"; } th.sorted.asc::after { content: " ▴"; }
+td.num, th.num { text-align: right; }
+tbody tr { cursor: pointer; } tbody tr:hover { background: var(--raised); }
+.decks { white-space: normal; }
+.decks b { font-weight: 600; }
+.muted { color: var(--muted); }
+.status { font-size: 12px; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--line); }
+.status.live { color: var(--live); border-color: var(--live); }
+.status.finished { color: var(--accent); }
+.foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--muted); }
+.pages { display: flex; gap: 6px; align-items: center; }
+.empty { padding: 30px; text-align: center; color: var(--muted); }
+</style></head><body>
+<main>
+<h1>Magic games</h1>
+<div class="bar">
+<input id="q" type="search" placeholder="Search by deck, player, winner or game id" autofocus>
+<select id="status"><option value="all">Every game</option><option value="live">Live</option><option value="finished">Finished</option><option value="unfinished">Unfinished</option></select>
+<select id="size"><option>10</option><option selected>25</option><option>50</option><option>100</option></select>
+</div>
+<div class="panel"><table>
+<thead><tr>
+<th data-sort="played">Played</th><th>Game</th><th data-sort="winner">Winner</th><th data-sort="turns" class="num">Turns</th>
+<th data-sort="decisions" class="num">Decisions</th><th data-sort="time" class="num">Time</th><th data-sort="cost" class="num">Cost</th><th>Status</th>
+</tr></thead>
+<tbody id="rows"></tbody>
+</table></div>
+<div class="foot"><span id="total"></span><span class="pages"><button id="back">◀</button><span id="page"></span><button id="forward">▶</button></span></div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const state = { q: params.get("q") ?? "", status: params.get("status") ?? "all", sort: params.get("sort") ?? "played", dir: params.get("dir") ?? "desc", page: Number(params.get("page")) || 1, size: Number(params.get("size")) || 25 };
+$("q").value = state.q; $("status").value = state.status; $("size").value = String(state.size);
+const cell = (text, cls) => { const td = document.createElement("td"); td.textContent = text; if (cls) td.className = cls; return td; };
+const minutes = (ms) => ms === undefined ? "—" : Math.floor(ms / 60000) + "m " + String(Math.round(ms / 1000) % 60).padStart(2, "0") + "s";
+let asked = 0;
+async function load() {
+  const query = new URLSearchParams(Object.entries(state).map(([key, value]) => [key, String(value)]));
+  history.replaceState(null, "", "?" + query);
+  const mine = ++asked, response = await fetch("api/games?" + query), found = await response.json();
+  if (mine !== asked) return;
+  state.page = found.page;
+  $("rows").replaceChildren(...found.rows.map((game) => {
+    const tr = document.createElement("tr"), decks = document.createElement("td"), status = document.createElement("td"), badge = document.createElement("span");
+    decks.className = "decks";
+    game.seats.forEach((seat, i) => { if (i) decks.append(" vs "); const b = document.createElement("b"); b.textContent = seat.deck; decks.append(b); });
+    const id = document.createElement("div"); id.className = "muted"; id.textContent = game.id; decks.append(id);
+    badge.className = "status " + game.status; badge.textContent = game.status; status.append(badge);
+    tr.append(cell(new Date(game.played).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })), decks, cell(game.winner ?? "—"),
+      cell(game.turns ?? "—", "num"), cell(game.decisions, "num"), cell(minutes(game.elapsedMs), "num"), cell(game.cost === undefined ? "—" : "$" + game.cost.toFixed(2), "num"), status);
+    tr.onclick = () => { location.href = "games/" + encodeURIComponent(game.id) + "/"; };
+    return tr;
+  }));
+  if (!found.rows.length) { const tr = document.createElement("tr"), td = cell(state.q ? "No game matches." : "No games yet.", "empty"); td.colSpan = 8; tr.append(td); $("rows").append(tr); }
+  $("total").textContent = found.total + (found.total === 1 ? " game" : " games");
+  $("page").textContent = "Page " + found.page + " of " + found.pages;
+  $("back").disabled = found.page <= 1; $("forward").disabled = found.page >= found.pages;
+  document.querySelectorAll("th[data-sort]").forEach((th) => { th.classList.toggle("sorted", th.dataset.sort === state.sort); th.classList.toggle("asc", th.dataset.sort === state.sort && state.dir === "asc"); });
+}
+let typing;
+$("q").oninput = () => { clearTimeout(typing); typing = setTimeout(() => { state.q = $("q").value; state.page = 1; load(); }, 200); };
+$("status").onchange = () => { state.status = $("status").value; state.page = 1; load(); };
+$("size").onchange = () => { state.size = Number($("size").value); state.page = 1; load(); };
+$("back").onclick = () => { state.page--; load(); }; $("forward").onclick = () => { state.page++; load(); };
+document.querySelectorAll("th[data-sort]").forEach((th) => th.onclick = () => {
+  state.dir = state.sort === th.dataset.sort && state.dir === "desc" ? "asc" : "desc"; state.sort = th.dataset.sort; state.page = 1; load();
+});
+load();
+// A live game's status changes while the page is open.
+setInterval(() => { if (document.visibilityState === "visible") load(); }, 15000);
+</script></body></html>

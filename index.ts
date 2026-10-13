@@ -76,9 +76,11 @@ import {
 } from "./src/core/journal.ts";
 import { load as loadRules, search as searchRules } from "./src/core/rules.ts";
 import type { Table } from "./src/core/table.ts";
-import type { SeatId, Viewer } from "./src/core/types.ts";
-import { playByPlay } from "./src/board/series.ts";
-import { gameStats, writeReplay, type Run } from "./src/board/replay.ts";
+import type { SeatId } from "./src/core/types.ts";
+import { gameStats, writeReplay } from "./src/board/replay.ts";
+import { dressOf, momentsOf, runOf } from "./src/watch/games.ts";
+import { watchServer, type Watch } from "./src/watch/server.ts";
+import { quickTunnel } from "./src/watch/tunnel.ts";
 import { project, render } from "./src/core/view.ts";
 import { CommandsSchema, commands } from "./src/core/work-language.ts";
 import { editWork, workFrame } from "./src/core/work-tools.ts";
@@ -99,6 +101,10 @@ const PLAY = ["Green Stompy", "Red Burn"];
 const CACHE = join(process.env.PI_CODING_AGENT_DIR ?? join(homedir(), ".pi", "agent"), "magic");
 const ROSTER = join(CACHE, "roster.json");
 const GAMES = join(CACHE, "games");
+/** This Pi's own Magic settings: whether it shows its games, and where. Not the roster, which is the seats' models. */
+const SETTINGS = join(CACHE, "settings.json");
+type Settings = { watch?: "off" | "local" | "public"; port?: number };
+const settings = (): Settings => { try { return JSON.parse(readFileSync(SETTINGS, "utf8")) as Settings; } catch { return {}; } };
 
 /** Shipped with the package, so a game runs with nothing downloaded. */
 const SHIPPED = join(import.meta.dirname, "cards", "standard.tsv");
@@ -160,25 +166,41 @@ export default function (pi: ExtensionAPI) {
 		return { avatars: Object.fromEntries(seats.map((one, at) => [at, one.look.avatar])), background, ...(colors ? { colors } : {}) };
 	}
 	/**
-	 * What a game's pictures wear, as its journal recorded the looks: every seat's portrait, and the viewer's
-	 * background and colours. A game saved before tables had looks gets a default background, the same one each time.
+	 * Showing this Pi's games: a read-only server for spectators and rewatchers,
+	 * on this machine alone or, when the settings say public, behind a Cloudflare
+	 * quick tunnel. A game this Pi is playing is watched live, from the audience.
 	 */
-	function dressOf(header: Header | undefined, viewer: Viewer): Dress {
-		const mine = viewer === "spectator" ? header : header?.seats[viewer], standing = defaults("backgrounds");
-		const background = mine?.background ?? header?.background ?? (header && standing[[...header.id].reduce((sum, one) => sum + one.charCodeAt(0), 0) % standing.length]);
-		return { avatars: Object.fromEntries((header?.seats ?? []).flatMap((one) => one.avatar ? [[one.id, one.avatar]] : [])),
-			...(background ? { background } : {}), ...(mine?.colors ? { colors: mine.colors } : {}) };
+	let watching: { server: Watch; mode: "local" | "public"; tunnel?: { url: string; close(): void } } | null = null;
+	let live: Awaited<ReturnType<Watch["live"]>> | undefined;
+	const watchUrl = () => watching ? watching.tunnel?.url ?? watching.server.base : undefined;
+	async function watchLive(game: Table) {
+		const journal = games.get(game);
+		if (!watching || !journal || live) return;
+		live = await watching.server.live(basename(journal.path, ".jsonl"), journal.header, game);
 	}
-
-	/** What a game's run took, from its newest saved result, when one was saved with model usage. */
-	function runOf(game: string): Run | undefined {
-		const named = new RegExp(`^${game.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-\\d+\\.result\\.json$`);
-		const newest = readdirSync(GAMES).filter((name) => named.test(name)).sort().at(-1);
-		if (!newest) return undefined;
-		const result = JSON.parse(readFileSync(join(GAMES, newest), "utf8")) as { elapsedMs?: number; llm?: { total?: { calls: number; input: number; output: number; cost: number }; roles?: { role: string; calls: number; cost: number }[] } };
-		const total = result.llm?.total;
-		return total && result.elapsedMs !== undefined ? { elapsedMs: result.elapsedMs, calls: total.calls, input: total.input, output: total.output, cost: total.cost,
-			roles: (result.llm?.roles ?? []).map(({ role, calls, cost }) => ({ role, calls, cost })) } : undefined;
+	async function watchGames(ctx: ExtensionContext, mode: "off" | "local" | "public") {
+		watching?.tunnel?.close();
+		live?.finish(); live = undefined;
+		await watching?.server.close();
+		watching = null;
+		mkdirSync(CACHE, { recursive: true });
+		writeFileSync(SETTINGS, JSON.stringify({ ...settings(), watch: mode }, null, 2) + "\n");
+		if (mode === "off") { ctx.ui.notify("This Pi no longer shows its games.", "info"); showTable(ctx); return; }
+		const options = { dir: GAMES, cards: () => universe(standard.name), rules: () => loadRules(RULES), art: artIds(),
+			resolveArt: async (definitions: Record<string, string>[]) => await cardboardArt(definitions, join(CACHE, "art")) };
+		let server: Watch;
+		try { server = await watchServer({ ...options, port: settings().port ?? 4747 }); }
+		catch { server = await watchServer(options); }
+		watching = { server, mode };
+		if (mode === "public") {
+			try { watching.tunnel = await quickTunnel(server.base); }
+			catch (error) { ctx.ui.notify(`No public address, so the games show on this machine only: ${error instanceof Error ? error.message : String(error)}`, "warning"); }
+		}
+		if (running && table) await watchLive(table);
+		const at = watchUrl()!, playing = table && games.get(table) ? `${at}/games/${basename(games.get(table)!.path, ".jsonl")}/` : undefined;
+		ctx.ui.notify([`This Pi shows its games at ${at}${watching.tunnel ? ", for anyone with the address" : ", on this machine"}.`,
+			...(playing ? [`This table: ${playing}`] : [])].join("\n"), "info");
+		showTable(ctx);
 	}
 
 	/**
@@ -191,19 +213,11 @@ export default function (pi: ExtensionAPI) {
 		const game = id ?? (table ? basename(games.get(table)?.path ?? "", ".jsonl") : saved()[0]);
 		const path = game && join(GAMES, `${game}.jsonl`);
 		if (!path || !existsSync(path)) { ctx.ui.notify(game ? `No game ${game} in ${GAMES}.` : "No saved games yet.", "warning"); return; }
-		const cards = universe(standard.name);
-		let series: ReturnType<typeof playByPlay> | undefined;
-		const back = replayGame(path, (saved) => {
-			const opened = start(standard, saved.seats.map((at) => ({ name: at.name, deck: at.deck })), saved.seed, cards);
-			series = playByPlay(opened.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck.name })));
-			return opened;
-		}, undefined, { cards, rules: loadRules(RULES) }, { observe: (seen) => series!.take(seen) });
-		series!.take(back.table);
-		const { moments, viewers } = series!, dir = join(GAMES, `${game}-replay`);
+		const cards = universe(standard.name), back = momentsOf(path, cards, loadRules(RULES)), { moments, viewers } = back, dir = join(GAMES, `${game}-replay`);
 		const art = (definitions: Record<string, string>[]) => cardboardArt(definitions, join(CACHE, "art"));
 		if (!await art([])) { ctx.ui.notify("The replay draws with cardboard-api, which is not installed (an optional dependency).", "warning"); return; }
 		const written = await writeReplay(dir, moments, viewers, { title: back.table.seats.map((one) => one.name).join(" vs "), subtitle: `${game} · play by play`,
-			stats: gameStats(back.table, back.header.created, runOf(game)), dress: (viewer) => dressOf(back.header, viewer), art: artIds(), cards, resolveArt: art });
+			stats: gameStats(back.table, back.header.created, runOf(GAMES, game)), dress: (viewer) => dressOf(back.header, viewer), art: artIds(), cards, resolveArt: art });
 		ctx.ui.notify(`Wrote a replay of ${game}: ${moments.length} moments from ${viewers.length} perspectives, ${(written.bytes / 1e6).toFixed(1)} MB. Open ${join(dir, "index.html")}.`, "info");
 	}
 
@@ -433,7 +447,10 @@ export default function (pi: ExtensionAPI) {
 		else if (setup.stage === "setting" && setup.seats.some((one) => one.by === "remote")) lines.push(`  Clock: ${setup.clock ? `${setup.clock}s a decision for guest seats, then they concede` : "off"}. /magic clock <seconds|off>`);
 		else if (host.asking) lines.push(`  ${host.asking}`);
 		// Pi shows ten lines of a text widget: the status, the last few public lines, and what the host can do next.
-		if (setup.stage === "playing") lines.push(...host.feed.slice(-FEED).map((line) => `  · ${line.length > 110 ? `${line.slice(0, 107)}...` : line}`));
+		// Pi shows a text widget's first ten lines: a watched game gives one feed line to its address.
+		const watched = watchUrl() && table && games.get(table) ? `${watchUrl()}/games/${basename(games.get(table)!.path, ".jsonl")}/` : undefined;
+		if (watched && setup.stage !== "setting") lines.push(`  Watch: ${watched}`);
+		if (setup.stage === "playing") lines.push(...host.feed.slice(watched ? -(FEED - 1) : -FEED).map((line) => `  · ${line.length > 110 ? `${line.slice(0, 107)}...` : line}`));
 		lines.push(`  ${setup.stage === "prepared" && table?.ledger.length ? `/magic begin asks every seat to play on from version ${table.ledger.length}.` : NEXT[setup.stage]}`);
 		return lines;
 	}
@@ -635,10 +652,13 @@ export default function (pi: ExtensionAPI) {
 			if (/^Turn \d+: /.test(line)) ctx.ui.notify(line, "info");
 			showTable(ctx);
 		};
+		await watchLive(opened);
+		// Watchers see the table before each decision, before a pause or a direction can stop the loop there.
+		const holding = ours.hold && { checkpoint: () => { live?.take(opened); ours.hold!.checkpoint(); }, halted: (game: Table) => ours.hold!.halted(game) };
 		try { outcome = await run(opened, sitting, inference(ctx), commentator, watch, games.get(opened), 30_000,
-			(turn) => board.take(`after-turn-${String(turn).padStart(2, "0")}`), ours.hold); }
+			(turn) => board.take(`after-turn-${String(turn).padStart(2, "0")}`), holding); }
 		catch (error) { failure = error; }
-		finally { running = false; clearInterval(ours.ticker); }
+		finally { running = false; clearInterval(ours.ticker); live?.take(opened); live?.finish(); live = undefined; }
 		board.take("final");
 		await board.settled();
 		// The run closed its seats either way; a stopped game is seated again by resuming it.
@@ -904,12 +924,12 @@ export default function (pi: ExtensionAPI) {
 		},
 	});
 
-	const VERBS = ["host", "seat", "first", "clock", "background", "colors", "replay", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
+	const VERBS = ["host", "seat", "first", "clock", "background", "colors", "replay", "watch", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
 	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | seat <n> avatar|background <name|url|random> | " +
 	"seat <n> colors <primary> <secondary> | auto | first <coin|n> | clock <seconds|off> | background <name|url|random> | colors <primary> <secondary> | auto | start | begin | " +
 		"join <invite> [suggest|auto|manual] | pick <n> | ok | pass [turn] | stops <smart|all> | show <n> | tell <words> | mode <suggest|auto|manual> | concede | leave | " +
 		"pause | continue | rollback <version> [why] | end [why] | status | resume <game> | clone <game> <version> <new-id> | " +
-		"models [why|<role> <pattern> [seat]] | board | replay [game] | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
+		"models [why|<role> <pattern> [seat]] | board | replay [game] | watch [local|public|off] | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
 
 	pi.registerCommand("magic", {
 		description: "Host a Magic table: host, start, begin, pause, rollback, end, resume, models, and more. /magic alone opens the menu.",
@@ -1081,6 +1101,19 @@ export default function (pi: ExtensionAPI) {
 				return;
 			}
 
+			if (verb === "watch") {
+				const mode = (["local", "public", "off"] as const).find((one) => one === words[1]);
+				if (words[1] && !mode) { ctx.ui.notify("/magic watch local | public | off", "warning"); return; }
+				if (mode) {
+					try { await watchGames(ctx, mode); }
+					catch (error) { ctx.ui.notify(`The games could not be shown: ${error instanceof Error ? error.message : String(error)}`, "error"); }
+					return;
+				}
+				ctx.ui.notify(watching ? `This Pi shows its games at ${watchUrl()}${watching.tunnel ? ", for anyone with the address" : ", on this machine"}. /magic watch off stops.`
+					: "This Pi does not show its games. /magic watch local shows them on this machine; /magic watch public gives them a public address.", "info");
+				return;
+			}
+
 			if (verb === "replay") {
 				try { await replayPage(ctx, words[1]); }
 				catch (error) { ctx.ui.notify(`Could not write the replay: ${error instanceof Error ? error.message : String(error)}`, "error"); }
@@ -1216,7 +1249,16 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	// A closing Pi leaves a game in play resumable: it stops the run and writes no end.
+	// A Pi set to show its games shows them from the start of each session.
+	pi.on("session_start", async (_event, ctx) => {
+		const mode = settings().watch;
+		if ((mode === "local" || mode === "public") && !watching) await watchGames(ctx, mode).catch((error) => ctx.ui.notify(`The games could not be shown: ${String(error)}`, "warning"));
+	});
+
 	pi.on("session_shutdown", async () => {
+		watching?.tunnel?.close();
+		await watching?.server.close();
+		watching = null;
 		if (running && host?.hold) { host.hold.direct({ do: "leave" }); await host.game; }
 		guest?.leaving.abort();
 		await host?.wire?.close();
