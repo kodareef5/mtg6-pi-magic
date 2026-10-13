@@ -261,10 +261,16 @@ test("a table's looks are set before the start, recorded with the game, and sent
 		await hostPi.magic("seat 0 avatar noir-karn");
 		await hostPi.magic("seat 1 avatar noir-karn");
 		await hostPi.magic("seat 1 background https://example.com/table.png");
+		await hostPi.magic("seat 1 colors purple #cbb8e6");
+		assert.match(hostPi.notes.at(-1)!, /primary and a secondary hex colour/);
+		await hostPi.magic("seat 1 colors 2a1040 cbb8e6");
+		await hostPi.magic("colors #0f2a40 #8fd6ec");
+		await hostPi.magic("colors auto");
+		assert.match(hostPi.notes.at(-1)!, /take their background's colours/);
 		await hostPi.magic("background");
 		assert.match(hostPi.notes.at(-1)!, /^Backgrounds: .*sunken-citadel/);
 		await hostPi.magic("background sunken-citadel");
-		assert.match((await hostPi.status()), /Seat 1 .*noir-karn on https:\/\/example\.com\/table\.png[^]*The host's pictures: sunken-citadel/);
+		assert.match((await hostPi.status()), /Seat 1 .*noir-karn on https:\/\/example\.com\/table\.png in #2a1040\/#cbb8e6[^]*The host's pictures: sunken-citadel\./);
 		await hostPi.magic("seat 1 open");
 		const client = await joinTable(/\/magic join (\S+)/.exec(hostPi.notes.findLast((note) => note.includes("/magic join"))!)![1]!, "a guest");
 		await hostPi.magic("start");
@@ -273,10 +279,10 @@ test("a table's looks are set before the start, recorded with the game, and sent
 		await client.agree({ what: "prepare", yes: true });
 		await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
 		while (!state.seats) state = await client.state(state.serial);
-		assert.deepEqual(state.seats.map((one) => [one.id, one.avatar === "noir-karn", one.background]).at(1), [1, true, "https://example.com/table.png"], "the guest receives every seat's look");
+		assert.deepEqual(state.seats.map((one) => [one.id, one.avatar === "noir-karn", one.background, one.colors]).at(1), [1, true, "https://example.com/table.png", { primary: "#2a1040", secondary: "#cbb8e6" }], "the guest receives every seat's look");
 		const id = /^Prepared (\S+)\./.exec(hostPi.notes.find((note) => note.startsWith("Prepared "))!)![1]!;
 		const header = JSON.parse(readFileSync(join(home, "magic", "games", `${id}.jsonl`), "utf8").split("\n")[0]!).header;
-		assert.deepEqual([header.seats[1].avatar, header.seats[1].background, header.background], ["noir-karn", "https://example.com/table.png", "sunken-citadel"], "the game records its looks");
+		assert.deepEqual([header.seats[1].avatar, header.seats[1].background, header.seats[1].colors?.primary, header.background, header.colors], ["noir-karn", "https://example.com/table.png", "#2a1040", "sunken-citadel", undefined], "the game records its looks");
 		assert.ok(header.seats[0].avatar && header.seats[0].avatar !== "noir-karn", "a portrait named for one seat is no other seat's");
 	} finally { await hostPi.shutdown(); }
 });

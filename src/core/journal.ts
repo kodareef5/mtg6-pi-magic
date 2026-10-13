@@ -48,14 +48,15 @@ export type Header = {
 	/**
 	 * Each seat's registered deck, so a replay registers the same lists. `setAs`
 	 * is the seat a host set it up as before a coin flip ordered the table: the
-	 * seat's roster and keys follow it, not the chair it ended up in. `avatar`
-	 * and `background` are its look in pictures, and nothing to the game.
+	 * seat's roster and keys follow it, not the chair it ended up in. `avatar`,
+	 * `background` and `colors` are its look in pictures, and nothing to the game.
 	 */
-	seats: { id: SeatId; name: string; deck: Deck; setAs?: SeatId; avatar?: string; background?: string }[];
+	seats: { id: SeatId; name: string; deck: Deck; setAs?: SeatId; avatar?: string; background?: string; colors?: { primary: string; secondary: string } }[];
 	/** Seconds a guest seat had to answer each decision before it conceded, when the table had a clock. */
 	clock?: number;
-	/** The background of the host's pictures. */
+	/** The background and frame colours of the host's pictures. */
 	background?: string;
+	colors?: { primary: string; secondary: string };
 	/**
 	 * The data files this game was played against, with their dates. A set
 	 * release changes oracle text, and a replay against different text is a

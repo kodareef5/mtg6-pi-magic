@@ -265,13 +265,17 @@ the game. The concession is a ledger row with the reason `timeout`, never
 seats are not on it; their call limits bound them.
 
 Pictures dress the table when cardboard-api is installed. Each seat has a
-look: its portrait in every picture and the background of its own pictures.
-The host's pictures have their own background. All are dealt at random, a
-different portrait for each seat, and set before the start with
-`/magic seat <n> avatar|background <name|url|random>`; `/magic background`
-changes this Pi's own view at any time, the host's or a guest's. The defaults
-are the files in `assets/`, named by file; adding one is adding a file, and
-any http(s) image URL stands in for one. The journal header records the looks.
+look: its portrait in every picture, and the background and frame colours of
+its own pictures. The host's pictures have their own. All are dealt at random,
+a different portrait for each seat, and set before the start with
+`/magic seat <n> avatar|background <name|url|random>` and
+`/magic seat <n> colors <primary> <secondary> | auto`; `/magic background` and
+`/magic colors` change this Pi's own view at any time, the host's or a guest's.
+The defaults are the files in `assets/`, named by file; adding one is adding a
+file, and any http(s) image URL stands in for one. A default background brings
+the frame colours in `assets/backgrounds/colors.json` unless colours are set,
+and a portrait that does not load gives way to a default. The journal header
+records the looks.
 
 A seat can carry its own key for a provider, named as an environment variable
 under `keys` in the roster file (`"keys": {"1": {"openrouter": "$OPENROUTER_SEAT_1"}}`).

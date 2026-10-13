@@ -1,0 +1,7 @@
+{
+  "celestial-ruins": { "primary": "#1f2c45", "secondary": "#c4d3ea" },
+  "dragonforge-arena": { "primary": "#3d1410", "secondary": "#e8a066" },
+  "emerald-sanctuary": { "primary": "#1e3a24", "secondary": "#e0c87a" },
+  "summoning-arena": { "primary": "#2a1040", "secondary": "#cbb8e6" },
+  "sunken-citadel": { "primary": "#0f2a40", "secondary": "#8fd6ec" }
+}

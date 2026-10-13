@@ -24,7 +24,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { Container, Image, Text } from "@earendil-works/pi-tui";
 import { boardFeed } from "./src/board/feed.ts";
 import { artIds, boardPng, type BoardRenderer, type Dress } from "./src/board/render.ts";
-import { choose, defaults, named, type Art, type Look } from "./src/board/looks.ts";
+import { choose, chooseColors, defaults, named, type Art, type Colors, type Look } from "./src/board/looks.ts";
 import { boardSnapshot } from "./src/board/snapshot.ts";
 import { menu, person, type Mode, type Person } from "./src/seating/person.ts";
 import { panel } from "./src/seating/panel.ts";
@@ -155,8 +155,8 @@ export default function (pi: ExtensionAPI) {
 	function dressFor(game: Table): Dress {
 		const setting = host && table === game ? host.lobby : undefined, header = games.get(game)?.header;
 		const avatars = setting ? setting.seats.map((one) => one.look.avatar) : header?.seats.map((one) => one.avatar) ?? [];
-		const background = setting?.background ?? header?.background;
-		return { avatars: Object.fromEntries(avatars.flatMap((avatar, at) => avatar ? [[at, avatar]] : [])), ...(background ? { background } : {}) };
+		const background = setting?.background ?? header?.background, colors = setting ? setting.colors : header?.colors;
+		return { avatars: Object.fromEntries(avatars.flatMap((avatar, at) => avatar ? [[at, avatar]] : [])), ...(background ? { background } : {}), ...(colors ? { colors } : {}) };
 	}
 
 	/**
@@ -179,7 +179,7 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(
 		ctx: ExtensionContext,
-		from: { seed: string; decks?: string[]; alpha?: true; setAs?: SeatId[]; remote?: Record<SeatId, Player>; clock?: number | null; looks?: Look[]; background?: string } | { resume: string },
+		from: { seed: string; decks?: string[]; alpha?: true; setAs?: SeatId[]; remote?: Record<SeatId, Player>; clock?: number | null; looks?: Look[]; background?: string; colors?: Colors } | { resume: string },
 	): Promise<{ opened: Table; sitting: Seated }> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
@@ -221,6 +221,7 @@ export default function (pi: ExtensionAPI) {
 				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck, ...(from.setAs ? { setAs: from.setAs[at.id]! } : {}), ...from.looks?.[at.id] })),
 				...(from.clock ? { clock: from.clock } : {}),
 				...(from.background ? { background: from.background } : {}),
+...(from.colors ? { colors: from.colors } : {}),
 				cards: { path: cards.path, generated: cards.generated, ...(cards.faces ? { faces: cards.faces } : {}), ...(cards.names ? { names: cards.names } : {}) },
 				rules: { path: RULES, effective: rules.effective },
 				created: new Date().toISOString(),
@@ -375,9 +376,9 @@ export default function (pi: ExtensionAPI) {
 			const moved = one.setAs !== undefined && one.setAs !== at ? ` (set up as seat ${one.setAs})` : "";
 			const guest = one.by === "remote" ? host!.wire?.guest(one.setAs ?? at) : undefined;
 			const who = one.by === "ai" ? "model" : guest ? `guest ${guest.name}` : "open, waiting for a guest";
-			lines.push(`  Seat ${at}${moved}  ${table?.seats[at]?.name ?? one.deck}  ${who}${life !== undefined ? `  life ${life}` : ""}${setup.stage === "setting" ? `  · ${named(one.look.avatar)} on ${named(one.look.background)}` : ""}`);
+			lines.push(`  Seat ${at}${moved}  ${table?.seats[at]?.name ?? one.deck}  ${who}${life !== undefined ? `  life ${life}` : ""}${setup.stage === "setting" ? `  · ${named(one.look.avatar)} on ${named(one.look.background)}${tinted(one.look.colors)}` : ""}`);
 		});
-		if (setup.stage === "setting") lines.push(`  The host's pictures: ${named(setup.background)}. /magic seat <n> avatar|background, /magic background <name|url|random>`);
+		if (setup.stage === "setting") lines.push(`  The host's pictures: ${named(setup.background)}${tinted(setup.colors)}. /magic seat <n> avatar|background|colors, /magic background, /magic colors`);
 		if (view?.window.kind === "turn") lines.push(`  Turn ${view.window.turn}, ${table!.seats[view.window.active]?.name}'s ${view.window.step.replace(/-/g, " ")}. Version ${table!.ledger.length}.`);
 		const asking = holding?.asking();
 		if (asking) lines.push(`  Waiting on seat ${asking.seat} for ${Math.round((Date.now() - asking.since) / 1000)}s${asking.clock ? ` of its ${asking.clock}s` : ""}.`);
@@ -399,7 +400,10 @@ export default function (pi: ExtensionAPI) {
 		over: "/magic host sets a new table. /magic rollback <version> rewinds this one; /magic resume seats it again.",
 	};
 
-	/** The defaults a look can take, for a command given no value. */
+	/** Colours set over a background's own, for the table widget. */
+const tinted = (colors: Colors | undefined) => colors ? ` in ${colors.primary}/${colors.secondary}` : "";
+
+/** The defaults a look can take, for a command given no value. */
 const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"}: ${defaults(kind).join(", ")}. Or random, or an http(s) image URL.`;
 
 /** Admitted alpha decks: legal main decks whose cards all have standing assessments. */
@@ -527,7 +531,7 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 			const remote = Object.fromEntries(setup.seats.flatMap((one, at) => one.by === "remote" ? [[at, ours.wire!.open(one.setAs!, one.deck).chair.player]] : []));
 			try {
 				const { opened, sitting } = await open(ctx, { seed: id, decks, alpha: true, setAs: order, remote, ...(Object.keys(remote).length ? { clock: setup.clock } : {}),
-	looks: setup.seats.map((one) => one.look), background: setup.background });
+	looks: setup.seats.map((one) => one.look), background: setup.background, ...(setup.colors ? { colors: setup.colors } : {}) });
 				// A table replaced while this one prepared keeps its own game: this preparation is closed, not installed.
 				if (host !== ours) { await Promise.all(Object.values(sitting.players).map((player) => player.close())); return; }
 				table = opened; seated = sitting;
@@ -640,8 +644,8 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 		// A game saved before tables had looks is dealt new ones for this session.
 		host = { lobby: { ...setup, seats: setup.seats.map((one, at) => {
 			const saved = header?.seats[at];
-			return { ...one, setAs: saved?.setAs ?? at, look: { avatar: saved?.avatar ?? one.look.avatar, background: saved?.background ?? one.look.background } };
-		}), background: header?.background ?? setup.background, stage: "prepared" }, feed: [] };
+			return { ...one, setAs: saved?.setAs ?? at, look: { avatar: saved?.avatar ?? one.look.avatar, background: saved?.background ?? one.look.background, ...(saved?.colors ? { colors: saved.colors } : {}) } };
+		}), background: header?.background ?? setup.background, ...(header?.colors ? { colors: header.colors } : {}), stage: "prepared" }, feed: [] };
 		showTable(ctx);
 		ctx.ui.notify(`Resumed ${id} at version ${opened.ledger.length}. ${opened.ledger.length ? `/magic begin asks every seat to play on from version ${opened.ledger.length}.` : NEXT.prepared}`, "info");
 	}
@@ -655,8 +659,8 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 	type Seating = { client: Guest; leaving: AbortController; state?: State; player?: Player; preparing?: Promise<boolean>; spend: ReturnType<typeof newTally>; gaps: string[];
 		/** A person at this seat, with the autopilot behind them; absent while the seat prepares. */
 		person?: Person; mode: Mode; pictured?: string;
-	/** This Pi's own choice of background for the seat's pictures, over the host's. */
-	background?: string };
+	/** This Pi's own choice of background and frame colours for the seat's pictures, over the host's. */
+	background?: string; colors?: Colors };
 	let guest: Seating | null = null;
 
 	// A component rather than lines: Pi cuts a text widget at ten lines, and a person's seat needs the whole question.
@@ -677,8 +681,9 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 		if (!ctx.hasUI || !frame || seat === undefined || !at || ours.pictured === at) return;
 		ours.pictured = at;
 		const seats = (state.seats ?? []).map((one) => ({ id: one.id, name: one.name, deck: one.deck.name }));
-		const background = ours.background ?? state.seats?.find((one) => one.id === seat)?.background;
-		const dress: Dress = { avatars: Object.fromEntries((state.seats ?? []).flatMap((one) => one.avatar ? [[one.id, one.avatar]] : [])), ...(background ? { background } : {}) };
+		// Colours set for the seat go with the background set for it; a background this Pi chose brings its own.
+		const mine = state.seats?.find((one) => one.id === seat), background = ours.background ?? mine?.background, colors = ours.colors ?? (ours.background ? undefined : mine?.colors);
+		const dress: Dress = { avatars: Object.fromEntries((state.seats ?? []).flatMap((one) => one.avatar ? [[one.id, one.avatar]] : [])), ...(background ? { background } : {}), ...(colors ? { colors } : {}) };
 		void (renderer ??= cardboardRenderer(artIds(), join(CACHE, "art"))).then(async (drawing) => {
 			if (!drawing) return;
 			const png = await boardPng(drawing, boardSnapshot(frame.view, seats, seat), dress);
@@ -851,9 +856,9 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 		},
 	});
 
-	const VERBS = ["host", "seat", "first", "clock", "background", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
+	const VERBS = ["host", "seat", "first", "clock", "background", "colors", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
 	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | seat <n> avatar|background <name|url|random> | " +
-	"first <coin|n> | clock <seconds|off> | background <name|url|random> | start | begin | " +
+	"seat <n> colors <primary> <secondary> | auto | first <coin|n> | clock <seconds|off> | background <name|url|random> | colors <primary> <secondary> | auto | start | begin | " +
 		"join <invite> [suggest|auto|manual] | pick <n> | ok | pass [turn] | stops <smart|all> | show <n> | tell <words> | mode <suggest|auto|manual> | concede | leave | " +
 		"pause | continue | rollback <version> [why] | end [why] | status | resume <game> | clone <game> <version> <new-id> | " +
 		"models [why|<role> <pattern> [seat]] | board | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
@@ -956,7 +961,14 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 					if (words[2] === "open") return openSeat(ctx, at);
 					if (host.wire?.guest(at)) { ctx.ui.notify(`A guest holds seat ${at}. Set a new table to change who answers it.`, "warning"); return; }
 					host.lobby.seats[at] = { ...host.lobby.seats[at]!, by: "ai" };
-				} else if (words[2] === "avatar" || words[2] === "background") {
+				} else if (words[2] === "colors") {
+	const at = Number(words[1]), one = host.lobby.seats[at];
+	if (!one) { ctx.ui.notify("/magic seat <n> colors <primary> <secondary> | auto", "warning"); return; }
+	try {
+		const { colors: _, ...rest } = one.look;
+		host.lobby.seats[at] = { ...one, look: words[3] === "auto" ? rest : { ...rest, colors: chooseColors(words[3], words[4]) } };
+	} catch (error) { ctx.ui.notify(error instanceof Error ? error.message : String(error), "warning"); return; }
+} else if (words[2] === "avatar" || words[2] === "background") {
 					const at = Number(words[1]), part = words[2], kind: Art = part === "avatar" ? "avatars" : "backgrounds", one = host.lobby.seats[at];
 					if (!one) { ctx.ui.notify("/magic seat <n> avatar|background <name|url|random>", "warning"); return; }
 					if (!words[3]) { ctx.ui.notify(choices(kind), "info"); return; }
@@ -976,6 +988,18 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 					host.lobby.seats[at] = { ...host.lobby.seats[at]!, deck: chosen };
 				}
 				showTable(ctx);
+				return;
+			}
+
+			// The frame colours of this Pi's own pictures; auto follows the background. Any time.
+			if (verb === "colors") {
+				let colors: Colors | undefined;
+				try { colors = words[1] === "auto" ? undefined : chooseColors(words[1], words[2]); } catch (error) { ctx.ui.notify(error instanceof Error ? error.message : String(error), "warning"); return; }
+				const own = guest ?? host?.lobby;
+				if (!own) { ctx.ui.notify("No table. /magic host sets one.", "warning"); return; }
+				if (colors) own.colors = colors; else delete own.colors;
+				if (guest) { delete guest.pictured; if (guest.state) pictureSeat(ctx, guest, guest.state); } else showTable(ctx);
+				ctx.ui.notify(`${guest ? "This seat's" : "The host's"} pictures ${colors ? `are framed in ${colors.primary} and ${colors.secondary}` : "take their background's colours"}.`, "info");
 				return;
 			}
 

@@ -10,7 +10,7 @@
  */
 
 import type { SeatId } from "../core/types.ts";
-import { choose, deal, type Look } from "../board/looks.ts";
+import { choose, deal, type Colors, type Look } from "../board/looks.ts";
 
 /**
  * Who answers a seat: a model in the host's Pi, or a guest over the wire who
@@ -29,8 +29,9 @@ export type Lobby = {
 	first: "coin" | SeatId;
 	/** Seconds a guest seat has to answer each decision before it concedes, or null for no clock. */
 	clock: number | null;
-	/** The background of the host's pictures, which show the table as a spectator sees it. */
+	/** The background of the host's pictures, which show the table as a spectator sees it, and their frame colours when set. */
 	background: string;
+	colors?: Colors;
 	stage: Stage;
 	agreed: Record<Agreement, SeatId[]>;
 };

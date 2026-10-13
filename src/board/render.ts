@@ -5,11 +5,12 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { SeatId } from "../core/types.ts";
+import type { Colors } from "./looks.ts";
 import type { BoardSnapshot } from "./snapshot.ts";
 
 export type BoardSize = { width: number; height: number };
-/** What a picture is dressed in: each seat's portrait and the background, named as in looks.ts. */
-export type Dress = { avatars?: Partial<Record<SeatId, string>>; background?: string };
+/** What a picture is dressed in: each seat's portrait, the background and the frame colours, as in looks.ts. */
+export type Dress = { avatars?: Partial<Record<SeatId, string>>; background?: string; colors?: Colors };
 export type BoardRenderer = { name: string; svg(snapshot: BoardSnapshot, size: BoardSize, dress?: Dress): Promise<string> };
 
 /** Card name to one Scryfall printing, for art only (cards/standard.art.tsv, built by tools/card-art.ts). */
@@ -20,7 +21,7 @@ export function artIds(path = join(import.meta.dirname, "..", "..", "cards", "st
 
 /** An image URL a picture names, fetched once a session. One that fails is left out, and a portrait shows initials instead. */
 const fetched = new Map<string, Promise<Buffer | undefined>>();
-function fetchImage(href: string): Promise<Buffer | undefined> {
+export function fetchImage(href: string): Promise<Buffer | undefined> {
 	if (!fetched.has(href)) fetched.set(href, fetch(href, { signal: AbortSignal.timeout(10_000) }).then(async (response) => {
 		if (!response.ok || !(response.headers.get("content-type") ?? "").startsWith("image/")) return undefined;
 		const bytes = Buffer.from(await response.arrayBuffer());

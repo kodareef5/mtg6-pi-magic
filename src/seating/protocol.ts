@@ -41,7 +41,7 @@ export type State = {
 	paused?: true;
 	/** The chair's seat at the table, once a coin flip has ordered it, and every seat's public registered list and look in pictures. */
 	seat?: SeatId;
-	seats?: { id: SeatId; name: string; deck: Deck; avatar?: string; background?: string }[];
+	seats?: { id: SeatId; name: string; deck: Deck; avatar?: string; background?: string; colors?: { primary: string; secondary: string } }[];
 	/** Once the table is prepared: whether it seated a judge to hear objections. */
 	judge?: boolean;
 	/** An agreement the host asks for that this chair has not answered. */

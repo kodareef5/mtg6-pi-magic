@@ -10,7 +10,7 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { artIds, svgToPng } from "../src/board/render.ts";
 import { cardboardRenderer, cardboardScene } from "../src/board/cardboard.ts";
-import { choose, deal, defaults, imageOf } from "../src/board/looks.ts";
+import { choose, chooseColors, colorsFor, deal, defaults, imageOf } from "../src/board/looks.ts";
 import { announce, establish, example, main, matchup, place, quiet } from "./play.ts";
 
 const seats = (table: Table) => table.seats.map((seat) => ({ id: seat.id, name: seat.name, deck: seat.deck.name }));
@@ -124,6 +124,11 @@ test("looks are a default by name, an image URL, or random, and seats are dealt 
 	assert.match(imageOf("avatars", "noir-karn")!, /^data:image\/jpeg;base64,/);
 	assert.equal(imageOf("avatars", "https://example.com/me.png"), "https://example.com/me.png");
 	assert.equal(imageOf("avatars", "gone-from-this-version"), undefined, "a name this version lacks draws nothing");
+	assert.ok(defaults("backgrounds").every((one) => colorsFor(one)), "every default background brings its frame colours");
+	assert.equal(colorsFor("https://example.com/table.png"), undefined);
+	assert.deepEqual(chooseColors("2A1040", "#cbb8e6"), { primary: "#2a1040", secondary: "#cbb8e6" });
+	assert.throws(() => chooseColors("purple", "#cbb8e6"), /primary and a secondary hex colour/);
+	assert.throws(() => chooseColors("#2a1040", undefined), /primary and a secondary hex colour/);
 });
 
 test("a scene wears each seat's portrait and the viewer's background", async () => {
@@ -135,9 +140,14 @@ test("a scene wears each seat's portrait and the viewer's background", async () 
 	await accepted(scene);
 	const drawer = await cardboardRenderer(new Map());
 	if (!drawer) return;
-	const svg = await drawer.svg(snap(table, 0), { width: 800, height: 600 }, { avatars: { 0: "noir-karn" }, background: "dragonforge-arena" });
+	const Tabletop = (await import("cardboard-api/tabletop.mjs" as string)).default;
+	const svg = await drawer.svg(snap(table, 0), { width: 800, height: 600 }, { avatars: { 0: "noir-karn", 1: "http://127.0.0.1:9/gone.png" }, background: "dragonforge-arena" });
 	assert.ok(svg.includes(`href="${imageOf("backgrounds", "dragonforge-arena")}"`), "the background is drawn");
 	assert.ok(svg.includes(imageOf("avatars", "noir-karn")!), "the portrait is drawn");
+	assert.ok(svg.includes(imageOf("avatars", defaults("avatars")[1])!), "a portrait that does not load gives way to a default, never an initial");
+	assert.ok(svg.includes(Tabletop.mtg.palette(colorsFor("dragonforge-arena")).gold), "a default background brings its frame colours");
+	const set = await drawer.svg(snap(table, 0), { width: 800, height: 600 }, { background: "dragonforge-arena", colors: { primary: "#0f2a40", secondary: "#8fd6ec" } });
+	assert.ok(set.includes(Tabletop.mtg.palette({ primary: "#0f2a40", secondary: "#8fd6ec" }).panel) && !set.includes(Tabletop.mtg.palette(colorsFor("dragonforge-arena")).gold), "colours set win over the background's");
 });
 
 test("an image URL in a picture is fetched for it; one that fails is left out", async () => {
