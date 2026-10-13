@@ -238,6 +238,22 @@ starts and prints one invite, and another Pi takes the seat with
 `/magic join <invite>`. That Pi plays the seat with its own models and keys,
 writes its own brief, and agrees for itself; `docs/SEATING.md` is the wire.
 
+A guest seat is a person's by default: `/magic join <invite>` seats a person
+with the guest Pi's models as the autopilot behind them (`src/seating/person.ts`).
+In suggest mode the autopilot proposes each choice and the person types a
+number, `ok` for its choice, or `p` to pass; auto hands the seat over and
+manual plays without it. A question with one real option is answered at once,
+and options a person cannot tell apart are one line. Smart stops ask at
+priority only in the seat's own main phases and when another seat has
+something on the stack, unless the autopilot wants to act; `/magic stops all`
+asks everywhere and `/magic pass turn` passes the rest of the turn. The seat
+panel shows the board in words from the seat's own frame. `/magic tell <words>`
+passes the person's instruction to the autopilot's strategy as a plan request.
+While the Pi holds a person's seat, its chat agent is the seat assistant, with
+`magic_seat` (this seat's view and the text of the cards it can see),
+`magic_choose` and `magic_tell`. The ledger records the person's own picks as
+`by: person`.
+
 The table has a clock for guest seats: 120 seconds a decision by default,
 `/magic clock <seconds|off>` before the start. A guest seat that does not
 answer in time concedes, which is also how a guest who disconnected leaves
@@ -609,6 +625,7 @@ src/seating/           who answers a seat
   hold.ts              the host's hold on a running game: pause, continue, and directions between loops
   protocol.ts          the wire's shapes and the invite: HTTP with long polling
   chair.ts             a seat answered over the wire: holds each ask and judges each answer
+  person.ts, panel.ts  a person at a seat over the autopilot, its stops and menu; the seat in words
   host.ts, guest.ts    the server that hands out chairs; claiming a chair and following it
 src/board/             board pictures: no game logic, never read by a seat
   snapshot.ts          the board as one viewer may see it, renderer-neutral and pure

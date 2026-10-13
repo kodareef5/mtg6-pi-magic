@@ -132,3 +132,27 @@ test("payments that fold into one line need no person", async () => {
 	] } } as unknown as Frame;
 	assert.equal((await seat.player.answer(frame) as { option: string }).option, "announce:payment:a");
 });
+
+test("a person's words reach the autopilot's strategy as one plan request, in a turn", async () => {
+	const pilot = autopilot(() => ({ kind: "pick", option: "pass", actionId: "pilot" }));
+	const seat = person("B", pilot, "suggest", () => {});
+	const opening = { ...ask(1, "keep", "mulligan"), view: { ...ask(1).view, window: { kind: "opening", action: "declare" } } } as unknown as Frame;
+	assert.equal(seat.tell("Attack with everything but the Elf."), null);
+	const kept = seat.player.answer(opening);
+	await new Promise((go) => setTimeout(go, 0));
+	assert.ok(seat.asking(), "the opening is no time to plan a turn: the request waits");
+	seat.choose(1);
+	await kept;
+	const request = await seat.player.answer(ask(2, "pass", "attack:x")) as Extract<Answer, { kind: "work" }>;
+	assert.equal(request.kind, "work");
+	assert.match(JSON.stringify(request.tools), /plan\.request.*The person playing this seat asks: Attack with everything but the Elf\./);
+	assert.equal((await seat.player.answer(at({ active: 0 }, 3, "pass", "attack:x")) as { kind: string }).kind, "pick", "once");
+
+	const open = seat.player.answer(ask(4, "pass", "attack:x"));
+	await new Promise((go) => setTimeout(go, 0));
+	seat.tell("Hold the Shock.");
+	assert.equal((await open as { kind: string }).kind, "work", "an open question gives way to the request");
+	await seat.switch("manual");
+	assert.match(seat.tell("Anything.") ?? "", /manual mode/);
+	assert.match(person("C", undefined, "manual", () => {}).tell("Anything.") ?? "", /no autopilot/);
+});

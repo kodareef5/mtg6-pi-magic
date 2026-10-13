@@ -745,6 +745,7 @@ export default function (pi: ExtensionAPI) {
 				}
 				ours.person = person(me.name, made.player, ours.mode, () => showSeat(ctx));
 				ours.player = ours.person.player;
+				seatTools(true);
 				return true;
 			},
 			player: () => ours.player,
@@ -760,14 +761,71 @@ export default function (pi: ExtensionAPI) {
 			const said = outcome ? `The game is over: this seat's result is ${result ?? "unknown"}.` : ours.state?.stage === "over" ? "The host's game stopped without a result." : "Left the table.";
 			ctx.ui.notify([said, ...bill(ours.spend.spent()), ...ours.gaps.map((gap) => `gap: ${gap}`)].join("\n"), "info");
 		}, (error) => ctx.ui.notify(`The seat stopped: ${error instanceof Error ? error.message : String(error)}`, "error")).finally(() => {
-			if (guest === ours) guest = null;
+			if (guest === ours) { guest = null; seatTools(false); }
 			showSeat(ctx);
 		});
 	}
 
-	const VERBS = ["host", "seat", "first", "clock", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
+	/**
+	 * The seat assistant: the Pi chat agent at a person's seat. It reads only
+	 * what this seat may see, passes the person's words to the seat's
+	 * autopilot, and answers the open question when the person names a choice.
+	 * The tools are active only while this Pi holds a person's seat.
+	 */
+	const SEAT_TOOLS = ["magic_seat", "magic_choose", "magic_tell"];
+	const seatTools = (on: boolean) => pi.setActiveTools([...new Set([...pi.getActiveTools().filter((name) => !SEAT_TOOLS.includes(name)), ...(on ? SEAT_TOOLS : [])])]);
+	const seatedPerson = (): Person => {
+		if (!guest?.person) throw new Error("This Pi has no seat at a Magic table. /magic join <invite> takes one.");
+		return guest.person;
+	};
+
+	/** What the assistant reads: the seat's panel, and the printed text of every card the seat can see. Nothing another seat hides. */
+	function seatReading(): string {
+		const seat = seatedPerson(), frame = seat.asking()?.frame ?? guest!.state?.frame;
+		if (!frame) return "The game has not started; the seat has nothing to read yet.";
+		const cards = universe(standard.name).cards, names = [...new Set((frame.view.objects ?? []).flatMap((one) => !one.faceDown && one.card ? [one.card] : []))].sort();
+		return [...seatLines(), "", "Cards this seat can see:", ...names.map((name) => {
+			const card = cards.get(name);
+			return card ? `${name} (${card.mana || "no cost"}; ${card.type}${card.stats ? `; ${card.stats}` : ""}): ${card.oracle.replace(/\n/g, " ").slice(0, 400)}` : name;
+		})].join("\n");
+	}
+
+	pi.registerTool({
+		name: "magic_seat", label: "Magic seat", defaultActive: false,
+		description: "Read the Magic seat this Pi holds for its person: life, each battlefield, this seat's own hand, the stack, what happened since its last choice, its plan, the open question with numbered options and the autopilot's choice, and the printed text of every card the seat can see. It is this seat's view only: another seat's hand and library are counts.",
+		promptSnippet: "Read the person's Magic seat: board, hand, the open question and its options, and card text",
+		promptGuidelines: [
+			"You assist a person playing a Magic seat. magic_seat is your only view of the game: it shows what this seat may see. Never guess or claim another seat's hidden cards, and never read files or run commands to learn about the game.",
+			"When the person says how to play, pass their words to the seat with magic_tell; the seat's autopilot plans from them and plays or suggests that plan. Use magic_choose only for a choice the person names, or when they ask you to decide the open question.",
+			"The table has a clock: an open question left unanswered too long concedes the seat. Keep advice short when a question is open.",
+		],
+		parameters: Type.Object({}),
+		async execute() { return { content: [{ type: "text", text: seatReading() }], details: {} }; },
+	});
+	pi.registerTool({
+		name: "magic_choose", label: "Magic choice", defaultActive: false,
+		description: "Answer the open question at the person's Magic seat: a number from the options magic_seat lists, ok for the autopilot's choice, or pass. The answer is final once the table applies it; the table judges it like any seat's answer.",
+		parameters: Type.Object({ choice: Type.Union([Type.Integer({ minimum: 1 }), Type.Literal("ok"), Type.Literal("pass")]) }),
+		async execute(_id, params) {
+			const seat = seatedPerson(), problem = params.choice === "ok" ? seat.accept() : params.choice === "pass" ? seat.pass("now") : seat.choose(params.choice);
+			if (problem) throw new Error(problem);
+			return { content: [{ type: "text", text: "Answered. Read magic_seat for what the table asks next." }], details: {} };
+		},
+	});
+	pi.registerTool({
+		name: "magic_tell", label: "Magic instruction", defaultActive: false,
+		description: "Pass the person's instruction for this seat, in their words, to the seat's autopilot. Its strategy plans the rest of this turn and the opponent's next turn from them at the seat's next question, and says what the rules do not allow. In suggest mode the suggestions follow that plan; in auto mode the autopilot plays it. Nothing moves until a question is answered.",
+		parameters: Type.Object({ instruction: Type.String({ minLength: 1, maxLength: 1000 }) }),
+		async execute(_id, params) {
+			const problem = seatedPerson().tell(params.instruction);
+			if (problem) throw new Error(problem);
+			return { content: [{ type: "text", text: "Passed to the seat's autopilot. It plans from it at the seat's next question." }], details: {} };
+		},
+	});
+
+	const VERBS = ["host", "seat", "first", "clock", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
 	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | first <coin|n> | clock <seconds|off> | start | begin | " +
-		"join <invite> [suggest|auto|manual] | pick <n> | ok | pass [turn] | stops <smart|all> | show <n> | mode <suggest|auto|manual> | concede | leave | " +
+		"join <invite> [suggest|auto|manual] | pick <n> | ok | pass [turn] | stops <smart|all> | show <n> | tell <words> | mode <suggest|auto|manual> | concede | leave | " +
 		"pause | continue | rollback <version> [why] | end [why] | status | resume <game> | clone <game> <version> <new-id> | " +
 		"models [why|<role> <pattern> [seat]] | board | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
 
@@ -810,7 +868,7 @@ export default function (pi: ExtensionAPI) {
 				try { await joinSeat(ctx, words[1], mode); } catch (error) { ctx.ui.notify(`Could not join: ${error instanceof Error ? error.message : String(error)}`, "error"); }
 				return;
 			}
-			if (["pick", "ok", "show", "mode", "concede", "pass", "stops"].includes(verb)) {
+			if (["pick", "ok", "show", "mode", "concede", "pass", "stops", "tell"].includes(verb)) {
 				const seat = guest?.person;
 				if (!seat) { ctx.ui.notify("This Pi has no seat to play. /magic join <invite> takes one.", "warning"); return; }
 				if (verb === "mode") {
@@ -818,6 +876,10 @@ export default function (pi: ExtensionAPI) {
 					const problem = mode ? await seat.switch(mode) : "/magic mode suggest|auto|manual";
 					ctx.ui.notify(problem ?? `This seat is in ${mode} mode.`, problem ? "warning" : "info");
 				} else if (verb === "concede") seat.concede();
+				else if (verb === "tell") {
+					const problem = rest ? seat.tell(rest) : "/magic tell <how to play this turn, in your words>";
+					ctx.ui.notify(problem ?? "Passed to the autopilot; it plans from it at the seat's next question.", problem ? "warning" : "info");
+				}
 				else if (verb === "stops") {
 					const stops = (["smart", "all"] as const).find((one) => one === words[1]);
 					if (stops) seat.setStops(stops);

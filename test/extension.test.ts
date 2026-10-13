@@ -53,11 +53,16 @@ function fakePi(gone = false) {
 		},
 	};
 	const commands = new Map<string, { handler(args: string, context: unknown): Promise<void> }>(), events = new Map<string, (...args: unknown[]) => Promise<unknown>>();
-	extension({ registerProvider() {}, registerTool() {}, registerCommand: (name: string, spec: never) => void commands.set(name, spec),
-		on: (name: string, handler: never) => void events.set(name, handler), exec: async () => ({}) } as never);
+	const tools = new Map<string, { execute(id: string, params: unknown): Promise<{ content: { text: string }[] }> }>();
+	let active = new Set(["read", "bash"]);
+	extension({ registerProvider() {}, registerTool: (tool: { name: string }) => void tools.set(tool.name, tool as never), registerCommand: (name: string, spec: never) => void commands.set(name, spec),
+		on: (name: string, handler: never) => void events.set(name, handler), exec: async () => ({}),
+		getActiveTools: () => [...active], setActiveTools: (names: string[]) => { active = new Set(names); } } as never);
 	const magic = (args: string) => commands.get("magic")!.handler(args, ctx);
 	return {
-		notes, calls, gate, magic,
+		notes, calls, gate, magic, active: () => [...active],
+		/** Call a registered tool as the Pi chat agent would. */
+		tool: async (name: string, params: unknown = {}) => (await tools.get(name)!.execute("call", params)).content.map((one) => one.text).join("\n"),
 		said: (pattern: RegExp) => notes.some((note) => pattern.test(note)),
 		status: async () => { await magic("status"); return notes.at(-1)!; },
 		shutdown: () => events.get("session_shutdown")?.(),
@@ -192,6 +197,11 @@ test("a person at a guest seat answers by number, and the ledger says the person
 		assert.match(panel, /suggest mode/);
 		assert.match(panel, /Your hand: /, "the panel shows the seat its own hand");
 		assert.match(panel, /1\. .*<- autopilot/, "and marks the autopilot's choice");
+		assert.ok(["magic_seat", "magic_choose", "magic_tell"].every((name) => personPi.active().includes(name)) && personPi.active().includes("bash"), "the seat tools join the chat agent's own");
+		const reading = await personPi.tool("magic_seat");
+		assert.match(reading, /Cards this seat can see:/);
+		assert.match(reading, /Mulligan/, "the assistant reads the open question");
+		assert.equal(await personPi.tool("magic_tell", { instruction: "Keep two-landers and attack every turn." }), "Passed to the seat's autopilot. It plans from it at the seat's next question.");
 		assert.deepEqual(await personPi.type("1"), { action: "handled" }, "a typed number answers the question");
 		await until(() => hostPi.calls.length > 1, "play to go on", hostPi.notes);
 		await hostPi.magic("end Person check done.");
@@ -200,6 +210,7 @@ test("a person at a guest seat answers by number, and the ledger says the person
 			.map((name) => join(home, "magic", "games", name)).sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)[0]!;
 		const rows = readFileSync(journal, "utf8").split("\n").filter((line) => line.includes('"row"')).map((line) => JSON.parse(line).row);
 		assert.ok(rows.some((row) => row.seat === 1 && row.by === "person" && row.situation === "pregame"), "the person's mulligan decision is the person's row");
+		await until(() => !personPi.active().includes("magic_seat"), "the seat tools to go with the seat", personPi.notes);
 	} finally {
 		await hostPi.shutdown();
 		await personPi.shutdown();

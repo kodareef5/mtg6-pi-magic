@@ -65,10 +65,18 @@ export function menu(asking: Asking): { option: Option; label: string }[] {
 
 export function person(name: string, autopilot: Player | undefined, start: Mode, shown: (asking: Asking | null) => void) {
 	let mode: Mode = autopilot ? start : "manual", stops: Stops = "smart", asking: (Asking & { settle(answer: Answer): void }) | null = null;
-	let conceding = false, picks = 0, passingTurn: number | undefined, latest: Frame | undefined;
+	let conceding = false, picks = 0, passingTurn: number | undefined, latest: Frame | undefined, told: string | undefined;
 	const pick = (frame: Frame, option: string, by?: "person"): Extract<Answer, { kind: "pick" }> => ({ kind: "pick", option, actionId: `${name}-${frame.version}-${++picks}`, ...(by ? { by } : {}) });
 	const settle = (answer: Answer) => { const now = asking; asking = null; shown(null); now?.settle(answer); };
 	const turnOf = (frame: Frame) => frame.view.window.kind === "turn" ? frame.view.window.turn : undefined;
+	// The person's words reach the autopilot's strategy as a plan request, in a turn, once.
+	const requesting = (frame: Frame) => !!told && !!autopilot && mode !== "manual" && frame.view.window.kind === "turn" &&
+		!frame.refused?.some((why) => /requests for a new plan are spent/.test(why));
+	const request = (frame: Frame): Answer => {
+		const reason = `The person playing this seat asks: ${told} Plan the rest of this turn and the opponent's next turn to carry it out where the rules allow, and say in your assessment what you cannot do.`;
+		told = undefined;
+		return { kind: "work", tools: [{ do: "plan.request", reason }], revision: frame.view.work?.revision ?? 0, actionId: `${name}-told-${frame.version}-${++picks}` };
+	};
 	// Another seat's spell or ability waiting to resolve is a chance to respond, under any stops.
 	const answerable = (frame: Frame) => (frame.view.objects ?? []).some((one) => one.zone === "stack" && one.controller !== frame.seat);
 	/** Whether a priority question with a pass may go by without the person. */
@@ -86,6 +94,7 @@ export function person(name: string, autopilot: Player | undefined, start: Mode,
 			latest = frame;
 			if (passingTurn !== undefined && (passingTurn !== turnOf(frame) || answerable(frame))) passingTurn = undefined;
 			if (conceding) return { kind: "concede", by: "person" };
+			if (requesting(frame)) return request(frame);
 			// One real line left once options a person cannot tell apart are folded: nothing to choose.
 			const real = menu({ frame }).filter((line) => !escape(line.option));
 			if (mode === "auto" && autopilot) return autopilot.answer(frame);
@@ -141,6 +150,19 @@ export function person(name: string, autopilot: Player | undefined, start: Mode,
 			if (next !== "manual" && !autopilot) return "This seat has no autopilot.";
 			mode = next;
 			if (next === "auto" && asking) settle(asking.suggestion ?? await autopilot!.answer(asking.frame));
+			return null;
+		},
+		/**
+		 * Tell the seat how to play, in words. The autopilot's strategy plans
+		 * from them at the seat's next question, and the autopilot plays that
+		 * plan: its suggestions in suggest mode, its moves in auto.
+		 */
+		tell(words: string): string | null {
+			if (!autopilot) return "This seat has no autopilot to tell.";
+			if (mode === "manual") return "In manual mode the autopilot plans nothing. /magic mode suggest or auto, then tell it.";
+			told = words.trim().slice(0, 1000);
+			// An open question waits on the person; the request goes in its place, and the question comes back planned.
+			if (asking && requesting(asking.frame)) settle(request(asking.frame));
 			return null;
 		},
 		/** Concede now if asked, or at the next ask. */
