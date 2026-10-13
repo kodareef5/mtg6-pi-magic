@@ -25,7 +25,7 @@ import { Container, Image, Text } from "@earendil-works/pi-tui";
 import { boardFeed } from "./src/board/feed.ts";
 import { artIds, boardPng, type BoardRenderer } from "./src/board/render.ts";
 import { boardSnapshot } from "./src/board/snapshot.ts";
-import { person, type Mode, type Person } from "./src/seating/person.ts";
+import { menu, person, type Mode, type Person } from "./src/seating/person.ts";
 import { panel } from "./src/seating/panel.ts";
 import { cardboardRenderer } from "./src/board/cardboard.ts";
 import { Type } from "typebox";
@@ -670,8 +670,8 @@ export default function (pi: ExtensionAPI) {
 	function seatLines(): string[] {
 		if (guest?.person && guest.state?.frame) {
 			const header = `Magic · seat ${guest.state.seat} at ${guest.client.welcome.game}${guest.state.paused ? " · paused by the host" : ""}${guest.state.judge ? " · a judge hears objections" : ""}`;
-			return [header, ...panel(guest.state, guest.person.mode(), guest.person.asking()).map((line) => line.startsWith("  ") ? line : `  ${line}`),
-				"  /magic mode suggest|auto|manual · /magic concede · /magic leave"];
+			return [header, ...panel(guest.state, guest.person.mode(), guest.person.asking(), guest.person.stops()).map((line) => line.startsWith("  ") ? line : `  ${line}`),
+				"  /magic pass [turn] · /magic stops smart|all · /magic mode suggest|auto|manual · /magic concede · /magic leave"];
 		}
 		if (!guest) return ["Not seated. /magic join <invite> takes a chair at another Pi's table."];
 		const state = guest.state, me = state?.seats?.find((one) => one.id === state.seat);
@@ -765,9 +765,9 @@ export default function (pi: ExtensionAPI) {
 		});
 	}
 
-	const VERBS = ["host", "seat", "first", "clock", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
+	const VERBS = ["host", "seat", "first", "clock", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
 	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | first <coin|n> | clock <seconds|off> | start | begin | " +
-		"join <invite> [suggest|auto|manual] | pick <n> | ok | show <n> | mode <suggest|auto|manual> | concede | leave | " +
+		"join <invite> [suggest|auto|manual] | pick <n> | ok | pass [turn] | stops <smart|all> | show <n> | mode <suggest|auto|manual> | concede | leave | " +
 		"pause | continue | rollback <version> [why] | end [why] | status | resume <game> | clone <game> <version> <new-id> | " +
 		"models [why|<role> <pattern> [seat]] | board | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
 
@@ -810,7 +810,7 @@ export default function (pi: ExtensionAPI) {
 				try { await joinSeat(ctx, words[1], mode); } catch (error) { ctx.ui.notify(`Could not join: ${error instanceof Error ? error.message : String(error)}`, "error"); }
 				return;
 			}
-			if (["pick", "ok", "show", "mode", "concede"].includes(verb)) {
+			if (["pick", "ok", "show", "mode", "concede", "pass", "stops"].includes(verb)) {
 				const seat = guest?.person;
 				if (!seat) { ctx.ui.notify("This Pi has no seat to play. /magic join <invite> takes one.", "warning"); return; }
 				if (verb === "mode") {
@@ -818,8 +818,16 @@ export default function (pi: ExtensionAPI) {
 					const problem = mode ? await seat.switch(mode) : "/magic mode suggest|auto|manual";
 					ctx.ui.notify(problem ?? `This seat is in ${mode} mode.`, problem ? "warning" : "info");
 				} else if (verb === "concede") seat.concede();
-				else if (verb === "show") {
-					const option = seat.asking()?.frame.decision?.options[Number(words[1]) - 1];
+				else if (verb === "stops") {
+					const stops = (["smart", "all"] as const).find((one) => one === words[1]);
+					if (stops) seat.setStops(stops);
+					ctx.ui.notify(stops ? (stops === "all" ? "This seat is asked at every priority." : "This seat is asked in its own main phases and when another seat has something on the stack.") : "/magic stops smart|all", stops ? "info" : "warning");
+				} else if (verb === "pass") {
+					const problem = seat.pass(words[1] === "turn" ? "turn" : "now");
+					if (problem) ctx.ui.notify(problem, "warning");
+					else if (words[1] === "turn") ctx.ui.notify("Passing for the rest of this turn, unless another seat puts something on the stack.", "info");
+				} else if (verb === "show") {
+					const asking = seat.asking(), option = asking && menu(asking)[Number(words[1]) - 1]?.option;
 					ctx.ui.notify(option ? [option.label, option.shows ?? "Nothing more to show for this option."].join("\n") : "/magic show <n>, for an option of the question being asked.", option ? "info" : "warning");
 				} else {
 					const problem = verb === "ok" ? seat.accept() : seat.choose(Number(words[1]));
@@ -999,11 +1007,11 @@ export default function (pi: ExtensionAPI) {
 		},
 	});
 
-	// A person answers the open question by typing its number, or ok for the autopilot's choice. Anything else is chat.
+	// A person answers the open question by typing its number, ok for the autopilot's choice, or p to pass. Anything else is chat.
 	pi.on("input", async (event, ctx) => {
 		const seat = guest?.person, text = event.text.trim().toLowerCase();
-		if (!seat?.asking() || !/^(\d{1,3}|ok|y|yes)$/.test(text)) return { action: "continue" };
-		const problem = /^\d/.test(text) ? seat.choose(Number(text)) : seat.accept();
+		if (!seat?.asking() || !/^(\d{1,3}|ok|y|yes|p|pass)$/.test(text)) return { action: "continue" };
+		const problem = /^\d/.test(text) ? seat.choose(Number(text)) : /^p/.test(text) ? seat.pass("now") : seat.accept();
 		if (problem) ctx.ui.notify(problem, "warning");
 		showSeat(ctx);
 		return { action: "handled" };

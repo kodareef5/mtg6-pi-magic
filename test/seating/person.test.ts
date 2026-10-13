@@ -8,10 +8,15 @@ import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import type { Answer, Player } from "../../src/core/player.ts";
 import type { Frame } from "../../src/core/types.ts";
-import { person, type Asking } from "../../src/seating/person.ts";
+import { menu, person, type Asking } from "../../src/seating/person.ts";
 
-const ask = (version: number, ...ids: string[]) => ({ seat: 1, version, view: { since: [] } as unknown as Frame["view"],
-	decision: { situation: "priority", seat: 1, question: "Act?", options: ids.map((id) => ({ id, label: id })) } }) as unknown as Frame;
+/** A priority question in seat 1's own precombat main, which smart stops ask about; `where` moves it. */
+const ask = (version: number, ...ids: string[]) => at({}, version, ...ids);
+function at(where: { active?: number; step?: string; stack?: number; situation?: string; turn?: number }, version: number, ...ids: string[]): Frame {
+	return { seat: 1, version, view: { since: [], window: { kind: "turn", turn: where.turn ?? 4, active: where.active ?? 1, step: where.step ?? "precombat-main" },
+		objects: where.stack === undefined ? [] : [{ id: "s", zone: "stack", controller: where.stack }] } as unknown as Frame["view"],
+		decision: { situation: where.situation ?? "priority", seat: 1, question: "Act?", options: ids.map((id) => ({ id, label: id })) } } as unknown as Frame;
+}
 const autopilot = (answer: (frame: Frame) => Answer): Player & { asked: number } => {
 	const pilot = { name: "pilot", asked: 0, observe() {}, close() {}, async answer(frame: Frame) { pilot.asked++; return answer(frame); } };
 	return pilot;
@@ -39,7 +44,9 @@ test("planning goes through, a single option is answered at once, and auto hands
 	const planner = autopilot((frame) => frame.version === 1 ? work : { kind: "pick", option: "pass", actionId: "pilot" });
 	const seat = person("B", planner, "suggest", () => {});
 	assert.equal(await seat.player.answer(ask(1, "pass", "land:7")), work, "the autopilot's planning moves no cards and is not asked");
-	assert.equal((await seat.player.answer(ask(2, "pass")) as { by?: string }).by, undefined, "one listed option: the autopilot's pass, at once");
+	const asked = planner.asked;
+	assert.equal((await seat.player.answer(ask(2, "pass")) as { by?: string }).by, "person", "one listed option: the person's standing pass, at once");
+	assert.equal(planner.asked, asked, "and the autopilot is not asked");
 	assert.equal(await seat.switch("auto"), null);
 	assert.deepEqual(await seat.player.answer(ask(3, "pass", "land:7")), { kind: "pick", option: "pass", actionId: "pilot" });
 });
@@ -60,4 +67,56 @@ test("handing an open question to the autopilot answers it; manual needs none; a
 	alone.concede();
 	assert.deepEqual(await asked, { kind: "concede", by: "person" });
 	assert.deepEqual(await alone.player.answer(ask(2, "pass", "land:7")), { kind: "concede", by: "person" }, "a concession stands for the next ask too");
+});
+
+test("a question with one real option is answered at once, and stepping back is not a real option", async () => {
+	const pilot = autopilot(() => ({ kind: "pick", option: "announce:cost:0", actionId: "pilot" }));
+	const seat = person("B", pilot, "suggest", () => {});
+	const answer = await seat.player.answer(ask(1, "announce:cost:0", "announce:cancel"));
+	assert.deepEqual([(answer as { option: string }).option, (answer as { by?: string }).by, pilot.asked], ["announce:cost:0", "person", 0]);
+});
+
+test("smart stops pass where the person did not ask to stop, unless the autopilot wants to act or another seat's spell waits", async () => {
+	const alone = person("C", undefined, "manual", () => {});
+	assert.equal((await alone.player.answer(at({ active: 0 }, 1, "pass", "cast:x")) as { option: string }).option, "pass", "another seat's main phase, nothing on the stack");
+	assert.equal((await alone.player.answer(at({ step: "upkeep" }, 2, "pass", "cast:x")) as { option: string }).option, "pass", "an upkeep");
+	const responding = alone.player.answer(at({ active: 0, stack: 0 }, 3, "pass", "cast:x"));
+	await new Promise((go) => setTimeout(go, 0));
+	assert.ok(alone.asking(), "another seat's spell on the stack is a chance to respond");
+	alone.choose(2);
+	assert.equal((await responding as { option: string }).option, "cast:x");
+	assert.ok(!alone.asking() && await Promise.race([alone.player.answer(at({ situation: "turn-based", active: 0 }, 4, "block:a", "block:done")).then(() => "answered"), new Promise((go) => setTimeout(() => go("asked"), 10))]) === "asked", "blocks always ask");
+
+	const eager = person("B", autopilot(() => ({ kind: "pick", option: "cast:x", actionId: "pilot" })), "suggest", () => {});
+	const wanted = eager.player.answer(at({ active: 0 }, 5, "pass", "cast:x"));
+	await new Promise((go) => setTimeout(go, 0));
+	assert.equal(eager.asking()?.suggestion?.option, "cast:x", "the autopilot sees a play at this stop, so the person is asked");
+	eager.accept();
+	await wanted;
+
+	alone.setStops("all");
+	void alone.player.answer(at({ active: 0 }, 6, "pass", "cast:x"));
+	await new Promise((go) => setTimeout(go, 0));
+	assert.ok(alone.asking(), "all stops asks at every priority");
+	assert.equal(alone.pass("turn"), null);
+	assert.equal((await alone.player.answer(ask(7, "pass", "cast:x")) as { option: string }).option, "pass", "passing the turn passes even its own main phase");
+	void alone.player.answer(at({ turn: 5 }, 8, "pass", "cast:x"));
+	await new Promise((go) => setTimeout(go, 0));
+	assert.ok(alone.asking(), "a new turn ends the pass");
+});
+
+test("a person's menu folds equal payments, leads a trigger with its target, and names a broken rule", () => {
+	const frame = { ...ask(1), decision: { situation: "priority", seat: 1, question: "Select mana sources one at a time. Still needs 1 mana, including {B}.", options: [
+		{ id: "p1", label: "Add to payment: tap Gene Pollinator (1-21) and Azog (1-0) for {W}" },
+		{ id: "p2", label: "Add to payment: tap Gene Pollinator (1-21) and Azog (1-0) for {B}" },
+		{ id: "p3", label: "Add to payment: tap Blood Crypt (1-8) for {B}" },
+		{ id: "t1", label: "Put on the stack: Azog: When Azog enters, destroy a creature. Target 1: Inti (0-32@5, opponent's, 2/2).",
+			trigger: { id: "x", name: "Azog (1-0@3)", text: "When Azog enters, destroy a creature.", targets: [] } },
+		{ id: "b1", label: "Block Hardened Academic with Gene Pollinator", shows: "Conflicts with flying: needs flying or reach. In normal combat damage..." },
+	] } } as unknown as Frame;
+	const lines = menu({ frame });
+	assert.deepEqual(lines.map((line) => line.option.id), ["p2", "p3", "t1", "b1"], "colour variants are one line, kept on the colour the cost needs");
+	assert.equal(lines[0]!.label, "Add to payment: tap Gene Pollinator and Azog for {B}");
+	assert.equal(lines[2]!.label, "Put Azog's trigger on the stack: Target 1: Inti (0-32@5, opponent's, 2/2).");
+	assert.match(lines[3]!.label, /\(Conflicts with flying: needs flying or reach\)$/);
 });
