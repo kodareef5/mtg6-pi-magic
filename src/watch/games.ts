@@ -7,6 +7,7 @@
  */
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { Worker } from "node:worker_threads";
 import type { Universe } from "../core/cards.ts";
 import { start } from "../core/commit.ts";
 import { standard } from "../core/format.ts";
@@ -25,7 +26,29 @@ export const GAME_ID = /^[a-z0-9][a-z0-9-]{0,159}$/i;
 export type Summary = {
 	id: string; played: string; seats: { name: string; deck: string }[];
 	status: "finished" | "live" | "unfinished"; winner?: string; turns?: number; decisions: number; cost?: number; elapsedMs?: number;
+	/** Not yet replayed: status, winner and turns are the saved result's, which a later rollback or end can outdate. */
+	checking?: true;
 };
+/** What a replay of a journal says about its game. */
+export type Facts = { outcome: Record<string, "win" | "lose" | "draw"> | null; turn: number; decisions: number };
+
+/**
+ * A worker thread that replays journals, or undefined where Node cannot load
+ * this repository's TypeScript in a worker. The list then keeps to saved results.
+ */
+export function journalReader(paths: { cards: string; rules: string }): { facts(path: string): Promise<Facts | undefined>; close(): void } | undefined {
+	if (!(process.features as { typescript?: unknown }).typescript) return undefined;
+	const worker = new Worker(new URL("./outcomes.ts", import.meta.url), { workerData: paths });
+	worker.unref();
+	const waiting = new Map<string, (facts: Facts | undefined) => void>();
+	let asked = 0;
+	worker.on("message", ({ id, error, ...facts }: Facts & { id: string; error?: string }) => { waiting.get(id)?.(error ? undefined : facts); waiting.delete(id); });
+	worker.on("error", () => { for (const done of waiting.values()) done(undefined); waiting.clear(); });
+	return {
+		facts: (path) => new Promise((done) => { const id = String(++asked); waiting.set(id, done); worker.postMessage({ id, path }); }),
+		close: () => void worker.terminate(),
+	};
+}
 
 /** The file name of a game's newest saved result, by the time its run began; part of what says a game changed. */
 export function resultName(dir: string, game: string): string | undefined {
@@ -69,10 +92,28 @@ export function momentsOf(path: string, cards: Universe, rules: Rules): { moment
 	return { moments: series!.moments, viewers: series!.viewers, table: back.table, header: back.header };
 }
 
-/** Every saved game's summary, read again only when its journal changes. `live` names the games playing in this Pi. */
-export function gameIndex(dir: string) {
+/**
+ * Every saved game's summary, read again only when its journal changes. `live`
+ * names the games playing in this Pi. Whether a game is over, who won and in
+ * how many turns come from replaying its journal with `facts`, in the
+ * background, one game at a time; until then a summary says it is checking.
+ */
+export function gameIndex(dir: string, facts?: (path: string) => Promise<Facts | undefined>) {
 	const known = new Map<string, { stamp: string; summary: Omit<Summary, "status"> & { finished: boolean } }>();
+	const replayed = new Map<string, { stamp: string; facts: Facts }>(), queued = new Set<string>();
+	let chain = Promise.resolve();
+	const check = (id: string, stamp: string) => {
+		if (!facts || queued.has(id)) return;
+		queued.add(id);
+		chain = chain.then(async () => {
+			const found = await facts(join(dir, `${id}.jsonl`)).catch(() => undefined);
+			if (found) replayed.set(id, { stamp, facts: found });
+			queued.delete(id);
+		});
+	};
 	return {
+		/** Resolves once every game asked about so far has been replayed. */
+		settled: () => chain,
 		all(live: ReadonlySet<string> = new Set()): Summary[] {
 			if (!existsSync(dir)) return [];
 			const games = readdirSync(dir).filter((name) => name.endsWith(".jsonl") && GAME_ID.test(name.slice(0, -6)));
@@ -90,7 +131,17 @@ export function gameIndex(dir: string) {
 				} catch { known.delete(id); }
 			}
 			for (const id of known.keys()) if (!games.includes(`${id}.jsonl`)) known.delete(id);
-			return [...known.values()].map(({ summary: { finished, ...one } }) => ({ ...one, status: live.has(one.id) ? "live" : finished ? "finished" : "unfinished" }));
+			return [...known.values()].map(({ summary: { finished, ...one } }): Summary => {
+				if (live.has(one.id)) return { ...one, status: "live" };
+				const file = statSync(join(dir, `${one.id}.jsonl`)), stamp = `${file.mtimeMs}:${file.size}`, found = replayed.get(one.id);
+				if (found?.stamp !== stamp) {
+					check(one.id, stamp);
+					return { ...one, status: finished ? "finished" : "unfinished", ...(facts ? { checking: true as const } : {}) };
+				}
+				const { outcome, turn, decisions } = found.facts, { winner: _winner, turns: _turns, ...rest } = one;
+				const won = outcome && one.seats.filter((_, seat) => outcome[seat] === "win").map((seat) => seat.name).join(" and ");
+				return { ...rest, decisions, turns: turn, status: outcome ? "finished" : "unfinished", ...(outcome ? { winner: won || "draw" } : {}) };
+			});
 		},
 	};
 }

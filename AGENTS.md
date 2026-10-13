@@ -294,8 +294,12 @@ seconds.
 `/magic watch local|public|off` shows this Pi's games (`src/watch/`), and the
 setting holds across sessions in `settings.json` beside the roster. A
 read-only server, apart from the seats' wire and needing no token, serves a
-games page, searched, sorted and paged on the server from each journal's
-header and decisions and its newest saved result, and each game's replay page.
+games page, searched, sorted and paged on the server, and each game's replay
+page. Whether a game is over, who won and in how many turns come from
+replaying its journal on a worker thread (`src/watch/outcomes.ts`), so a Pi
+playing a game never stops for it; until a journal is replayed, its saved
+result stands, marked as checking. A rollback a spectator was watching is a
+moment of its own, the position play went back to.
 A game with a result is served from every perspective. Any other, live or
 stopped short, is served as the audience saw it, since it may yet be played
 on. A game this Pi is playing is watched live: the loop's checkpoint hands the
@@ -677,6 +681,7 @@ src/seating/           who answers a seat
   host.ts, guest.ts    the server that hands out chairs; claiming a chair and following it
 src/watch/             showing games to spectators and rewatchers: read-only, never a seat
   games.ts             saved games: summaries, search and paging, moments, looks and run cost
+  outcomes.ts          a worker that replays journals, so the list knows how each game stands
   server.ts            the watching server: the games page, replays, and a live game as it plays
   games.html           the games page
   tunnel.ts            a Cloudflare quick tunnel's public address

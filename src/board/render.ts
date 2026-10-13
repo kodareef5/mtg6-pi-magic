@@ -22,14 +22,21 @@ export function artIds(path = join(import.meta.dirname, "..", "..", "cards", "st
 }
 
 /** An image URL a picture names, fetched once a session. One that fails is left out, and a portrait shows initials instead. */
-const fetched = new Map<string, Promise<Buffer | undefined>>();
-export function fetchImage(href: string): Promise<Buffer | undefined> {
+const fetched = new Map<string, Promise<{ bytes: Buffer; type: string } | undefined>>();
+function fetchOnce(href: string): Promise<{ bytes: Buffer; type: string } | undefined> {
 	if (!fetched.has(href)) fetched.set(href, fetch(href, { signal: AbortSignal.timeout(10_000) }).then(async (response) => {
-		if (!response.ok || !(response.headers.get("content-type") ?? "").startsWith("image/")) return undefined;
+		const type = (response.headers.get("content-type") ?? "").split(";")[0]!.trim().toLowerCase();
+		if (!response.ok || !type.startsWith("image/")) return undefined;
 		const bytes = Buffer.from(await response.arrayBuffer());
-		return bytes.length <= 8_000_000 ? bytes : undefined;
+		return bytes.length <= 8_000_000 ? { bytes, type } : undefined;
 	}).catch(() => undefined));
 	return fetched.get(href)!;
+}
+export const fetchImage = async (href: string): Promise<Buffer | undefined> => (await fetchOnce(href))?.bytes;
+/** An image URL as a data URL, for a page that must open with no network: only the formats cardboard takes. */
+export async function imageData(href: string): Promise<string | undefined> {
+	const got = await fetchOnce(href);
+	return got && /^image\/(png|jpeg|webp|gif|avif)$/.test(got.type) ? `data:${got.type};base64,${got.bytes.toString("base64")}` : undefined;
 }
 
 /** A drawn picture: PNG for a terminal, WebP to keep. */

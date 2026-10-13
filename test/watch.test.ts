@@ -14,13 +14,18 @@ import { load } from "../src/core/cards.ts";
 import { start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { endByHost } from "../src/core/host.ts";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
+import { endByHost, rollbackByHost } from "../src/core/host.ts";
 import { open, save, type Header } from "../src/core/journal.ts";
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import type { Table } from "../src/core/table.ts";
 import type { Frame } from "../src/core/types.ts";
+import { project } from "../src/core/view.ts";
+import { gameStats, replayBuilder } from "../src/board/replay.ts";
+import { playByPlay } from "../src/board/series.ts";
 import { searchGames, type Summary } from "../src/watch/games.ts";
 import { watchServer } from "../src/watch/server.ts";
 import { quickTunnel } from "../src/watch/tunnel.ts";
@@ -50,7 +55,19 @@ async function games() {
 	await through(two, 3); save(open(join(dir, `${stopped.id}.jsonl`), stopped), two);
 	return { dir, ended, stopped };
 }
-const serve = (dir: string) => watchServer({ dir, cards: () => cards, rules: () => rules, art: new Map(), resolveArt: async () => ({}) });
+/** A game ended with no result written, and one whose saved result says it finished before a rollback took it back. */
+async function outdated(dir: string) {
+	const quiet = header("green-stompy-vs-dimir-control-3", ["Green Stompy", "Dimir Control"]), back = header("green-stompy-vs-dimir-control-4", ["Green Stompy", "Dimir Control"]);
+	const one = dealt(quiet), journal = open(join(dir, `${quiet.id}.jsonl`), quiet);
+	await through(one, 2); endByHost(one, "Ended while stopped."); save(journal, one);
+	const two = dealt(back), kept = open(join(dir, `${back.id}.jsonl`), back);
+	await through(two, 2); endByHost(two, "Over, for now."); save(kept, two);
+	writeFileSync(join(dir, `${back.id}-1791891574243.result.json`), JSON.stringify({ outcome: two.outcome, turn: 3, elapsedMs: 1_000 }));
+	rollbackByHost(two, 2, "Not over after all.", () => dealt(back)); save(kept, two);
+	return { quiet, back };
+}
+const serve = (dir: string, port?: number) => watchServer({ dir, cards: () => cards, rules: () => rules, art: new Map(), resolveArt: async () => ({}),
+	paths: { cards: join(import.meta.dirname, "..", "cards", "standard.tsv"), rules: join(import.meta.dirname, "..", "rules", "cr.tsv") }, ...(port ? { port } : {}) });
 const data = (script: string) => JSON.parse(script.replace(/^window\.GAME = /, "").replace(/;\n$/, ""));
 
 test("the games list is searched, filtered, sorted and paged on the server", () => {
@@ -122,4 +139,82 @@ test("a public address is the one cloudflared prints, and a missing cloudflared 
 	assert.equal(tunnel.url, "https://quick-brown-fox.trycloudflare.com");
 	tunnel.close();
 	await assert.rejects(quickTunnel("http://127.0.0.1:4747", join(tmpdir(), "no-such-cloudflared")), /brew install cloudflared/);
+});
+
+test("the list says a game is over from its journal, not from a result that is missing or outdated", async () => {
+	const { dir } = await games(), { quiet, back } = await outdated(dir), server = await serve(dir);
+	try {
+		const status = async () => Object.fromEntries((await (await fetch(`${server.base}/api/games?size=100`)).json()).rows.map((one: Summary) => [one.id, [one.status, one.winner ?? null, !!one.checking]]));
+		const first = await status();
+		assert.deepEqual([first[quiet.id], first[back.id]], [["unfinished", null, true], ["finished", "draw", true]], "until replayed, the saved results stand, marked as checking");
+		await server.indexed();
+		const after = await status();
+		assert.deepEqual([after[quiet.id], after[back.id]], [["finished", "draw", false], ["unfinished", null, false]], "replayed, each journal says how its game stands");
+	} finally { await server.close(); }
+});
+
+test("a port in use is an error to recover from, and a watcher who leaves stops waiting", async () => {
+	const { dir } = await games(), first = await serve(dir);
+	try {
+		await assert.rejects(serve(dir, Number(new URL(first.base).port)), /EADDRINUSE/);
+		const made = header("live-2", ["Green Stompy", "Dimir Control"]), table = dealt(made);
+		open(join(dir, "live-2.jsonl"), made);
+		const watched = await first.live("live-2", made, table), version = (await (await fetch(`${first.base}/games/live-2/game.js`)).text()).match(/"version":(\d+)/)![1]!;
+		const leaving = new AbortController(), began = Date.now();
+		const waited = watched.since(new URLSearchParams({ version }), leaving.signal);
+		setTimeout(() => leaving.abort(), 50);
+		await waited;
+		assert.ok(Date.now() - began < 2_000, "the hold ends when the watcher leaves");
+		const held = fetch(`${first.base}/games/live-2/live.json?version=${version}`).then((one) => one.json(), () => "closed");
+		await new Promise((go) => setTimeout(go, 50));
+		await first.close();
+		assert.ok(["closed", "object"].includes(typeof (await held) === "object" ? "object" : String(await held)), "closing ends a held request");
+	} finally { await first.close().catch(() => {}); }
+});
+
+test("a rollback is a moment of its own, showing the position play went back to", async () => {
+	const made = header("rolled", ["Green Stompy", "Dimir Control"]), table = dealt(made), seen = playByPlay(table.seats.map((one) => ({ id: one.id, name: one.name })), ["spectator"]);
+	await through(table, 2, () => seen.take(table));
+	const lands = (snapshot: { seats: { battlefield: unknown[] }[] }) => snapshot.seats.reduce((sum, one) => sum + one.battlefield.length, 0);
+	assert.ok(lands(seen.moments.at(-1)!.views[0]!.snapshot) > 0, "a land was played before the rollback");
+	rollbackByHost(table, 2, "Back to the start.", () => dealt(made));
+	seen.take(table);
+	const now = seen.moments.at(-1)!.views[0]!;
+	assert.match(now.lines.join(" "), /^Play went back to an earlier position\. The host's note: Back to the start\.$/);
+	assert.equal(lands(now.snapshot), project(table, "spectator").objects!.filter((one) => one.zone === "battlefield").length);
+	assert.equal(lands(now.snapshot), 0, "the board as it stands after the rollback");
+});
+
+test("no client is sent a card before its art and text, and custom images are kept in the replay", async () => {
+	const made = header("drawn", ["Green Stompy", "Dimir Control"]), table = dealt(made), seen = playByPlay(table.seats.map((one) => ({ id: one.id, name: one.name })));
+	await through(table, 2, () => seen.take(table));
+	const portrait = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+	const images = createServer((_request, response) => { response.writeHead(200, { "content-type": "image/png" }); response.end(portrait); });
+	await new Promise<void>((done) => images.listen(0, "127.0.0.1", done));
+	const at = `http://127.0.0.1:${(images.address() as AddressInfo).port}`;
+	try {
+		let release!: () => void;
+		const later = new Promise<void>((go) => { release = go; });
+		const built = await replayBuilder(table.seats, seen.viewers, { title: "t", subtitle: "s", art: new Map([["Forest", "f"]]), cards,
+			dress: () => ({ avatars: { 0: `${at}/me.png` }, background: `${at}/table.png` }),
+			resolveArt: async (definitions) => { await later; return Object.fromEntries(definitions.filter((one) => one.scryfallId).map((one) => [`${one.scryfallId}:front`, { image: "data:image/jpeg;base64,AA==" }])); } });
+		const syncing = built.sync(seen.moments);
+		const early = built.data() as { deck: unknown[]; moments: unknown[] };
+		assert.deepEqual([early.deck.length, early.moments.length], [0, 0], "nothing is published while the art is coming");
+		release();
+		await syncing;
+		const late = built.since({ moments: 0, deck: early.deck.length, images: 0 }) as unknown as { deck: { id: string; scryfallId?: string; name: string }[]; art: Record<string, unknown>; cards: Record<string, unknown> };
+		const forest = late.deck.find((one) => one.name === "Forest")!;
+		assert.ok(forest && late.art[`${forest.scryfallId}:front`] && late.cards[forest.id], "the card arrives with its art and text");
+		const all = JSON.stringify(built.data());
+		assert.ok(!all.includes(at), "no scene names the image server");
+		assert.ok(Object.values((built.data() as { images: Record<string, string> }).images).some((one) => one.startsWith("data:image/png;base64,")), "the custom portrait is kept in the replay");
+	} finally { images.close(); }
+});
+
+test("damage dealt by a referenced object counts for its owner", () => {
+	const table = { seats: [{ id: 0, name: "A", deck: { name: "Red" } }, { id: 1, name: "B", deck: { name: "Blue" } }], ledger: [], outcome: null, cursor: { turn: 3 },
+		log: [{ reason: "resolve", changes: [{ do: "damage", source: { id: "0-12", incarnation: 2 }, target: { player: 1 }, amount: 2 }, { do: "damage", source: "0-13", target: { player: 1 }, amount: 3, combat: true }] }] } as unknown as Table;
+	const counts = Object.fromEntries(gameStats(table).seats[0]!.counts);
+	assert.deepEqual([counts["Other damage to players"], counts["Combat damage to players"]], [2, 3]);
 });

@@ -21,15 +21,23 @@ export const viewerKey = (viewer: Viewer) => viewer === "spectator" ? "audience"
 /** `viewers` defaults to the audience and every seat; a live game shows the audience alone. */
 export function playByPlay(seats: { id: number; name: string; deck?: string }[], viewers: Viewer[] = ["spectator", ...seats.map((one) => one.id)]) {
 	const moments: Moment[] = [];
-	let seen = 0, boards = "";
+	let seen = 0, boards = "", looked: unknown;
 	return {
 		viewers,
 		moments,
 		/** Look at the table: before each recorded decision, and once at the end. */
 		take(table: Table) {
+			// A rollback rebuilds the log, so the entry looked at last is gone: the position play went back to is the next moment.
+			if (seen && table.log[seen - 1] !== looked) {
+				const ruled = table.rulings.at(-1), note = ruled && "by" in ruled ? ` The host's note: ${ruled.note}` : "";
+				const line = `Play went back to an earlier position.${note}`;
+				seen = table.log.length; looked = table.log.at(-1); boards = "";
+				moments.push({ views: viewers.map((viewer) => ({ snapshot: boardSnapshot(project(table, viewer), seats, viewer), lines: [line] })) });
+				return;
+			}
 			if (table.log.length === seen) return;
 			const views = viewers.map((viewer) => project(table, viewer, seen));
-			seen = table.log.length;
+			seen = table.log.length; looked = table.log.at(-1);
 			if (!views.some((view) => view.since.length)) return;
 			const now = views.map((view, at): View => ({ snapshot: boardSnapshot(view, seats, viewers[at]!), lines: [...view.since] }));
 			const same = JSON.stringify(now.map(({ snapshot: { step: _step, ...rest } }) => rest)), last = moments.at(-1);

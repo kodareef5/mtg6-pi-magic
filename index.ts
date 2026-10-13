@@ -186,7 +186,7 @@ export default function (pi: ExtensionAPI) {
 		mkdirSync(CACHE, { recursive: true });
 		writeFileSync(SETTINGS, JSON.stringify({ ...settings(), watch: mode }, null, 2) + "\n");
 		if (mode === "off") { ctx.ui.notify("This Pi no longer shows its games.", "info"); showTable(ctx); return; }
-		const options = { dir: GAMES, cards: () => universe(standard.name), rules: () => loadRules(RULES), art: artIds(),
+		const options = { dir: GAMES, cards: () => universe(standard.name), rules: () => loadRules(RULES), art: artIds(), paths: { cards: universe(standard.name).path, rules: RULES },
 			resolveArt: async (definitions: Record<string, string>[]) => await cardboardArt(definitions, join(CACHE, "art")) };
 		let server: Watch;
 		try { server = await watchServer({ ...options, port: settings().port ?? 4747 }); }

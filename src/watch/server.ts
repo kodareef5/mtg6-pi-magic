@@ -25,7 +25,7 @@ import type { Table } from "../core/table.ts";
 import type { Header } from "../core/journal.ts";
 import { cardboardScript, gameScript, gameStats, replayBuilder, replayPage, type ReplayOptions } from "../board/replay.ts";
 import { audienceOnly, playByPlay } from "../board/series.ts";
-import { dressOf, GAME_ID, gameIndex, momentsOf, resultName, runOf, searchGames } from "./games.ts";
+import { dressOf, GAME_ID, gameIndex, journalReader, momentsOf, resultName, runOf, searchGames } from "./games.ts";
 
 const HOLD_MS = 25_000;
 /** Replays kept built, the most recently asked for first. */
@@ -36,14 +36,18 @@ export type Watching = {
 	dir: string;
 	cards(): Universe; rules(): Rules;
 	art: ReplayOptions["art"]; resolveArt: ReplayOptions["resolveArt"];
+	/** The card list and rules files, for replaying journals off the main thread; without them the list keeps to saved results. */
+	paths?: { cards: string; rules: string };
 	port?: number;
 };
 
 export type Watch = Awaited<ReturnType<typeof watchServer>>;
 
 export async function watchServer(options: Watching) {
-	const index = gameIndex(options.dir), built = new Map<string, { stamp: string; script: string }>();
-	const live = new Map<string, { take(table: Table): void; finish(): void; script(): string; since(query: URLSearchParams): Promise<unknown> }>();
+	// The journal reader starts once the server is listening, so a port in use leaves no worker behind.
+	let reader: ReturnType<typeof journalReader>, index = gameIndex(options.dir);
+	const built = new Map<string, { stamp: string; script: string }>();
+	const live = new Map<string, { take(table: Table): void; finish(): void; script(): string; since(query: URLSearchParams, signal: AbortSignal): Promise<unknown> }>();
 	/** A game still playing has no totals yet; its page shows them once it is over. */
 	const replayOptions = (id: string, header: Header, table: Table, totals: boolean): ReplayOptions => ({
 		title: header.seats.map((one) => one.name).join(" vs "), subtitle: `${id} · ${totals ? "play by play" : "live"}`,
@@ -93,7 +97,12 @@ export async function watchServer(options: Watching) {
 				try { return send(response, 200, "text/javascript; charset=utf-8", playing ? playing.script() : await saved(id)); }
 				catch (error) { return send(response, 200, "text/javascript; charset=utf-8", `window.GAME_ERROR = ${JSON.stringify(`This game could not be replayed here: ${error instanceof Error ? error.message : String(error)}`)};\n`); }
 			}
-			if (rest === "/live.json") return json(response, 200, playing ? await playing.since(url.searchParams) : { finished: true });
+			if (rest === "/live.json") {
+				// A watcher who leaves stops waiting.
+				const gone = new AbortController();
+				response.once("close", () => gone.abort());
+				return json(response, 200, playing ? await playing.since(url.searchParams, gone.signal) : { finished: true });
+			}
 			const script = /^\/cardboard\/([a-z-]+)\.js$/.exec(rest), file = script && cardboardScript(script[1]!);
 			if (file) return send(response, 200, "text/javascript; charset=utf-8", readFileSync(file));
 			return json(response, 404, { message: "No such page." });
@@ -101,7 +110,13 @@ export async function watchServer(options: Watching) {
 			if (!response.headersSent) json(response, 500, { message: error instanceof Error ? error.message : String(error) });
 		}
 	});
-	await new Promise<void>((done) => server.listen(options.port ?? 0, "127.0.0.1", done));
+	// A port in use is an error the caller can recover from, as by trying another.
+	await new Promise<void>((done, fail) => {
+		server.once("error", fail);
+		server.listen(options.port ?? 0, "127.0.0.1", () => { server.off("error", fail); done(); });
+	});
+	reader = options.paths && journalReader(options.paths);
+	index = gameIndex(options.dir, reader?.facts);
 	const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 
 	return {
@@ -115,8 +130,9 @@ export async function watchServer(options: Watching) {
 			const seats = table.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck.name }));
 			const series = playByPlay(seats, ["spectator"]);
 			const replay = await replayBuilder(table.seats, ["spectator"], replayOptions(id, header, table, false));
-			let waiting: (() => void)[] = [], queue = Promise.resolve(), finished = false;
-			const wake = () => { const now = waiting; waiting = []; for (const go of now) go(); };
+			const waiting = new Set<() => void>();
+			let queue = Promise.resolve(), finished = false;
+			const wake = () => { for (const go of [...waiting]) go(); };
 			const watched = {
 				take(seen: Table) {
 					series.take(seen);
@@ -124,9 +140,15 @@ export async function watchServer(options: Watching) {
 				},
 				finish() { finished = true; void queue.then(() => { live.delete(id); wake(); }); },
 				script: () => gameScript(replay.data({ live: true })),
-				async since(query: URLSearchParams) {
+				async since(query: URLSearchParams, signal: AbortSignal) {
 					const have = (name: string) => Number(query.get(name) ?? 0) || 0;
-					if (replay.version === have("version") && !finished) await new Promise<void>((go) => { waiting.push(go); setTimeout(go, HOLD_MS); });
+					// Held until something is new, the hold runs out or the watcher leaves; whichever comes first clears the others.
+					if (replay.version === have("version") && !finished && !signal.aborted) await new Promise<void>((go) => {
+						const done = () => { clearTimeout(timer); waiting.delete(done); signal.removeEventListener("abort", done); go(); };
+						const timer = setTimeout(done, HOLD_MS);
+						waiting.add(done);
+						signal.addEventListener("abort", done, { once: true });
+					});
 					return { ...replay.since({ moments: have("moments"), deck: have("deck"), images: have("images") }), finished };
 				},
 			};
@@ -134,6 +156,8 @@ export async function watchServer(options: Watching) {
 			watched.take(table);
 			return watched;
 		},
-		close: () => new Promise<void>((done) => { for (const one of live.values()) one.finish(); server.closeAllConnections(); server.close(() => done()); }),
+		/** Resolves once the games list has replayed every journal it was asked about. */
+		indexed: () => index.settled(),
+		close: () => new Promise<void>((done) => { reader?.close(); for (const one of live.values()) one.finish(); server.closeAllConnections(); server.close(() => done()); }),
 	};
 }

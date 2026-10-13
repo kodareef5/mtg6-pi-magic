@@ -68,7 +68,8 @@ async function load() {
     decks.className = "decks";
     game.seats.forEach((seat, i) => { if (i) decks.append(" vs "); const b = document.createElement("b"); b.textContent = seat.deck; decks.append(b); });
     const id = document.createElement("div"); id.className = "muted"; id.textContent = game.id; decks.append(id);
-    badge.className = "status " + game.status; badge.textContent = game.status; status.append(badge);
+    badge.className = "status " + game.status; badge.textContent = game.status + (game.checking ? " …" : ""); status.append(badge);
+    if (game.checking) badge.title = "Being checked against its journal; the result may change.";
     tr.append(cell(new Date(game.played).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })), decks, cell(game.winner ?? "—"),
       cell(game.turns ?? "—", "num"), cell(game.decisions, "num"), cell(minutes(game.elapsedMs), "num"), cell(game.cost === undefined ? "—" : "$" + game.cost.toFixed(2), "num"), status);
     tr.onclick = () => { location.href = "games/" + encodeURIComponent(game.id) + "/"; };

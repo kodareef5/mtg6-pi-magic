@@ -16,8 +16,8 @@ import type { Universe } from "../core/cards.ts";
 import type { Table } from "../core/table.ts";
 import type { Viewer } from "../core/types.ts";
 import { cardboardScene, portrait } from "./cardboard.ts";
-import { colorsFor, imageOf, type Colors } from "./looks.ts";
-import type { Dress } from "./render.ts";
+import { colorsFor, imageOf, isUrl, type Colors } from "./looks.ts";
+import { imageData, type Dress } from "./render.ts";
 import { viewerKey, when, type Moment } from "./series.ts";
 
 /** What the game's records count, per seat and for the game, and what its run cost when a result was saved. */
@@ -43,8 +43,9 @@ export function gameStats(table: Table, played?: string, run?: Run): Stats {
 			if (reason === "destroy" || reason === "sacrifice") add(seat, "Permanents destroyed or sacrificed");
 		}
 		if (change.do === "attack") for (const one of change.attackers as { id: string }[]) add(owner(one.id), "Attackers declared");
+		// A damage source is an object's id or a reference to the object.
 		if (change.do === "damage" && (change.target as { player?: number }).player !== undefined)
-			add(owner(String(change.source)), change.combat ? "Combat damage to players" : "Other damage to players", Number(change.amount));
+			add(owner(typeof change.source === "object" ? String((change.source as { id: string }).id) : String(change.source)), change.combat ? "Combat damage to players" : "Other damage to players", Number(change.amount));
 	}
 	const rows = table.ledger, by = (key: "why" | "by", value: string) => rows.filter((row) => row[key] === value).length;
 	const winner = table.outcome && table.seats.filter((seat) => table.outcome!.results[seat.id] === "win").map((seat) => seat.name);
@@ -112,39 +113,48 @@ export async function replayBuilder(seats: { id: number; name: string }[], viewe
 		images.set(key, value);
 		return `@${key}`;
 	};
+	// An image given by URL is fetched and kept like a default one, so the page opens with no network.
+	const embed = async (value: string | undefined) => value && isUrl(value) ? await imageData(value) : value;
 	const looks = await Promise.all(viewers.map(async (viewer) => {
-		const dress = options.dress(viewer), background = image(imageOf("backgrounds", dress.background));
-		const avatars = Object.fromEntries(await Promise.all(seats.map(async (seat) => [seat.id, image(await portrait(dress.avatars?.[seat.id], seat.id))] as const)));
+		const dress = options.dress(viewer), background = image(await embed(imageOf("backgrounds", dress.background)));
+		const avatars = Object.fromEntries(await Promise.all(seats.map(async (seat) =>
+			[seat.id, image(await embed(await portrait(dress.avatars?.[seat.id], seat.id)) ?? await portrait(undefined, seat.id))] as const)));
 		return { avatars, colors: dress.colors ?? colorsFor(dress.background), ...(background ? { background } : {}) };
 	}));
-	const scene = (view: Moment["views"][number], at: number) => {
+	const scene = (view: Moment["views"][number], at: number, fresh: Map<string, Record<string, string>>) => {
 		const look = looks[at]!, { decks, ...rest } = cardboardScene(view.snapshot, options.art, { width: 1920, height: 1080 },
 			{ avatars: look.avatars, ...(look.background ? { background: look.background } : {}), ...(look.colors ? { colors: look.colors } : {}) });
-		for (const card of decks[0]!.cards) if (!definitions.has(card.id!)) definitions.set(card.id!, card as Record<string, string>);
+		for (const card of decks[0]!.cards) if (!definitions.has(card.id!)) fresh.set(card.id!, card as Record<string, string>);
 		return rest;
 	};
 	const shown: Shown[] = [];
-	let version = 0, resolved = 0;
+	let version = 0;
 	const perspectives = viewers.map((viewer, at) => ({ key: viewerKey(viewer), label: viewer === "spectator" ? "Audience" : seats.find((one) => one.id === viewer)?.name ?? `Seat ${viewer}`,
 		theme: theme(looks[at]!.colors ?? ORIGINAL) }));
 	return {
-		/** Bring the shown moments up to `moments`: the last shown one again, since it may have grown, and every one after it. */
+		/**
+		 * Bring the shown moments up to `moments`: the last shown one again, since it may have grown, and every one
+		 * after it. Nothing is published until the new cards' art and text are in, so no client ever holds a card
+		 * without them: a client is sent only what it lacks, and would never be sent them again.
+		 */
 		async sync(moments: Moment[]): Promise<boolean> {
 			const from = Math.max(0, shown.length - 1);
 			if (moments.length === shown.length && moments.length && JSON.stringify(shown.at(-1)!.views.map((one) => one.lines)) === JSON.stringify(moments.at(-1)!.views.map((one) => one.lines))) return false;
+			const fresh = new Map<string, Record<string, string>>(), built: Shown[] = [];
 			for (let at = from; at < moments.length; at++) {
 				const moment = moments[at]!, first = moment.views[0]!.snapshot;
-				shown[at] = { when: when(first), turn: first.turn ?? 0,
+				built.push({ when: when(first), turn: first.turn ?? 0,
 					counts: first.seats.map((one) => [one.life, one.hand, one.library, one.battlefield.length, one.graveyard.length, one.exile.length]),
-					views: moment.views.map((view, index) => ({ lines: view.lines, scene: scene(view, index) })) };
+					views: moment.views.map((view, index) => ({ lines: view.lines, scene: scene(view, index, fresh) })) });
 			}
-			const fresh = [...definitions.values()].slice(resolved);
-			resolved = definitions.size;
-			Object.assign(art, await options.resolveArt(fresh) ?? {});
-			for (const one of fresh) {
+			const drawn = await options.resolveArt([...fresh.values()]) ?? {};
+			for (const [id, one] of fresh) {
+				definitions.set(id, one);
 				const card = options.cards.cards.get(one.name!);
-				if (one.id !== "hidden") cards[one.id!] = card ? { name: card.name, cost: card.mana, type: card.type, text: card.oracle, stats: card.stats } : { name: one.name };
+				if (id !== "hidden") cards[id] = card ? { name: card.name, cost: card.mana, type: card.type, text: card.oracle, stats: card.stats } : { name: one.name };
 			}
+			Object.assign(art, drawn);
+			shown.splice(from, Infinity, ...built);
 			version++;
 			return true;
 		},
