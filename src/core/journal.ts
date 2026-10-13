@@ -409,8 +409,8 @@ export function replay(
 	start: (header: Header) => Table,
 	upTo?: number,
 	against?: { cards: Pick<Header["cards"], "generated" | "faces" | "names">; rules: { effective: string } },
-	/** Keep only the first `workAt` work entries recorded at `upTo`: the position as a seat saw it before its own later work there, such as a help request. */
-	options: { workAt?: number } = {},
+	/** Keep only the first `workAt` work entries recorded at `upTo`: the position as a seat saw it before its own later work there, such as a help request. `observe` sees the table before each recorded decision. */
+	options: { workAt?: number; observe?: (table: Table) => void } = {},
 ): { table: Table; header: Header; prepared: { seat: SeatId; made: unknown }[] } {
 	const { header, lines: recorded } = read(path);
 	let kept = 0;
@@ -452,7 +452,7 @@ export function replay(
 	if (!header.cards.faces) for (const printed of Object.values(initial.printed)) {
 		delete printed.faces; delete printed.layout;
 	}
-	const table = relive(initial, rowsOf(lines, upTo), work);
+	const table = relive(initial, rowsOf(lines, upTo), work, options.observe && ((seen) => options.observe!(seen)));
 	restoreWork(table, lines, upTo);
 	table.said = lines.flatMap((line) => "said" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.said)] : []);
 	table.rulings = lines.flatMap((line) => "ruling" in line ? [structuredClone(line.ruling)] : []);

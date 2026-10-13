@@ -4,6 +4,7 @@
  * layout are its business; this file only maps Magic facts onto its zones, references and annotations,
  * and dresses the table in the seats' portraits and the viewer's background.
  */
+import { createHash } from "node:crypto";
 import { STEPS, type Step } from "../core/steps.ts";
 import type { SeatId } from "../core/types.ts";
 import { colorsFor, defaults, imageOf, isUrl, type Colors } from "./looks.ts";
@@ -13,6 +14,12 @@ import type { BoardRenderer, BoardSize } from "./render.ts";
 
 const COLORS = ["#e2b878", "#8fb3d9", "#b9d48a", "#d993b8"];
 const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+/** Within cardboard's limits of 100 characters for an id and 150 for a name. An ability on the stack is named by its text. */
+const cardId = (prefix: string, name: string) => {
+	const plain = `${prefix}-${slug(name)}`;
+	return plain.length <= 100 ? plain : `${plain.slice(0, 88)}-${createHash("sha256").update(name).digest("hex").slice(0, 10)}`;
+};
+const cardName = (name: string) => name.length <= 150 ? name : `${name.slice(0, 149)}…`;
 type Place = { playerId: string; zoneId: string; index: number };
 
 /** The cardboard request for a snapshot, with each seat's portrait and the background as image URLs, and the frame colours. Pure, so the mapping is testable without the package. */
@@ -22,9 +29,9 @@ export function cardboardScene(snapshot: BoardSnapshot, art: ReadonlyMap<string,
 	const definitions = new Map<string, Record<string, string>>(), annotations: Record<string, unknown>[] = [], highlights: Record<string, unknown>[] = [];
 	const where = new Map<string, Place>();
 	const define = (one: BoardCard) => {
-		const id = one.name ? `${one.token ? "t" : "c"}-${slug(one.name)}` : "hidden";
+		const id = one.name ? cardId(one.token ? "t" : "c", one.name) : "hidden";
 		const scryfallId = !one.token && one.name ? art.get(one.name) : undefined;
-		if (!definitions.has(id)) definitions.set(id, { id, name: one.name ?? "Face-down card", ...(scryfallId ? { scryfallId } : {}) });
+		if (!definitions.has(id)) definitions.set(id, { id, name: one.name ? cardName(one.name) : "Face-down card", ...(scryfallId ? { scryfallId } : {}) });
 		return id;
 	};
 	const targeted = new Set(snapshot.stack.flatMap((item) => item.targets.filter((aim): aim is string => typeof aim === "string")));

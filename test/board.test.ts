@@ -106,6 +106,18 @@ test("a board with nothing visible yet is still a scene", async () => {
 	await accepted(scene);
 });
 
+test("an ability on the stack named by long rules text is still a card the preset accepts", async () => {
+	const text = "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.";
+	const seat = (id: number) => ({ id, name: `P${id}`, life: 20, library: 40, hand: 7, battlefield: [], graveyard: [], exile: [] });
+	const ability = (name: string, id: string) => ({ id, name, types: [], controller: 0, targets: [] });
+	const scene = cardboardScene({ viewer: "spectator", seats: [seat(0), seat(1)], stack: [ability(text, "s1"), ability(`${text} Twice.`, "s2"), ability("x".repeat(400), "s3")] },
+		new Map(), { width: 800, height: 600 });
+	const cards = scene.decks[0]!.cards;
+	assert.equal(new Set(cards.map((one) => one.id)).size, 3, "two long names that share a beginning keep their own ids");
+	assert.ok(cards.every((one) => one.id!.length <= 100 && one.name!.length <= 150));
+	await accepted(scene);
+});
+
 test("an SVG becomes a PNG with no browser", async () => {
 	const png = await svgToPng('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8" fill="#123456"/></svg>');
 	assert.deepEqual([...png.slice(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);

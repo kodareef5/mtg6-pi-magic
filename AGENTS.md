@@ -277,6 +277,14 @@ the frame colours in `assets/backgrounds/colors.json` unless colours are set,
 and a portrait that does not load gives way to a default. The journal header
 records the looks.
 
+`/magic pictures [game] [spectator|<seat>]` turns a saved game into a
+play-by-play picture series (`src/board/series.ts`). The journal replays,
+calling no models, and each moment something visible happened becomes a
+numbered picture as that viewer saw it; a moment that leaves the board as it
+was joins the one before. `index.md` beside the pictures lists what happened
+in each. A full game is about 150 to 200 pictures at 1280 × 720, drawn in
+under a minute.
+
 A seat can carry its own key for a provider, named as an environment variable
 under `keys` in the roster file (`"keys": {"1": {"openrouter": "$OPENROUTER_SEAT_1"}}`).
 That seat's own calls use it. The judge and the commentator are the table's and
@@ -648,6 +656,7 @@ src/board/             board pictures: no game logic, never read by a seat
   render.ts            the renderer seam, the art map, and SVG to PNG through resvg
   cardboard.ts         the interim renderer: a snapshot as a cardboard-api MTG 26 scene (optional dependency)
   looks.ts             seat portraits and table backgrounds: the defaults in assets/, or image URLs
+  series.ts            a saved game as a play-by-play picture series, with an index of what happened
   feed.ts              one picture per turn and at the end, drawn off the game loop and saved
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/card-names.ts    build the Oracle name companion from a matching cached bulk snapshot
