@@ -6,19 +6,21 @@
  */
 
 import { boardSnapshot, type BoardCard } from "../board/snapshot.ts";
-import type { SeatId } from "../core/types.ts";
+import type { Frame, SeatId } from "../core/types.ts";
 import { menu, type Asking, type Mode, type Stops } from "./person.ts";
-import type { State } from "./protocol.ts";
+
+/** The seat the panel reads: its newest frame, which seat it is, every seat by name and deck, and its clock when asked. */
+export type Sitting = { frame?: Frame; seat?: SeatId; seats: { id: SeatId; name: string; deck: string }[]; remaining?: number };
 
 const card = (one: BoardCard) => [one.name ?? "a face-down card", one.power !== undefined ? ` ${one.power}/${one.toughness}` : "",
 	one.counters && Object.keys(one.counters).length ? ` (${Object.entries(one.counters).map(([kind, n]) => `${n} ${kind}`).join(", ")})` : "",
 	one.tapped ? " (tapped)" : "", one.summoningSick ? " (new)" : "", one.attacking ? " (attacking)" : "", one.blocking ? " (blocking)" : ""].join("");
 const list = (cards: BoardCard[]) => cards.length ? cards.map(card).join(", ") : "nothing";
 
-export function panel(state: State, mode: Mode, asking: Asking | null, stops: Stops = "smart"): string[] {
-	const frame = asking?.frame ?? state.frame, seats = state.seats ?? [], me = state.seat;
+export function panel(state: Sitting, mode: Mode, asking: Asking | null, stops: Stops = "smart"): string[] {
+	const frame = asking?.frame ?? state.frame, seats = state.seats, me = state.seat;
 	if (!frame || me === undefined) return [];
-	const board = boardSnapshot(frame.view, seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck.name })), me as SeatId);
+	const board = boardSnapshot(frame.view, seats, me);
 	const mine = board.seats.find((one) => one.id === me), theirs = board.seats.filter((one) => one.id !== me);
 	const lines = [
 		`${board.finished ? "Game over" : board.turn ? `Turn ${board.turn}, ${board.active === me ? "your" : `${seats.find((one) => one.id === board.active)?.name}'s`} ${board.step?.replace(/-/g, " ")}` : "Opening hands"} · ${mode} mode, ${stops} stops` +

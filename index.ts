@@ -2,14 +2,15 @@
  * pi-magic. A table, its seats, and the game it is running.
  *
  * pi-magic owns the table. This file wires commands to it and holds no game
- * logic. Both seats here are answered by a decision model, because that is the
- * only kind of seat that needs nothing outside this process. A seat played over
- * p2p, by a person or through MCP drops into the same place and loads none of
- * src/context/.
+ * logic. The host runs every seat with that seat's models; who pilots a seat
+ * decides whether its AI's picks are played or shown to a player as
+ * suggestions (src/seating/person.ts). Whoever holds a seat's code pilots it,
+ * from the seat's page or, for the host, from this terminal.
  *
  * Inference is Pi's. Pi holds the providers, the credentials and the model
- * catalogue, so nothing here names an endpoint or reads a key. Declaring a game
- * means naming a model per part, and src/context/roles.ts is the whole of that.
+ * catalogue, so nothing here names an endpoint. Declaring a game means naming
+ * a model per part, and src/context/roles.ts is the whole of that. A seat may
+ * pay with its own OpenRouter key, which is held in memory and never written.
  *
  * Commands and tool registrations stay together past 150 lines so their
  * shared game, roster and journal lifecycle can be read in one file.
@@ -18,16 +19,15 @@
 import { claudeCli } from "./src/context/claude-cli.ts";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename, dirname, join } from "node:path";
+import { basename, join } from "node:path";
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Container, Image, Text } from "@earendil-works/pi-tui";
 import { boardFeed } from "./src/board/feed.ts";
-import { artIds, boardPicture, type BoardRenderer, type Dress } from "./src/board/render.ts";
-import { choose, chooseColors, defaults, named, type Art, type Colors, type Look } from "./src/board/looks.ts";
-import { boardSnapshot } from "./src/board/snapshot.ts";
-import { menu, person, type Mode, type Person } from "./src/seating/person.ts";
-import { panel } from "./src/seating/panel.ts";
+import { artIds, type BoardRenderer, type Dress } from "./src/board/render.ts";
+import { choose, chooseColors, defaults, named, type Art, type Colors } from "./src/board/looks.ts";
+import { menu, person, type Person } from "./src/seating/person.ts";
+import { panel, type Sitting } from "./src/seating/panel.ts";
 import { cardboardArt, cardboardRenderer } from "./src/board/cardboard.ts";
 import { Type } from "typebox";
 
@@ -44,19 +44,10 @@ import {
 	type Cast,
 	type Role,
 } from "./src/context/roles.ts";
-import { keep as keepBrief } from "./src/core/journal.ts";
 import { degraded, restartOf, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
 import { endByHost, rollbackByHost } from "./src/core/host.ts";
 import { hold, type Hold } from "./src/seating/hold.ts";
-import { agree, GAME_TYPES, lobby, seatOrder, type Agreement, type Lobby } from "./src/seating/lobby.ts";
-import { hostTable, type Hosted, type Hosting } from "./src/seating/host.ts";
-import { follow, join as joinTable, type Guest } from "./src/seating/guest.ts";
-import type { Briefing, Result, State, Working } from "./src/seating/protocol.ts";
-import { aiPlayer, seatBrief, setupWork } from "./src/context/sit.ts";
-import { startingIntent } from "./src/context/plan.ts";
-import { bill, tally as newTally } from "./src/context/spend.ts";
-import type { Player } from "./src/core/player.ts";
-import type { Chronicle } from "./src/context/packet.ts";
+import { agree, GAME_TYPES, lobby, seatOf, seatOrder, type Agreement, type KeyFrom, type Lobby, type SeatSetup } from "./src/seating/lobby.ts";
 import { gameResult, report, preparationFailure, saveReport } from "./tools/game-report.ts";
 import { load, type Universe } from "./src/core/cards.ts";
 import { alpha, deck, seatLabels } from "./src/core/decks.ts";
@@ -122,22 +113,40 @@ function universe(format: string): Universe {
 	throw new Error(`No card list for ${format}. Run /magic cards ${format}.`);
 }
 
-/** Every role resolved for one seat, or for the table when no seat is named. */
-async function roster(ctx: ExtensionContext, seat?: SeatId): Promise<Cast[]> {
-	if (typeof ctx.modelRegistry.getAvailableOfType !== "function") {
+/** The provider a seat's own key is for. */
+const OPENROUTER = "openrouter";
+/** The roles a seat chooses for itself; the judge and the commentator are the table's. */
+const SEAT_ROLES: Role[] = ["decide", "pregame", "strategy"];
+
+/**
+ * Every role resolved for one seat, or for the table when no seat is named:
+ * the roster file's, then the seat's own choices. A seat paying with its own
+ * OpenRouter key may name any OpenRouter model, not only those Pi's own
+ * credentials reach.
+ */
+async function roster(ctx: ExtensionContext, seat?: SeatId, chosen: Record<string, string> = {}, ownKey = false): Promise<Cast[]> {
+	const registry = ctx.modelRegistry;
+	if (typeof registry.getAvailableOfType !== "function") {
 		throw new Error("Magic requires Pi 1.0 or newer for classifier models. This repo's CLI is node node_modules/@earendil-works/pi-coding-agent/dist/cli.js -e ./index.ts.");
 	}
-	return cast(rosterFor(loadCrew(ROSTER), seat), {
-		chat: ctx.modelRegistry.getAvailable(),
-		classifiers: await ctx.modelRegistry.getAvailableOfType("classifier"),
+	const unique = <T extends { provider: string; id: string }>(models: readonly T[]) => [...new Map(models.map((one) => [`${one.provider}/${one.id}`, one])).values()];
+	return cast({ ...rosterFor(loadCrew(ROSTER), seat), ...chosen }, {
+		chat: unique([...registry.getAvailable(), ...ownKey ? registry.getAll?.().filter((one) => one.provider === OPENROUTER) ?? [] : []]),
+		classifiers: unique([...await registry.getAvailableOfType("classifier"), ...ownKey ? registry.getModelsOfType?.("classifier", OPENROUTER) ?? [] : []]),
 	});
 }
 
-/** What a game needs from Pi: one classifier call and one chat call, with a seat's own key for a provider when it has one. */
-const inference = (ctx: ExtensionContext, keys: Record<string, string> = {}): Inference => ({
-	classify: (model, request, options) => ctx.modelRegistry.classify(model, request, { ...options, ...(keys[model.provider] ? { apiKey: keys[model.provider] } : {}) }),
-	stream: (model, context, options) =>
-		ctx.modelRegistry.streamSimple(model, context as never, { ...options, ...(keys[model.provider] ? { apiKey: keys[model.provider] } : {}) } as never) as never,
+/**
+ * What a game needs from Pi: one classifier call and one chat call, with a
+ * seat's own key for a provider when it has one. The keys are read at each
+ * call, so a player can give theirs after a game is resumed.
+ */
+const inference = (ctx: ExtensionContext, keys: () => Record<string, string> = () => ({})): Inference => ({
+	classify: (model, request, options) => { const key = keys()[model.provider]; return ctx.modelRegistry.classify(model, request, { ...options, ...(key ? { apiKey: key } : {}) }); },
+	stream: (model, context, options) => {
+		const key = keys()[model.provider];
+		return ctx.modelRegistry.streamSimple(model, context as never, { ...options, ...(key ? { apiKey: key } : {}) } as never) as never;
+	},
 });
 
 const slug = (text: string) => text.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase();
@@ -241,7 +250,7 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(
 		ctx: ExtensionContext,
-		from: { seed: string; decks?: string[]; alpha?: true; setAs?: SeatId[]; remote?: Record<SeatId, Player>; clock?: number | null; looks?: Look[]; background?: string; colors?: Colors } | { resume: string },
+		from: { seed: string; decks?: string[]; alpha?: true; seats?: SeatSetup[]; clock?: number | null; background?: string; colors?: Colors } | { resume: string },
 	): Promise<{ opened: Table; sitting: Seated }> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
@@ -280,7 +289,11 @@ export default function (pi: ExtensionAPI) {
 				id: from.seed,
 				format: standard.name,
 				seed: from.seed,
-				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck, ...(from.setAs ? { setAs: from.setAs[at.id]! } : {}), ...from.looks?.[at.id] })),
+				seats: opened.seats.map((at) => {
+					const setup = from.seats?.[at.id];
+					return { id: at.id, name: at.name, deck: at.deck, ...setup && { setAs: setup.setAs ?? at.id, ...setup.look, pilot: setup.pilot, key: setup.key,
+						...Object.keys(setup.models).length ? { models: setup.models } : {} } };
+				}),
 				...(from.clock ? { clock: from.clock } : {}),
 				...(from.background ? { background: from.background } : {}),
 				...(from.colors ? { colors: from.colors } : {}),
@@ -292,14 +305,13 @@ export default function (pi: ExtensionAPI) {
 		}
 
 		const began = Date.now();
-		// A seat's roster and keys belong to the seat the host set up, which a coin flip may have moved.
-		const setAs = (at: SeatId) => header.seats[at]?.setAs ?? at;
-		const sitting = await seatTable(opened, (at) => roster(ctx, setAs(at)), inference(ctx), cards, {
+		// A seat's roster, choices and keys belong to the seat the host set up, which a coin flip may have moved.
+		const setAs = (at: SeatId) => header.seats[at]?.setAs ?? at, key = (at: SeatId) => (header.seats[at]?.key ?? "game") as KeyFrom;
+		const sitting = await seatTable(opened, (at) => roster(ctx, setAs(at), header.seats[at]?.models, key(at) !== "game"), inference(ctx), cards, {
 			format: standard.name,
 			reusePackages: !resuming,
 			packageNotice: (message) => ctx.ui.notify(message, "warning"),
-			seatInference: (at) => inference(ctx, seatKeys(loadCrew(ROSTER), setAs(at))),
-			...("remote" in from && from.remote ? { remote: from.remote } : {}),
+			seatInference: (at) => inference(ctx, keysOf(setAs(at), key(at))),
 			journal,
 			// The rules are already loaded for the replay check, so the dialer costs
 			// nothing to switch on: a seat may look a rule up mid decision.
@@ -395,26 +407,61 @@ export default function (pi: ExtensionAPI) {
 			readRoster(parts.filter((part) => ROLES[part.role].whose === whose));
 		const lines = [
 			`Roster in ${ROSTER}. Edit it there, or with /magic models <role> <pattern> [seat].`,
+			`A table being set takes each seat's own choices: /magic seat <n> model <role> <pattern>.`,
 			`/magic models why says what each default was chosen for.`,
 		];
 		const keys = loadCrew(ROSTER).keys ?? {};
 		for (const at of seats) {
 			// The roster file names seats as the host set them up; a coin flip may have moved one to another chair.
-			const setAs = (table && games.get(table)?.header.seats[at.id]?.setAs) ?? at.id;
-			lines.push("", `Seat ${at.id}, ${at.name}${setAs !== at.id ? ` (set up as seat ${setAs})` : ""}:`, ...mine(await roster(ctx, setAs), "seat"));
+			const setAs = (table && games.get(table)?.header.seats[at.id]?.setAs) ?? at.id, setup = host?.lobby.seats[at.id];
+			lines.push("", `Seat ${at.id}, ${at.name}${setAs !== at.id ? ` (set up as seat ${setAs})` : ""}:`, ...mine(await roster(ctx, setAs, setup?.models, !!setup && setup.key !== "game"), "seat"));
 			for (const [provider, named] of Object.entries(keys[String(setAs)] ?? {}))
 				lines.push(`  ${provider} calls use this seat's key from ${named}${process.env[named.replace(/^\$/, "")] ? "" : ", which is not set"}.`);
+			if (setup && setup.key !== "game") lines.push(`  ${OPENROUTER} calls use ${keyText(setup)}.`);
 		}
 		lines.push("", "The table:", ...mine(await roster(ctx), "table"));
 		ctx.ui.notify(lines.join("\n"), "info");
 	}
 
 	/**
-	 * The table the host is running: its lobby, the hold on a game in play, and
-	 * the game's run. The host is never a seat, so nothing here answers a
-	 * decision; the host's view is the spectator's.
+	 * The table the host is running: its lobby, the hold on a game in play, the
+	 * game's run, and each seat's pilot over its AI once a game is seated. The
+	 * keys players gave and the agreements put to them are kept here, never in
+	 * the lobby, the journal or a file.
 	 */
-	let host: { lobby: Lobby; hold?: Hold; game?: Promise<void>; ticker?: ReturnType<typeof setInterval>; feed: string[]; wire?: Hosted; asking?: string } | null = null;
+	type Hosting = {
+		lobby: Lobby; hold?: Hold; game?: Promise<void>; ticker?: ReturnType<typeof setInterval>; feed: string[]; asking?: string;
+		/** Each seat's pilot over its AI while a game is seated, by table seat. */
+		pilots?: Record<SeatId, Person>;
+		/** The agreement a seat's player has been asked and not answered, by seat code. */
+		agreeing: Map<string, { what: Agreement; settle(yes: boolean): void }>;
+		/** OpenRouter keys players gave, by the seat as set up. */
+		keys: Map<SeatId, string>;
+		/** The seat this terminal pilots, by its code. */
+		piloting?: string;
+	};
+	let host: Hosting | null = null;
+	const hosting = (lobby: Lobby): Hosting => ({ lobby, feed: [], agreeing: new Map(), keys: new Map() });
+	/** A table replaced or closed: whatever it was asking its players goes unanswered. */
+	const dismiss = (old: Hosting | null) => { for (const one of old?.agreeing.values() ?? []) one.settle(false); old?.agreeing.clear(); };
+
+	/**
+	 * A seat's keys by provider: the roster file's for the seat as set up, then
+	 * the OpenRouter key its setup names, read at each call. A seat agreed to pay
+	 * with its own key never falls back to the game's.
+	 */
+	function keysOf(setAs: SeatId, from: KeyFrom): () => Record<string, string> {
+		const named = seatKeys(loadCrew(ROSTER), setAs);
+		if (from === "game") return () => named;
+		return () => {
+			const key = from === "player" ? host?.keys.get(setAs) : process.env[from.slice(1)];
+			if (!key) throw new Error(from === "player" ? `The player at the seat set up as seat ${setAs} has not given their OpenRouter key.` : `${from} is not set.`);
+			return { ...named, [OPENROUTER]: key };
+		};
+	}
+	/** Whose key a seat's OpenRouter calls use, in words. */
+	const keyText = (setup: SeatSetup, at?: number) => setup.key === "game" ? "the game's key" : setup.key === "player"
+		? `its player's own key${host?.keys.has(setup.setAs ?? at ?? -1) ? "" : ", not given yet"}` : `the key in ${setup.key}${process.env[setup.key.slice(1)] ? "" : ", which is not set"}`;
 
 	/** The host's status widget: the game type, the stage, each seat, and who the table is waiting on. */
 	function showTable(ctx: ExtensionContext) {
@@ -422,10 +469,17 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setWidget("magic-table", host ? tableLines() : undefined);
 	}
 
-	/** Something every chair may see changed: the stage, a recap, the outcome. */
+	/** Something every seat may see changed: the stage, a recap, the outcome. */
 	function told(ctx: ExtensionContext) {
 		showTable(ctx);
-		host?.wire?.changed();
+	}
+
+	/** Who pilots a seat now, in words. */
+	function pilotText(one: SeatSetup, at: number): string {
+		const mode = host?.pilots?.[at]?.mode(), here = host?.piloting === one.code ? ", from this terminal" : "";
+		if (!mode) return `${one.pilot === "ai" ? "its AI" : "a player"}${here}`;
+		if (mode === "auto") return one.pilot === "ai" && !here ? "its AI" : `its AI, handed over by its pilot${here}`;
+		return `${one.pilot === "ai" ? "a player, taken over from its AI" : "a player"}${here}, ${mode} mode`;
 	}
 
 	function tableLines(): string[] {
@@ -436,17 +490,17 @@ export default function (pi: ExtensionAPI) {
 		setup.seats.forEach((one, at) => {
 			const life = view?.players?.find((facts) => facts.id === at)?.life;
 			const moved = one.setAs !== undefined && one.setAs !== at ? ` (set up as seat ${one.setAs})` : "";
-			const guest = one.by === "remote" ? host!.wire?.guest(one.setAs ?? at) : undefined;
-			const who = one.by === "ai" ? "model" : guest ? `guest ${guest.name}` : "open, waiting for a guest";
-			lines.push(`  Seat ${at}${moved}  ${table?.seats[at]?.name ?? one.deck}  ${who}${life !== undefined ? `  life ${life}` : ""}${setup.stage === "setting" ? `  · ${named(one.look.avatar)} on ${named(one.look.background)}${tinted(one.look.colors)}` : ""}`);
+			const chosen = Object.entries(one.models).map(([role, pattern]) => `${role} ${pattern}`);
+			const setting = setup.stage === "setting" ? `  · ${named(one.look.avatar)} on ${named(one.look.background)}${tinted(one.look.colors)}` +
+				`${chosen.length ? ` · ${chosen.join(", ")}` : ""}${one.key !== "game" ? ` · ${keyText(one, at)}` : ""}` : "";
+			lines.push(`  Seat ${at}${moved}  ${table?.seats[at]?.name ?? one.deck}  ${pilotText(one, at)}${life !== undefined ? `  life ${life}` : ""}${setting}`);
 		});
 		if (setup.stage === "setting") lines.push(`  The host's pictures: ${named(setup.background)}${tinted(setup.colors)}. /magic seat <n> avatar|background|colors, /magic background, /magic colors`);
 		if (view?.window.kind === "turn") lines.push(`  Turn ${view.window.turn}, ${table!.seats[view.window.active]?.name}'s ${view.window.step.replace(/-/g, " ")}. Version ${table!.ledger.length}.`);
 		const asking = holding?.asking();
-		if (asking) lines.push(`  Waiting on seat ${asking.seat} for ${Math.round((Date.now() - asking.since) / 1000)}s${asking.clock ? ` of its ${asking.clock}s` : ""}.`);
-		else if (setup.stage === "setting" && setup.seats.some((one) => one.by === "remote")) lines.push(`  Clock: ${setup.clock ? `${setup.clock}s a decision for guest seats, then they concede` : "off"}. /magic clock <seconds|off>`);
+		if (asking) lines.push(`  Waiting on seat ${asking.seat} for ${Math.round((Date.now() - asking.since) / 1000)}s${asking.clock ? ` of its player's ${asking.clock}s` : ""}.`);
+		else if (setup.stage === "setting" && setup.seats.some((one) => one.pilot === "player")) lines.push(`  Clock: ${setup.clock ? `${setup.clock}s a decision for a player, then their seat concedes` : "off"}. /magic clock <seconds|off>`);
 		else if (host.asking) lines.push(`  ${host.asking}`);
-		// Pi shows ten lines of a text widget: the status, the last few public lines, and what the host can do next.
 		// Pi shows a text widget's first ten lines: a watched game gives one feed line to its address.
 		const watched = watchUrl() && table && games.get(table) ? `${watchUrl()}/games/${basename(games.get(table)!.path, ".jsonl")}/` : undefined;
 		if (watched && setup.stage !== "setting") lines.push(`  Watch: ${watched}`);
@@ -458,8 +512,8 @@ export default function (pi: ExtensionAPI) {
 	/** Public lines the host's widget keeps in view; the turn recaps also go to the chat. */
 	const FEED = 4;
 	const NEXT: Record<Lobby["stage"], string> = {
-		setting: "/magic seat <n> deck <name|random> | open | ai, /magic first <coin|n>, then /magic start asks every seat to prepare.",
-		preparing: "Decks register, card assessments load and model seats write their briefs.",
+		setting: "/magic seat <n> deck|ai|player|model|key, /magic first <coin|n>, then /magic start asks every seat to prepare.",
+		preparing: "Decks register, card assessments load and seats write their briefs.",
 		prepared: "/magic begin asks every seat to begin: the hands are dealt and the mulligans start.",
 		playing: "/magic pause | continue | rollback <version> [why] | end [why]",
 		over: "/magic host sets a new table. /magic rollback <version> rewinds this one; /magic resume seats it again.",
@@ -471,7 +525,7 @@ export default function (pi: ExtensionAPI) {
 	/** The defaults a look can take, for a command given no value. */
 	const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"}: ${defaults(kind).join(", ")}. Or random, or an http(s) image URL.`;
 
-/** Admitted alpha decks: legal main decks whose cards all have standing assessments. */
+	/** Admitted alpha decks: legal main decks whose cards all have standing assessments. */
 	const pool = (ctx: ExtensionContext) =>
 		admittedAlpha(universe(standard.name), { notice: (message) => ctx.ui.notify(message, "warning") }).map((one) => one.name);
 
@@ -481,7 +535,6 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function setTable(ctx: ExtensionContext, rest: string) {
 		if (running) { ctx.ui.notify("A game is in play. /magic end it, or /magic pause and leave it, first.", "warning"); return; }
-		if (guest) { ctx.ui.notify("This Pi is a guest at another table. /magic leave first.", "warning"); return; }
 		const decks = pool(ctx);
 		const random = () => decks[Math.floor(Math.random() * decks.length)]!;
 		let chosen: string[];
@@ -498,90 +551,39 @@ export default function (pi: ExtensionAPI) {
 		const unknown = chosen.filter((name) => !decks.includes(name));
 		if (unknown.length) { ctx.ui.notify(`Not an admitted deck: ${unknown.join(", ")}. The decks are: ${decks.join(", ")}.`, "warning"); return; }
 		await Promise.all(Object.values(seated?.players ?? {}).map((player) => player.close()));
-		await host?.wire?.close();
-		host = { lobby: lobby(chosen), feed: [] };
+		dismiss(host);
+		host = hosting(lobby(chosen));
 		table = null; seated = null;
+		seatTools(false);
 		showTable(ctx);
-		ctx.ui.notify(`Table set: ${chosen.join(" vs ")}. Both seats are model seats. ${NEXT.setting}`, "info");
+		showSeat(ctx);
+		ctx.ui.notify(`Table set: ${chosen.join(" vs ")}. Both seats are piloted by their AI. ${NEXT.setting}`, "info");
 	}
 
 	/**
-	 * Open a seat to a guest: the table's server starts if it is not running, and
-	 * the seat gets one invite. Whoever presents it first takes the seat, with
-	 * its own player and models.
+	 * Ask every seat at once. A seat its AI pilots agrees when asked, as does one
+	 * this terminal pilots; a player answers from their seat.
 	 */
-	async function openSeat(ctx: ExtensionContext, at: SeatId) {
-		const ours = host!;
-		ours.wire ??= await hostTable({ game: GAME_TYPES[ours.lobby.game].name, view: (setAs) => chairView(ours, setAs), work: (setAs, post) => chairWork(ours, setAs, post), brief: (setAs, post) => chairBrief(ours, setAs, post),
-			claimed: (setAs, name) => { showTable(ctx); ctx.ui.notify(`${name} took the seat set up as seat ${setAs}.`, "info"); } });
-		const one = ours.lobby.seats[at]!;
-		ours.lobby.seats[at] = { ...one, by: "remote" };
-		const { invite } = ours.wire.open(at, one.deck);
-		showTable(ctx);
-		ctx.ui.notify(`Seat ${at} (${one.deck}) is open. On the same machine, the guest types:\n/magic join ${invite}`, "info");
-	}
-
-	/** The table seat a chair answers once a coin flip has ordered the table, or undefined before. */
-	const chairSeat = (ours: NonNullable<typeof host>, setAs: SeatId) => ours.lobby.stage === "setting" ? undefined : ours.lobby.seats.findIndex((one, at) => (one.setAs ?? at) === setAs);
-
-	/** What a chair's guest sees beside its own frames: the stage and what is public. Never another seat's view. */
-	function chairView(ours: NonNullable<typeof host>, setAs: SeatId): ReturnType<Hosting["view"]> {
-		const seat = chairSeat(ours, setAs), decks = ours.lobby.seats.map((one) => one.deck), names = seatLabels(decks);
-		const game = host === ours ? table : null;
-		return {
-			stage: ours.lobby.stage, ...(ours.hold?.paused() ? { paused: true as const } : {}),
-			...(ours.lobby.clock ? { clock: ours.lobby.clock } : {}),
-			...((asking) => asking?.clock && asking.seat === seat && !ours.hold?.paused() ? { remaining: Math.max(0, asking.since + asking.clock * 1000 - Date.now()) } : {})(ours.hold?.asking()),
-			...(seat !== undefined && seat >= 0 ? { seat, seats: (game?.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck })) ?? decks.map((name, at) => ({ id: at, name: names[at]!, deck: alpha(deck(name)) })))
-				.map((one) => ({ ...one, ...ours.lobby.seats[one.id]?.look })) } : {}),
-			recaps: (host === ours ? seated?.chronicle.recaps ?? [] : []).map((one) => ({ ...one })),
-			// Known once preparation has seated the table's roles.
-			...(game && host === ours && seated ? { judge: !!seated.judge } : {}),
-			...(game?.outcome ? { outcome: game.outcome } : {}),
-			// Before play there is no loop to project a frame: the chair's own equipment, for its setup edits.
-			...(game && seat !== undefined && seat >= 0 && ours.lobby.stage === "prepared" ? { frame: workFrame(game, seat) } : {}),
-		};
-	}
-
-	/** A guest's setup edit to its own seat's equipment, while the game waits. */
-	function chairWork(ours: NonNullable<typeof host>, setAs: SeatId, post: Working): Result {
-		const seat = chairSeat(ours, setAs);
-		if (host !== ours || !table || running || seat === undefined || seat < 0 || ours.lobby.stage !== "prepared") return { ok: false, refused: "not-now", message: "Seat edits wait for a prepared table that is not playing." };
-		try { editWork(table, seat, commands(post.tools), post.actionId, post.revision); }
-		catch (error) { return { ok: false, refused: "bad-request", message: error instanceof Error ? error.message : String(error) }; }
-		const journal = games.get(table);
-		if (journal) saveGame(journal, table);
-		host.wire?.changed();
-		return { ok: true };
-	}
-
-	/** A guest's pregame brief, journaled like any seat's preparation so a clone or resume carries it. */
-	function chairBrief(ours: NonNullable<typeof host>, setAs: SeatId, post: Briefing): Result {
-		const seat = chairSeat(ours, setAs);
-		if (host !== ours || !table || running || seat === undefined || seat < 0 || ours.lobby.stage !== "prepared" || table.ledger.length)
-			return { ok: false, refused: "not-now", message: "A brief is kept before the first decision of a prepared table." };
-		const made = post?.brief as { version?: number; seat?: number } | undefined;
-		if (made?.version !== 3 || made.seat !== seat) return { ok: false, refused: "bad-request", message: `A brief for seat ${seat} in the current shape.` };
-		const journal = games.get(table);
-		if (journal) keepBrief(journal, seat, made);
-		return { ok: true };
-	}
-
-	/** Ask every seat at once: a model seat agrees when asked, a guest answers when it answers. */
-	async function askSeats(ctx: ExtensionContext, ours: NonNullable<typeof host>, what: Agreement): Promise<boolean> {
+	async function askSeats(ctx: ExtensionContext, ours: Hosting, what: Agreement): Promise<boolean> {
 		ours.asking = `Asking every seat to ${what}.`;
 		told(ctx);
-		const declined = await agree(ours.lobby, what, async (at, one) => one.by === "ai" || !!await ours.wire?.open(one.setAs ?? at, one.deck).chair.request(what));
+		const declined = await agree(ours.lobby, what, async (_at, one) => one.pilot === "ai" || ours.piloting === one.code ||
+			new Promise<boolean>((settle) => { ours.agreeing.set(one.code, { what, settle }); told(ctx); }));
 		delete ours.asking;
 		if (declined.length) ctx.ui.notify(`Seat ${declined.join(", ")} did not agree to ${what}.`, "warning");
 		return host === ours && !declined.length;
 	}
 
+	/** A key the host named for a seat that this Pi's environment does not have. */
+	const unset = (ours: Hosting) => ours.lobby.seats.flatMap((one, at) => one.key.startsWith("$") && !process.env[one.key.slice(1)] ? [`Seat ${at}'s key names ${one.key}, which is not set.`] : []);
+
 	/** First agreement: every seat agrees to prepare. The coin flip orders the seats, then preparation runs beside the session. */
 	async function startTable(ctx: ExtensionContext) {
 		if (!host || host.lobby.stage !== "setting") { ctx.ui.notify(host ? `The table is ${host.lobby.stage}.` : "No table. /magic host sets one.", "warning"); return; }
-		const ours = host, setup = ours.lobby;
-		if (setup.seats.some((one, at) => one.by === "remote" && !ours.wire?.guest(at))) ctx.ui.notify("An open seat has no guest yet; the agreement waits for one.", "info");
+		const ours = host, setup = ours.lobby, missing = unset(ours);
+		if (missing.length) { ctx.ui.notify(missing.join(" "), "warning"); return; }
+		const waiting = setup.seats.flatMap((one, at) => one.pilot === "player" && ours.piloting !== one.code ? [at] : []);
+		if (waiting.length) ctx.ui.notify(`The agreement waits for the player at seat ${waiting.join(" and ")}.`, "info");
 		void (async () => {
 			if (!await askSeats(ctx, ours, "prepare") || setup.stage !== "setting") return showTable(ctx);
 			const { order, by } = seatOrder(setup);
@@ -593,10 +595,8 @@ export default function (pi: ExtensionAPI) {
 			setup.stage = "preparing";
 			told(ctx);
 			ctx.ui.notify(`Every seat agreed to prepare. ${by === "coin" ? "The coin flip" : "The host"} put ${decks[0]} on the play. Preparing ${id}.`, "info");
-			const remote = Object.fromEntries(setup.seats.flatMap((one, at) => one.by === "remote" ? [[at, ours.wire!.open(one.setAs!, one.deck).chair.player]] : []));
 			try {
-				const { opened, sitting } = await open(ctx, { seed: id, decks, alpha: true, setAs: order, remote, ...(Object.keys(remote).length ? { clock: setup.clock } : {}),
-					looks: setup.seats.map((one) => one.look), background: setup.background, ...(setup.colors ? { colors: setup.colors } : {}) });
+				const { opened, sitting } = await open(ctx, { seed: id, decks, alpha: true, seats: setup.seats, clock: setup.clock, background: setup.background, ...(setup.colors ? { colors: setup.colors } : {}) });
 				// A table replaced while this one prepared keeps its own game: this preparation is closed, not installed.
 				if (host !== ours) { await Promise.all(Object.values(sitting.players).map((player) => player.close())); return; }
 				table = opened; seated = sitting;
@@ -610,17 +610,23 @@ export default function (pi: ExtensionAPI) {
 		})();
 	}
 
-	/** Second agreement: every seat agrees to begin, and the game plays beside the session so the host can still direct it. */
+	/**
+	 * Second agreement: every seat agrees to begin, and the game plays beside the
+	 * session so the host can still direct it. Each seat's AI goes under its
+	 * pilot: played as it picks for a seat its AI pilots, shown as suggestions to
+	 * a player. A player's clock runs while they are shown a question.
+	 */
 	async function beginTable(ctx: ExtensionContext) {
 		if (!host || host.lobby.stage !== "prepared" || !table || !seated) { ctx.ui.notify(host ? `The table is ${host.lobby.stage}, not prepared.` : "No table. /magic host sets one.", "warning"); return; }
-		const ours = host, game = table, sitting = seated;
+		const ours = host, game = table, sitting = seated, missing = unset(ours);
+		if (missing.length) { ctx.ui.notify(missing.join(" "), "warning"); return; }
 		void (async () => {
 			if (!await askSeats(ctx, ours, "begin") || ours.lobby.stage !== "prepared") return showTable(ctx);
 			const holding = hold(restartOf(game, universe(standard.name)), (direction, now, refused) => {
 				if (refused) { ctx.ui.notify(`The table refused ${direction.do}: ${refused} Play goes on.`, "warning"); return; }
 				if (direction.do === "timeout") {
 					ours.feed.push(`Seat ${direction.seat} ran out of time on the clock and conceded.`);
-					ctx.ui.notify(`Seat ${direction.seat} did not answer within ${ours.lobby.clock}s and conceded.`, "warning");
+					ctx.ui.notify(`Seat ${direction.seat}'s player did not answer within ${ours.lobby.clock}s, and the seat conceded.`, "warning");
 					return;
 				}
 				if (direction.do !== "rollback") return;
@@ -629,19 +635,27 @@ export default function (pi: ExtensionAPI) {
 				const board = feedFor(ctx, now);
 				board.take(`rolled-back-to-${direction.to}`);
 			});
-			// The clock is for guest seats: the host's own models are bounded by their call limits.
-			const clocked = (at: number) => ours.lobby.seats[at]?.by === "remote" && ours.lobby.clock ? ours.lobby.clock : undefined;
-			sitting.players = Object.fromEntries(Object.entries(sitting.players).map(([id, player]) => [id, holding.seat(player, Number(id), clocked(Number(id)))]));
-			Object.assign(ours, { hold: holding, ticker: setInterval(() => showTable(ctx), 5_000) });
+			const pilots: Record<SeatId, Person> = {};
+			for (const [id, ai] of Object.entries(sitting.players)) {
+				const at = Number(id), setup = ours.lobby.seats[at]!;
+				pilots[at] = person(game.seats[at]!.name, ai, setup.pilot === "player" ? "suggest" : "auto", (asking) => {
+					holding.clock(at, asking ? ours.lobby.clock ?? undefined : undefined);
+					if (host === ours && ours.piloting === ours.lobby.seats[at]?.code) showSeat(ctx);
+				});
+			}
+			ours.pilots = pilots;
+			sitting.players = Object.fromEntries(Object.entries(pilots).map(([id, one]) => [id, holding.seat(one.player, Number(id))]));
+			Object.assign(ours, { hold: holding, ticker: setInterval(() => { showTable(ctx); if (ours.piloting) showSeat(ctx); }, 5_000) });
 			ours.lobby.stage = "playing";
 			told(ctx);
+			showSeat(ctx);
 			ctx.ui.notify(`Every seat agreed to begin. ${game.ledger.length ? "Play goes on." : "Dealing; the mulligans come first."}`, "info");
 			ours.game = playOn(ctx, game, sitting, ours);
 		})();
 	}
 
 	/** The game's run, the board pictures and the report. Never awaited by a command. */
-	async function playOn(ctx: ExtensionContext, opened: Table, sitting: Seated, ours: NonNullable<typeof host>) {
+	async function playOn(ctx: ExtensionContext, opened: Table, sitting: Seated, ours: Hosting) {
 		const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
 		running = true;
 		const board = feedFor(ctx, opened);
@@ -709,32 +723,32 @@ export default function (pi: ExtensionAPI) {
 		table = opened; seated = sitting;
 		const header = games.get(opened)?.header;
 		const setup = lobby(opened.seats.map((one) => one.deck.name));
-		// A game saved before tables had looks is dealt new ones for this session.
-		host = { lobby: { ...setup, seats: setup.seats.map((one, at) => {
+		// The seats as the game recorded them, with new codes. A game saved before tables had looks is dealt new ones for this session.
+		dismiss(host);
+		host = hosting({ ...setup, seats: setup.seats.map((one, at) => {
 			const saved = header?.seats[at];
-			return { ...one, setAs: saved?.setAs ?? at, look: { avatar: saved?.avatar ?? one.look.avatar, background: saved?.background ?? one.look.background, ...(saved?.colors ? { colors: saved.colors } : {}) } };
-		}), background: header?.background ?? setup.background, ...(header?.colors ? { colors: header.colors } : {}), stage: "prepared" }, feed: [] };
+			return { ...one, setAs: saved?.setAs ?? at, pilot: saved?.pilot ?? "ai", models: saved?.models ?? {}, key: (saved?.key ?? "game") as KeyFrom,
+				look: { avatar: saved?.avatar ?? one.look.avatar, background: saved?.background ?? one.look.background, ...(saved?.colors ? { colors: saved.colors } : {}) } };
+		}), clock: header?.clock ?? setup.clock, background: header?.background ?? setup.background, ...(header?.colors ? { colors: header.colors } : {}), stage: "prepared" });
+		seatTools(false);
 		showTable(ctx);
+		showSeat(ctx);
 		ctx.ui.notify(`Resumed ${id} at version ${opened.ledger.length}. ${opened.ledger.length ? `/magic begin asks every seat to play on from version ${opened.ledger.length}.` : NEXT.prepared}`, "info");
 	}
 
 	/**
-	 * This Pi as a guest at another host's table: the claimed chair, the seat's
-	 * player once it has prepared, and the loop that follows the chair. The seat
-	 * plays with this Pi's models and keys, under the seat the host set it up as;
-	 * the host never runs them and never pays for them.
+	 * Piloting a seat from this terminal. The host holds every seat's code, so it
+	 * can play one itself: the seat's panel shows the board in words from the
+	 * seat's own view, a number, ok or p answers its question, and the Pi chat
+	 * agent is that seat's assistant. The host's start and begin agree for it.
 	 */
-	type Seating = { client: Guest; leaving: AbortController; state?: State; player?: Player; preparing?: Promise<boolean>; spend: ReturnType<typeof newTally>; gaps: string[];
-		/** A person at this seat, with the autopilot behind them; absent while the seat prepares. */
-		person?: Person; mode: Mode; pictured?: string;
-		/** This Pi's own choice of background and frame colours for the seat's pictures, over the host's. */
-		background?: string; colors?: Colors };
-	let guest: Seating | null = null;
+	const pilotedAt = () => host?.piloting === undefined ? undefined : seatOf(host.lobby, host.piloting);
+	const piloted = (): Person | undefined => { const at = pilotedAt(); return at === undefined ? undefined : host?.pilots?.[at]; };
 
-	// A component rather than lines: Pi cuts a text widget at ten lines, and a person's seat needs the whole question.
+	// A component rather than lines: Pi cuts a text widget at ten lines, and a seat's panel needs the whole question.
 	function showSeat(ctx: ExtensionContext) {
 		if (!ctx.hasUI) return;
-		if (!guest) { ctx.ui.setWidget("magic-seat", undefined); return; }
+		if (pilotedAt() === undefined) { ctx.ui.setWidget("magic-seat", undefined); return; }
 		const lines = seatLines();
 		ctx.ui.setWidget("magic-seat", (_tui, theme) => {
 			const box = new Container();
@@ -743,146 +757,40 @@ export default function (pi: ExtensionAPI) {
 		});
 	}
 
-	/** The seat's own picture, once a turn and at the end, drawn from its own frame: what this seat may see. */
-	function pictureSeat(ctx: ExtensionContext, ours: Seating, state: State) {
-		const frame = state.frame, seat = state.seat, at = frame?.view.window.kind === "turn" ? `turn-${frame.view.window.turn}` : state.outcome ? "final" : undefined;
-		if (!ctx.hasUI || !frame || seat === undefined || !at || ours.pictured === at) return;
-		ours.pictured = at;
-		const seats = (state.seats ?? []).map((one) => ({ id: one.id, name: one.name, deck: one.deck.name }));
-		// Colours set for the seat go with the background set for it; a background this Pi chose brings its own.
-		const mine = state.seats?.find((one) => one.id === seat), background = ours.background ?? mine?.background, colors = ours.colors ?? (ours.background ? undefined : mine?.colors);
-		const dress: Dress = { avatars: Object.fromEntries((state.seats ?? []).flatMap((one) => one.avatar ? [[one.id, one.avatar]] : [])), ...(background ? { background } : {}), ...(colors ? { colors } : {}) };
-		void (renderer ??= cardboardRenderer(artIds(), join(CACHE, "art"))).then(async (drawing) => {
-			if (!drawing) return;
-			const picture = await boardPicture(drawing, boardSnapshot(frame.view, seats, seat), dress), png = picture.png();
-			const path = join(GAMES, `guest-${ours.client.welcome.table}-seat-${seat}`, `${at}.webp`);
-			mkdirSync(dirname(path), { recursive: true });
-			writeFileSync(path, await picture.webp());
-			ctx.ui.setWidget("magic-board", (_tui, theme) => new Image(Buffer.from(png).toString("base64"), "image/png",
-				{ fallbackColor: (text) => theme.fg("dim", text) }, { maxWidthCells: 120, filename: path }));
-		}).catch((error) => ctx.ui.notify(`The seat's picture failed: ${error instanceof Error ? error.message : String(error)}`, "warning"));
+	/** What a seat may see now: its own projection of the table, never the table, and its player's clock when asked. */
+	function sittingOf(at: SeatId): Sitting {
+		const asking = host?.hold?.asking();
+		return { ...(table ? { frame: { seat: at, version: table.cursor.clock, view: project(table, at) } } : {}), seat: at,
+			seats: (table?.seats ?? []).map((one) => ({ id: one.id, name: one.name, deck: one.deck.name })),
+			...(asking?.seat === at && asking.clock ? { remaining: Math.max(0, asking.since + asking.clock * 1000 - Date.now()) } : {}) };
 	}
 
 	function seatLines(): string[] {
-		if (guest?.person && guest.state?.frame) {
-			const header = `Magic · seat ${guest.state.seat} at ${guest.client.welcome.game}${guest.state.paused ? " · paused by the host" : ""}${guest.state.judge ? " · a judge hears objections" : ""}`;
-			return [header, ...panel(guest.state, guest.person.mode(), guest.person.asking(), guest.person.stops()).map((line) => line.startsWith("  ") ? line : `  ${line}`),
-				"  /magic pass [turn] · /magic stops smart|all · /magic mode suggest|auto|manual · /magic concede · /magic leave"];
-		}
-		if (!guest) return ["Not seated. /magic join <invite> takes a chair at another Pi's table."];
-		const state = guest.state, me = state?.seats?.find((one) => one.id === state.seat);
-		const lines = [`Magic · a guest at ${guest.client.welcome.game} · ${state?.stage ?? "joining"}${state?.paused ? " · paused by the host" : ""}`];
-		if (me) lines.push(`  You are seat ${me.id}, ${me.name}, against ${state!.seats!.filter((one) => one !== me).map((one) => one.name).join(", ")}.`);
-		const view = state?.frame?.view;
-		if (view?.window.kind === "turn") lines.push(`  Turn ${view.window.turn}, ${view.window.step.replace(/-/g, " ")}. Life ${(view.players ?? []).map((one) => `${state!.seats?.[one.id]?.name ?? one.id} ${one.life}`).join(", ")}.`);
-		if (state?.judge) lines.push("  A judge hears objections at this table.");
-		if (state?.agreement) lines.push(`  The host asks every seat to ${state.agreement}.`);
-		else if (state?.ask) lines.push(`  Your seat is choosing.${state.remaining !== undefined ? ` About ${Math.round(state.remaining / 1000)}s left on the clock when asked; then it concedes.` : ""}`);
-		lines.push("  /magic leave gives up the chair.");
-		return lines;
+		const at = pilotedAt(), one = at === undefined ? undefined : host?.pilots?.[at];
+		if (at === undefined || !host) return ["This terminal pilots no seat. /magic pilot <n> takes one."];
+		const header = `Magic · piloting seat ${at}, ${table?.seats[at]?.name ?? host.lobby.seats[at]?.deck}${host.hold?.paused() ? " · paused by the host" : ""}${seated?.judge ? " · a judge hears objections" : ""}`;
+		if (!one) return [header, "  Not dealt yet. /magic start and /magic begin agree for this seat."];
+		return [header, ...panel(sittingOf(at), one.mode(), one.asking(), one.stops()).map((line) => line.startsWith("  ") ? line : `  ${line}`),
+			"  /magic pass [turn] · /magic stops smart|all · /magic mode suggest|auto|manual · /magic concede · /magic pilot off"];
 	}
 
 	/**
-	 * Take a chair at another Pi's table. A person plays it, with this Pi's
-	 * models as the autopilot behind them; `auto` hands the seat to the
-	 * autopilot from the start, and `manual` plays it without asking one. A
-	 * manual seat needs no decision model; its autopilot then only prepares.
-	 */
-	async function joinSeat(ctx: ExtensionContext, invite: string, mode: Mode = "suggest") {
-		if (host || guest) { ctx.ui.notify(host ? "This Pi is hosting a table. A host is never a seat; join from another Pi." : "This Pi already has a chair. /magic leave first.", "warning"); return; }
-		const client = await joinTable(invite, process.env.USER ?? "guest");
-		const ours: Seating = { client, leaving: new AbortController(), spend: newTally(), gaps: [], mode };
-		guest = ours;
-		const { setAs } = client.welcome;
-		const chronicle: Chronicle = { briefs: {}, recaps: [] };
-		ctx.ui.notify(`Joined ${client.welcome.game} as the seat set up as seat ${setAs}. This Pi's models play it. Waiting for the host.`, "info");
-		showSeat(ctx);
-
-		const cards = universe(standard.name), rules = loadRules(RULES);
-		let parts: Cast[] = [], seatInference = inference(ctx);
-		// The seat's own preparation, once the table is ordered: its brief from the public lists.
-		const prepare = async (state: State): Promise<boolean> => {
-			try {
-				const me = state.seats!.find((one) => one.id === state.seat)!, others = state.seats!.filter((one) => one.id !== state.seat);
-				parts = await roster(ctx, setAs);
-				seatInference = inference(ctx, seatKeys(loadCrew(ROSTER), setAs));
-				chronicle.briefs[me.id] = await seatBrief(me, others, parts, cards, seatInference, ours.spend, { format: standard.name, rules, cache: {} });
-				return true;
-			} catch (error) {
-				ctx.ui.notify(`This seat could not prepare: ${error instanceof Error ? error.message : String(error)}`, "error");
-				return false;
-			}
-		};
-
-		void follow(client, {
-			async agree(what, state) {
-				if (what === "prepare") return true;
-				ours.preparing ??= prepare(state);
-				if (!await ours.preparing || state.seat === undefined || ours.leaving.signal.aborted) return false;
-				// The player is made once the table is prepared, when it is known whether a judge hears objections.
-				const me = state.seats!.find((one) => one.id === state.seat)!;
-				let made: ReturnType<typeof aiPlayer>;
-				try {
-					made = aiPlayer(me, parts, seatInference, cards, { chronicle, tally: ours.spend, intent: startingIntent(me.id), judge: !!state.judge, rules,
-						undecided: ours.mode === "manual", onGap: (note) => void ours.gaps.push(note), onDial() {}, onPlanned() {} });
-				} catch (error) { ctx.ui.notify(`This seat cannot play: ${error instanceof Error ? error.message : String(error)}`, "error"); return false; }
-				if (!made.deciding) ctx.ui.notify("This Pi's roster has no decision model, so the person makes every choice; the autopilot only prepares cards.", "warning");
-				let work = state.frame?.view.work;
-				// A seat with card uses left to interpret needs its own strategy model: nobody else at the table will.
-				if (!made.planning && work?.packages?.some((pack) => pack.deferred?.length)) {
-					ctx.ui.notify("This seat's deck has card uses to interpret during play, and this Pi's roster has no strategy model. It declines to begin.", "warning");
-					await made.player.close();
-					return false;
-				}
-				// The host journals the brief, so a clone or resume of this game carries this seat's preparation.
-				const kept = await client.brief({ brief: chronicle.briefs[me.id] });
-				if (!kept.ok) ctx.ui.notify(`The host did not keep this seat's brief: ${kept.message ?? kept.refused}`, "warning");
-				for (const edit of made.planning ? setupWork(work, 0, me.id) : []) {
-					const done = await client.work({ tools: edit.tools, revision: work?.revision ?? 0, actionId: edit.actionId });
-					if (!done.ok) { ctx.ui.notify(`The host refused this seat's setup: ${done.message ?? done.refused}`, "warning"); await made.player.close(); return false; }
-					work = { ...work, revision: (work?.revision ?? 0) + 1 } as typeof work;
-				}
-				// Left while the setup was posted: the seat never sat, and its player stops.
-				if (ours.leaving.signal.aborted) { await made.player.close(); return false; }
-				ours.person = person(me.name, made.player, ours.mode, () => showSeat(ctx), made.deciding);
-				ours.player = ours.person.player;
-				seatTools(true);
-				return true;
-			},
-			player: () => ours.player,
-			seen(state) {
-				ours.state = state;
-				pictureSeat(ctx, ours, state);
-				chronicle.recaps.splice(0, chronicle.recaps.length, ...state.recaps.map((one) => ({ ...one })));
-				if (state.stage === "preparing" && state.seat !== undefined) ours.preparing ??= prepare(state);
-				showSeat(ctx);
-			},
-		}, ours.leaving.signal).then((outcome) => {
-			const seat = ours.state?.seat, result = outcome && seat !== undefined ? outcome.results[seat] : undefined;
-			const said = outcome ? `The game is over: this seat's result is ${result ?? "unknown"}.` : ours.state?.stage === "over" ? "The host's game stopped without a result." : "Left the table.";
-			ctx.ui.notify([said, ...bill(ours.spend.spent()), ...ours.gaps.map((gap) => `gap: ${gap}`)].join("\n"), "info");
-		}, (error) => ctx.ui.notify(`The seat stopped: ${error instanceof Error ? error.message : String(error)}`, "error")).finally(() => {
-			if (guest === ours) { guest = null; seatTools(false); }
-			showSeat(ctx);
-		});
-	}
-
-	/**
-	 * The seat assistant: the Pi chat agent at a person's seat. It reads only
-	 * what this seat may see, passes the person's words to the seat's
+	 * The seat assistant: the Pi chat agent at the seat this terminal pilots. It
+	 * reads only what this seat may see, passes the person's words to the seat's
 	 * autopilot, and answers the open question when the person names a choice.
-	 * The tools are active only while this Pi holds a person's seat.
+	 * The tools are active only while this terminal pilots a seat.
 	 */
 	const SEAT_TOOLS = ["magic_seat", "magic_choose", "magic_tell"];
 	const seatTools = (on: boolean) => pi.setActiveTools([...new Set([...pi.getActiveTools().filter((name) => !SEAT_TOOLS.includes(name)), ...(on ? SEAT_TOOLS : [])])]);
 	const seatedPerson = (): Person => {
-		if (!guest?.person) throw new Error("This Pi has no seat at a Magic table. /magic join <invite> takes one.");
-		return guest.person;
+		const seat = piloted();
+		if (!seat) throw new Error(pilotedAt() === undefined ? "This terminal pilots no Magic seat. /magic pilot <n> takes one." : "The seat this terminal pilots has no game in play yet.");
+		return seat;
 	};
 
 	/** What the assistant reads: the seat's panel, and the printed text of every card the seat can see. Nothing another seat hides. */
 	function seatReading(): string {
-		const seat = seatedPerson(), frame = seat.asking()?.frame ?? guest!.state?.frame;
+		const seat = seatedPerson(), frame = seat.asking()?.frame ?? sittingOf(pilotedAt()!).frame;
 		if (!frame) return "The game has not started; the seat has nothing to read yet.";
 		const cards = universe(standard.name).cards, names = [...new Set((frame.view.objects ?? []).flatMap((one) => !one.faceDown && one.card ? [one.card] : []))].sort();
 		return [...seatLines(), "", "Cards this seat can see:", ...names.map((name) => {
@@ -893,7 +801,7 @@ export default function (pi: ExtensionAPI) {
 
 	pi.registerTool({
 		name: "magic_seat", label: "Magic seat", defaultActive: false,
-		description: "Read the Magic seat this Pi holds for its person: life, each battlefield, this seat's own hand, the stack, what happened since its last choice, its plan, the open question with numbered options and the autopilot's choice, and the printed text of every card the seat can see. It is this seat's view only: another seat's hand and library are counts.",
+		description: "Read the Magic seat this terminal pilots for its person: life, each battlefield, this seat's own hand, the stack, what happened since its last choice, its plan, the open question with numbered options and the autopilot's choice, and the printed text of every card the seat can see. It is this seat's view only: another seat's hand and library are counts.",
 		promptSnippet: "Read the person's Magic seat: board, hand, the open question and its options, and card text",
 		promptGuidelines: [
 			"You assist a person playing a Magic seat. magic_seat is your only view of the game: it shows what this seat may see. Never guess or claim another seat's hidden cards, and never read files or run commands to learn about the game.",
@@ -924,10 +832,10 @@ export default function (pi: ExtensionAPI) {
 		},
 	});
 
-	const VERBS = ["host", "seat", "first", "clock", "background", "colors", "replay", "watch", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
-	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | seat <n> avatar|background <name|url|random> | " +
-	"seat <n> colors <primary> <secondary> | auto | first <coin|n> | clock <seconds|off> | background <name|url|random> | colors <primary> <secondary> | auto | start | begin | " +
-		"join <invite> [suggest|auto|manual] | pick <n> | ok | pass [turn] | stops <smart|all> | show <n> | tell <words> | mode <suggest|auto|manual> | concede | leave | " +
+	const VERBS = ["host", "seat", "first", "clock", "background", "colors", "replay", "watch", "start", "begin", "pause", "continue", "rollback", "end", "status", "pilot", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
+	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> ai|player | seat <n> model <role> <pattern|default> | seat <n> key game|$NAME | " +
+	"seat <n> avatar|background <name|url|random> | seat <n> colors <primary> <secondary> | auto | first <coin|n> | clock <seconds|off> | background <name|url|random> | colors <primary> <secondary> | auto | start | begin | " +
+		"pilot <n>|off | pick <n> | ok | pass [turn] | stops <smart|all> | show <n> | tell <words> | mode <suggest|auto|manual> | concede | " +
 		"pause | continue | rollback <version> [why] | end [why] | status | resume <game> | clone <game> <version> <new-id> | " +
 		"models [why|<role> <pattern> [seat]] | board | replay [game] | watch [local|public|off] | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
 
@@ -943,13 +851,8 @@ export default function (pi: ExtensionAPI) {
 			// Nothing starts by itself: the menu sets a table or opens a saved game.
 			if (!verb) {
 				if (!ctx.hasUI) { ctx.ui.notify(USAGE, "info"); return; }
-				const choice = await ctx.ui.select("Magic", [...(host || guest ? ["Table status"] : []), "Host a table", "Join a table", "Resume a saved game", "Models", "Help"]);
+				const choice = await ctx.ui.select("Magic", [...(host ? ["Table status"] : []), "Host a table", "Resume a saved game", "Models", "Help"]);
 				if (choice === "Host a table") return setTable(ctx, "");
-				if (choice === "Join a table") {
-					const invite = await ctx.ui.input("Paste the invite the host's Pi printed", "http://127.0.0.1:.../t/...#...");
-					if (invite) try { await joinSeat(ctx, invite); } catch (error) { ctx.ui.notify(`Could not join: ${error instanceof Error ? error.message : String(error)}`, "error"); }
-					return;
-				}
 				if (choice === "Table status") verb = "status";
 				else if (choice === "Models") return models(["models"], ctx);
 				else if (choice === "Help") { ctx.ui.notify(USAGE, "info"); return; }
@@ -963,16 +866,23 @@ export default function (pi: ExtensionAPI) {
 			if (verb === "host" || verb === "play") return setTable(ctx, rest);
 			if (verb === "start") return startTable(ctx);
 			if (verb === "begin") return beginTable(ctx);
-			if (verb === "status") { ctx.ui.notify((guest ? seatLines() : tableLines()).join("\n"), "info"); return; }
-			if (verb === "join") {
-				const mode = (["suggest", "auto", "manual"] as const).find((one) => one === words[2]);
-				if (!words[1] || (words[2] && !mode)) { ctx.ui.notify("/magic join <invite> [suggest|auto|manual], with the invite as the host's Pi printed it.", "warning"); return; }
-				try { await joinSeat(ctx, words[1], mode); } catch (error) { ctx.ui.notify(`Could not join: ${error instanceof Error ? error.message : String(error)}`, "error"); }
+			if (verb === "status") { ctx.ui.notify([...tableLines(), ...(pilotedAt() === undefined ? [] : seatLines())].join("\n"), "info"); return; }
+			if (verb === "pilot") {
+				if (!host) { ctx.ui.notify("No table. /magic host sets one.", "warning"); return; }
+				if (words[1] === "off") { delete host.piloting; seatTools(false); showSeat(ctx); showTable(ctx); ctx.ui.notify("This terminal pilots no seat.", "info"); return; }
+				const at = Number(words[1]), one = host.lobby.seats[at];
+				if (!words[1] || !one) { ctx.ui.notify("/magic pilot <n> | off", "warning"); return; }
+				host.piloting = one.code;
+				seatTools(true);
+				showSeat(ctx);
+				showTable(ctx);
+				const mode = host.pilots?.[at]?.mode();
+				ctx.ui.notify(`This terminal pilots seat ${at}. ${mode === "auto" || !mode && one.pilot === "ai" ? "Its AI plays it until /magic mode suggest or manual." : "Its AI suggests; type a number, ok or p."}`, "info");
 				return;
 			}
 			if (["pick", "ok", "show", "mode", "concede", "pass", "stops", "tell"].includes(verb)) {
-				const seat = guest?.person;
-				if (!seat) { ctx.ui.notify("This Pi has no seat to play. /magic join <invite> takes one.", "warning"); return; }
+				const seat = piloted();
+				if (!seat) { ctx.ui.notify(pilotedAt() === undefined ? "This terminal pilots no seat. /magic pilot <n> takes one." : "The seat this terminal pilots has no game in play yet.", "warning"); return; }
 				if (verb === "mode") {
 					const mode = (["suggest", "auto", "manual"] as const).find((one) => one === words[1]);
 					const problem = mode ? await seat.switch(mode) : "/magic mode suggest|auto|manual";
@@ -1000,20 +910,16 @@ export default function (pi: ExtensionAPI) {
 				showSeat(ctx);
 				return;
 			}
-			if (verb === "leave") {
-				if (!guest) { ctx.ui.notify("This Pi has no chair.", "warning"); return; }
-				guest.leaving.abort();
-				return;
-			}
+
 			if (verb === "rollback" || verb === "end") return direct(ctx, words);
 			if (verb === "resume") return resumeGame(ctx, seed);
 
 			if (verb === "clock") {
 				if (!host || host.lobby.stage !== "setting") { ctx.ui.notify("The clock is set before /magic start.", "warning"); return; }
 				const seconds = words[1] === "off" ? null : Number(words[1]);
-				if (seconds !== null && (!Number.isFinite(seconds) || seconds <= 0)) { ctx.ui.notify("/magic clock <seconds|off>. A guest seat that does not answer within it concedes.", "warning"); return; }
+				if (seconds !== null && (!Number.isFinite(seconds) || seconds <= 0)) { ctx.ui.notify("/magic clock <seconds|off>. A player who does not answer within it concedes their seat.", "warning"); return; }
 				host.lobby.clock = seconds;
-				ctx.ui.notify(seconds ? `Guest seats have ${seconds}s for each decision, then concede.` : "No clock: the table waits for every seat however long it takes.", "info");
+				ctx.ui.notify(seconds ? `Players have ${seconds}s for each decision, then their seat concedes.` : "No clock: the table waits for every player however long they take.", "info");
 				showTable(ctx);
 				return;
 			}
@@ -1023,12 +929,22 @@ export default function (pi: ExtensionAPI) {
 					const first = words[1] === "coin" ? "coin" as const : Number(words[1]);
 					if (first !== "coin" && !host.lobby.seats[first]) { ctx.ui.notify("/magic first <coin|seat>", "warning"); return; }
 					host.lobby.first = first;
-				} else if (words[2] === "open" || words[2] === "ai") {
+				} else if (words[2] === "ai" || words[2] === "player") {
 					const at = Number(words[1]);
-					if (!host.lobby.seats[at]) { ctx.ui.notify("/magic seat <n> open | ai", "warning"); return; }
-					if (words[2] === "open") return openSeat(ctx, at);
-					if (host.wire?.guest(at)) { ctx.ui.notify(`A guest holds seat ${at}. Set a new table to change who answers it.`, "warning"); return; }
-					host.lobby.seats[at] = { ...host.lobby.seats[at]!, by: "ai" };
+					if (!host.lobby.seats[at]) { ctx.ui.notify("/magic seat <n> ai | player", "warning"); return; }
+					host.lobby.seats[at] = { ...host.lobby.seats[at]!, pilot: words[2] };
+				} else if (words[2] === "model") {
+					const at = Number(words[1]), one = host.lobby.seats[at], role = words[3] as Role, pattern = words[4];
+					if (!one || !SEAT_ROLES.includes(role) || !pattern) { ctx.ui.notify(`/magic seat <n> model <${SEAT_ROLES.join("|")}> <pattern|default>. The judge and the commentator are the table's: /magic models.`, "warning"); return; }
+					const { [role]: _, ...rest } = one.models;
+					host.lobby.seats[at] = { ...one, models: pattern === "default" ? rest : { ...rest, [role]: pattern } };
+					const cast = (await roster(ctx, at, host.lobby.seats[at]!.models, one.key !== "game")).find((part) => part.role === role)!;
+					if (cast.problem) ctx.ui.notify(`Seat ${at}'s ${role}: ${cast.problem}`, "warning");
+				} else if (words[2] === "key") {
+					const at = Number(words[1]), one = host.lobby.seats[at], from = words[3];
+					if (!one || !from || from !== "game" && !/^\$[A-Za-z_][A-Za-z0-9_]*$/.test(from)) { ctx.ui.notify("/magic seat <n> key game | $NAME, an environment variable holding an OpenRouter key. A player gives their own from their seat.", "warning"); return; }
+					host.lobby.seats[at] = { ...one, key: from as KeyFrom };
+					if (from !== "game" && !process.env[from.slice(1)]) ctx.ui.notify(`${from} is not set in this Pi's environment; the table will not start until it is.`, "warning");
 				} else if (words[2] === "colors") {
 					const at = Number(words[1]), one = host.lobby.seats[at];
 					if (!one) { ctx.ui.notify("/magic seat <n> colors <primary> <secondary> | auto", "warning"); return; }
@@ -1063,28 +979,22 @@ export default function (pi: ExtensionAPI) {
 			if (verb === "colors") {
 				let colors: Colors | undefined;
 				try { colors = words[1] === "auto" ? undefined : chooseColors(words[1], words[2]); } catch (error) { ctx.ui.notify(error instanceof Error ? error.message : String(error), "warning"); return; }
-				const own = guest ?? host?.lobby;
-				if (!own) { ctx.ui.notify("No table. /magic host sets one.", "warning"); return; }
-				if (colors) own.colors = colors; else delete own.colors;
-				if (guest) { delete guest.pictured; if (guest.state) pictureSeat(ctx, guest, guest.state); } else showTable(ctx);
-				ctx.ui.notify(`${guest ? "This seat's" : "The host's"} pictures ${colors ? `are framed in ${colors.primary} and ${colors.secondary}` : "take their background's colours"}.`, "info");
+				if (!host) { ctx.ui.notify("No table. /magic host sets one.", "warning"); return; }
+				if (colors) host.lobby.colors = colors; else delete host.lobby.colors;
+				showTable(ctx);
+				ctx.ui.notify(`The host's pictures ${colors ? `are framed in ${colors.primary} and ${colors.secondary}` : "take their background's colours"}.`, "info");
 				return;
 			}
 
-			// The background of this Pi's own pictures: the host's view of the table, or a guest's view of its seat. Any time.
+			// The background of the host's pictures, which show the table as a spectator sees it. Any time.
 			if (verb === "background") {
 				if (!words[1]) { ctx.ui.notify(choices("backgrounds"), "info"); return; }
 				let chosen: string;
 				try { chosen = choose("backgrounds", words[1]); } catch (error) { ctx.ui.notify(error instanceof Error ? error.message : String(error), "warning"); return; }
-				if (guest) {
-					guest.background = chosen;
-					delete guest.pictured;
-					if (guest.state) pictureSeat(ctx, guest, guest.state);
-				} else if (host) {
-					host.lobby.background = chosen;
-					showTable(ctx);
-				} else { ctx.ui.notify("No table. /magic host sets one.", "warning"); return; }
-				ctx.ui.notify(`${guest ? "This seat's" : "The host's"} pictures are on ${named(chosen)}.`, "info");
+				if (!host) { ctx.ui.notify("No table. /magic host sets one.", "warning"); return; }
+				host.lobby.background = chosen;
+				showTable(ctx);
+				ctx.ui.notify(`The host's pictures are on ${named(chosen)}.`, "info");
 				return;
 			}
 
@@ -1240,7 +1150,7 @@ export default function (pi: ExtensionAPI) {
 
 	// A person answers the open question by typing its number, ok for the autopilot's choice, or p to pass. Anything else is chat.
 	pi.on("input", async (event, ctx) => {
-		const seat = guest?.person, text = event.text.trim().toLowerCase();
+		const seat = piloted(), text = event.text.trim().toLowerCase();
 		if (!seat?.asking() || !/^(\d{1,3}|ok|y|yes|p|pass)$/.test(text)) return { action: "continue" };
 		const problem = /^\d/.test(text) ? seat.choose(Number(text)) : /^p/.test(text) ? seat.pass("now") : seat.accept();
 		if (problem) ctx.ui.notify(problem, "warning");
@@ -1260,8 +1170,7 @@ export default function (pi: ExtensionAPI) {
 		await watching?.server.close();
 		watching = null;
 		if (running && host?.hold) { host.hold.direct({ do: "leave" }); await host.game; }
-		guest?.leaving.abort();
-		await host?.wire?.close();
+		dismiss(host);
 		await Promise.all(Object.values(seated?.players ?? {}).map((player) => player.close()));
 		table = null;
 		seated = null;

@@ -2,15 +2,17 @@
  * The host's hold on a game it runs: pause, continue, the two directions that
  * need the loop stopped first, a rollback and an end, and the table's clock.
  *
- * A clocked seat that does not answer within its time concedes: the hold stops
- * the loop and the concession is applied between loops, recorded as a timeout.
- * That is also how a guest who disconnected leaves the game. Pausing stops the
- * clock, and continuing gives the seat being asked its full time again.
+ * The clock runs while a seat waits on its player, never while its AI thinks.
+ * A player who does not answer within it concedes: the hold stops the loop and
+ * the concession is applied between loops, recorded as a timeout. That is also
+ * how a player who left leaves the game. The AI never answers in their place.
+ * Pausing stops the clock, and continuing gives the player being asked their
+ * full time again.
  *
  * It wraps each seat's player, so it needs no change to the loop. A paused
  * seat's answer waits; a direction stops the loop at once, dropping an answer
  * still being thought about, and is applied to the stopped table between loops.
- * The host is never a seat: nothing here answers a decision.
+ * Nothing here answers a decision.
  */
 
 import { concede } from "../core/concede.ts";
@@ -72,15 +74,23 @@ export function hold(restart: () => Table, applied?: (direction: Direction, tabl
 			if (next) applied?.(next, table);
 			return next?.do !== "end" && next?.do !== "leave" && !table.outcome;
 		},
-		/** `seconds` is this seat's time to answer each decision; without it the seat is not on the clock. */
-		seat(player: Player, id: SeatId, seconds?: number): Player {
+		/**
+		 * Start the clock on the seat being asked, for `seconds`, when its player is
+		 * shown the question; stop it, with no seconds, when they are not.
+		 */
+		clock(id: SeatId, seconds?: number) {
+			if (asking?.seat !== id) return;
+			if (seconds) Object.assign(asking, { since: Date.now(), clock: seconds });
+			else delete asking.clock;
+			if (!paused) clock();
+		},
+		seat(player: Player, id: SeatId): Player {
 			return {
 				name: player.name,
 				async answer(frame) {
 					while (paused && !direction) await Promise.race([new Promise<void>((go) => waiting.push(go)), halt.promise]);
 					if (direction) throw new TableHalted(`The host directed: ${direction.do}.`);
-					asking = { seat: id, since: Date.now(), ...(seconds ? { clock: seconds } : {}) };
-					clock();
+					asking = { seat: id, since: Date.now() };
 					const thinking = player.answer(frame);
 					thinking.catch(() => {});
 					try { return await Promise.race([thinking, halt.promise]); } finally { asking = null; clearTimeout(timer); }

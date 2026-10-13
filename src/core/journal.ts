@@ -50,9 +50,13 @@ export type Header = {
 	 * is the seat a host set it up as before a coin flip ordered the table: the
 	 * seat's roster and keys follow it, not the chair it ended up in. `avatar`,
 	 * `background` and `colors` are its look in pictures, and nothing to the game.
+	 * `pilot` is who was to pilot it, `models` the role patterns it chose over the
+	 * host's roster, and `key` whose OpenRouter key paid: the game's, its
+	 * player's, or an environment variable's name. Never a key.
 	 */
-	seats: { id: SeatId; name: string; deck: Deck; setAs?: SeatId; avatar?: string; background?: string; colors?: { primary: string; secondary: string } }[];
-	/** Seconds a guest seat had to answer each decision before it conceded, when the table had a clock. */
+	seats: { id: SeatId; name: string; deck: Deck; setAs?: SeatId; avatar?: string; background?: string; colors?: { primary: string; secondary: string };
+		pilot?: "ai" | "player"; models?: Record<string, string>; key?: string }[];
+	/** Seconds a player had to answer each decision before their seat conceded, when the table had a clock. */
 	clock?: number;
 	/** The background and frame colours of the host's pictures. */
 	background?: string;

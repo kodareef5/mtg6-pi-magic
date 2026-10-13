@@ -26,14 +26,12 @@ sitting at that seat still want it?
   everything. This picks the slice that matters for one decision and carries the
   guidance that keeps a choice coherent with the turn. It never writes to the
   table and never advances a phase.
-- **`src/seating/`** is who answers a seat: the lobby and its two agreements,
-  the host's hold on a running game, and the wire that lets another Pi answer
-  a seat over HTTP.
+- **`src/seating/`** is who pilots a seat: the lobby and its two agreements,
+  the host's hold on a running game, and a person over a seat's AI.
 
-The player adapter in use is a decision model through `src/context/`, in the
-host's Pi or in a guest's Pi at the far end of the wire. Person and MCP
-adapters will use the same core interface without loading decision-model
-context.
+Every seat's player is a decision model through `src/context/`, in the host's
+Pi. A person piloting a seat sits over it (`src/seating/person.ts`) and loads
+none of `src/context/`; an MCP adapter will do the same.
 
 The player interface is intended to offer the same capabilities to every seat.
 Listed picks, table talk, prepared procedures, objections and conceding when
@@ -216,14 +214,14 @@ started a fresh game carrying another game's briefs was neither of those things.
 the game type, a deck per seat, and who plays first. Standard alpha, main decks
 only and one on one, is the only type so far.
 
-The host is never a seat, and every seat agrees twice:
+The host runs every seat, and every seat agrees twice to the table as set:
 - `/magic start` asks the seats to prepare. A coin flip orders them, decks
-  register, card assessments load and model seats write their briefs.
+  register, card assessments load and the seats write their briefs.
 - `/magic begin` asks the seats to begin. The hands are dealt and the mulligans
   start.
 
-A model seat agrees as soon as it is asked. The game then plays beside the
-session, and the host directs it:
+A seat its AI pilots agrees as soon as it is asked; a player answers when they
+answer. The game then plays beside the session, and the host directs it:
 - `/magic pause` and `/magic continue` hold and release the next seat asked;
 - `/magic rollback <version>` takes the game back;
 - `/magic end` ends it with no winner.
@@ -233,16 +231,21 @@ honors. The host's view is the spectator's: the play-by-play, the table widget
 and the public board. `design-ref/pi-ux-plan-20261012.md` holds the plan for
 remote seats, people at a seat and the assistant.
 
-`/magic seat <n> open` gives a seat to a guest instead: the table's server
-starts and prints one invite, and another Pi takes the seat with
-`/magic join <invite>`. That Pi plays the seat with its own models and keys,
-writes its own brief, and agrees for itself; `docs/SEATING.md` is the wire.
+Who pilots a seat decides what happens to its AI's picks (`docs/SEATING.md`).
+A seat piloted by its AI plays them; `/magic seat <n> player` sets a seat for
+a player, who sees them as suggestions. Each seat chooses its own decide,
+pregame and strategy models over the roster file's with
+`/magic seat <n> model <role> <pattern|default>`, and whose OpenRouter key
+pays with `/magic seat <n> key game|$NAME`; a player can give their own key.
+The journal header records each seat's pilot, models and key source, never a
+key. Each seat has a code, and whoever holds it pilots the seat. The host holds
+every code: `/magic pilot <n>` pilots a seat from this terminal, and the host's
+start and begin agree for it.
 
-A guest seat is a person's by default: `/magic join <invite>` seats a person
-with the guest Pi's models as the autopilot behind them (`src/seating/person.ts`).
+A seat's pilot sits over its AI as the autopilot (`src/seating/person.ts`).
 In suggest mode the autopilot proposes each choice and the person types a
-number, `ok` for its choice, or `p` to pass; auto hands the seat over and
-manual plays without asking it, and needs no decision model. Preparing card
+number, `ok` for its choice, or `p` to pass; auto hands the seat to the AI and
+manual plays without asking it. Preparing card
 uses is no choice, so the autopilot does it in every mode. A question with one
 real option is answered at once unless the turn's plan is owed first, and
 options that come to the same thing are one line: payments fold only over
@@ -250,19 +253,20 @@ permanents alike in everything the seat sees, as core groups mana sources. Smart
 priority only in the seat's own main phases and when another seat has
 something on the stack, unless the autopilot wants to act; `/magic stops all`
 asks everywhere and `/magic pass turn` passes the rest of the turn. The seat
-panel shows the board in words from the seat's own frame. `/magic tell <words>`
+panel shows the board in words from the seat's own view. `/magic tell <words>`
 passes the person's instruction to the autopilot's strategy as a plan request.
-While the Pi holds a person's seat, its chat agent is the seat assistant, with
+While this terminal pilots a seat, the Pi chat agent is the seat assistant, with
 `magic_seat` (this seat's view and the text of the cards it can see),
 `magic_choose` and `magic_tell`. The ledger records the person's own picks as
 `by: person`.
 
-The table has a clock for guest seats: 120 seconds a decision by default,
-`/magic clock <seconds|off>` before the start. A guest seat that does not
-answer in time concedes, which is also how a guest who disconnected leaves
-the game. The concession is a ledger row with the reason `timeout`, never
-`chosen`, and replay applies it. Pausing stops the clock. The host's own model
-seats are not on it; their call limits bound them.
+The table has a clock for players: 120 seconds a decision by default,
+`/magic clock <seconds|off>` before the start. It runs while a player is shown
+a question, never while the AI works out its suggestion. A player who does not
+answer in time concedes their seat, which is also how a player who left leaves
+the game; the AI never answers in their place. The concession is a ledger row
+with the reason `timeout`, never `chosen`, and replay applies it. Pausing
+stops the clock. A seat its AI plays is not on it; its call limits bound it.
 
 Pictures dress the table when cardboard-api is installed. Each seat has a
 look: its portrait in every picture, and the background and frame colours of
@@ -270,7 +274,7 @@ its own pictures. The host's pictures have their own. All are dealt at random,
 a different portrait for each seat, and set before the start with
 `/magic seat <n> avatar|background <name|url|random>` and
 `/magic seat <n> colors <primary> <secondary> | auto`; `/magic background` and
-`/magic colors` change this Pi's own view at any time, the host's or a guest's.
+`/magic colors` change the host's own view at any time.
 The defaults are the files in `assets/`, named by file; adding one is adding a
 file, and any http(s) image URL stands in for one. A default background brings
 the frame colours in `assets/backgrounds/colors.json` unless colours are set,
@@ -293,7 +297,7 @@ seconds.
 
 `/magic watch local|public|off` shows this Pi's games (`src/watch/`), and the
 setting holds across sessions in `settings.json` beside the roster. A
-read-only server, apart from the seats' wire and needing no token, serves a
+read-only server, needing no code, serves a
 games page, searched, sorted and paged on the server, and each game's replay
 page. Whether a game is over, who won and in how many turns come from
 replaying its journal on a worker thread (`src/watch/outcomes.ts`), so a Pi
@@ -310,11 +314,11 @@ quick tunnel in front, whose address changes each time. The host's table shows
 the address.
 
 Saved pictures are WebP (jSquash's libwebp build, quality 85), about a tenth
-the size of PNG: the host's picture after each turn and a guest seat's own. The terminal widget is shown PNG, which every terminal image
+the size of PNG: the host's picture after each turn. The terminal widget is shown PNG, which every terminal image
 protocol takes.
 
-A seat can carry its own key for a provider, named as an environment variable
-under `keys` in the roster file (`"keys": {"1": {"openrouter": "$OPENROUTER_SEAT_1"}}`).
+A seat can also carry its own key for a provider, named as an environment
+variable under `keys` in the roster file (`"keys": {"1": {"openrouter": "$OPENROUTER_SEAT_1"}}`).
 That seat's own calls use it. The judge and the commentator are the table's and
 use Pi's credentials.
 
@@ -521,8 +525,9 @@ rather than adding a test for each branch.
   did. Through the extension itself: a table replaced
   while another prepared keeps its own game, and a seat's models and keys
   follow it through the coin flip, journaled as `setAs` so a resume keeps them.
-  A guest Pi plays its seat with its own models and keys, and one that stops
-  answering loses on the clock and hears that it lost.
+  A seat's own models and key pay for its calls. A player who stops answering
+  loses on the clock, and the seat's AI never answers for them. The host pilots
+  a seat from its terminal, and its picks are the person's rows.
 - **Alone.** A finished game reports and returns with nothing else keeping the
   process alive. Stated in a child process, since a test runner keeps the event
   loop awake and hides it.
@@ -672,13 +677,10 @@ src/context/           questions for a decision model. Its own AGENTS.md
   metrics.ts, trace.ts usage arithmetic and the bill; exact requests and replies when tracing
   playbook.ts, plan.ts the policy schema; the starting intent
 src/core/host.ts       the host's rollback and end, kept as rulings by the host
-src/seating/           who answers a seat
-  lobby.ts             seats, decks, who plays first, and the two agreements before dealing
-  hold.ts              the host's hold on a running game: pause, continue, and directions between loops
-  protocol.ts          the wire's shapes and the invite: HTTP with long polling
-  chair.ts             a seat answered over the wire: holds each ask and judges each answer
-  person.ts, panel.ts  a person at a seat over the autopilot, its stops and menu; the seat in words
-  host.ts, guest.ts    the server that hands out chairs; claiming a chair and following it
+src/seating/           who pilots a seat
+  lobby.ts             seats, decks, pilots, models, keys, codes, who plays first, and the two agreements
+  hold.ts              the host's hold on a running game: pause, continue, the clock, and directions between loops
+  person.ts, panel.ts  a person over a seat's AI, its stops and menu; the seat in words
 src/watch/             showing games to spectators and rewatchers: read-only, never a seat
   games.ts             saved games: summaries, search and paging, moments, looks and run cost
   outcomes.ts          a worker that replays journals, so the list knows how each game stands
@@ -727,7 +729,7 @@ rules/cr.tsv           4063 rules, headings and glossary terms, committed
 docs/PLANS.md          the plan a seat flies: what it holds, how the table flies it
 docs/COMBAT.md         characteristics, the layer walk, combat, and the seams
 docs/MULLIGAN.md       the opening: the rules, the three decisions, what a seat knows
-docs/SEATING.md        the wire, for a reader with no code
+docs/SEATING.md        seats, pilots, codes and the clock, for a reader with no code
 docs/STATE.md          export, rollback, copying a game, and hosting options
 docs/ZONES.md          the zones, identity, exile, dungeons, outside the game
 design-ref/            observations about Magic, on disk and not ours to publish.
@@ -773,7 +775,6 @@ verify every carried field against the source and refuse to pass on a mismatch.
   replies and errors, including the recaps each call received. The trace is
   private seat data. The forced ratio is evidence about cost, not decision
   quality; a comparison harness and version attribution remain unfinished.
-- Seats beyond this machine. The wire works on the loopback address; tunnels,
-  the email check, a person at a seat, the MCP adapter and reopening a guest's
-  seat on resume are the next milestones in `design-ref/pi-ux-plan-20261012.md`.
+- Seats beyond this terminal. A seat's page, where its code holder plays it in
+  a browser, and the MCP adapter are next in `design-ref/pi-ux-plan-20261012.md`.
 - Any format but Standard, and any seat count but two.

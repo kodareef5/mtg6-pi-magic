@@ -1,5 +1,5 @@
 /**
- * Hosted. The host is never a seat. Nothing is dealt until every seat agrees,
+ * Hosted. Nothing is dealt until every seat agrees,
  * a paused game asks nobody and then plays on exactly as it would have, and the
  * host's rollback and end are journal lines that replay honors: a clone before
  * either is the game without it.
@@ -138,11 +138,11 @@ test("the host's end gives no winner, replay honors it, and a clone before it or
 	});
 });
 
-test("a seat on the clock that does not answer concedes as a timeout, paused time does not count, and replay reaches the same end", async () => {
+test("a player's clock runs only while they are asked, a seat that does not answer concedes as a timeout, paused time does not count, and replay reaches the same end", async () => {
 	const dir = mkdtempSync(join(tmpdir(), "magic-clock-"));
 	const table = dealt(), holding = hold(dealt), journal = open(join(dir, "clock.jsonl"), made);
 	const gone: Player = { name: "B", observe() {}, close() {}, answer: () => new Promise(() => {}) };
-	const players = { 0: holding.seat(steady("A"), 0), 1: holding.seat(gone, 1, 0.3) };
+	const players = { 0: holding.seat(steady("A"), 0), 1: holding.seat(gone, 1) };
 	const running = (async () => {
 		for (;;) {
 			try { await play(table, players, {}, { checkpoint: holding.checkpoint }); break; }
@@ -152,6 +152,10 @@ test("a seat on the clock that does not answer concedes as a timeout, paused tim
 	})();
 	for (const begun = Date.now(); holding.asking()?.seat !== 1; await new Promise((go) => setTimeout(go, 5)))
 		if (Date.now() - begun > 5_000) throw new Error("seat 1 was never asked");
+	holding.clock(0, 0.3);
+	await new Promise((go) => setTimeout(go, 400));
+	assert.equal(table.outcome, null, "no clock runs before the seat's player is shown the question, and none for a seat not being asked");
+	holding.clock(1, 0.3);
 	holding.pause();
 	await new Promise((go) => setTimeout(go, 600));
 	const outcome = () => table.outcome;

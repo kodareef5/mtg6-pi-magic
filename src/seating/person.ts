@@ -29,14 +29,20 @@ import type { Frame, Option } from "../core/types.ts";
 export type Mode = "suggest" | "auto" | "manual";
 export type Stops = "smart" | "all";
 
-/** What the person is being asked: the frame, and the autopilot's pick when it has one. */
-export type Asking = { frame: Frame; suggestion?: Extract<Answer, { kind: "pick" }> };
+/**
+ * What the person is being asked: the frame, and the autopilot's pick when it
+ * has one. `ask` numbers the questions shown, so an answer meant for one never
+ * lands on the next.
+ */
+export type Asking = { frame: Frame; ask?: number; suggestion?: Extract<Answer, { kind: "pick" }> };
 
 export type Person = ReturnType<typeof person>;
 
 /** Options that step back or out of a use the seat started: never the reason a question needs a person. */
 const ESCAPES = new Set(["announce:back", "announce:cancel", "payment:cancel", "announce:individual"]);
 export const escape = (option: Option) => ESCAPES.has(option.id) || /^(announce:unpay|announce:remove-target|payment:remove):/.test(option.id);
+
+const GONE = "That question was answered or withdrawn; answer the one asked now.";
 
 const PAYING = /^(Confirm and pay|Add to payment):/, NAMED = / \((\d+-\d+|token-[\d-]+)\)/g, SPENT = /for \{([WUBRG])\}(?=;|$)/g;
 
@@ -87,7 +93,7 @@ export function menu(asking: Asking): { option: Option; label: string }[] {
 export function person(name: string, autopilot: Player | undefined, start: Mode, shown: (asking: Asking | null) => void, decides = true) {
 	const deciding = !!autopilot && decides;
 	let mode: Mode = deciding ? start : "manual", stops: Stops = "smart", asking: (Asking & { settle(answer: Answer): void }) | null = null;
-	let conceding = false, picks = 0, passingTurn: number | undefined, latest: Frame | undefined, told: string | undefined;
+	let conceding = false, picks = 0, asks = 0, passingTurn: number | undefined, latest: Frame | undefined, told: string | undefined;
 	// Each ask, rewind and close moves `serial`: an answer worked out for an older one is never shown.
 	let serial = 0;
 	const pick = (frame: Frame, option: string, by?: "person"): Extract<Answer, { kind: "pick" }> => ({ kind: "pick", option, actionId: `${name}-${frame.version}-${++picks}`, ...(by ? { by } : {}) });
@@ -137,7 +143,7 @@ export function person(name: string, autopilot: Player | undefined, start: Mode,
 			// A stop the person has not asked for: pass, unless the autopilot sees something to do here.
 			if (passes(frame) && (!suggestion || suggestion.option === "pass")) return suggestion ?? pick(frame, "pass", "person");
 			// A newer ask replaces one the table withdrew; the person answers what is asked now.
-			return new Promise<Answer>((resolve) => { asking = { frame, ...(suggestion ? { suggestion } : {}), settle: resolve }; shown(asking); });
+			return new Promise<Answer>((resolve) => { asking = { frame, ask: ++asks, ...(suggestion ? { suggestion } : {}), settle: resolve }; shown(asking); });
 		},
 		// In manual mode the autopilot is not asked, and does not prepare in the background either.
 		observe(frame) { latest = frame; if (mode !== "manual") autopilot?.observe(frame); },
@@ -150,23 +156,28 @@ export function person(name: string, autopilot: Player | undefined, start: Mode,
 		mode: () => mode,
 		stops: () => stops,
 		asking: () => asking,
-		/** Answer with a line of the menu by its number, from 1. */
-		choose(number: number): string | null {
+		/** The seat's newest frame, asked or only observed. */
+		latest: () => latest,
+		/** Answer with a line of the menu by its number, from 1; with `ask`, only that question. */
+		choose(number: number, ask?: number): string | null {
 			if (!asking) return "Nothing is being asked of this seat.";
+			if (ask !== undefined && ask !== asking.ask) return GONE;
 			const lines = menu(asking), line = lines[number - 1];
 			if (!line) return `Choose 1 to ${lines.length}.`;
 			settle(pick(asking.frame, line.option.id, "person"));
 			return null;
 		},
 		/** Take the autopilot's choice. */
-		accept(): string | null {
+		accept(ask?: number): string | null {
 			if (!asking) return "Nothing is being asked of this seat.";
+			if (ask !== undefined && ask !== asking.ask) return GONE;
 			if (!asking.suggestion) return "The autopilot has no choice here; answer with a number.";
 			settle(asking.suggestion);
 			return null;
 		},
 		/** Pass now, or for the rest of this turn unless another seat puts something on the stack. */
-		pass(rest: "now" | "turn"): string | null {
+		pass(rest: "now" | "turn", ask?: number): string | null {
+			if (asking && ask !== undefined && ask !== asking.ask) return GONE;
 			const frame = asking?.frame ?? latest;
 			if (rest === "turn") passingTurn = frame && turnOf(frame);
 			if (!asking) return rest === "turn" ? null : "Nothing is being asked of this seat.";

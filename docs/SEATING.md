@@ -1,100 +1,50 @@
-# The wire
+# Seats
 
-A seat can be answered from another Pi, or by any agent that speaks HTTP. The
-host's Pi owns the game; a guest claims a chair, reads what that chair may see,
-and answers what it is asked. The protocol is `pi-magic/1`: JSON over HTTP
-with long polling. The shapes are in `src/seating/protocol.ts`.
+The host's Pi runs every seat. Each seat has an AI: its strategy model plans
+the turn and Jev picks. Who pilots the seat decides what happens to the AI's
+picks. With no pilot, they are played. With a person or an agent piloting,
+they are suggestions the pilot accepts or overrides.
 
-## How a guest sits down
+## The game config
 
-1. The host sets a table and opens a seat: `/magic seat 1 open`. The table's
-   server starts on the loopback address and prints one invite for that seat.
-2. The guest's Pi runs `/magic join <invite>`. It now holds the chair and plays
-   it with its own models and keys, under the seat the host set it up as.
-3. Both agreements reach the guest. It agrees to prepare and writes its own
-   brief from the public lists once the coin flip has ordered the table. Once
-   the table is prepared it makes its player, knowing whether a judge hears
-   objections, sends the host its brief to journal and its setup edits, and
-   agrees to begin.
-4. During play the guest answers each ask once. At the end it hears the outcome
-   and prints its own bill. The host never runs the guest's models and never
-   pays for them.
+Before play, the host sets each seat:
 
-## The invite
+- its deck and its look in pictures;
+- its pilot, its AI (`/magic seat <n> ai`) or a player (`/magic seat <n> player`);
+- its models: decide, pregame and strategy, over the roster file's
+  (`/magic seat <n> model <role> <pattern|default>`). Two seats with different
+  models are two models playing each other. The judge and the commentator are
+  the table's;
+- whose OpenRouter key pays for its calls: the game's, its player's own, or one
+  the host names as an environment variable (`/magic seat <n> key game|$NAME`).
 
-```
-http://127.0.0.1:64810/t/6fc9163a4128#AFEUkTLL9kO8xFjCqd27MZ5ysI0HkJHVf9hnvGXq1o0
-```
+Every seat agrees to this config twice before a card is dealt: to prepare, and
+to begin. A seat its AI pilots agrees when asked; a player answers when they
+answer. The journal header records each seat's pilot, models and whose key
+paid, never a key. A seat agreed to pay with its own key never falls back to
+the game's.
 
-An invite is a capability: 32 random bytes after the `#`. Whoever presents
-them first claims that chair, and the host answers with a token the guest
-sends from then on. A browser, a proxy or a log line never sends or records
-what follows a `#`, so an invite can travel as a link.
+## Seat codes
 
-What a bearer invite costs: anyone who reads it before the intended guest can
-take the chair. A tunnel in front of the server is what reaches another
-machine, and the remote-seat plan puts an email check in front of the invite.
+Each seat has a code: 32 random bytes. Whoever holds it sees that seat and
+acts for it. Nothing else is checked: no account, no email. The host holds
+every code and can pilot any seat from its own terminal with
+`/magic pilot <n>`; its start and begin then agree for that seat.
 
-## The calls
-
-| Call | Body | Answer |
-|---|---|---|
-| `POST /v1/claim` | protocol, table, secret, name | the token and the seat it was set up as |
-| `GET /v1/state?after=<serial>` | | the chair's state, held up to 25 seconds until something it may see changes |
-| `POST /v1/answer` | the ask it answers, and one answer or a failure | ok, or a refusal |
-| `POST /v1/agree` | prepare or begin, yes or no | ok, or a refusal |
-| `POST /v1/work` | equipment edits with their revision and actionId | ok, or a refusal; only while the game waits |
-| `POST /v1/brief` | the seat's pregame brief | ok, or a refusal; kept in the host's journal before the first decision |
-
-A state carries the stage, the chair's seat and every seat's public list and
-look in pictures once the table is ordered, whether a judge was seated once it
-is prepared, an agreement the host is asking for, the chair's latest frame, the
-ask when the frame wants an answer, the rollback count, the turn recaps, and
-the outcome when the game is over.
-
-An answer is any answer a seat can give: a listed pick, a plan or package
-edit, an objection, table talk. The same set the model seats use. The host's
-loop judges it as it judges every seat's answer: an unlisted pick is refused
-and asked once more with the reason, then the table takes the terminating
-option and records a gap. A guest whose player failed says so, and the loop
-counts it as that seat failing, with the same retry. A guest that cannot answer
-at all, as when its model provider is down, says `unavailable`, and the
-decision stays pending as it would for a seat at the host: no fallback move.
-
-## Why an answer names its ask
-
-Each ask has a number, and an answer names the one it answers.
-
-- A newer ask is open: `stale`. The table moved on, and the newer state
-  carries the newer ask.
-- The actionId was already applied with the same answer: a replay. The game
-  changes once, so a guest can resend after a dropped connection.
-- The actionId was applied with a different answer: `duplicate`.
-- No ask is open: `not-your-turn`. A rollback withdraws the open ask, and the
-  guest drops the work it began for it.
-
-Those four answers are the whole concurrency story. There is no lock and no
-lease.
+Holding a code of a seat set up for its AI is a takeover: switching the seat
+to suggest or manual mode takes it from the AI, and switching back to auto
+hands it back. The ledger records every pick the pilot makes as `by: person`,
+so a takeover shows in the journal and the replay.
 
 ## The clock
 
 The table's clock is a table rule, 120 seconds a decision unless the host sets
-another with `/magic clock`. A state carries the clock and, for an open ask,
-the time left when it was sent. A guest seat that does not answer in time
-concedes, and the guest hears it on its next read: it keeps reading its chair
-while its seat chooses, and drops an ask the host has closed. A guest that
-disconnected therefore loses instead of holding the table. Pausing stops the
-clock, and continuing gives the seat its full time again.
+another with `/magic clock`. It runs while a player is shown a question, never
+while the AI works out its suggestion. A player who does not answer in time
+concedes their seat: the AI never answers in their place. Pausing stops the
+clock, and continuing gives the player their full time again.
 
-## What a state deliberately does not carry
+## What a seat sees
 
-Another seat's hidden cards, the seed, the library order, and the executable
-changes behind an option. Frames are the host loop's projection for that one
-seat, so a hidden card never reaches the wire. Registered deck lists are
-public and travel by name and count.
-
-## Not in this version
-
-- No tunnel or email check yet. The server binds 127.0.0.1.
-- No spectator chair, no person at a seat and no MCP adapter yet.
-- A resumed game does not reopen a guest's seat.
+Its own projection of the table: its hand, every public zone, other seats'
+hidden cards as counts. The seed and the library order never reach it.

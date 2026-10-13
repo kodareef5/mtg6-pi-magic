@@ -1,24 +1,36 @@
 /**
- * A table before its game: the seats, their decks and looks, who plays first,
- * and the two agreements.
+ * A table before its game: the seats, their decks, looks, models and keys, who
+ * plays first, and the two agreements.
  *
- * The host sets the table and is never a seat. Nothing is dealt until every
- * seat has agreed twice: first to prepare, when decks register, card
- * assessments load and model seats write their briefs; then to begin, when the
- * hands are dealt and the mulligans start. A seat answered by a model agrees as
- * soon as it is asked. A person or a remote agent answers when it answers.
+ * The host runs every seat. What differs is who pilots it: a seat piloted by
+ * its AI plays the AI's picks, and a seat piloted by a player shows the AI's
+ * picks to the player as suggestions. Each seat has a code, and whoever holds
+ * it sees that seat and acts for it. Nothing is dealt until every seat has
+ * agreed twice, to the table as it is set: first to prepare, when decks
+ * register, card assessments load and seats write their briefs; then to begin,
+ * when the hands are dealt and the mulligans start. A seat its AI pilots agrees
+ * as soon as it is asked; a player answers when they answer.
  */
 
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { SeatId } from "../core/types.ts";
 import { choose, deal, type Colors, type Look } from "../board/looks.ts";
 
+export type Pilot = "ai" | "player";
+
 /**
- * Who answers a seat: a model in the host's Pi, or a guest over the wire who
- * brings its own player and models. `setAs` is the seat it was set up as before
- * the table was ordered: its roster, keys, chair and look follow it. The look is
- * the seat's portrait in every picture and the background of its own.
+ * Whose OpenRouter key pays for a seat's model calls: the game's, the one the
+ * seat's player gave, or one the host names as an environment variable
+ * (`$OPENROUTER_SEAT_1`). The key itself is never here.
  */
-export type SeatSetup = { deck: string; by: "ai" | "remote"; setAs?: SeatId; look: Look };
+export type KeyFrom = "game" | "player" | `$${string}`;
+
+/**
+ * `setAs` is the seat it was set up as before the table was ordered: its
+ * roster, keys and look follow it. `models` are role patterns over the table's
+ * roster for this seat alone, which is how two models play each other.
+ */
+export type SeatSetup = { deck: string; setAs?: SeatId; look: Look; pilot: Pilot; models: Record<string, string>; key: KeyFrom; code: string };
 export type Agreement = "prepare" | "begin";
 export type Stage = "setting" | "preparing" | "prepared" | "playing" | "over";
 
@@ -27,7 +39,7 @@ export type Lobby = {
 	seats: SeatSetup[];
 	/** A coin flip decides who plays first unless the host names a seat. */
 	first: "coin" | SeatId;
-	/** Seconds a guest seat has to answer each decision before it concedes, or null for no clock. */
+	/** Seconds a player has to answer each decision before their seat concedes, or null for no clock. */
 	clock: number | null;
 	/** The background of the host's pictures, which show the table as a spectator sees it, and their frame colours when set. */
 	background: string;
@@ -36,18 +48,28 @@ export type Lobby = {
 	agreed: Record<Agreement, SeatId[]>;
 };
 
-/** Two minutes a decision, as a table setting: long enough for a person or a guest's models, short enough that a guest who left does not hold the table. */
+/** Two minutes a decision, as a table setting: long enough for a person, short enough that a player who left does not hold the table. */
 export const CLOCK = 120;
 
 export const GAME_TYPES = {
 	"standard-alpha": { name: "Standard alpha: main decks only, one on one", seats: 2 },
 } as const;
 
+/** 32 random bytes: a seat's code, which nobody guesses. */
+export const seatCode = () => randomBytes(32).toString("base64url");
+
 export function lobby(decks: readonly string[], game: keyof typeof GAME_TYPES = "standard-alpha"): Lobby {
 	if (decks.length !== GAME_TYPES[game].seats) throw new Error(`${GAME_TYPES[game].name} seats ${GAME_TYPES[game].seats} players, not ${decks.length}.`);
 	const looks = deal(decks.length);
-	return { game, seats: decks.map((deck, at) => ({ deck, by: "ai" as const, look: looks[at]! })), first: "coin", clock: CLOCK, background: choose("backgrounds", "random"),
-		stage: "setting", agreed: { prepare: [], begin: [] } };
+	return { game, seats: decks.map((deck, at) => ({ deck, look: looks[at]!, pilot: "ai" as const, models: {}, key: "game" as const, code: seatCode() })),
+		first: "coin", clock: CLOCK, background: choose("backgrounds", "random"), stage: "setting", agreed: { prepare: [], begin: [] } };
+}
+
+/** The seat a code opens, by its place at the table, compared in constant time. */
+export function seatOf(table: Lobby, code: string): number | undefined {
+	const given = Buffer.from(code);
+	const at = table.seats.findIndex((one) => { const mine = Buffer.from(one.code); return mine.length === given.length && timingSafeEqual(mine, given); });
+	return at < 0 ? undefined : at;
 }
 
 /**
