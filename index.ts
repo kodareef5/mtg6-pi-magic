@@ -689,7 +689,8 @@ export default function (pi: ExtensionAPI) {
 	/**
 	 * Take a chair at another Pi's table. A person plays it, with this Pi's
 	 * models as the autopilot behind them; `auto` hands the seat to the
-	 * autopilot from the start, and `manual` plays it without one.
+	 * autopilot from the start, and `manual` plays it without asking one. A
+	 * manual seat needs no decision model; its autopilot then only prepares.
 	 */
 	async function joinSeat(ctx: ExtensionContext, invite: string, mode: Mode = "suggest") {
 		if (host || guest) { ctx.ui.notify(host ? "This Pi is hosting a table. A host is never a seat; join from another Pi." : "This Pi already has a chair. /magic leave first.", "warning"); return; }
@@ -721,18 +722,20 @@ export default function (pi: ExtensionAPI) {
 			async agree(what, state) {
 				if (what === "prepare") return true;
 				ours.preparing ??= prepare(state);
-				if (!await ours.preparing || state.seat === undefined) return false;
+				if (!await ours.preparing || state.seat === undefined || ours.leaving.signal.aborted) return false;
 				// The player is made once the table is prepared, when it is known whether a judge hears objections.
 				const me = state.seats!.find((one) => one.id === state.seat)!;
 				let made: ReturnType<typeof aiPlayer>;
 				try {
 					made = aiPlayer(me, parts, seatInference, cards, { chronicle, tally: ours.spend, intent: startingIntent(me.id), judge: !!state.judge, rules,
-						onGap: (note) => void ours.gaps.push(note), onDial() {}, onPlanned() {} });
+						undecided: ours.mode === "manual", onGap: (note) => void ours.gaps.push(note), onDial() {}, onPlanned() {} });
 				} catch (error) { ctx.ui.notify(`This seat cannot play: ${error instanceof Error ? error.message : String(error)}`, "error"); return false; }
+				if (!made.deciding) ctx.ui.notify("This Pi's roster has no decision model, so the person makes every choice; the autopilot only prepares cards.", "warning");
 				let work = state.frame?.view.work;
 				// A seat with card uses left to interpret needs its own strategy model: nobody else at the table will.
 				if (!made.planning && work?.packages?.some((pack) => pack.deferred?.length)) {
 					ctx.ui.notify("This seat's deck has card uses to interpret during play, and this Pi's roster has no strategy model. It declines to begin.", "warning");
+					await made.player.close();
 					return false;
 				}
 				// The host journals the brief, so a clone or resume of this game carries this seat's preparation.
@@ -740,10 +743,12 @@ export default function (pi: ExtensionAPI) {
 				if (!kept.ok) ctx.ui.notify(`The host did not keep this seat's brief: ${kept.message ?? kept.refused}`, "warning");
 				for (const edit of made.planning ? setupWork(work, 0, me.id) : []) {
 					const done = await client.work({ tools: edit.tools, revision: work?.revision ?? 0, actionId: edit.actionId });
-					if (!done.ok) { ctx.ui.notify(`The host refused this seat's setup: ${done.message ?? done.refused}`, "warning"); return false; }
+					if (!done.ok) { ctx.ui.notify(`The host refused this seat's setup: ${done.message ?? done.refused}`, "warning"); await made.player.close(); return false; }
 					work = { ...work, revision: (work?.revision ?? 0) + 1 } as typeof work;
 				}
-				ours.person = person(me.name, made.player, ours.mode, () => showSeat(ctx));
+				// Left while the setup was posted: the seat never sat, and its player stops.
+				if (ours.leaving.signal.aborted) { await made.player.close(); return false; }
+				ours.person = person(me.name, made.player, ours.mode, () => showSeat(ctx), made.deciding);
 				ours.player = ours.person.player;
 				seatTools(true);
 				return true;
@@ -786,7 +791,7 @@ export default function (pi: ExtensionAPI) {
 		const cards = universe(standard.name).cards, names = [...new Set((frame.view.objects ?? []).flatMap((one) => !one.faceDown && one.card ? [one.card] : []))].sort();
 		return [...seatLines(), "", "Cards this seat can see:", ...names.map((name) => {
 			const card = cards.get(name);
-			return card ? `${name} (${card.mana || "no cost"}; ${card.type}${card.stats ? `; ${card.stats}` : ""}): ${card.oracle.replace(/\n/g, " ").slice(0, 400)}` : name;
+			return card ? `${name} (${card.mana || "no cost"}; ${card.type}${card.stats ? `; ${card.stats}` : ""}): ${card.oracle.replace(/\n/g, " ")}` : name;
 		})].join("\n");
 	}
 

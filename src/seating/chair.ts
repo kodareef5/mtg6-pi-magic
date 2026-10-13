@@ -62,8 +62,9 @@ export function chair(name: string, changed: () => void) {
 			if (id !== undefined) applied.set(id, JSON.stringify(answer));
 			const now = asking;
 			asking = undefined;
+			const failed = `The seat's player failed: ${"failed" in post ? String(post.failed).slice(0, 500) : "no answer"}`;
 			if (answer) now.settle(answer);
-			else now.fail(new Error(`The seat's player failed: ${"failed" in post ? String(post.failed).slice(0, 500) : "no answer"}`));
+			else now.fail("unavailable" in post && post.unavailable ? new PlayerUnavailable(failed) : new Error(failed));
 			changed();
 			return { ok: true };
 		},

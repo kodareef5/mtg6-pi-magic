@@ -66,8 +66,10 @@ export type State = {
  * declaration carries a fresh actionId. `failed` says the seat's player could
  * not answer, so the host's loop treats it as it treats any seat that fails:
  * it asks once more, then takes the terminating option and records a gap.
+ * `unavailable` says it could not answer at all, as when its model provider is
+ * down: the decision stays pending, as it would for a seat at the host.
  */
-export type Answering = { ask: number; answer: Answer } | { ask: number; failed: string };
+export type Answering = { ask: number; answer: Answer } | { ask: number; failed: string; unavailable?: true };
 
 /** `POST /v1/brief`: the seat's pregame brief, journaled by the host like any seat's preparation. */
 export type Briefing = { brief: unknown };

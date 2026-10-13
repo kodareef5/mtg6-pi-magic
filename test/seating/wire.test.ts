@@ -9,7 +9,7 @@ import { start } from "../../src/core/commit.ts";
 import { deck } from "../../src/core/decks.ts";
 import { standard } from "../../src/core/format.ts";
 import { play } from "../../src/core/loop.ts";
-import type { Player } from "../../src/core/player.ts";
+import { PlayerUnavailable, type Player } from "../../src/core/player.ts";
 import type { Table } from "../../src/core/table.ts";
 import type { Frame } from "../../src/core/types.ts";
 import { chair } from "../../src/seating/chair.ts";
@@ -118,4 +118,35 @@ test("over HTTP, an unusable answer or a failing player is asked again as the lo
 		await following;
 		assert.equal(closed, 1, "leaving closes the seat's player");
 	} finally { await host.close(); }
+});
+
+test("an unavailable guest leaves the decision pending as a local seat would, and a guest that leaves while it prepares agrees to nothing", async () => {
+	const down: Player = { name: "B", observe() {}, close() {}, async answer() { throw new PlayerUnavailable("The provider is down."); } };
+	const local = dealt();
+	await through(local, { 0: steady("A"), 1: down }, 2);
+
+	const table = dealt();
+	const host = await hostTable({ game: "test", work: () => ({ ok: false, refused: "not-now" }), brief: () => ({ ok: false, refused: "not-now" }),
+		view: () => ({ stage: "preparing", seat: 1, seats: table.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck })), recaps: [] }) });
+	const leaving = new AbortController(), going = new AbortController();
+	try {
+		const { invite, chair: remote } = host.open(1, "B");
+		const following = follow(await join(invite, "guest B"), { agree: async () => true, player: () => down }, leaving.signal);
+		await through(table, { 0: steady("A"), 1: remote.player }, 2);
+		assert.equal(physical(table), physical(local));
+		assert.ok(!table.ledger.some((row) => row.why === "fallback") && table.gaps.some((gap) => /unavailable/.test(gap)), "no fallback move: the decision stays pending");
+		leaving.abort();
+		await following;
+
+		let ready!: (yes: boolean) => void;
+		const { invite: second, chair: other } = host.open(0, "A");
+		const agreed = other.request("begin");
+		const preparing = follow(await join(second, "guest A"), { agree: () => new Promise<boolean>((settle) => { ready = settle; }), player: () => undefined }, going.signal);
+		await new Promise((go) => setTimeout(go, 50));
+		going.abort();
+		ready(true);
+		const said = await Promise.race([agreed, new Promise((go) => setTimeout(() => go("nothing"), 50))]);
+		assert.equal(said, "nothing", "preparation that finishes after leaving posts no agreement");
+		await preparing;
+	} finally { leaving.abort(); going.abort(); await host.close(); }
 });

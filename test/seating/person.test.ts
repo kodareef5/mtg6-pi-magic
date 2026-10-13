@@ -116,10 +116,20 @@ test("a person's menu folds equal payments, leads a trigger with its target, and
 		{ id: "b1", label: "Block Hardened Academic with Gene Pollinator", shows: "Conflicts with flying: needs flying or reach. In normal combat damage..." },
 	] } } as unknown as Frame;
 	const lines = menu({ frame });
-	assert.deepEqual(lines.map((line) => line.option.id), ["p2", "p3", "land:1-9", "t1", "b1"], "colour variants and copies are one line, kept on the colour the cost needs");
-	assert.equal(lines[0]!.label, "Add to payment: tap Gene Pollinator and Azog for {B}");
-	assert.equal(lines[3]!.label, "Put Azog's trigger on the stack: Target 1: Inti (0-32@5, opponent's, 2/2).");
-	assert.match(lines[4]!.label, /\(Conflicts with flying: needs flying or reach\)$/);
+	assert.deepEqual(lines.map((line) => line.option.id), ["p1", "p2", "p3", "land:1-9", "t1", "b1"], "copies are one line; different mana is not");
+	assert.equal(lines[1]!.label, "Add to payment: tap Gene Pollinator and Azog for {B}");
+	assert.equal(lines[4]!.label, "Put Azog's trigger on the stack: Target 1: Inti (0-32@5, opponent's, 2/2).");
+	assert.match(lines[5]!.label, /\(Conflicts with flying: needs flying or reach\)$/);
+});
+
+test("payments fold only over permanents alike in everything the seat sees", () => {
+	const forest = (id: string, more = {}) => ({ id, incarnation: 1, card: "Forest", zone: "battlefield", controller: 1, owner: 1, ...more });
+	const paying = (id: string) => ({ id: `announce:payment:${id}`, label: `Confirm and pay: tap Forest (${id}) for {G}`, objects: [{ id, incarnation: 1 }] });
+	const frame = { ...ask(1), view: { ...ask(1).view, objects: [forest("1-3"), forest("1-4"), forest("1-5", { counters: { "+1/+1": 2 } })] },
+		decision: { situation: "priority", seat: 1, question: "Choose a complete payment.", options: ["1-3", "1-4", "1-5"].map(paying) } } as unknown as Frame;
+	const lines = menu({ frame });
+	assert.deepEqual(lines.map((line) => line.option.id), ["announce:payment:1-3", "announce:payment:1-5"], "two plain Forests are one line; the one with counters is its own");
+	assert.deepEqual(lines.map((line) => line.label), ["Confirm and pay: tap Forest (1-3) for {G}", "Confirm and pay: tap Forest (1-5) for {G}"], "lines that would read the same keep their ids");
 });
 
 test("payments that fold into one line need no person", async () => {
@@ -131,6 +141,45 @@ test("payments that fold into one line need no person", async () => {
 		{ id: "announce:cancel", label: "Cancel this use and return to priority; spend nothing" },
 	] } } as unknown as Frame;
 	assert.equal((await seat.player.answer(frame) as { option: string }).option, "announce:payment:a");
+});
+
+test("an answer worked out for a withdrawn or taken-over question is never shown or played", async () => {
+	const waiting: ((answer: Answer) => void)[] = [];
+	const held = (): Player => ({ name: "pilot", observe() {}, close() {}, answer: () => new Promise<Answer>((settle) => waiting.push(settle)) });
+	const seat = person("B", held(), "suggest", () => {});
+	const old = seat.player.answer(ask(1, "pass", "land:7"));
+	seat.player.reset!();
+	const fresh = seat.player.answer(ask(2, "pass", "land:7"));
+	waiting[1]!({ kind: "pick", option: "pass", actionId: "fresh" });
+	await new Promise((go) => setTimeout(go, 0));
+	waiting[0]!({ kind: "pick", option: "land:7", actionId: "late" });
+	await old;
+	assert.equal(seat.asking()?.frame.version, 2, "a late suggestion does not replace the question asked after the rewind");
+	seat.choose(2);
+	assert.equal((await fresh as { option: string }).option, "land:7");
+
+	const taken = person("B", held(), "auto", () => {});
+	const open = taken.player.answer(ask(1, "pass", "land:7"));
+	await taken.switch("manual");
+	waiting[2]!({ kind: "pick", option: "land:7", actionId: "auto" });
+	await new Promise((go) => setTimeout(go, 0));
+	assert.ok(taken.asking() && !taken.asking()!.suggestion, "taking over mid-thought asks the person, without the autopilot's move");
+	taken.choose(1);
+	assert.deepEqual({ ...await open, actionId: "" }, { kind: "pick", option: "pass", actionId: "", by: "person" });
+});
+
+test("preparation and a due plan go to the autopilot first; manual mode keeps it idle", async () => {
+	const work: Answer = { kind: "work", tools: [], revision: 0, actionId: "plan" };
+	let observed = 0;
+	const pilot = { ...autopilot(() => work), observe() { observed++; } };
+	const seat = person("B", pilot, "suggest", () => {});
+	const due = { ...ask(1, "pass"), view: { ...ask(1).view, work: { revision: 0, request: "Plan the turn." } } } as unknown as Frame;
+	assert.equal(await seat.player.answer(due), work, "one option, but the turn's plan is owed");
+	await seat.switch("manual");
+	const shock = { ...ask(2, "pass", "cast:shock"), decision: { ...ask(2, "pass", "cast:shock").decision!, preparation: [{ card: "Shock", uses: [] }] } } as unknown as Frame;
+	assert.equal(await seat.player.answer(shock), work, "preparing a card's uses is no choice, so even manual mode hands it over");
+	seat.player.observe(ask(3, "pass"));
+	assert.equal(observed, 0, "manual mode starts no background work");
 });
 
 test("a person's words reach the autopilot's strategy as one plan request, in a turn", async () => {

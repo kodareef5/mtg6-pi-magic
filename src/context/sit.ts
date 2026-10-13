@@ -22,7 +22,7 @@ import { keep, save, type Journal } from "../core/journal.ts";
 import type { Intent } from "../core/intent.ts";
 import { play, type Judge, type PlayOptions, type Watcher } from "../core/loop.ts";
 import { start } from "../core/commit.ts";
-import { TableHalted, type Player } from "../core/player.ts";
+import { PlayerUnavailable, TableHalted, type Player } from "../core/player.ts";
 import type { Seat, Table } from "../core/table.ts";
 import type { Workspace } from "../core/work.ts";
 import type { WorkCommand } from "../core/work-language.ts";
@@ -255,19 +255,18 @@ export async function seat(
  * and the strategy model, when the seat has one, writes its plans and
  * interprets its deferred card uses. It reads frames, never the table, so it
  * answers the same way in the host's Pi or at the far end of a wire.
+ * `undecided` allows a roster with no decision model: the seat then only
+ * prepares, and any decision it is asked is unavailable. A person who makes
+ * every choice needs no more.
  */
 export function aiPlayer(at: { id: SeatId; name: string }, parts: Cast[], inference: Inference, universe: Universe, shared: {
-	chronicle: Chronicle; tally: Tally; intent: Intent; judge: boolean; rules?: Rules; dials?: number;
+	chronicle: Chronicle; tally: Tally; intent: Intent; judge: boolean; rules?: Rules; dials?: number; undecided?: boolean;
 	onGap(note: string): void; onDial(route: string): void; onPlanned(one: Planned): void;
-}): { player: Player; planning: boolean } {
-	const decide = pick(parts, "decide");
-	if (!decide?.model || decide.model.type !== "classifier") {
-		throw new Error(
-			`Seat ${at.id} has no decision model. ` +
-				`${decide?.problem ?? `${decide?.pattern} is not a classifier.`} ` +
-				`Run /magic models to read the roster, and /magic models decide <pattern> to change it.`,
-		);
-	}
+}): { player: Player; planning: boolean; deciding: boolean } {
+	const decide = pick(parts, "decide"), deciding = decide?.model?.type === "classifier";
+	const missing = `Seat ${at.id} has no decision model. ${decide?.problem ?? `${decide?.pattern} is not a classifier.`} ` +
+		`Run /magic models to read the roster, and /magic models decide <pattern> to change it.`;
+	if (!deciding && !shared.undecided) throw new Error(missing);
 	const strategy = pick(parts, "strategy");
 	const planning = strategy && !strategy.off && strategy.model && strategy.model.type !== "classifier"
 		? reasoner({ role: "strategy", seat: at.id, stream: inference.stream, model: strategy.model as Model<Api>, tally: shared.tally,
@@ -276,7 +275,8 @@ export function aiPlayer(at: { id: SeatId; name: string }, parts: Cast[], infere
 	const context = () => ({ brief: shared.chronicle.briefs[at.id], recaps: shared.chronicle.recaps, cards: universe, ...(shared.rules ? { rules: shared.rules } : {}) });
 	const player = aiSeat({
 		name: at.name, judge: shared.judge,
-		api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>, { tally: shared.tally, seat: at.id }),
+		api: deciding ? decisionApi(inference.classify, decide!.model as ClassifierModel<ClassifierApi>, { tally: shared.tally, seat: at.id })
+			: { named: "no decision model", ask: async () => { throw new PlayerUnavailable(missing); } },
 		intent: shared.intent, chronicle: shared.chronicle,
 		...(shared.rules ? { rules: shared.rules } : {}), ...(shared.dials === undefined ? {} : { dials: shared.dials }),
 		onGap: shared.onGap, onDial: shared.onDial, onPlanned: shared.onPlanned,
@@ -286,7 +286,7 @@ export function aiPlayer(at: { id: SeatId; name: string }, parts: Cast[], infere
 			prepare: (frame: Frame, signal?: AbortSignal) => prepareTurn(frame, context(), planning, signal),
 		} : {}),
 	});
-	return { player, planning: !!planning };
+	return { player, planning: !!planning, deciding };
 }
 
 /**

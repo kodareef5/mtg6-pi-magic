@@ -28,8 +28,8 @@ const planner = { id: "planner", name: "planner", api: "openai-completions", pro
 	cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, reasoning: true, contextWindow: 100000, maxTokens: 10000 };
 
 /** One Pi with the extension loaded: what it said, and every classifier call with the key it carried. */
-/** `gone` is a Pi whose models never answer: from the host's side, a guest that disconnected mid-decision. */
-function fakePi(gone = false) {
+/** `gone` is a Pi whose models never answer: from the host's side, a guest that disconnected mid-decision. `undecided` has no classifier. */
+function fakePi(gone = false, undecided = false) {
 	const notes: string[] = [], calls: { model: string; key?: string }[] = [];
 	// The next roster read waits for `release`: a preparation that finishes late.
 	const gate = { hold: false, release: () => {} };
@@ -40,7 +40,7 @@ function fakePi(gone = false) {
 			getAvailable: () => [planner],
 			async getAvailableOfType() {
 				if (gate.hold) { gate.hold = false; await new Promise<void>((go) => { gate.release = go; }); }
-				return [classifier("jev-a"), classifier("jev-b")];
+				return undecided ? [] : [classifier("jev-a"), classifier("jev-b")];
 			},
 			async classify(model: { id: string }, request: { questions: Record<string, { criteria: Record<string, string> }> }, options?: { apiKey?: string }) {
 				calls.push({ model: model.id, ...(options?.apiKey ? { key: options.apiKey } : {}) });
@@ -189,11 +189,15 @@ test("a person at a guest seat answers by number, and the ledger says the person
 		await hostPi.magic("start");
 		await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
 		await hostPi.magic("begin");
-		let panel = "";
-		for (const begun = Date.now(); !/Type a number/.test(panel); await new Promise((go) => setTimeout(go, 50))) {
-			if (Date.now() - begun > 20_000) throw new Error(`The person was never asked. Panel: ${panel}`);
-			panel = await personPi.status();
-		}
+		const panelShows = async (pattern: RegExp) => {
+			let panel = "";
+			for (const begun = Date.now(); !pattern.test(panel); await new Promise((go) => setTimeout(go, 50))) {
+				if (Date.now() - begun > 20_000) throw new Error(`The panel never showed ${pattern}. Panel: ${panel}`);
+				panel = await personPi.status();
+			}
+			return panel;
+		};
+		const panel = await panelShows(/Type a number/);
 		assert.match(panel, /suggest mode/);
 		assert.match(panel, /Your hand: /, "the panel shows the seat its own hand");
 		assert.match(panel, /1\. .*<- autopilot/, "and marks the autopilot's choice");
@@ -203,7 +207,7 @@ test("a person at a guest seat answers by number, and the ledger says the person
 		assert.match(reading, /Mulligan/, "the assistant reads the open question");
 		assert.equal(await personPi.tool("magic_tell", { instruction: "Keep two-landers and attack every turn." }), "Passed to the seat's autopilot. It plans from it at the seat's next question.");
 		assert.deepEqual(await personPi.type("1"), { action: "handled" }, "a typed number answers the question");
-		await until(() => hostPi.calls.length > 1, "play to go on", hostPi.notes);
+		await panelShows(/Jund-Sacrifice declared keep/);
 		await hostPi.magic("end Person check done.");
 		await until(() => personPi.said(/this seat's result is draw/), "the person to hear the end", personPi.notes);
 		const journal = readdirSync(join(home, "magic", "games")).filter((name) => name.startsWith("mardu-discard-vs-jund-sacrifice") && name.endsWith(".jsonl"))
@@ -211,6 +215,35 @@ test("a person at a guest seat answers by number, and the ledger says the person
 		const rows = readFileSync(journal, "utf8").split("\n").filter((line) => line.includes('"row"')).map((line) => JSON.parse(line).row);
 		assert.ok(rows.some((row) => row.seat === 1 && row.by === "person" && row.situation === "pregame"), "the person's mulligan decision is the person's row");
 		await until(() => !personPi.active().includes("magic_seat"), "the seat tools to go with the seat", personPi.notes);
+	} finally {
+		await hostPi.shutdown();
+		await personPi.shutdown();
+	}
+});
+
+test("a person playing manual needs no decision model", async () => {
+	const hostPi = fakePi(), personPi = fakePi(false, true);
+	try {
+		await hostPi.magic("host Mardu Discard vs Jund Sacrifice");
+		await hostPi.magic("first 0");
+		await hostPi.magic("seat 1 open");
+		await personPi.magic(`join ${/\/magic join (\S+)/.exec(hostPi.notes.findLast((note) => note.includes("/magic join"))!)![1]} manual`);
+		await hostPi.magic("start");
+		await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
+		await hostPi.magic("begin");
+		await until(() => personPi.said(/no decision model, so the person makes every choice/), "the seat to say what it lacks", personPi.notes);
+		let panel = "";
+		for (const begun = Date.now(); !/Type a number/.test(panel); await new Promise((go) => setTimeout(go, 50))) {
+			if (Date.now() - begun > 20_000) throw new Error(`The person was never asked. Panel: ${panel}`);
+			panel = await personPi.status();
+		}
+		assert.match(panel, /manual mode/);
+		await personPi.magic("mode suggest");
+		assert.match(personPi.notes.at(-1)!, /no decision model; it only prepares cards/);
+		assert.deepEqual(await personPi.type("1"), { action: "handled" });
+		assert.ok(!personPi.said(/declines to begin|cannot play/), "the seat sat down");
+		await hostPi.magic("end Manual check done.");
+		await until(() => personPi.said(/this seat's result is draw/), "the person to hear the end", personPi.notes);
 	} finally {
 		await hostPi.shutdown();
 		await personPi.shutdown();

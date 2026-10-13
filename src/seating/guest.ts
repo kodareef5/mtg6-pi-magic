@@ -7,7 +7,7 @@
  * player can be anything that answers a frame, a model seat or a person.
  */
 
-import type { Player } from "../core/player.ts";
+import { PlayerUnavailable, type Player } from "../core/player.ts";
 import type { Outcome } from "../core/types.ts";
 import type { Agreement } from "./lobby.ts";
 import { HOLD_MS, PROTOCOL, parseInvite, type Agreeing, type Answering, type Briefing, type Claim, type Result, type State, type Welcome, type Working } from "./protocol.ts";
@@ -69,6 +69,8 @@ export async function follow(guest: Guest, seat: {
 			catch (error) { if (tries >= 3 || signal?.aborted) throw error; await new Promise((wait) => setTimeout(wait, 1_000)); }
 		}
 	};
+	// Leaving while the seat prepares to agree says nothing to the host.
+	const left = new Promise<undefined>((done) => signal?.addEventListener("abort", () => done(undefined), { once: true }));
 	try {
 		while (!signal?.aborted) {
 			let state: State;
@@ -76,7 +78,13 @@ export async function follow(guest: Guest, seat: {
 			else try { state = await read(after, signal); } catch { break; }
 			after = state.serial;
 			seat.seen?.(state);
-			if (state.agreement) { await guest.agree({ what: state.agreement, yes: await seat.agree(state.agreement, state) }); continue; }
+			if (state.agreement) {
+				const yes = await Promise.race([seat.agree(state.agreement, state), left]);
+				if (yes === undefined || signal?.aborted) break;
+				await guest.agree({ what: state.agreement, yes });
+				current = seat.player(state) ?? current;
+				continue;
+			}
 			const player = seat.player(state);
 			current = player ?? current;
 			if (player && state.resets !== resets) { resets = state.resets; player.reset?.(); }
@@ -88,7 +96,8 @@ export async function follow(guest: Guest, seat: {
 				answered = ask;
 				version = state.frame.version;
 				// A player that throws is reported, so the host's loop retries it as it would any seat's failure.
-				const thinking = player.answer(state.frame).then((answer) => ({ answer }), (error: unknown) => ({ failed: error instanceof Error ? error.message : String(error) }));
+				const thinking = player.answer(state.frame).then((answer) => ({ answer }), (error: unknown) =>
+					({ failed: error instanceof Error ? error.message : String(error), ...(error instanceof PlayerUnavailable ? { unavailable: true as const } : {}) }));
 				const moved = (async () => {
 					for (let at = after; ;) {
 						const seen = await read(at, stop);
@@ -102,7 +111,7 @@ export async function follow(guest: Guest, seat: {
 				watching.abort();
 				// Stale means the table moved on; the next state carries the newer ask.
 				if ("answer" in first) await send({ ask, answer: first.answer });
-				else if ("failed" in first) await send({ ask, failed: first.failed });
+				else if ("failed" in first) await send({ ask, ...first });
 				else next = first.moved;
 			} else if (state.frame.version !== version) {
 				version = state.frame.version;

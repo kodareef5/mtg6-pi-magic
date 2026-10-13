@@ -242,8 +242,11 @@ A guest seat is a person's by default: `/magic join <invite>` seats a person
 with the guest Pi's models as the autopilot behind them (`src/seating/person.ts`).
 In suggest mode the autopilot proposes each choice and the person types a
 number, `ok` for its choice, or `p` to pass; auto hands the seat over and
-manual plays without it. A question with one real option is answered at once,
-and options a person cannot tell apart are one line. Smart stops ask at
+manual plays without asking it, and needs no decision model. Preparing card
+uses is no choice, so the autopilot does it in every mode. A question with one
+real option is answered at once unless the turn's plan is owed first, and
+options that come to the same thing are one line: payments fold only over
+permanents alike in everything the seat sees, as core groups mana sources. Smart stops ask at
 priority only in the seat's own main phases and when another seat has
 something on the stack, unless the autopilot wants to act; `/magic stops all`
 asks everywhere and `/magic pass turn` passes the rest of the turn. The seat

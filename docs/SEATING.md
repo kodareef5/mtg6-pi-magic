@@ -57,7 +57,9 @@ edit, an objection, table talk. The same set the model seats use. The host's
 loop judges it as it judges every seat's answer: an unlisted pick is refused
 and asked once more with the reason, then the table takes the terminating
 option and records a gap. A guest whose player failed says so, and the loop
-counts it as that seat failing, with the same retry.
+counts it as that seat failing, with the same retry. A guest that cannot answer
+at all, as when its model provider is down, says `unavailable`, and the
+decision stays pending as it would for a seat at the host: no fallback move.
 
 ## Why an answer names its ask
 
