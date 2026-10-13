@@ -282,8 +282,13 @@ play-by-play picture series (`src/board/series.ts`). The journal replays,
 calling no models, and each moment something visible happened becomes a
 numbered picture as that viewer saw it; a moment that leaves the board as it
 was joins the one before. `index.md` beside the pictures lists what happened
-in each. A full game is about 150 to 200 pictures at 1280 × 720, drawn in
-under a minute.
+in each. A full game is about 150 to 200 pictures at 1920 × 1080, drawn in
+about a minute.
+
+Saved pictures are WebP (jSquash's libwebp build, quality 85), about a tenth
+the size of PNG: the series, the host's picture after each turn and a guest
+seat's own. The terminal widget is shown PNG, which every terminal image
+protocol takes.
 
 A seat can carry its own key for a provider, named as an environment variable
 under `keys` in the roster file (`"keys": {"1": {"openrouter": "$OPENROUTER_SEAT_1"}}`).
@@ -653,7 +658,7 @@ src/seating/           who answers a seat
   host.ts, guest.ts    the server that hands out chairs; claiming a chair and following it
 src/board/             board pictures: no game logic, never read by a seat
   snapshot.ts          the board as one viewer may see it, renderer-neutral and pure
-  render.ts            the renderer seam, the art map, and SVG to PNG through resvg
+  render.ts            the renderer seam, the art map, and SVG to PNG or WebP through resvg and jSquash
   cardboard.ts         the interim renderer: a snapshot as a cardboard-api MTG 26 scene (optional dependency)
   looks.ts             seat portraits and table backgrounds: the defaults in assets/, or image URLs
   series.ts            a saved game as a play-by-play picture series, with an index of what happened

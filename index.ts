@@ -23,7 +23,7 @@ import { basename, dirname, join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Container, Image, Text } from "@earendil-works/pi-tui";
 import { boardFeed } from "./src/board/feed.ts";
-import { artIds, boardPng, type BoardRenderer, type Dress } from "./src/board/render.ts";
+import { artIds, boardPicture, type BoardRenderer, type Dress } from "./src/board/render.ts";
 import { choose, chooseColors, defaults, named, type Art, type Colors, type Look } from "./src/board/looks.ts";
 import { boardSnapshot } from "./src/board/snapshot.ts";
 import { menu, person, type Mode, type Person } from "./src/seating/person.ts";
@@ -725,10 +725,10 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 		const dress: Dress = { avatars: Object.fromEntries((state.seats ?? []).flatMap((one) => one.avatar ? [[one.id, one.avatar]] : [])), ...(background ? { background } : {}), ...(colors ? { colors } : {}) };
 		void (renderer ??= cardboardRenderer(artIds(), join(CACHE, "art"))).then(async (drawing) => {
 			if (!drawing) return;
-			const png = await boardPng(drawing, boardSnapshot(frame.view, seats, seat), dress);
-			const path = join(GAMES, `guest-${ours.client.welcome.table}-seat-${seat}`, `${at}.png`);
+			const picture = await boardPicture(drawing, boardSnapshot(frame.view, seats, seat), dress), png = picture.png();
+			const path = join(GAMES, `guest-${ours.client.welcome.table}-seat-${seat}`, `${at}.webp`);
 			mkdirSync(dirname(path), { recursive: true });
-			writeFileSync(path, png);
+			writeFileSync(path, await picture.webp());
 			ctx.ui.setWidget("magic-board", (_tui, theme) => new Image(Buffer.from(png).toString("base64"), "image/png",
 				{ fallbackColor: (text) => theme.fg("dim", text) }, { maxWidthCells: 120, filename: path }));
 		}).catch((error) => ctx.ui.notify(`The seat's picture failed: ${error instanceof Error ? error.message : String(error)}`, "warning"));

@@ -49,6 +49,7 @@
     "art": "node tools/card-art.ts"
   },
   "dependencies": {
+    "@jsquash/webp": "^1.5.0",
     "@resvg/resvg-js": "^2.6.2",
     "typebox": "^1.3.27"
   },

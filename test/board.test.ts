@@ -8,7 +8,7 @@ import type { Table } from "../src/core/table.ts";
 import { boardSnapshot } from "../src/board/snapshot.ts";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import { artIds, svgToPng } from "../src/board/render.ts";
+import { artIds, rasterize, svgToPng } from "../src/board/render.ts";
 import { cardboardRenderer, cardboardScene } from "../src/board/cardboard.ts";
 import { choose, chooseColors, colorsFor, deal, defaults, imageOf } from "../src/board/looks.ts";
 import { announce, establish, example, main, matchup, place, quiet } from "./play.ts";
@@ -118,9 +118,16 @@ test("an ability on the stack named by long rules text is still a card the prese
 	await accepted(scene);
 });
 
-test("an SVG becomes a PNG with no browser", async () => {
+test("an SVG becomes a PNG to show or a WebP to keep, with no browser", async () => {
 	const png = await svgToPng('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8" fill="#123456"/></svg>');
 	assert.deepEqual([...png.slice(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+	// Gradients and noise, as a board's art is: WebP keeps it at a fraction of the PNG.
+	const busy = await rasterize(`<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360"><defs><filter id="n"><feTurbulence baseFrequency=".8" numOctaves="3"/></filter>
+		<linearGradient id="g"><stop stop-color="#3d1410"/><stop offset="1" stop-color="#e8a066"/></linearGradient></defs><rect width="640" height="360" fill="url(#g)"/><rect width="640" height="360" filter="url(#n)" opacity=".5"/></svg>`);
+	const kept = await busy.webp();
+	assert.equal(Buffer.from(kept.slice(0, 4)).toString(), "RIFF");
+	assert.equal(Buffer.from(kept.slice(8, 12)).toString(), "WEBP");
+	assert.ok(kept.length * 3 < busy.png().length, `${kept.length} bytes of WebP against ${busy.png().length} of PNG`);
 });
 
 test("looks are a default by name, an image URL, or random, and seats are dealt different portraits", () => {

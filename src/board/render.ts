@@ -1,9 +1,11 @@
 /**
  * The seam between a board snapshot and a picture. A renderer turns a snapshot into SVG;
- * resvg turns SVG into PNG with no browser. Swapping the look means swapping the renderer.
+ * resvg turns SVG into pixels with no browser, encoded as PNG for a terminal to show or as WebP,
+ * about a tenth the size, to keep. Swapping the look means swapping the renderer.
  */
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
 import type { SeatId } from "../core/types.ts";
 import type { Colors } from "./looks.ts";
 import type { BoardSnapshot } from "./snapshot.ts";
@@ -30,17 +32,44 @@ export function fetchImage(href: string): Promise<Buffer | undefined> {
 	return fetched.get(href)!;
 }
 
-/** SVG to PNG. System fonts are loaded for each picture, which costs about half a second. */
-export async function svgToPng(svg: string): Promise<Uint8Array> {
+/** A drawn picture: PNG for a terminal, WebP to keep. */
+export type Picture = { png(): Uint8Array; webp(): Promise<Uint8Array> };
+
+/** SVG to pixels. System fonts are loaded for each picture, which costs about half a second. */
+export async function rasterize(svg: string): Promise<Picture> {
 	const { Resvg } = await import("@resvg/resvg-js");
 	const drawing = new Resvg(svg, { font: { loadSystemFonts: true } });
 	for (const href of drawing.imagesToResolve()) {
 		const bytes = await fetchImage(href);
 		if (bytes) drawing.resolveImage(href, bytes);
 	}
-	return drawing.render().asPng();
+	const image = drawing.render();
+	return { png: () => image.asPng(), webp: () => webp(image.pixels, image.width, image.height) };
 }
 
-export async function boardPng(renderer: BoardRenderer, snapshot: BoardSnapshot, dress?: Dress, size: BoardSize = { width: 1920, height: 1080 }): Promise<Uint8Array> {
-	return svgToPng(await renderer.svg(snapshot, size, dress));
+export async function svgToPng(svg: string): Promise<Uint8Array> {
+	return (await rasterize(svg)).png();
+}
+
+export async function boardPicture(renderer: BoardRenderer, snapshot: BoardSnapshot, dress?: Dress, size: BoardSize = { width: 1920, height: 1080 }): Promise<Picture> {
+	return rasterize(await renderer.svg(snapshot, size, dress));
+}
+
+export async function boardPng(renderer: BoardRenderer, snapshot: BoardSnapshot, dress?: Dress, size?: BoardSize): Promise<Uint8Array> {
+	return (await boardPicture(renderer, snapshot, dress, size)).png();
+}
+
+/**
+ * RGBA pixels to WebP at quality 85, through jSquash's libwebp build. In Node the encoder is given
+ * its WebAssembly from disk; Node 22 has WebAssembly SIMD, and the encoder picks its SIMD build then.
+ */
+let encoder: Promise<(data: { data: Uint8ClampedArray; width: number; height: number }, options: { quality: number }) => Promise<ArrayBuffer>> | undefined;
+async function webp(pixels: Buffer, width: number, height: number): Promise<Uint8Array> {
+	encoder ??= (async () => {
+		const { default: encode, init } = await import("@jsquash/webp/encode.js");
+		const root = dirname(createRequire(import.meta.url).resolve("@jsquash/webp/package.json"));
+		await init(await WebAssembly.compile(readFileSync(join(root, "codec", "enc", "webp_enc_simd.wasm"))));
+		return encode as never;
+	})();
+	return new Uint8Array(await (await encoder)({ data: new Uint8ClampedArray(pixels.buffer, pixels.byteOffset, pixels.length), width, height }, { quality: 85 }));
 }

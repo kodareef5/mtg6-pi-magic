@@ -10,7 +10,7 @@ import { join } from "node:path";
 import type { Table } from "../core/table.ts";
 import type { Viewer } from "../core/types.ts";
 import { project } from "../core/view.ts";
-import { boardPng, type BoardRenderer, type BoardSize, type Dress } from "./render.ts";
+import { boardPicture, type BoardRenderer, type BoardSize, type Dress } from "./render.ts";
 import { boardSnapshot, type BoardSnapshot } from "./snapshot.ts";
 
 export type Moment = { snapshot: BoardSnapshot; lines: string[] };
@@ -53,10 +53,10 @@ export async function drawSeries(moments: Moment[], renderer: BoardRenderer, dir
 	for (const [at, moment] of moments.entries()) {
 		// A finished board has no turn of its own; it keeps the last one's.
 		turn = moment.snapshot.turn ?? turn;
-		const name = `${String(at + 1).padStart(4, "0")}-turn-${String(turn).padStart(2, "0")}.png`;
+		const name = `${String(at + 1).padStart(4, "0")}-turn-${String(turn).padStart(2, "0")}.webp`;
 		let drawn: string;
 		try {
-			writeFileSync(join(dir, name), await boardPng(renderer, moment.snapshot, options.dress, options.size ?? { width: 1280, height: 720 }));
+			writeFileSync(join(dir, name), await (await boardPicture(renderer, moment.snapshot, options.dress, options.size)).webp());
 			files.push(name);
 			drawn = `![${name}](${name})`;
 		} catch (error) { failed++; drawn = `Not drawn: ${error instanceof Error ? error.message : String(error)}`; }

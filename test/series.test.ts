@@ -59,13 +59,13 @@ test("a series is drawn as numbered pictures named by turn, with an index of wha
 	const { files, failed } = await drawSeries(moments, plain, dir, "pictured: play by play", { progress: (done) => void heard.push(done) });
 	assert.deepEqual([files.length, failed], [moments.length, 0]);
 	assert.deepEqual(heard, moments.map((_, at) => at + 1));
-	assert.match(files[0]!, /^0001-turn-00\.png$/);
-	assert.ok(files.some((name) => /-turn-03\.png$/.test(name)));
+	assert.match(files[0]!, /^0001-turn-00\.webp$/);
+	assert.ok(files.some((name) => /-turn-03\.webp$/.test(name)));
 	assert.deepEqual(readdirSync(dir).sort(), [...files, "index.md"].sort());
 	const index = readFileSync(join(dir, "index.md"), "utf8");
-	assert.match(index, /^# pictured: play by play\n\n## 1\. Opening hands\n\n!\[0001-turn-00\.png\]\(0001-turn-00\.png\)\n\n- /);
+	assert.match(index, /^# pictured: play by play\n\n## 1\. Opening hands\n\n!\[0001-turn-00\.webp\]\(0001-turn-00\.webp\)\n\n- /);
 	assert.match(index, /## \d+\. Turn 2, B's /);
-	assert.ok(!files.slice(1).some((name) => /-turn-00\.png$/.test(name)), "only the opening hands come before turn 1");
+	assert.ok(!files.slice(1).some((name) => /-turn-00\.webp$/.test(name)), "only the opening hands come before turn 1");
 
 	let drawn = 0;
 	const flaky = { name: "flaky", svg: async () => { if (++drawn === 2) throw new Error("Card ID must contain 1–100 characters."); return plain.svg(); } };
