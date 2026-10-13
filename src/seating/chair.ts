@@ -1,14 +1,15 @@
 /**
  * A chair answered over the wire, as the host's loop sees it: a player like any
- * other. When the loop asks, the chair holds the frame until its guest answers;
- * it judges the answer against the ask and hands it to the loop, which applies
- * its own rules as it does for every seat. The chair also carries the lobby's
- * agreements to its guest.
+ * other. When the loop asks, the chair holds the frame until its guest answers,
+ * matches the answer to the ask, and hands it to the loop. The loop judges it
+ * as it judges every seat's: an unlisted pick is refused and asked once more,
+ * then the table takes the terminating option and records a gap. The chair
+ * also carries the lobby's agreements to its guest.
  *
- * Five verdicts are the whole concurrency story. An answer to an older ask is
- * stale. A resent actionId with the same answer is a replay and changes the
- * game once; with a different answer it is a duplicate. With no ask open it is
- * not this seat's turn, and a pick names a listed option or is refused.
+ * Four verdicts are the chair's whole concurrency story. An answer to an older
+ * ask is stale. A resent actionId with the same answer is a replay and changes
+ * the game once; with a different answer it is a duplicate. With no ask open it
+ * is not this seat's turn.
  */
 
 import { PlayerUnavailable, type Answer, type Player } from "../core/player.ts";
@@ -36,7 +37,8 @@ export function chair(name: string, changed: () => void) {
 			return answered;
 		},
 		observe(frame) { latest = frame; changed(); },
-		reset() { resets++; changed(); },
+		// A rewind withdraws the open ask: the loop asks again from the position it went back to.
+		reset() { asking?.fail(new Error("The game went back; this ask is withdrawn.")); asking = undefined; resets++; changed(); },
 		close() {
 			closed = true;
 			asking?.fail(new PlayerUnavailable(`${name} left the table.`));
@@ -52,17 +54,16 @@ export function chair(name: string, changed: () => void) {
 			...(agreement ? { agreement: agreement.what } : {}) }),
 		closed: () => closed,
 		supply(post: Answering): Result {
-			const answer = post.answer, id = "actionId" in answer ? answer.actionId : undefined;
+			const answer = "answer" in post ? post.answer : undefined, id = answer && "actionId" in answer ? answer.actionId : undefined;
 			const before = id === undefined ? undefined : applied.get(id);
 			if (before !== undefined) return before === JSON.stringify(answer) ? { ok: true } : { ok: false, refused: "duplicate" };
 			if (!asking) return { ok: false, refused: "not-your-turn" };
 			if (post.ask !== asking.ask) return { ok: false, refused: "stale" };
-			if (answer.kind === "pick" && !asking.frame.decision?.options.some((option) => option.id === answer.option))
-				return { ok: false, refused: "unknown-option", message: `No option ${answer.option}.` };
 			if (id !== undefined) applied.set(id, JSON.stringify(answer));
 			const now = asking;
 			asking = undefined;
-			now.settle(answer);
+			if (answer) now.settle(answer);
+			else now.fail(new Error(`The seat's player failed: ${"failed" in post ? String(post.failed).slice(0, 500) : "no answer"}`));
 			changed();
 			return { ok: true };
 		},

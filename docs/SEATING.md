@@ -11,9 +11,11 @@ with long polling. The shapes are in `src/seating/protocol.ts`.
    server starts on the loopback address and prints one invite for that seat.
 2. The guest's Pi runs `/magic join <invite>`. It now holds the chair and plays
    it with its own models and keys, under the seat the host set it up as.
-3. Both agreements reach the guest. It agrees to prepare, writes its own brief
-   from the public lists once the coin flip has ordered the table, sends its
-   setup edits, and agrees to begin when it is ready.
+3. Both agreements reach the guest. It agrees to prepare and writes its own
+   brief from the public lists once the coin flip has ordered the table. Once
+   the table is prepared it makes its player, knowing whether a judge hears
+   objections, sends the host its brief to journal and its setup edits, and
+   agrees to begin.
 4. During play the guest answers each ask once. At the end it hears the outcome
    and prints its own bill. The host never runs the guest's models and never
    pays for them.
@@ -37,19 +39,25 @@ machine, and the remote-seat plan puts an email check in front of the invite.
 
 | Call | Body | Answer |
 |---|---|---|
-| `POST /v1/claim` | protocol, table, secret, name | the token, the seat it was set up as, whether there is a judge |
+| `POST /v1/claim` | protocol, table, secret, name | the token and the seat it was set up as |
 | `GET /v1/state?after=<serial>` | | the chair's state, held up to 25 seconds until something it may see changes |
-| `POST /v1/answer` | the ask it answers, and one answer | ok, or a refusal |
+| `POST /v1/answer` | the ask it answers, and one answer or a failure | ok, or a refusal |
 | `POST /v1/agree` | prepare or begin, yes or no | ok, or a refusal |
 | `POST /v1/work` | equipment edits with their revision and actionId | ok, or a refusal; only while the game waits |
+| `POST /v1/brief` | the seat's pregame brief | ok, or a refusal; kept in the host's journal before the first decision |
 
 A state carries the stage, the chair's seat and every seat's public list once
-the table is ordered, an agreement the host is asking for, the chair's latest
+the table is ordered, whether a judge was seated once it is prepared, an
+agreement the host is asking for, the chair's latest
 frame, the ask when the frame wants an answer, the rollback count, the turn
 recaps, and the outcome when the game is over.
 
 An answer is any answer a seat can give: a listed pick, a plan or package
-edit, an objection, table talk. The same set the model seats use.
+edit, an objection, table talk. The same set the model seats use. The host's
+loop judges it as it judges every seat's answer: an unlisted pick is refused
+and asked once more with the reason, then the table takes the terminating
+option and records a gap. A guest whose player failed says so, and the loop
+counts it as that seat failing, with the same retry.
 
 ## Why an answer names its ask
 
@@ -60,10 +68,10 @@ Each ask has a number, and an answer names the one it answers.
 - The actionId was already applied with the same answer: a replay. The game
   changes once, so a guest can resend after a dropped connection.
 - The actionId was applied with a different answer: `duplicate`.
-- No ask is open: `not-your-turn`.
-- A pick that names no listed option: `unknown-option`.
+- No ask is open: `not-your-turn`. A rollback withdraws the open ask, and the
+  guest drops the work it began for it.
 
-Those five answers are the whole concurrency story. There is no lock and no
+Those four answers are the whole concurrency story. There is no lock and no
 lease.
 
 ## The clock

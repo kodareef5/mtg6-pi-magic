@@ -13,17 +13,18 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import type { AddressInfo } from "node:net";
 import type { SeatId } from "../core/types.ts";
 import { chair, type Chair } from "./chair.ts";
-import { HOLD_MS, PROTOCOL, formatInvite, mintInvite, type Agreeing, type Answering, type Claim, type Result, type State, type Welcome, type Working } from "./protocol.ts";
+import { HOLD_MS, PROTOCOL, formatInvite, mintInvite, type Agreeing, type Answering, type Briefing, type Claim, type Result, type State, type Welcome, type Working } from "./protocol.ts";
 
 export type Hosting = {
 	/** Everything but the chair's own part of a state, for the chair set up as `setAs`. */
 	view(setAs: SeatId): Omit<State, "serial" | "ask" | "resets" | "agreement">;
 	/** An equipment edit from a chair's guest, while the game waits. */
 	work(setAs: SeatId, post: Working): Result;
+	/** A chair's pregame brief, for the host to journal. */
+	brief(setAs: SeatId, post: Briefing): Result;
 	/** Told when a guest takes a chair. */
 	claimed?(setAs: SeatId, guest: string): void;
 	game: string;
-	judge: () => boolean;
 	port?: number;
 };
 
@@ -70,7 +71,7 @@ export async function hostTable(options: Hosting) {
 				one.guest = String(claim.name || "guest").slice(0, 40);
 				changed();
 				options.claimed?.(setAs, one.guest);
-				return send(response, 200, { protocol: PROTOCOL, table, token: one.token, game: options.game, setAs, judge: options.judge() } satisfies Welcome);
+				return send(response, 200, { protocol: PROTOCOL, table, token: one.token, game: options.game, setAs } satisfies Welcome);
 			}
 			const held = holder(request);
 			if (!held) return refuse(response, 401, "bad-invite", "Claim a chair first, and send its token.");
@@ -91,6 +92,7 @@ export async function hostTable(options: Hosting) {
 				return send(response, 200, one.chair.agree(post.what, !!post.yes));
 			}
 			if (request.method === "POST" && url.pathname === "/v1/work") return send(response, 200, options.work(setAs, await body(request) as Working));
+			if (request.method === "POST" && url.pathname === "/v1/brief") return send(response, 200, options.brief(setAs, await body(request) as Briefing));
 			return refuse(response, 404, "bad-request", `No ${request.method} ${url.pathname}.`);
 		} catch (error) {
 			if (!response.headersSent) refuse(response, 400, "bad-request", error instanceof Error ? error.message : String(error));

@@ -28,8 +28,6 @@ export type Welcome = {
 	protocol: string; table: string; token: string; game: string;
 	/** The chair as the host set it up, before a coin flip orders the table. */
 	setAs: SeatId;
-	/** Whether the table has a judge to hear objections. */
-	judge: boolean;
 };
 
 /**
@@ -44,6 +42,8 @@ export type State = {
 	/** The chair's seat at the table, once a coin flip has ordered it, and every seat's public registered list. */
 	seat?: SeatId;
 	seats?: { id: SeatId; name: string; deck: Deck }[];
+	/** Once the table is prepared: whether it seated a judge to hear objections. */
+	judge?: boolean;
 	/** An agreement the host asks for that this chair has not answered. */
 	agreement?: Agreement;
 	/** The chair's latest frame. */
@@ -61,8 +61,16 @@ export type State = {
 	outcome?: Outcome;
 };
 
-/** `POST /v1/answer`: one answer to one ask. A pick, a work edit or a declaration carries a fresh actionId. */
-export type Answering = { ask: number; answer: Answer };
+/**
+ * `POST /v1/answer`: one answer to one ask. A pick, a work edit or a
+ * declaration carries a fresh actionId. `failed` says the seat's player could
+ * not answer, so the host's loop treats it as it treats any seat that fails:
+ * it asks once more, then takes the terminating option and records a gap.
+ */
+export type Answering = { ask: number; answer: Answer } | { ask: number; failed: string };
+
+/** `POST /v1/brief`: the seat's pregame brief, journaled by the host like any seat's preparation. */
+export type Briefing = { brief: unknown };
 
 /** `POST /v1/agree`. */
 export type Agreeing = { what: Agreement; yes: boolean };
@@ -70,7 +78,7 @@ export type Agreeing = { what: Agreement; yes: boolean };
 /** `POST /v1/work`: the chair's own equipment, edited while the game waits. */
 export type Working = { tools: WorkCommand[]; revision: number; actionId: string };
 
-export type Refusal = "stale" | "duplicate" | "not-your-turn" | "unknown-option" | "not-now" | "bad-request" | "bad-invite" | "seat-taken";
+export type Refusal = "stale" | "duplicate" | "not-your-turn" | "not-now" | "bad-request" | "bad-invite" | "seat-taken";
 export type Result = { ok: true } | { ok: false; refused: Refusal; message?: string };
 
 /**

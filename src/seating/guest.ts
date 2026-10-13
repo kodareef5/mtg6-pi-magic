@@ -10,7 +10,7 @@
 import type { Player } from "../core/player.ts";
 import type { Outcome } from "../core/types.ts";
 import type { Agreement } from "./lobby.ts";
-import { HOLD_MS, PROTOCOL, parseInvite, type Agreeing, type Answering, type Claim, type Result, type State, type Welcome, type Working } from "./protocol.ts";
+import { HOLD_MS, PROTOCOL, parseInvite, type Agreeing, type Answering, type Briefing, type Claim, type Result, type State, type Welcome, type Working } from "./protocol.ts";
 
 export type Guest = Awaited<ReturnType<typeof join>>;
 
@@ -32,6 +32,7 @@ export async function join(invite: string, name: string) {
 		answer: (value: Answering) => post("/v1/answer", value),
 		agree: (value: Agreeing) => post("/v1/agree", value),
 		work: (value: Working) => post("/v1/work", value),
+		brief: (value: Briefing) => post("/v1/brief", value),
 	};
 }
 
@@ -50,7 +51,7 @@ export async function follow(guest: Guest, seat: {
 	player(state: State): Player | undefined;
 	seen?(state: State): void;
 }, signal?: AbortSignal): Promise<Outcome | undefined> {
-	let after = -1, answered = 0, resets = 0, version = -1, next: State | undefined;
+	let after = -1, answered = 0, resets = 0, version = -1, next: State | undefined, current: Player | undefined;
 	const read = async (at: number, stop?: AbortSignal): Promise<State> => {
 		for (;;) {
 			try { return await guest.state(at, stop); }
@@ -61,42 +62,56 @@ export async function follow(guest: Guest, seat: {
 			}
 		}
 	};
-	while (!signal?.aborted) {
-		let state: State;
-		if (next) { state = next; next = undefined; }
-		else try { state = await read(after, signal); } catch { break; }
-		after = state.serial;
-		seat.seen?.(state);
-		if (state.agreement) { await guest.agree({ what: state.agreement, yes: await seat.agree(state.agreement, state) }); continue; }
-		const player = seat.player(state);
-		if (player && state.resets !== resets) { resets = state.resets; player.reset?.(); }
-		// Over, with a result or without one: a host's game can stop short of an outcome.
-		if (state.outcome || state.stage === "over") { await player?.close(); return state.outcome; }
-		if (!player || !state.frame) continue;
-		if (state.ask !== undefined && state.ask > answered) {
-			const ask = state.ask, watching = new AbortController(), stop = AbortSignal.any([watching.signal, ...(signal ? [signal] : [])]);
-			answered = ask;
-			version = state.frame.version;
-			const thinking = player.answer(state.frame).then((answer) => ({ answer }));
-			const moved = (async () => {
-				for (let at = after; ;) {
-					const seen = await read(at, stop);
-					at = seen.serial;
-					seat.seen?.(seen);
-					if (seen.ask !== ask || seen.outcome || seen.stage === "over") return { moved: seen };
-				}
-			})();
-			thinking.catch(() => {});
-			moved.catch(() => {});
-			const first = await Promise.race([thinking, moved]);
-			watching.abort();
-			// Stale means the table moved on; the next state carries the newer ask.
-			if ("answer" in first) await guest.answer({ ask, answer: first.answer });
-			else next = first.moved;
-		} else if (state.frame.version !== version) {
-			version = state.frame.version;
-			player.observe(state.frame);
+	// A dropped post is sent again: an answer with an actionId is a replay to the host and changes the game once.
+	const send = async (post: Answering) => {
+		for (let tries = 1; ; tries++) {
+			try { return await guest.answer(post); }
+			catch (error) { if (tries >= 3 || signal?.aborted) throw error; await new Promise((wait) => setTimeout(wait, 1_000)); }
 		}
+	};
+	try {
+		while (!signal?.aborted) {
+			let state: State;
+			if (next) { state = next; next = undefined; }
+			else try { state = await read(after, signal); } catch { break; }
+			after = state.serial;
+			seat.seen?.(state);
+			if (state.agreement) { await guest.agree({ what: state.agreement, yes: await seat.agree(state.agreement, state) }); continue; }
+			const player = seat.player(state);
+			current = player ?? current;
+			if (player && state.resets !== resets) { resets = state.resets; player.reset?.(); }
+			// Over, with a result or without one: a host's game can stop short of an outcome.
+			if (state.outcome || state.stage === "over") return state.outcome;
+			if (!player || !state.frame) continue;
+			if (state.ask !== undefined && state.ask > answered) {
+				const ask = state.ask, watching = new AbortController(), stop = AbortSignal.any([watching.signal, ...(signal ? [signal] : [])]);
+				answered = ask;
+				version = state.frame.version;
+				// A player that throws is reported, so the host's loop retries it as it would any seat's failure.
+				const thinking = player.answer(state.frame).then((answer) => ({ answer }), (error: unknown) => ({ failed: error instanceof Error ? error.message : String(error) }));
+				const moved = (async () => {
+					for (let at = after; ;) {
+						const seen = await read(at, stop);
+						at = seen.serial;
+						seat.seen?.(seen);
+						if (seen.ask !== ask || seen.resets !== resets || seen.outcome || seen.stage === "over") return { moved: seen };
+					}
+				})();
+				moved.catch(() => {});
+				const first = await Promise.race([thinking, moved]);
+				watching.abort();
+				// Stale means the table moved on; the next state carries the newer ask.
+				if ("answer" in first) await send({ ask, answer: first.answer });
+				else if ("failed" in first) await send({ ask, failed: first.failed });
+				else next = first.moved;
+			} else if (state.frame.version !== version) {
+				version = state.frame.version;
+				player.observe(state.frame);
+			}
+		}
+	} finally {
+		// Leaving, failing or finishing, the seat's player stops whatever it was still working on.
+		await current?.close();
 	}
 	return undefined;
 }

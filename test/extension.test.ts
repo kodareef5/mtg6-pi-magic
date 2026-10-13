@@ -5,7 +5,7 @@
  * coin flip, and a bad rollback leaves the game playing.
  */
 import { strict as assert } from "node:assert";
-import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
@@ -16,7 +16,7 @@ process.env.PI_CODING_AGENT_DIR = home;
 process.env.SEAT_ONE_KEY = "key-for-seat-one";
 mkdirSync(join(home, "magic"), { recursive: true });
 writeFileSync(join(home, "magic", "roster.json"), JSON.stringify({
-	every: { decide: "fake/jev-a", strategy: "fake/planner", pregame: "off", judge: "off", summary: "off" },
+	every: { decide: "fake/jev-a", strategy: "fake/planner", pregame: "off", judge: "fake/planner", summary: "off" },
 	seats: { 1: { decide: "fake/jev-b" } },
 	keys: { 1: { fake: "$SEAT_ONE_KEY" } },
 }));
@@ -134,6 +134,10 @@ test("a guest's Pi takes an open seat and plays it with its own models and keys"
 	await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
 	await hostPi.magic("begin");
 	await until(() => hostPi.calls.length > 0 && guestPi.calls.length > 0, "both seats to be asked", hostPi.notes);
+	assert.match(await guestPi.status(), /A judge hears objections/, "the guest learns of the judge the table seated");
+	const journal = readdirSync(join(home, "magic", "games")).find((name) => name.startsWith("mardu-discard-vs-jund-sacrifice") && name.endsWith(".jsonl"))!;
+	const prepared = readFileSync(join(home, "magic", "games", journal), "utf8").split("\n").filter((line) => line.includes('"prepared"')).map((line) => JSON.parse(line).prepared.seat);
+	assert.deepEqual(prepared.sort(), [0, 1], "the host journals the guest's brief beside its own seat's");
 	assert.ok(hostPi.calls.every((call) => call.model === "jev-a" && call.key === undefined), "the host's Pi answers only its own seat");
 	assert.ok(guestPi.calls.every((call) => call.model === "jev-b" && call.key === "key-for-seat-one"), "the guest's Pi answers its seat with its own model and key");
 	assert.match(await hostPi.status(), /Seat 1\s+Jund-Sacrifice\s+guest /);

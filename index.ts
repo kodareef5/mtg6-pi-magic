@@ -40,13 +40,14 @@ import {
 	type Cast,
 	type Role,
 } from "./src/context/roles.ts";
+import { keep as keepBrief } from "./src/core/journal.ts";
 import { degraded, restartOf, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
 import { endByHost, rollbackByHost } from "./src/core/host.ts";
 import { hold, type Hold } from "./src/seating/hold.ts";
 import { agree, GAME_TYPES, lobby, seatOrder, type Agreement, type Lobby } from "./src/seating/lobby.ts";
 import { hostTable, type Hosted, type Hosting } from "./src/seating/host.ts";
 import { follow, join as joinTable, type Guest } from "./src/seating/guest.ts";
-import type { Result, State, Working } from "./src/seating/protocol.ts";
+import type { Briefing, Result, State, Working } from "./src/seating/protocol.ts";
 import { aiPlayer, seatBrief, setupWork } from "./src/context/sit.ts";
 import { startingIntent } from "./src/context/plan.ts";
 import { bill, tally as newTally } from "./src/context/spend.ts";
@@ -426,7 +427,7 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function openSeat(ctx: ExtensionContext, at: SeatId) {
 		const ours = host!;
-		ours.wire ??= await hostTable({ game: GAME_TYPES[ours.lobby.game].name, judge: () => !!seated?.judge, view: (setAs) => chairView(ours, setAs), work: (setAs, post) => chairWork(ours, setAs, post),
+		ours.wire ??= await hostTable({ game: GAME_TYPES[ours.lobby.game].name, view: (setAs) => chairView(ours, setAs), work: (setAs, post) => chairWork(ours, setAs, post), brief: (setAs, post) => chairBrief(ours, setAs, post),
 			claimed: (setAs, name) => { showTable(ctx); ctx.ui.notify(`${name} took the seat set up as seat ${setAs}.`, "info"); } });
 		const one = ours.lobby.seats[at]!;
 		ours.lobby.seats[at] = { ...one, by: "remote" };
@@ -448,6 +449,8 @@ export default function (pi: ExtensionAPI) {
 			...((asking) => asking?.clock && asking.seat === seat && !ours.hold?.paused() ? { remaining: Math.max(0, asking.since + asking.clock * 1000 - Date.now()) } : {})(ours.hold?.asking()),
 			...(seat !== undefined && seat >= 0 ? { seat, seats: game?.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck })) ?? decks.map((name, at) => ({ id: at, name: names[at]!, deck: alpha(deck(name)) })) } : {}),
 			recaps: (host === ours ? seated?.chronicle.recaps ?? [] : []).map((one) => ({ ...one })),
+			// Known once preparation has seated the table's roles.
+			...(game && host === ours && seated ? { judge: !!seated.judge } : {}),
 			...(game?.outcome ? { outcome: game.outcome } : {}),
 			// Before play there is no loop to project a frame: the chair's own equipment, for its setup edits.
 			...(game && seat !== undefined && seat >= 0 && ours.lobby.stage === "prepared" ? { frame: workFrame(game, seat) } : {}),
@@ -463,6 +466,18 @@ export default function (pi: ExtensionAPI) {
 		const journal = games.get(table);
 		if (journal) saveGame(journal, table);
 		host.wire?.changed();
+		return { ok: true };
+	}
+
+	/** A guest's pregame brief, journaled like any seat's preparation so a clone or resume carries it. */
+	function chairBrief(ours: NonNullable<typeof host>, setAs: SeatId, post: Briefing): Result {
+		const seat = chairSeat(ours, setAs);
+		if (host !== ours || !table || running || seat === undefined || seat < 0 || ours.lobby.stage !== "prepared" || table.ledger.length)
+			return { ok: false, refused: "not-now", message: "A brief is kept before the first decision of a prepared table." };
+		const made = post?.brief as { version?: number; seat?: number } | undefined;
+		if (made?.version !== 3 || made.seat !== seat) return { ok: false, refused: "bad-request", message: `A brief for seat ${seat} in the current shape.` };
+		const journal = games.get(table);
+		if (journal) keepBrief(journal, seat, made);
 		return { ok: true };
 	}
 
@@ -629,6 +644,7 @@ export default function (pi: ExtensionAPI) {
 		if (me) lines.push(`  You are seat ${me.id}, ${me.name}, against ${state!.seats!.filter((one) => one !== me).map((one) => one.name).join(", ")}.`);
 		const view = state?.frame?.view;
 		if (view?.window.kind === "turn") lines.push(`  Turn ${view.window.turn}, ${view.window.step.replace(/-/g, " ")}. Life ${(view.players ?? []).map((one) => `${state!.seats?.[one.id]?.name ?? one.id} ${one.life}`).join(", ")}.`);
+		if (state?.judge) lines.push("  A judge hears objections at this table.");
 		if (state?.agreement) lines.push(`  The host asks every seat to ${state.agreement}.`);
 		else if (state?.ask) lines.push(`  Your seat is choosing.${state.remaining !== undefined ? ` About ${Math.round(state.remaining / 1000)}s left on the clock when asked; then it concedes.` : ""}`);
 		lines.push("  /magic leave gives up the chair.");
@@ -641,22 +657,20 @@ export default function (pi: ExtensionAPI) {
 		const client = await joinTable(invite, process.env.USER ?? "guest");
 		const ours: Seating = { client, leaving: new AbortController(), spend: newTally(), gaps: [] };
 		guest = ours;
-		const { setAs, judge } = client.welcome;
+		const { setAs } = client.welcome;
 		const chronicle: Chronicle = { briefs: {}, recaps: [] };
-		let planning = false;
 		ctx.ui.notify(`Joined ${client.welcome.game} as the seat set up as seat ${setAs}. This Pi's models play it. Waiting for the host.`, "info");
 		showSeat(ctx);
 
-		// The seat's own preparation, once the table is ordered: its brief from the public lists, then its player.
+		const cards = universe(standard.name), rules = loadRules(RULES);
+		let parts: Cast[] = [], seatInference = inference(ctx);
+		// The seat's own preparation, once the table is ordered: its brief from the public lists.
 		const prepare = async (state: State): Promise<boolean> => {
 			try {
 				const me = state.seats!.find((one) => one.id === state.seat)!, others = state.seats!.filter((one) => one.id !== state.seat);
-				const parts = await roster(ctx, setAs), seatInference = inference(ctx, seatKeys(loadCrew(ROSTER), setAs)), cards = universe(standard.name), rules = loadRules(RULES);
+				parts = await roster(ctx, setAs);
+				seatInference = inference(ctx, seatKeys(loadCrew(ROSTER), setAs));
 				chronicle.briefs[me.id] = await seatBrief(me, others, parts, cards, seatInference, ours.spend, { format: standard.name, rules, cache: {} });
-				const made = aiPlayer(me, parts, seatInference, cards, { chronicle, tally: ours.spend, intent: startingIntent(me.id), judge, rules,
-					onGap: (note) => void ours.gaps.push(note), onDial() {}, onPlanned() {} });
-				ours.player = made.player;
-				planning = made.planning;
 				return true;
 			} catch (error) {
 				ctx.ui.notify(`This seat could not prepare: ${error instanceof Error ? error.message : String(error)}`, "error");
@@ -668,17 +682,30 @@ export default function (pi: ExtensionAPI) {
 			async agree(what, state) {
 				if (what === "prepare") return true;
 				ours.preparing ??= prepare(state);
-				if (!await ours.preparing) return false;
-				const work = state.frame?.view.work;
+				if (!await ours.preparing || state.seat === undefined) return false;
+				// The player is made once the table is prepared, when it is known whether a judge hears objections.
+				const me = state.seats!.find((one) => one.id === state.seat)!;
+				let made: ReturnType<typeof aiPlayer>;
+				try {
+					made = aiPlayer(me, parts, seatInference, cards, { chronicle, tally: ours.spend, intent: startingIntent(me.id), judge: !!state.judge, rules,
+						onGap: (note) => void ours.gaps.push(note), onDial() {}, onPlanned() {} });
+				} catch (error) { ctx.ui.notify(`This seat cannot play: ${error instanceof Error ? error.message : String(error)}`, "error"); return false; }
+				let work = state.frame?.view.work;
 				// A seat with card uses left to interpret needs its own strategy model: nobody else at the table will.
-				if (!planning && work?.packages?.some((pack) => pack.deferred?.length)) {
+				if (!made.planning && work?.packages?.some((pack) => pack.deferred?.length)) {
 					ctx.ui.notify("This seat's deck has card uses to interpret during play, and this Pi's roster has no strategy model. It declines to begin.", "warning");
 					return false;
 				}
-				const tools = planning ? setupWork(work, 0) : [];
-				const done = tools.length ? await client.work({ tools, revision: work?.revision ?? 0, actionId: `setup-${state.seat}` }) : { ok: true as const };
-				if (!done.ok) ctx.ui.notify(`The host refused this seat's setup: ${done.message ?? done.refused}`, "warning");
-				return done.ok;
+				// The host journals the brief, so a clone or resume of this game carries this seat's preparation.
+				const kept = await client.brief({ brief: chronicle.briefs[me.id] });
+				if (!kept.ok) ctx.ui.notify(`The host did not keep this seat's brief: ${kept.message ?? kept.refused}`, "warning");
+				for (const edit of made.planning ? setupWork(work, 0, me.id) : []) {
+					const done = await client.work({ tools: edit.tools, revision: work?.revision ?? 0, actionId: edit.actionId });
+					if (!done.ok) { ctx.ui.notify(`The host refused this seat's setup: ${done.message ?? done.refused}`, "warning"); return false; }
+					work = { ...work, revision: (work?.revision ?? 0) + 1 } as typeof work;
+				}
+				ours.player = made.player;
+				return true;
 			},
 			player: () => ours.player,
 			seen(state) {

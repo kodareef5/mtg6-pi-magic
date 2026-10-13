@@ -44,11 +44,18 @@ test("a chair judges each answer against its ask", async () => {
 	const answered = seat.player.answer(frame);
 	const ask = seat.seen().ask!;
 	assert.deepEqual(seat.supply({ ask: ask + 1, answer: { kind: "pick", option: "keep", actionId: "a" } }), { ok: false, refused: "stale" });
-	assert.equal(seat.supply({ ask, answer: { kind: "pick", option: "shuffle", actionId: "b" } }).ok, false);
 	assert.deepEqual(seat.supply({ ask, answer: { kind: "pick", option: "keep", actionId: "c" } }), { ok: true });
 	assert.deepEqual(await answered, { kind: "pick", option: "keep", actionId: "c" });
 	assert.deepEqual(seat.supply({ ask, answer: { kind: "pick", option: "keep", actionId: "c" } }), { ok: true }, "a resent answer is a replay");
 	assert.deepEqual(seat.supply({ ask, answer: { kind: "pick", option: "mulligan", actionId: "c" } }), { ok: false, refused: "duplicate" });
+	const withdrawn = seat.player.answer(frame), open = seat.seen().ask!;
+	seat.player.reset!();
+	await assert.rejects(withdrawn, /withdrawn/, "a rewind withdraws the open ask");
+	assert.equal(seat.seen().ask, undefined);
+	assert.deepEqual(seat.supply({ ask: open, answer: { kind: "pick", option: "keep", actionId: "d" } }), { ok: false, refused: "not-your-turn" });
+	const failing = seat.player.answer(frame);
+	seat.supply({ ask: seat.seen().ask!, failed: "the model fell over" });
+	await assert.rejects(failing, /fell over/, "a guest's failure reaches the loop as a failure");
 	const agreed = seat.request("prepare");
 	assert.equal(seat.seen().agreement, "prepare");
 	assert.deepEqual(seat.agree("begin", true).ok, false, "only the agreement asked for");
@@ -62,7 +69,7 @@ test("a seat answered over HTTP plays the game a local seat would, and sees only
 
 	const table = dealt();
 	let stage: "playing" | "over" = "playing";
-	const host = await hostTable({ game: "test", judge: () => false, work: () => ({ ok: false, refused: "not-now" }),
+	const host = await hostTable({ game: "test", work: () => ({ ok: false, refused: "not-now" }), brief: () => ({ ok: false, refused: "not-now" }),
 		view: () => ({ stage, seat: 1, seats: table.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck })), recaps: [] }) });
 	const { invite, chair: remote } = host.open(1, "B");
 	const guest = await join(invite, "guest B");
@@ -82,4 +89,33 @@ test("a seat answered over HTTP plays the game a local seat would, and sees only
 	assert.ok(frames.length > 10, "the guest followed the game");
 	assert.ok(frames.every((frame) => frame.seat === 1), "every frame is the chair's own");
 	assert.ok(frames.every((frame) => (frame.view.objects ?? []).every((object) => object.zone !== "hand" || object.owner === 1 || !object.card)), "another seat's hand never names a card");
+});
+
+test("over HTTP, an unusable answer or a failing player is asked again as the loop asks any seat, and leaving closes the player", async () => {
+	const local = dealt();
+	await through(local, { 0: steady("A"), 1: steady("B") }, 2);
+
+	const table = dealt();
+	const host = await hostTable({ game: "test", work: () => ({ ok: false, refused: "not-now" }), brief: () => ({ ok: false, refused: "not-now" }),
+		view: () => ({ stage: "playing", seat: 1, seats: table.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck })), recaps: [] }) });
+	try {
+		const { invite, chair: remote } = host.open(1, "B");
+		let asked = 0, closed = 0;
+		// The first decision gets an unlisted pick, the second a throw; each retry, and every later ask, a good answer.
+		const wobbly: Player = { name: "B", observe() {}, close() { closed++; }, async answer(frame) {
+			asked++;
+			if (asked === 1) return { kind: "pick", option: "shuffle-their-library", actionId: "bad" };
+			if (asked === 3) throw new Error("The model fell over.");
+			return steady("B").answer(frame);
+		} };
+		const leaving = new AbortController();
+		const following = follow(await join(invite, "guest B"), { agree: async () => true, player: () => wobbly }, leaving.signal);
+		await through(table, { 0: steady("A"), 1: remote.player }, 2);
+		assert.ok(asked > 4, "the guest was asked again after each");
+		assert.equal(physical(table), physical(local), "a refused answer and a failure leave no trace in the game");
+		assert.ok(table.gaps.length === 0 && !table.ledger.some((row) => row.why === "fallback"), "each was answered on the retry");
+		leaving.abort();
+		await following;
+		assert.equal(closed, 1, "leaving closes the seat's player");
+	} finally { await host.close(); }
 });

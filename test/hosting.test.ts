@@ -22,6 +22,7 @@ import type { Frame } from "../src/core/types.ts";
 import { project } from "../src/core/view.ts";
 import { hold, type Hold } from "../src/seating/hold.ts";
 import { agree, lobby, seatOrder } from "../src/seating/lobby.ts";
+import { setupWork } from "../src/context/sit.ts";
 
 const made: Header = {
 	id: "hosted", format: standard.name, seed: "hosted",
@@ -169,4 +170,10 @@ test("a seat that concedes when asked loses, and the row says it chose to", asyn
 	await play(table, { 0: steady("A"), 1: quitter }, {});
 	assert.deepEqual(table.outcome?.results, { 0: "win", 1: "lose" });
 	assert.deepEqual([table.ledger.at(-1)!.picked, table.ledger.at(-1)!.why], ["concede", "chosen"]);
+});
+
+test("a seat's setup edits keep the actionIds older journals carry", () => {
+	assert.deepEqual(setupWork(undefined, 0, 1), [{ actionId: "planning-1", tools: [{ do: "plan.each-turn" }] }]);
+	const older = { revision: 2, request: "Plan the opening: your first turn and the opponent's first turn." } as never;
+	assert.deepEqual(setupWork(older, 0, 0).map((one) => one.actionId), ["planning-0", "opening-covered-0"]);
 });

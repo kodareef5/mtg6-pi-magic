@@ -158,8 +158,7 @@ export async function seat(
 		const made = aiPlayer(at, parts.get(at.id)!, of(at.id), universe, { chronicle, tally: counted, judge: !!judging && !!options.rules, intent: intents[at.id]!,
 			...(options.rules ? { rules: options.rules } : {}), ...(options.dials === undefined ? {} : { dials: options.dials }),
 			onGap: (note) => void table.gaps.push(note), onDial: (route) => void (dialled[route] = (dialled[route] ?? 0) + 1), onPlanned: (one) => void planned.push(one) });
-		const setup = made.planning ? setupWork(table.work[at.id], table.ledger.length) : [];
-		if (setup.length) editWork(table, at.id, setup, `planning-${at.id}`);
+		for (const edit of made.planning ? setupWork(table.work[at.id], table.ledger.length, at.id) : []) editWork(table, at.id, edit.tools, edit.actionId);
 		players[at.id] = made.player;
 	}
 
@@ -291,16 +290,17 @@ export function aiPlayer(at: { id: SeatId; name: string }, parts: Cast[], infere
 }
 
 /**
- * The equipment edits a planning seat needs before play: strategy is due each
- * turn, since the brief handles the opening and upkeep. Older version-zero
- * clones carried an automatic opening request; it is retired without
- * discarding their brief, packages or human requests.
+ * The equipment edits a planning seat needs before play, each under the
+ * actionId journals have always carried it with, so an older clone replays its
+ * own: strategy is due each turn, since the brief handles the opening and
+ * upkeep; and an automatic opening request that older version-zero clones
+ * carried is retired without discarding their brief, packages or human requests.
  */
-export function setupWork(work: Workspace | undefined, version: number): WorkCommand[] {
+export function setupWork(work: Workspace | undefined, version: number, seat: SeatId): { actionId: string; tools: WorkCommand[] }[] {
 	return [
-		...(!work?.eachTurn ? [{ do: "plan.each-turn" as const }] : []),
+		...(!work?.eachTurn ? [{ actionId: `planning-${seat}`, tools: [{ do: "plan.each-turn" as const }] }] : []),
 		...(version === 0 && work?.accepted === undefined && work?.request === "Plan the opening: your first turn and the opponent's first turn."
-			? [{ do: "plan.keep" as const, reason: "The brief covers the opening; strategy follows the draw." }] : []),
+			? [{ actionId: `opening-covered-${seat}`, tools: [{ do: "plan.keep" as const, reason: "The brief covers the opening; strategy follows the draw." }] }] : []),
 	];
 }
 
