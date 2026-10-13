@@ -3,6 +3,7 @@
  * the pilot the same question the game did: the seat's view since its last
  * decision, the decision with the plan's marks, and the brief as seating reads it.
  */
+import { perspective } from "../src/core/perspective.ts";
 import type { Frame, SeatId } from "../src/core/types.ts";
 import type { Table } from "../src/core/table.ts";
 import type { Plan } from "../src/core/language.ts";
@@ -29,6 +30,6 @@ export function decisionFrame(table: Table, seat: SeatId, options: { refused?: r
 	const work = table.work[seat] ? supplied(workFrame(table, seat)) : undefined;
 	const state = work && planReason(work) === undefined ? planState(work) : null;
 	const view = supplied({ seat, version: table.cursor.clock, view: project(table, seat, sinceDecision(table, seat)) }).view;
-	return { seat, version: table.cursor.clock, view, decision: state ? { ...decision, options: annotate(decision.options, state) } : decision,
-		...(options.refused?.length ? { refused: [...options.refused] } : {}) };
+	return perspective(table, seat).hide({ seat, version: table.cursor.clock, view, decision: state ? { ...decision, options: annotate(decision.options, state) } : decision,
+		...(options.refused?.length ? { refused: [...options.refused] } : {}) });
 }

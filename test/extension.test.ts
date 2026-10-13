@@ -147,6 +147,7 @@ test("a seat's own models and key are chosen before the start, journaled, and pa
 		const header = JSON.parse(readFileSync(join(home, "magic", "games", `${id}.jsonl`), "utf8").split("\n")[0]!).header;
 		assert.deepEqual(header.seats.map((one: { pilot: string; models?: object; key: string }) => [one.pilot, one.models, one.key]),
 			[["ai", { decide: "openrouter/jev-c" }, "$SEAT_ZERO_KEY"], ["ai", undefined, "game"]], "the game records what every seat agreed to, and never a key");
+		assert.match(header.seed, /^[0-9a-f]{32}$/, "the seed, which decides every shuffle, is secret: never the game's public id");
 		await hostPi.magic("begin");
 		await until(() => hostPi.calls.some((call) => call.model === "jev-c") && hostPi.calls.some((call) => call.model === "jev-b"), "both seats to be asked", hostPi.notes);
 		assert.ok(hostPi.calls.every((call) => call.model === "jev-c" ? call.key === "key-for-seat-zero" : call.model === "jev-b" && call.key === "key-for-seat-one"),

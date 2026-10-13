@@ -34,6 +34,20 @@ const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command",
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
 const publicName = (thing?: Thing) => visible(thing) ? thing.card ?? thing.token?.name ?? thing.copied?.spec.name ?? thing.ability?.claim ?? (thing.emblem ? "an emblem" : "an unnamed object") : "an unknown card";
 
+/**
+ * What a viewer may see of each object: whether it is entitled to the object at
+ * all, which it is in public zones, its own hand and what it was shown; whether
+ * it may look at a face-down one; and so whether it knows which card it is.
+ * Anything it does not know, it must not be able to name, by name or by id.
+ */
+export function sight(table: Table, viewer: Viewer) {
+	const retained = cardsIn(table, "stack").flatMap(one => one.ability?.cost.shown?.filter(ref => ref.reveal && ref.until === "leaves-stack") ?? []);
+	const inspected = [...table.resolution?.seen?.[viewer] ?? [], ...retained];
+	const canLook = (item: Thing) => viewer !== "spectator" && (item.zone === "exile" && !!item.lookedBy?.includes(viewer) || item.zone === "battlefield" && item.controller === viewer);
+	const entitled = (item: Thing) => PUBLIC.has(item.zone) || viewer !== "spectator" && item.zone === "hand" && item.owner === viewer || inspected.some((one) => one.id === item.id && one.incarnation === item.incarnation);
+	return { inspected, canLook, entitled, knows: (item: Thing) => entitled(item) && (!item.faceDown || canLook(item)) };
+}
+
 /** Receipt index before this seat's last nonautomatic decision, including a fallback.
  * Its own action stays visible. Looking, asking for help and editing work consume nothing. */
 export function sinceDecision(table: Table, viewer: SeatId): number {
@@ -143,10 +157,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		}
 	}
 
-	const retained = cardsIn(table, "stack").flatMap(one => one.ability?.cost.shown?.filter(ref => ref.reveal && ref.until === "leaves-stack") ?? []);
-	const inspected = [...table.resolution?.seen?.[viewer] ?? [], ...retained];
-	const canLook = (item: Thing) => viewer !== "spectator" && (item.zone === "exile" && !!item.lookedBy?.includes(viewer) || item.zone === "battlefield" && item.controller === viewer);
-	const entitled = (item: Thing) => PUBLIC.has(item.zone) || viewer !== "spectator" && item.zone === "hand" && item.owner === viewer || inspected.some((one) => one.id === item.id && one.incarnation === item.incarnation);
+	const { inspected, canLook, entitled } = sight(table, viewer);
 	const visibleRefs = new Set([...table.things.values()].filter((one) => entitled(one) && (!one.faceDown || canLook(one) || one.zone === "battlefield")).map((one) => `${one.id}@${one.incarnation}`));
 	const bound = (values: NonNullable<Table["resolution"]>["bound"]) => Object.fromEntries(Object.entries(values).map(([key, value]) => [key,
 		{ ...value, objects: value.objects.filter((one) => visibleRefs.has(`${one.id}@${one.incarnation}`)) }]));

@@ -182,6 +182,17 @@ Public zones do not make face-down identities public. Receipts retain object
 facts before and after their group; narration uses those facts, never a later
 incarnation's visibility. A tap in a library stays unnamed after a later reveal.
 
+An object id is not neutral: a card's id is its owner and its place in a
+registered list, and the lists are public, so an id names the card. Nothing
+crosses to a viewer except through `perspective` in perspective.ts. It gives
+every object the viewer cannot identify an alias keyed by the game's seed,
+moves those objects after the rest, and turns an answer's aliases back into
+ids. `sight` in view.ts says what a viewer may identify, for both. The engine
+inside reads real ids: guard the crossing, not the projection.
+
+The seed decides every shuffle, so it is as secret as the libraries. A hosted
+game's seed is random and never its public id.
+
 ## The engine keeps perfect state
 
 The library is an ordered list and the engine always knows the order. The

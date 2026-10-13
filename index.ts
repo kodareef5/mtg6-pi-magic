@@ -17,6 +17,7 @@
  */
 
 import { claudeCli } from "./src/context/claude-cli.ts";
+import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
@@ -73,6 +74,7 @@ import { gameStats, writeReplay } from "./src/board/replay.ts";
 import { dressOf, momentsOf, runOf } from "./src/watch/games.ts";
 import { watchServer, type Desk, type Watch } from "./src/watch/server.ts";
 import { quickTunnel } from "./src/watch/tunnel.ts";
+import { perspective } from "./src/core/perspective.ts";
 import { project, render } from "./src/core/view.ts";
 import { CommandsSchema, commands } from "./src/core/work-language.ts";
 import { editWork, workFrame } from "./src/core/work-tools.ts";
@@ -251,7 +253,7 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(
 		ctx: ExtensionContext,
-		from: { seed: string; decks?: string[]; alpha?: true; seats?: SeatSetup[]; clock?: number | null; background?: string; colors?: Colors } | { resume: string },
+		from: { seed: string; id?: string; decks?: string[]; alpha?: true; seats?: SeatSetup[]; clock?: number | null; background?: string; colors?: Colors } | { resume: string },
 	): Promise<{ opened: Table; sitting: Seated }> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
@@ -287,7 +289,7 @@ export default function (pi: ExtensionAPI) {
 			opened = start(standard, chosen.map((name, at) => ({ name: names[at]!, deck: from.alpha ? alpha(deck(name)) : deck(name) })), from.seed, cards, { announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0, discardsFrom: 0 });
 			header = {
 				announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0, discardsFrom: 0,
-				id: from.seed,
+				id: from.id ?? from.seed,
 				format: standard.name,
 				seed: from.seed,
 				seats: opened.seats.map((at) => {
@@ -302,7 +304,7 @@ export default function (pi: ExtensionAPI) {
 				rules: { path: RULES, effective: rules.effective },
 				created: new Date().toISOString(),
 			};
-			journal = openGame(join(GAMES, `${from.seed}.jsonl`), header);
+			journal = openGame(join(GAMES, `${from.id ?? from.seed}.jsonl`), header);
 		}
 
 		const began = Date.now();
@@ -603,7 +605,8 @@ export default function (pi: ExtensionAPI) {
 			told(ctx);
 			ctx.ui.notify(`Every seat agreed to prepare. ${by === "coin" ? "The coin flip" : "The host"} put ${decks[0]} on the play. Preparing ${id}.`, "info");
 			try {
-				const { opened, sitting } = await open(ctx, { seed: id, decks, alpha: true, seats: setup.seats, clock: setup.clock, background: setup.background, ...(setup.colors ? { colors: setup.colors } : {}) });
+				// The seed decides every shuffle and keys what a seat cannot identify, so it is secret: never the game's public id.
+				const { opened, sitting } = await open(ctx, { id, seed: randomBytes(16).toString("hex"), decks, alpha: true, seats: setup.seats, clock: setup.clock, background: setup.background, ...(setup.colors ? { colors: setup.colors } : {}) });
 				// A table replaced while this one prepared keeps its own game: this preparation is closed, not installed.
 				if (host !== ours) { await Promise.all(Object.values(sitting.players).map((player) => player.close())); return; }
 				table = opened; seated = sitting;
@@ -901,7 +904,7 @@ export default function (pi: ExtensionAPI) {
 	/** What a seat may see now: its own projection of the table, never the table, and its player's clock when asked. */
 	function sittingOf(at: SeatId): Sitting {
 		const asking = host?.hold?.asking();
-		return { ...(table ? { frame: { seat: at, version: table.cursor.clock, view: project(table, at) } } : {}), seat: at,
+		return { ...(table ? { frame: perspective(table, at).hide({ seat: at, version: table.cursor.clock, view: project(table, at) }) } : {}), seat: at,
 			seats: (table?.seats ?? []).map((one) => ({ id: one.id, name: one.name, deck: one.deck.name })),
 			...(asking?.seat === at && asking.clock ? { remaining: Math.max(0, asking.since + asking.clock * 1000 - Date.now()) } : {}) };
 	}

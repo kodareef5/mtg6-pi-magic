@@ -7,6 +7,7 @@
  */
 import type { Table } from "../core/table.ts";
 import type { Viewer } from "../core/types.ts";
+import { perspective } from "../core/perspective.ts";
 import { project } from "../core/view.ts";
 import { boardSnapshot, type BoardSnapshot } from "./snapshot.ts";
 
@@ -32,11 +33,11 @@ export function playByPlay(seats: { id: number; name: string; deck?: string }[],
 				const ruled = table.rulings.at(-1), note = ruled && "by" in ruled ? ` The host's note: ${ruled.note}` : "";
 				const line = `Play went back to an earlier position.${note}`;
 				seen = table.log.length; looked = table.log.at(-1); boards = "";
-				moments.push({ views: viewers.map((viewer) => ({ snapshot: boardSnapshot(project(table, viewer), seats, viewer), lines: [line] })) });
+				moments.push({ views: viewers.map((viewer) => ({ snapshot: boardSnapshot(perspective(table, viewer).hide(project(table, viewer)), seats, viewer), lines: [line] })) });
 				return;
 			}
 			if (table.log.length === seen) return;
-			const views = viewers.map((viewer) => project(table, viewer, seen));
+			const views = viewers.map((viewer) => perspective(table, viewer).hide(project(table, viewer, seen)));
 			seen = table.log.length; looked = table.log.at(-1);
 			if (!views.some((view) => view.since.length)) return;
 			const now = views.map((view, at): View => ({ snapshot: boardSnapshot(view, seats, viewers[at]!), lines: [...view.since] }));

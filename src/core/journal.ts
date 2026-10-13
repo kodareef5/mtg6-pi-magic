@@ -21,6 +21,7 @@ import { beginAnnouncement } from "./announcing.ts";
 import { advance, apply, nextDecision } from "./decisions.ts";
 import type { Said } from "./say.ts";
 import type { LedgerRow, Receipt, Table } from "./table.ts";
+import { perspective } from "./perspective.ts";
 import { project } from "./view.ts";
 import type { SeatId } from "./types.ts";
 import type { WorkEntry } from "./work.ts";
@@ -533,7 +534,7 @@ export function exportGame(
 		return [JSON.stringify({ header }), ...lines.filter((line) => line.v <= at).map((line) => JSON.stringify(line))].join("\n") + "\n";
 	}
 	const table = replay(path, start, at).table;
-	const view = project(table, how.mode === "seat" ? how.seat : "spectator");
+	const viewer = how.mode === "seat" ? how.seat : "spectator", view = perspective(table, viewer).hide(project(table, viewer));
 	return [stamp, ...view.table, ...view.yours,
 		...(view.decks ?? []).map((deck) => `Registered deck for seat ${deck.seat}: ${JSON.stringify(deck.cards)}`),
 		...(view.work ? ["Your equipment:", JSON.stringify(view.work, null, 2)] : [])].join("\n");

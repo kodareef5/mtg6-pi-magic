@@ -23,6 +23,7 @@ import type { Table } from "./table.ts";
 import { endingPhase } from "./turn.ts";
 import type { Decision, Frame, Outcome, SeatId } from "./types.ts";
 import { describe, project, sinceDecision } from "./view.ts";
+import { perspective } from "./perspective.ts";
 import { annotate, execution, planReason, planState, type PlanState } from "./planning.ts";
 import { editWork, prepareWork, recordWork, workFrame } from "./work-tools.ts";
 import { activate } from "./procedures.ts";
@@ -117,7 +118,7 @@ export async function play(
 				// Every seat sees the new turn begin, however its decisions go: forced and delegated play asks nobody.
 				for (const one of table.seats) {
 					const view = project(table, one.id, sinceDecision(table, one.id));
-					players[one.id]?.observe({ seat: one.id, version: table.cursor.clock, view });
+					players[one.id]?.observe(perspective(table, one.id).hide({ seat: one.id, version: table.cursor.clock, view }));
 				}
 			}
 			continue;
@@ -156,10 +157,12 @@ export async function play(
 			return { seat, version, view };
 		};
 
+		// What crosses to a seat names nothing it cannot identify; its answer comes back in the table's ids.
 		for (const other of table.seats) {
 			if (other.id === decision.seat) continue;
-			players[other.id]?.observe(frame(other.id));
+			players[other.id]?.observe(perspective(table, other.id).hide(frame(other.id)));
 		}
+		const lens = perspective(table, decision.seat);
 
 		const player = players[decision.seat];
 		if (!player) throw new Error(`Seat ${decision.seat} has nobody to answer it`);
@@ -194,7 +197,7 @@ export async function play(
 		const failures: string[] = [];
 		for (let attempt = 0; attempt < 2; attempt++) {
 			try {
-				const received = await player.answer(failures.length ? { ...asked, refused: [...failures] } : asked);
+				const received = lens.reveal(await player.answer(lens.hide(failures.length ? { ...asked, refused: [...failures] } : asked)));
 				let why = refuse(received, offered);
 				if (why === null && decision.preparation?.length && (received as Answer).kind === "pick")
 					why = `Prepare the known uses of ${decision.preparation.map((one) => one.card).join(", ")} with seat work before choosing an action or passing.`;
@@ -368,11 +371,12 @@ async function atPhaseEnd(
 	for (const seat of table.seats) {
 		const player = players[seat.id];
 		if (!player?.interject) continue;
-		const answer = await player.interject({
+		const lens = perspective(table, seat.id);
+		const answer = lens.reveal(await player.interject(lens.hide({
 			seat: seat.id,
 			version: table.cursor.clock,
 			view: project(table, seat.id),
-		});
+		})));
 		if (!answer) continue;
 		if (answer.kind === "say") {
 			table.said.push({ seat: seat.id, message: answer.message, at: table.ledger.length });

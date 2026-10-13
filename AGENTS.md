@@ -486,7 +486,10 @@ rather than adding a test for each branch.
 - **No leak.** Registered deck names and counts are public. A view associates
   names with objects only in public zones or the viewer's own hand, respects
   face-down identities, and keeps hidden counts. Receipt text uses event-time
-  visibility, so a later reveal cannot expose an earlier action.
+  visibility, so a later reveal cannot expose an earlier action. No frame a
+  game hands a seat, and no view the audience gets, names by id a card the
+  viewer cannot identify, a face-down creature in play included; play goes on
+  through the aliases. A hosted game's seed is secret.
 - **Replay.** The same seed and the same recorded decisions give the same log,
   change for change, and rebuild the cards, the cursor, the ledger and the
   outcome. `relive` drives from the ledger with each row's own reason, so a
@@ -615,6 +618,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   loop.ts              the serial game loop: ask, retry once, fallback, stops, loop guard, objections
   journal.ts           the stored form: header and lines, replay, clone, rollback, torn-line repair
   view.ts              projection: the one reader on a seat's behalf, visibility as a filter
+  perspective.ts       what crosses to a viewer: aliases for the cards it cannot identify, and answers back
   player.ts, intent.ts the Player interface and refusals; what a seat means to do
   budget.ts            the mana and payment forecast a plan is checked against before acceptance
   announce.ts          the announcement options a seat's packages and plan offer
