@@ -63,6 +63,8 @@ export function cardboardScene(snapshot: BoardSnapshot, art: ReadonlyMap<string,
 	});
 	const step = snapshot.step as Step | undefined, phase = step && STEPS[step]?.phase;
 	const label = snapshot.finished ? "Game over" : step ? (step[0]!.toUpperCase() + step.slice(1)).replace(/-/g, " ") : "Opening hands";
+	// The preset needs one card definition; before anything is visible, the back of a card.
+	if (!definitions.size) definitions.set("hidden", { id: "hidden", name: "Face-down card" });
 	return {
 		theme: "mtg26", stage: { width: size.width, height: size.height }, activeDeckId: "board",
 		decks: [{ id: "board", name: "Board", cards: [...definitions.values()] }], players,

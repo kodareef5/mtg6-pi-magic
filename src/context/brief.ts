@@ -207,7 +207,7 @@ const submission = <T>(schema: Parameters<typeof problems>[0], description: stri
 const pointers = (schema: object): object => JSON.parse(JSON.stringify(schema).replace(/"\$ref":"([A-Za-z]+)"/g, '"$ref":"#/$defs/$1"'));
 
 /** The facts every analyst reads: both lists in full, the computed numbers, the table, and any deck guide written for either list. */
-function facts(seat: Seat, others: Seat[], universe: Universe, format: string, guides?: (deck: string) => string | undefined): string {
+function facts(seat: Pick<Seat, "id" | "name" | "deck">, others: Pick<Seat, "id" | "name" | "deck">[], universe: Universe, format: string, guides?: (deck: string) => string | undefined): string {
 	const mine = listed(seat.deck.main);
 	const guide = (deck: string, whose: string) => { const text = guides?.(deck); return text ? ["", `${whose} deck guide, written before the game about how ${deck} is designed to be played. Advice, not facts; the lists above and the card text win any disagreement.`, text] : []; };
 	return [
@@ -224,8 +224,8 @@ function facts(seat: Seat, others: Seat[], universe: Universe, format: string, g
  * brief fails only when the synthesis does, or when every analyst did.
  */
 export async function brief(
-	seat: Seat,
-	others: Seat[],
+	seat: Pick<Seat, "id" | "name" | "deck">,
+	others: Pick<Seat, "id" | "name" | "deck">[],
 	universe: Universe,
 	reasoners: () => Pick<Reasoner, "work">,
 	options: { format: string; rules?: Rules; guides?: (deck: string) => string | undefined; cache?: BriefCache },

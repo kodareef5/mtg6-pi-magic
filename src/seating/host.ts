@@ -1,85 +1,124 @@
 /**
- * The host. It owns the state, hands out chairs, and judges every pick.
+ * The host's side of the wire: an HTTP server that hands out chairs and
+ * answers each chair's guest.
  *
- * The socket half is unwritten. The judging half is here and complete, because
- * it is the part that decides whether two agents can trust the same table.
+ * It owns no game. Everything a guest sees comes from two places: its chair,
+ * which holds the frames the host's loop projected for that seat, and `view`,
+ * which the host fills with the stage and what is public. It binds the loopback
+ * address; a tunnel in front of it is what reaches another machine.
  */
 
-import type { Decision, Outcome, SeatId } from "../core/types.ts";
-import type { Act, Invite, Refusal } from "./protocol.ts";
+import { randomBytes } from "node:crypto";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import type { AddressInfo } from "node:net";
+import type { SeatId } from "../core/types.ts";
+import { chair, type Chair } from "./chair.ts";
+import { HOLD_MS, PROTOCOL, formatInvite, mintInvite, type Agreeing, type Answering, type Claim, type Result, type State, type Welcome, type Working } from "./protocol.ts";
 
-/**
- * What the host does with a pick.
- *
- * `replay` is not a refusal. A guest that resends the same actionId after a
- * dropped socket gets the original answer back and the game changes once.
- * `duplicate` means the same actionId arrived carrying a different pick, which
- * only happens when a guest reuses an id, so the host refuses rather than
- * guessing which pick was meant.
- */
-export type Verdict =
-	| { kind: "apply" }
-	| { kind: "replay" }
-	| { kind: "refuse"; refused: Refusal };
-
-export type JudgeInput = {
-	version: number;
-	decision: Decision | null;
-	/** actionId to the option it carried, for every pick already applied. */
-	applied: ReadonlyMap<string, string>;
-};
-
-export function judgeAct(act: Act, at: JudgeInput): Verdict {
-	const previous = at.applied.get(act.actionId);
-	if (previous !== undefined) {
-		return previous === act.option
-			? { kind: "replay" }
-			: { kind: "refuse", refused: "duplicate" };
-	}
-	if (act.version !== at.version) return { kind: "refuse", refused: "stale" };
-	if (at.decision === null || at.decision.seat !== act.seat) {
-		return { kind: "refuse", refused: "not-your-turn" };
-	}
-	if (!at.decision.options.some((option) => option.id === act.option)) {
-		return { kind: "refuse", refused: "unknown-option" };
-	}
-	return { kind: "apply" };
-}
-
-export type TableOptions = {
-	/** The game type the table runs. */
+export type Hosting = {
+	/** Everything but the chair's own part of a state, for the chair set up as `setAs`. */
+	view(setAs: SeatId): Omit<State, "serial" | "ask" | "resets" | "agreement">;
+	/** An equipment edit from a chair's guest, while the game waits. */
+	work(setAs: SeatId, post: Working): Result;
+	/** Told when a guest takes a chair. */
+	claimed?(setAs: SeatId, guest: string): void;
 	game: string;
-	seats: number;
-	/** Recorded, so the game replays. */
-	seed?: string;
-	/** Default 127.0.0.1. Nothing here traverses a NAT. */
-	host?: string;
-	/** Default 0, meaning the operating system picks a free one. */
+	judge: () => boolean;
 	port?: number;
 };
 
-export type Table = {
-	/** One invite per open chair. The first guest to present it claims that chair. */
-	invite(seat: SeatId): Invite;
-	status(): { game: string; version: number; seats: SeatId[]; claimed: SeatId[] };
-	/** Resolves when the game records an outcome. */
-	finished(): Promise<Outcome>;
-	close(): Promise<void>;
-};
+export type Hosted = Awaited<ReturnType<typeof hostTable>>;
 
-/**
- * This does not get its own loop. src/loop.ts already runs the game, and a
- * remote seat is a Player like any other: it answers decide() from a socket
- * instead of from a model. So the work here is a server, a chair claim, and
- * `remotePlayer`, and nothing that duplicates the loop.
- *
- * Two rules it must not break. The host projects before it writes to a socket,
- * never after. A refusal names its reason rather than dropping the pick.
- */
-export async function hostTable(options: TableOptions): Promise<Table> {
-	throw new Error(
-		`hostTable is unwritten. It needs: a WebSocket server on ${options.host ?? "127.0.0.1"}, ` +
-			"one invite per chair, the loop above, and a per seat record of applied actionIds. " +
-			"See src/core/AGENTS.md for the invariants it has to hold and docs/SEATING.md for the wire.",
-	);
+export async function hostTable(options: Hosting) {
+	const table = randomBytes(6).toString("hex");
+	const chairs = new Map<SeatId, { chair: Chair; secret: string; token?: string; guest?: string; seen?: number }>();
+	let serial = 0, waiting: (() => void)[] = [];
+	const changed = () => { serial++; const now = waiting; waiting = []; for (const wake of now) wake(); };
+
+	const send = (response: ServerResponse, status: number, body: unknown) => {
+		response.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" });
+		response.end(JSON.stringify(body));
+	};
+	const refuse = (response: ServerResponse, status: number, refused: Extract<Result, { ok: false }>["refused"], message: string) => send(response, status, { ok: false, refused, message });
+	async function body(request: IncomingMessage): Promise<unknown> {
+		const parts: Buffer[] = [];
+		let size = 0;
+		for await (const part of request) {
+			size += (part as Buffer).length;
+			if (size > 1_000_000) throw new Error("The request is too large.");
+			parts.push(part as Buffer);
+		}
+		return JSON.parse(Buffer.concat(parts).toString("utf8") || "null");
+	}
+	const holder = (request: IncomingMessage) => {
+		const token = request.headers.authorization?.replace(/^Bearer /, "");
+		return token ? [...chairs.entries()].find(([, one]) => one.token === token) : undefined;
+	};
+	const state = (setAs: SeatId, at: { chair: Chair }): State => ({ ...options.view(setAs), ...at.chair.seen(), serial });
+
+	const server = createServer(async (request, response) => {
+		try {
+			const url = new URL(request.url ?? "/", "http://host");
+			if (request.method === "POST" && url.pathname === "/v1/claim") {
+				const claim = await body(request) as Claim;
+				if (claim?.protocol !== PROTOCOL) return refuse(response, 400, "bad-request", `This table speaks ${PROTOCOL}.`);
+				const found = [...chairs.entries()].find(([, one]) => claim.table === table && one.secret === claim.secret);
+				if (!found) return refuse(response, 403, "bad-invite", "No chair at this table has that secret.");
+				const [setAs, one] = found;
+				if (one.token) return refuse(response, 409, "seat-taken", `${one.guest} has already taken this chair.`);
+				one.token = randomBytes(32).toString("base64url");
+				one.guest = String(claim.name || "guest").slice(0, 40);
+				changed();
+				options.claimed?.(setAs, one.guest);
+				return send(response, 200, { protocol: PROTOCOL, table, token: one.token, game: options.game, setAs, judge: options.judge() } satisfies Welcome);
+			}
+			const held = holder(request);
+			if (!held) return refuse(response, 401, "bad-invite", "Claim a chair first, and send its token.");
+			const [setAs, one] = held;
+			one.seen = Date.now();
+			if (request.method === "GET" && url.pathname === "/v1/state") {
+				const after = Number(url.searchParams.get("after") ?? -1);
+				if (serial <= after) await new Promise<void>((wake) => {
+					const timer = setTimeout(wake, HOLD_MS);
+					waiting.push(() => { clearTimeout(timer); wake(); });
+					request.on("close", () => { clearTimeout(timer); wake(); });
+				});
+				return send(response, 200, state(setAs, one));
+			}
+			if (request.method === "POST" && url.pathname === "/v1/answer") return send(response, 200, one.chair.supply(await body(request) as Answering));
+			if (request.method === "POST" && url.pathname === "/v1/agree") {
+				const post = await body(request) as Agreeing;
+				return send(response, 200, one.chair.agree(post.what, !!post.yes));
+			}
+			if (request.method === "POST" && url.pathname === "/v1/work") return send(response, 200, options.work(setAs, await body(request) as Working));
+			return refuse(response, 404, "bad-request", `No ${request.method} ${url.pathname}.`);
+		} catch (error) {
+			if (!response.headersSent) refuse(response, 400, "bad-request", error instanceof Error ? error.message : String(error));
+		}
+	});
+	await new Promise<void>((ready, fail) => { server.once("error", fail); server.listen(options.port ?? 0, "127.0.0.1", ready); });
+	const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+	return {
+		base,
+		table,
+		changed,
+		/** Open a chair for the seat set up as `setAs`: its invite, and the chair the host seats in the game. */
+		open(setAs: SeatId, name: string): { invite: string; chair: Chair } {
+			const before = chairs.get(setAs);
+			if (before) return { invite: formatInvite({ base, table, secret: before.secret }), chair: before.chair };
+			const invite = mintInvite(base, table), made = chair(name, changed);
+			chairs.set(setAs, { chair: made, secret: invite.secret });
+			changed();
+			return { invite: formatInvite(invite), chair: made };
+		},
+		/** Who has taken the chair set up as `setAs`, and when it last asked anything. */
+		guest: (setAs: SeatId) => { const one = chairs.get(setAs); return one?.guest ? { name: one.guest, seen: one.seen } : undefined; },
+		async close() {
+			for (const one of chairs.values()) one.chair.player.close();
+			changed();
+			server.closeAllConnections();
+			await new Promise<void>((done) => server.close(() => done()));
+		},
+	};
 }

@@ -24,7 +24,9 @@ import { play, type Judge, type PlayOptions, type Watcher } from "../core/loop.t
 import { start } from "../core/commit.ts";
 import { TableHalted, type Player } from "../core/player.ts";
 import type { Seat, Table } from "../core/table.ts";
-import type { Outcome, SeatId } from "../core/types.ts";
+import type { Workspace } from "../core/work.ts";
+import type { WorkCommand } from "../core/work-language.ts";
+import type { Frame, Outcome, SeatId } from "../core/types.ts";
 import { brief, current, emptyBrief, type Brief } from "./brief.ts";
 import { guideFor } from "./guides.ts";
 import { loadStored, saveAssessed } from "../core/packages.ts";
@@ -35,7 +37,10 @@ import { reasoner, type Reasoner, type Stream } from "./reason.ts";
 import { rule } from "./ruling.ts";
 import type { Cast, Role } from "./roles.ts";
 import { bill, tally, type Tally } from "./spend.ts";
-import { aiSeat, type Planned } from "./seat.ts";
+import { aiSeat, type Planned, type Prepared } from "./seat.ts";
+
+/** What a brief reads of a seat: who, and the registered list. A guest has these from the public lists alone. */
+type BriefSeat = Pick<Seat, "id" | "name" | "deck">;
 import { recap, type Recap } from "./summary.ts";
 import { planWork, prepareTurn } from "./strategy.ts";
 import { editWork } from "../core/work-tools.ts";
@@ -111,6 +116,8 @@ export async function seat(
 		prepared?: { seat: SeatId; made: unknown }[];
 		/** A seat's own calls, such as one made with that seat's key. The table's judge uses `inference`. */
 		seatInference?: (seat: SeatId) => Inference;
+		/** Seats answered from elsewhere, by seat: their player, models and brief are theirs, not this table's. */
+		remote?: Record<SeatId, Player>;
 	},
 ): Promise<Seated> {
 	const of = (at: SeatId) => options.seatInference?.(at) ?? inference;
@@ -125,7 +132,7 @@ export async function seat(
 	const intents: Record<SeatId, Intent> = {};
 
 	const parts = new Map<SeatId, Cast[]>();
-	for (const at of table.seats) parts.set(at.id, await rosters(at.id));
+	for (const at of table.seats) parts.set(at.id, options.remote?.[at.id] ? [] : await rosters(at.id));
 	const judging = table.seats.map((at) => pick(parts.get(at.id)!, "judge")).find((part) => part && !part.off && part.model && part.model.type !== "classifier");
 
 	/**
@@ -144,48 +151,16 @@ export async function seat(
 	};
 
 	for (const at of table.seats) {
-		const decide = pick(parts.get(at.id)!, "decide");
-		if (!decide?.model || decide.model.type !== "classifier") {
-			throw new Error(
-				`Seat ${at.id} has no decision model. ` +
-					`${decide?.problem ?? `${decide?.pattern} is not a classifier.`} ` +
-					`Run /magic models to read the roster, and /magic models decide <pattern> to change it.`,
-			);
-		}
 		intents[at.id] = startingIntent(at.id);
-		const strategy = pick(parts.get(at.id)!, "strategy");
-		const planning = strategy && !strategy.off && strategy.model && strategy.model.type !== "classifier"
-			? reasoner({ role: "strategy", seat: at.id, stream: of(at.id).stream, model: strategy.model as Model<Api>, tally: counted,
-				...(strategy.thinkingLevel ? { thinking: strategy.thinkingLevel } : {}) }) : undefined;
-		// The brief handles the opening and upkeep. Strategy is due after the first draw window.
-		if (planning && !table.work[at.id]?.eachTurn) {
-			editWork(table, at.id, [{ do: "plan.each-turn" }], `planning-${at.id}`);
-		}
-		// Older version-zero clones carried this automatic opening request.
-		// Retire it without discarding their brief, packages or human requests.
-		if (planning && table.ledger.length === 0 && table.work[at.id]?.accepted === undefined &&
-			table.work[at.id]?.request === "Plan the opening: your first turn and the opponent's first turn.")
-			editWork(table, at.id, [{ do: "plan.keep", reason: "The brief covers the opening; strategy follows the draw." }], `opening-covered-${at.id}`);
-		players[at.id] = aiSeat({
-			name: at.name, judge: !!judging && !!options.rules,
-			api: decisionApi(of(at.id).classify, decide.model as ClassifierModel<ClassifierApi>, { tally: counted, seat: at.id }),
-			intent: intents[at.id]!,
-			chronicle,
-			...(options.rules ? { rules: options.rules } : {}),
-			...(options.dials === undefined ? {} : { dials: options.dials }),
-			onGap: (note) => void table.gaps.push(note),
-			onDial: (route) => void (dialled[route] = (dialled[route] ?? 0) + 1),
-			onPlanned: (one) => void planned.push(one),
-			...(planning ? (() => {
-				// What every writer session reads beside the position: the brief, the recaps, and the cards and rules to look up.
-				const context = () => ({ brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe, ...(options.rules ? { rules: options.rules } : {}) });
-				return {
-					interpret: (frame) => interpret(frame, planning, universe, options.rules),
-					plan: (frame, prepared, changed) => planWork(frame, context(), planning, prepared, changed),
-					prepare: (frame, signal) => prepareTurn(frame, context(), planning, signal),
-				};
-			})() : {}),
-		});
+		// A seat answered from elsewhere brings its own player and models; the table only plays against it.
+		const remote = options.remote?.[at.id];
+		if (remote) { players[at.id] = remote; continue; }
+		const made = aiPlayer(at, parts.get(at.id)!, of(at.id), universe, { chronicle, tally: counted, judge: !!judging && !!options.rules, intent: intents[at.id]!,
+			...(options.rules ? { rules: options.rules } : {}), ...(options.dials === undefined ? {} : { dials: options.dials }),
+			onGap: (note) => void table.gaps.push(note), onDial: (route) => void (dialled[route] = (dialled[route] ?? 0) + 1), onPlanned: (one) => void planned.push(one) });
+		const setup = made.planning ? setupWork(table.work[at.id], table.ledger.length) : [];
+		if (setup.length) editWork(table, at.id, setup, `planning-${at.id}`);
+		players[at.id] = made.player;
 	}
 
 	// Card meaning precedes play. Every seat needs the registered universe,
@@ -193,6 +168,8 @@ export async function seat(
 	// a version-zero clone; a resumed position must already carry its assessment.
 	const reuse = options.reusePackages && !table.ledger.length && !options.prepared?.length;
 	if (reuse) loadStored(table, universe, (seat) => {
+		// A remote seat interprets its deferred uses with its own strategy model.
+		if (options.remote?.[seat]) return false;
 		const strategy = pick(parts.get(seat)!, "strategy");
 		return !strategy?.model || !!strategy.off || strategy.model.type === "classifier";
 	}, options.packageNotice ? { notice: options.packageNotice } : {});
@@ -206,6 +183,7 @@ export async function seat(
 	if (jobs.length && table.ledger.length) return refuse("This position lacks standing card assessments and use inventories. Replay remains available; start from prepared version zero to play.");
 	const assessors = new Map<SeatId, Reasoner>();
 	for (const seat of new Set(jobs.map((job) => job.seat))) {
+		if (options.remote?.[seat]) return refuse(`Seat ${seat} is answered from elsewhere, and its deck has cards without stored assessments. Seat a deck the store covers.`);
 		const role = pick(parts.get(seat)!, "pregame");
 		if (!role?.model || role.off || role.model.type === "classifier") return refuse(`Seat ${seat} needs a pregame model to assess its cards before play, or a clone carrying standing assessments and use inventories.`);
 		assessors.set(seat, reasoner({ role: "pregame", seat, stream: of(seat).stream, model: role.model as Model<Api>, tally: counted,
@@ -227,7 +205,7 @@ export async function seat(
 	if (failed.length) return refuse(`Card assessment is incomplete; play has not started. ${failed.join("\n")}`);
 	for (const at of table.seats) {
 		const strategy = pick(parts.get(at.id)!, "strategy");
-		if (table.work[at.id]?.packages?.some((pack) => pack.deferred?.length) && (!strategy?.model || strategy.off || strategy.model.type === "classifier"))
+		if (!options.remote?.[at.id] && table.work[at.id]?.packages?.some((pack) => pack.deferred?.length) && (!strategy?.model || strategy.off || strategy.model.type === "classifier"))
 			return refuse(`Seat ${at.id} carries deferred card uses but has no strategy model to interpret them. Use a roster with an interpreter or a clone with those uses prepared.`);
 	}
 	if (options.journal) save(options.journal, table);
@@ -245,40 +223,14 @@ export async function seat(
 				take(at.id, current(carried.made, at.id), "carried");
 				return;
 			}
-			const role = pick(parts.get(at.id)!, "pregame");
-			// Off is a decision somebody made, so it is not a gap.
-			if (role?.off) {
-				take(at.id, emptyBrief(at.id), "written");
-				return;
-			}
-			if (!role?.model || role.model.type === "classifier") {
-				take(
-					at.id,
-					{
-						...emptyBrief(at.id),
-						gaps: [`no pregame model: ${role?.problem ?? `${role?.pattern} is not a chat model`}`],
-					},
-					"written",
-				);
-				return;
-			}
-			const others = table.seats.filter((other) => other.id !== at.id) as Seat[];
-			const cache = reuse && options.briefCache !== false ? { ...options.briefCache, identity: {
-				format: table.format, rosters: [at, ...others].map((one) => parts.get(one.id)!.map((part) => ({
-					role: part.role, pattern: part.pattern, off: part.off, problem: part.problem,
-					model: part.model && { id: part.model.id, provider: part.model.provider, api: part.model.api }, thinking: part.thinkingLevel,
-				})).sort((a, b) => a.role.localeCompare(b.role))),
-			} } : undefined;
-			// A reasoner per call, so one analyst's failures cannot stop its siblings or the synthesis.
-			const written = await brief(at, others, universe, () => reasoner({
-				role: "pregame",
-				seat: at.id,
-				stream: of(at.id).stream,
-				model: role.model as Model<Api>,
-				...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}),
-				tally: counted,
-			}), { format: options.format, guides: guideFor, cache, ...(options.rules ? { rules: options.rules } : {}) });
-			take(at.id, written, "written");
+			// A remote seat's brief is its own, written where its models are.
+			if (options.remote?.[at.id]) return;
+			const others = table.seats.filter((other) => other.id !== at.id);
+			take(at.id, await seatBrief(at, others, parts.get(at.id)!, universe, of(at.id), counted, {
+				format: options.format, ...(options.rules ? { rules: options.rules } : {}),
+				// A guest's roster is its own and unknown here: the brief is keyed on the rosters this table knows.
+				...(reuse && options.briefCache !== false ? { cache: options.briefCache ?? {}, rosters: [at, ...others].filter((one) => !options.remote?.[one.id]).map((one) => parts.get(one.id)!) } : {}),
+			}), "written");
 		}),
 	);
 
@@ -297,6 +249,83 @@ export async function seat(
 		...(judging && options.rules ? { judge: { reasoner: reasoner({ role: "judge", stream: inference.stream, model: judging.model as Model<Api>, tally: counted,
 			...(judging.thinkingLevel ? { thinking: judging.thinkingLevel } : {}) }), rules: options.rules, universe } } : {}),
 	};
+}
+
+/**
+ * One model seat's player, from its roster: Jev answers every listed decision,
+ * and the strategy model, when the seat has one, writes its plans and
+ * interprets its deferred card uses. It reads frames, never the table, so it
+ * answers the same way in the host's Pi or at the far end of a wire.
+ */
+export function aiPlayer(at: { id: SeatId; name: string }, parts: Cast[], inference: Inference, universe: Universe, shared: {
+	chronicle: Chronicle; tally: Tally; intent: Intent; judge: boolean; rules?: Rules; dials?: number;
+	onGap(note: string): void; onDial(route: string): void; onPlanned(one: Planned): void;
+}): { player: Player; planning: boolean } {
+	const decide = pick(parts, "decide");
+	if (!decide?.model || decide.model.type !== "classifier") {
+		throw new Error(
+			`Seat ${at.id} has no decision model. ` +
+				`${decide?.problem ?? `${decide?.pattern} is not a classifier.`} ` +
+				`Run /magic models to read the roster, and /magic models decide <pattern> to change it.`,
+		);
+	}
+	const strategy = pick(parts, "strategy");
+	const planning = strategy && !strategy.off && strategy.model && strategy.model.type !== "classifier"
+		? reasoner({ role: "strategy", seat: at.id, stream: inference.stream, model: strategy.model as Model<Api>, tally: shared.tally,
+			...(strategy.thinkingLevel ? { thinking: strategy.thinkingLevel } : {}) }) : undefined;
+	// What every writer session reads beside the position: the brief, the recaps, and the cards and rules to look up.
+	const context = () => ({ brief: shared.chronicle.briefs[at.id], recaps: shared.chronicle.recaps, cards: universe, ...(shared.rules ? { rules: shared.rules } : {}) });
+	const player = aiSeat({
+		name: at.name, judge: shared.judge,
+		api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>, { tally: shared.tally, seat: at.id }),
+		intent: shared.intent, chronicle: shared.chronicle,
+		...(shared.rules ? { rules: shared.rules } : {}), ...(shared.dials === undefined ? {} : { dials: shared.dials }),
+		onGap: shared.onGap, onDial: shared.onDial, onPlanned: shared.onPlanned,
+		...(planning ? {
+			interpret: (frame: Frame) => interpret(frame, planning, universe, shared.rules),
+			plan: (frame: Frame, prepared?: Prepared, changed?: string[]) => planWork(frame, context(), planning, prepared, changed),
+			prepare: (frame: Frame, signal?: AbortSignal) => prepareTurn(frame, context(), planning, signal),
+		} : {}),
+	});
+	return { player, planning: !!planning };
+}
+
+/**
+ * The equipment edits a planning seat needs before play: strategy is due each
+ * turn, since the brief handles the opening and upkeep. Older version-zero
+ * clones carried an automatic opening request; it is retired without
+ * discarding their brief, packages or human requests.
+ */
+export function setupWork(work: Workspace | undefined, version: number): WorkCommand[] {
+	return [
+		...(!work?.eachTurn ? [{ do: "plan.each-turn" as const }] : []),
+		...(version === 0 && work?.accepted === undefined && work?.request === "Plan the opening: your first turn and the opponent's first turn."
+			? [{ do: "plan.keep" as const, reason: "The brief covers the opening; strategy follows the draw." }] : []),
+	];
+}
+
+/**
+ * One seat's pregame brief, from the public registered lists. Off is a
+ * decision somebody made, so it is not a gap; a missing model is. With a cache,
+ * a complete matchup brief for the same lists, pins and rosters is reused.
+ */
+export async function seatBrief(at: BriefSeat, others: BriefSeat[], parts: Cast[], universe: Universe, inference: Inference, tally: Tally,
+	options: { format: string; rules?: Rules; cache?: Omit<BriefCache, "identity">; rosters?: Cast[][] }): Promise<Brief> {
+	const role = pick(parts, "pregame");
+	if (role?.off) return emptyBrief(at.id);
+	if (!role?.model || role.model.type === "classifier")
+		return { ...emptyBrief(at.id), gaps: [`no pregame model: ${role?.problem ?? `${role?.pattern} is not a chat model`}`] };
+	const cache = options.cache && { ...options.cache, identity: {
+		format: options.format, rosters: (options.rosters ?? [parts]).map((one) => one.map((part) => ({
+			role: part.role, pattern: part.pattern, off: part.off, problem: part.problem,
+			model: part.model && { id: part.model.id, provider: part.model.provider, api: part.model.api }, thinking: part.thinkingLevel,
+		})).sort((a, b) => a.role.localeCompare(b.role))),
+	} };
+	// A reasoner per call, so one analyst's failures cannot stop its siblings or the synthesis.
+	return brief(at, others, universe, () => reasoner({
+		role: "pregame", seat: at.id, stream: inference.stream, model: role.model as Model<Api>,
+		...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}), tally,
+	}), { format: options.format, guides: guideFor, ...(cache ? { cache } : {}), ...(options.rules ? { rules: options.rules } : {}) });
 }
 
 /**

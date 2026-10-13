@@ -1,30 +1,23 @@
-# Seats over a socket
+# Who answers a seat
 
-This directory is who answers a seat. `lobby.ts` and `hold.ts` are wired in:
-the host's table before dealing, and its hold on a running game. The wire below
-lets another agent take a seat at a table this Pi owns. It is written, type
-checked, partly tested, and not wired in yet; milestone 2 of
-`design-ref/pi-ux-plan-20261012.md` wires it.
+This directory is the host's lobby and its hold on a running game, and the
+wire that lets another Pi or agent answer a seat. `docs/SEATING.md` is the
+reasoning for a reader with no code.
 
-`docs/SEATING.md` is the reasoning, written for a reader with no code. The
-short version:
+- `lobby.ts`: seats, decks, who plays first, and the two agreements.
+- `hold.ts`: the host's pause, continue and directions between loops.
+- `protocol.ts`: the wire's shapes and the invite. HTTP with long polling.
+- `chair.ts`: a seat answered over the wire, as the host's loop sees it: a
+  player that holds each ask and judges each answer against it.
+- `host.ts`: the server that hands out chairs and answers their guests.
+- `guest.ts`: claim a chair and follow it, driving any player.
 
-- Seven messages: hello, welcome, frame, act, result, over, error. A frame
-  carries the view and, when it is that seat's turn, the decision.
-- An invite is a capability. Whoever presents the secret first claims the seat.
-- A pick carries the version of the frame it answers and a fresh actionId, which
-  is what makes a stale pick, a replayed pick and a reused id tell apart.
-- `judgeAct` in host.ts distinguishes acceptance, replay, id reuse, staleness
-  and invalid picks. Its tests cover the parked wire; core invariants have
-  their own tests.
+A remote seat is a player like any other. It is not a second game loop, and if
+it starts to look like one, stop. Nothing here imports `src/context/`: the
+guest's model seat is built by the extension and handed to `follow` as a
+player, so a person or an MCP client can be handed in the same way.
 
-## What wiring it in means
-
-A remote seat is a Player like any other. It answers `answer` from a socket
-instead of from a model. So the work is a server, a chair claim, and
-`remotePlayer`. It is not a second game loop, and if it starts to look like one,
-stop.
-
-`table-seat.SKILL.md` describes the two tools a seated agent calls. It moves
-into `skills/` when those tools get registered, and not before: a skill
-describing tools that do not exist teaches a model something false.
+`table-seat.SKILL.md` describes the tools a seated agent will call through the
+MCP adapter. It moves into `skills/` when those tools are registered, and not
+before: a skill describing tools that do not exist teaches a model something
+false.

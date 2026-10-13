@@ -27,13 +27,13 @@ sitting at that seat still want it?
   guidance that keeps a choice coherent with the turn. It never writes to the
   table and never advances a phase.
 - **`src/seating/`** is who answers a seat: the lobby and its two agreements,
-  the host's hold on a running game, the wire protocol and remote pick
-  validation. Socket hosting, joining and the pending-player adapter are
-  unfinished.
+  the host's hold on a running game, and the wire that lets another Pi answer
+  a seat over HTTP.
 
-The current player adapter uses a decision model through `src/context/`.
-Future remote, human and MCP adapters use the same core interface without
-loading decision-model context.
+The player adapter in use is a decision model through `src/context/`, in the
+host's Pi or in a guest's Pi at the far end of the wire. Person and MCP
+adapters will use the same core interface without loading decision-model
+context.
 
 The player interface is intended to offer the same capabilities to every seat.
 Listed picks, table talk, prepared procedures and objections work today. Raw
@@ -231,6 +231,11 @@ Rollback and end are rulings by the host, so they are journal lines that replay
 honors. The host's view is the spectator's: the play-by-play, the table widget
 and the public board. `design-ref/pi-ux-plan-20261012.md` holds the plan for
 remote seats, people at a seat and the assistant.
+
+`/magic seat <n> open` gives a seat to a guest instead: the table's server
+starts and prints one invite, and another Pi takes the seat with
+`/magic join <invite>`. That Pi plays the seat with its own models and keys,
+writes its own brief, and agrees for itself; `docs/SEATING.md` is the wire.
 
 A seat can carry its own key for a provider, named as an environment variable
 under `keys` in the roster file (`"keys": {"1": {"openrouter": "$OPENROUTER_SEAT_1"}}`).
@@ -586,10 +591,12 @@ src/context/           questions for a decision model. Its own AGENTS.md
   metrics.ts, trace.ts usage arithmetic and the bill; exact requests and replies when tracing
   playbook.ts, plan.ts the policy schema; the starting intent
 src/core/host.ts       the host's rollback and end, kept as rulings by the host
-src/seating/           who answers a seat; sockets unfinished
+src/seating/           who answers a seat
   lobby.ts             seats, decks, who plays first, and the two agreements before dealing
   hold.ts              the host's hold on a running game: pause, continue, and directions between loops
-  protocol.ts, host.ts the wire's messages, invites and pick judging
+  protocol.ts          the wire's shapes and the invite: HTTP with long polling
+  chair.ts             a seat answered over the wire: holds each ask and judges each answer
+  host.ts, guest.ts    the server that hands out chairs; claiming a chair and following it
 src/board/             board pictures: no game logic, never read by a seat
   snapshot.ts          the board as one viewer may see it, renderer-neutral and pure
   render.ts            the renderer seam, the art map, and SVG to PNG through resvg
@@ -675,6 +682,7 @@ verify every carried field against the source and refuse to pass on a mismatch.
   replies and errors, including the recaps each call received. The trace is
   private seat data. The forced ratio is evidence about cost, not decision
   quality; a comparison harness and version attribution remain unfinished.
-- Socket hosting and joining. The protocol and pick validation exist in
-  `src/seating/`; its sockets and pending-player adapter are unfinished.
+- Seats beyond this machine. The wire works on the loopback address; tunnels,
+  the email check, a person at a seat, the MCP adapter and reopening a guest's
+  seat on resume are the next milestones in `design-ref/pi-ux-plan-20261012.md`.
 - Any format but Standard, and any seat count but two.

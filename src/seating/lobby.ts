@@ -12,10 +12,11 @@
 import type { SeatId } from "../core/types.ts";
 
 /**
- * Who answers a seat. Only model seats run in the host's Pi so far. `setAs` is
- * the seat it was set up as before the table was ordered: its roster and keys.
+ * Who answers a seat: a model in the host's Pi, or a guest over the wire who
+ * brings its own player and models. `setAs` is the seat it was set up as before
+ * the table was ordered: its roster, keys and chair follow it.
  */
-export type SeatSetup = { deck: string; by: "ai"; setAs?: SeatId };
+export type SeatSetup = { deck: string; by: "ai" | "remote"; setAs?: SeatId };
 export type Agreement = "prepare" | "begin";
 export type Stage = "setting" | "preparing" | "prepared" | "playing" | "over";
 
@@ -34,7 +35,7 @@ export const GAME_TYPES = {
 
 export function lobby(decks: readonly string[], game: keyof typeof GAME_TYPES = "standard-alpha"): Lobby {
 	if (decks.length !== GAME_TYPES[game].seats) throw new Error(`${GAME_TYPES[game].name} seats ${GAME_TYPES[game].seats} players, not ${decks.length}.`);
-	return { game, seats: decks.map((deck) => ({ deck, by: "ai" })), first: "coin", stage: "setting", agreed: { prepare: [], begin: [] } };
+	return { game, seats: decks.map((deck) => ({ deck, by: "ai" as const })), first: "coin", stage: "setting", agreed: { prepare: [], begin: [] } };
 }
 
 /**

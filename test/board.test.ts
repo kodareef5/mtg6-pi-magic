@@ -96,6 +96,13 @@ test("the cardboard scene keeps hidden zones as counts and carries art ids and a
 	await accepted(scene); await accepted(mine);
 });
 
+test("a board with nothing visible yet is still a scene", async () => {
+	const table = matchup("board-empty");
+	const scene = cardboardScene(snap(table, "spectator"), artIds(), { width: 800, height: 600 });
+	assert.equal(scene.decks[0]!.cards.length, 1);
+	await accepted(scene);
+});
+
 test("an SVG becomes a PNG with no browser", async () => {
 	const png = await svgToPng('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8" fill="#123456"/></svg>');
 	assert.deepEqual([...png.slice(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);

@@ -5,9 +5,10 @@ description: "How table_view and table_act behave when you are seated at a Magic
 
 # Your chair at the table
 
-This describes the intended remote seat tools. Socket hosting and joining are
-unfinished; `table_view` and `table_act` are not registered by this package yet.
-When connected, the host owns the game and filters each seat's view.
+This describes the remote seat tools the MCP adapter will register over the
+HTTP wire in `docs/SEATING.md`. `table_view` and `table_act` are not registered
+by this package yet; a guest Pi follows its chair without them. The host owns
+the game and filters each seat's view.
 
 ## What you can see
 
