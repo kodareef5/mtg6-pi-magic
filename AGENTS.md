@@ -277,19 +277,22 @@ the frame colours in `assets/backgrounds/colors.json` unless colours are set,
 and a portrait that does not load gives way to a default. The journal header
 records the looks.
 
-`/magic pictures [game] [spectator|<seat>]` turns a saved game into a
-play-by-play picture series (`src/board/series.ts`). The journal replays,
-calling no models, and each moment something visible happened becomes a
-numbered picture as that viewer saw it; a moment that leaves the board as it
-was joins the one before. `index.html` beside the pictures flips through them
-(`src/board/viewer.ts`): what happened, each seat's counts at that moment, life
-over the game, per-seat totals counted from the game's log and ledger, and the
-run's time and cost when its result was saved. `index.md` lists the same lines. A full game is about 150 to 200 pictures at 1920 × 1080, drawn in
-about a minute.
+`/magic replay [game]` writes a saved game as a page to replay in a browser
+(`src/board/replay.ts`, `replay.html`). The journal replays, calling no models,
+and each moment something visible happened (`src/board/series.ts`) is kept as a
+cardboard-api scene for the audience and each seat; a moment that leaves every
+board as it was joins the one before. The page draws the scenes live with
+cardboard's own browser scripts, copied beside it with `game.js`, which holds
+the scenes, the card art and the looks, so it opens with no network. Switch
+perspective at any moment; hover a card for its printed text and state, click
+it to bring it forward. Beside the board: what that viewer saw happen, each
+seat's counts, life over the game, per-seat totals counted from the log and
+ledger, and the run's time and cost when its result was saved. The page wears
+the frame colours of the board being looked at. A 16-turn game writes in
+seconds.
 
 Saved pictures are WebP (jSquash's libwebp build, quality 85), about a tenth
-the size of PNG: the series, the host's picture after each turn and a guest
-seat's own. The terminal widget is shown PNG, which every terminal image
+the size of PNG: the host's picture after each turn and a guest seat's own. The terminal widget is shown PNG, which every terminal image
 protocol takes.
 
 A seat can carry its own key for a provider, named as an environment variable
@@ -663,8 +666,8 @@ src/board/             board pictures: no game logic, never read by a seat
   render.ts            the renderer seam, the art map, and SVG to PNG or WebP through resvg and jSquash
   cardboard.ts         the interim renderer: a snapshot as a cardboard-api MTG 26 scene (optional dependency)
   looks.ts             seat portraits and table backgrounds: the defaults in assets/, or image URLs
-  series.ts            a saved game as a play-by-play picture series, with an index of what happened
-  viewer.ts            the series' page: flip through it with each moment's counts and the game's totals
+  series.ts            a saved game as moments, each as the audience and every seat saw it
+  replay.ts, .html     those moments as cardboard scenes and a page that draws them, with the game's totals
   feed.ts              one picture per turn and at the end, drawn off the game loop and saved
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/card-names.ts    build the Oracle name companion from a matching cached bulk snapshot

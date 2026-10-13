@@ -1,0 +1,210 @@
+<!doctype html>
+<!--
+  A Magic game to replay: game.js beside this page holds every moment's board as
+  cardboard-api scenes, for the audience and each seat, and cardboard's own
+  scripts draw them here. Written by /magic replay; a game file can also be
+  dropped on the page.
+-->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magic replay</title>
+<style>
+:root { --ink: #f4edda; --bg: #061a16; --panel: #0d2a24; --raised: #133d33; --line: #2b4a42; --muted: #a9b8b0; --accent: #d9bf84; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; transition: background .3s; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 14px; padding: 14px; min-height: 100%; align-items: start; }
+@media (max-width: 1100px) { main { grid-template-columns: 1fr; } .board { position: static; } }
+.board { position: sticky; top: 14px; }
+.stage { background: #000; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; aspect-ratio: 16 / 9; max-height: calc(100vh - 28px); margin: 0 auto;
+  box-shadow: 0 0 0 1px var(--panel), 0 10px 30px #0008; }
+.stage svg { width: 100%; height: 100%; display: block; }
+h1 { margin: 0; font: 600 17px Georgia, serif; letter-spacing: .4px; color: var(--accent); }
+h2 { margin: 0 0 8px; font: 600 12px Georgia, serif; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); }
+.sub { color: var(--muted); font-size: 12px; margin-top: 2px; word-break: break-all; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; margin-bottom: 12px; }
+.row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.row:first-child { margin-top: 0; }
+button, select { background: var(--raised); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 6px 11px; font: inherit; cursor: pointer; }
+button:hover, select:hover { border-color: var(--accent); }
+.views { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.views button[aria-pressed=true] { border-color: var(--accent); color: var(--accent); }
+input[type=range] { flex: 1; accent-color: var(--accent); }
+.grow { flex: 1; }
+.count { color: var(--muted); }
+.when { font: 600 15px Georgia, serif; margin-bottom: 6px; }
+ul { margin: 0; padding-left: 18px; } li { margin: 2px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; } th, td { text-align: right; padding: 3px 5px; border-bottom: 1px solid var(--line); }
+th:first-child, td:first-child { text-align: left; } th { color: var(--muted); font-weight: normal; }
+#now td:first-child, #perseat th { white-space: nowrap; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+#chart { width: 100%; height: 110px; cursor: pointer; display: block; }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; } dt { color: var(--muted); } dd { margin: 0; }
+.keys { color: var(--muted); font-size: 12px; margin-top: 8px; }
+#tip { position: fixed; z-index: 10; width: 300px; pointer-events: none; display: none; background: var(--panel); border: 1px solid var(--accent); border-radius: 8px;
+  padding: 10px; box-shadow: 0 12px 30px #000a; }
+#tip img { width: 100%; border-radius: 10px; display: block; margin-bottom: 8px; }
+#tip .name { font: 600 15px Georgia, serif; color: var(--accent); }
+#tip .type { color: var(--muted); font-size: 12px; margin: 2px 0 6px; }
+#tip .text { white-space: pre-wrap; font-size: 13px; }
+#tip .state { margin-top: 6px; color: var(--accent); font-size: 12px; }
+#tip .credit { margin-top: 6px; color: var(--muted); font-size: 11px; }
+#open { max-width: 520px; margin: 18vh auto; text-align: center; }
+</style></head><body>
+<main id="replay" hidden>
+<section class="board"><div class="stage" id="stage"></div></section>
+<aside>
+<div class="panel">
+<h1 id="title"></h1><div class="sub" id="subtitle"></div>
+<div class="views" id="views"></div>
+</div>
+<div class="panel">
+<div class="row"><button id="first" title="First (Home)">⏮</button><button id="prev" title="Previous (←)">◀</button><button id="play" title="Play (space)" class="grow">Play</button><button id="next" title="Next (→)">▶</button><button id="last" title="Last (End)">⏭</button></div>
+<div class="row"><input type="range" id="scrub" min="0" value="0"></div>
+<div class="row"><select id="turns" title="Jump to a turn" class="grow"></select><span class="count" id="count"></span></div>
+<div class="keys">← → step · PageUp/PageDown turn · space plays · V perspective · hover a card for its text, click to bring it forward</div>
+</div>
+<div class="panel"><h2>Life</h2><svg id="chart" preserveAspectRatio="none"></svg></div>
+<div class="panel"><div class="when" id="when"></div><ul id="lines"></ul></div>
+<div class="panel"><h2>At this moment</h2><table id="now"></table></div>
+<div class="panel" id="totals"><h2>Game totals</h2><table id="perseat"></table></div>
+<div class="panel" id="facts"><h2>The game</h2><dl id="game"></dl></div>
+</aside>
+</main>
+<div id="open" class="panel" hidden><h1>Magic replay</h1><p>Open a game file written by <code>/magic replay</code>, or drop one here.</p><input type="file" id="file" accept=".js,.json"></div>
+<div id="tip"></div>
+<script src="cardboard/engine.js"></script>
+<script src="cardboard/extras.js"></script>
+<script src="cardboard/perspective.js"></script>
+<script src="cardboard/layout.js"></script>
+<script src="cardboard/scryfall.js"></script>
+<script src="cardboard/renderer.js"></script>
+<script src="cardboard/mtg-layout.js"></script>
+<script src="cardboard/mtg-renderer.js"></script>
+<script src="game.js"></script>
+<script>
+const T = window.Tabletop, $ = (id) => document.getElementById(id);
+const el = (tag, text, cls) => { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (cls) node.className = cls; return node; };
+
+function start(G) {
+  $("open").hidden = true; $("replay").hidden = false;
+  const moments = G.moments, total = moments.length, views = G.perspectives;
+  const assets = new Map(Object.entries(G.art)), deck = { id: "board", name: "Board", cards: G.deck }, byId = new Map(G.deck.map((one) => [one.id, one]));
+  let at = 0, seen = 0, timer = null, focus = null;
+  $("title").textContent = G.title; $("subtitle").textContent = G.subtitle; $("scrub").max = String(total - 1); document.title = G.title;
+  const turnStarts = []; moments.forEach((one, i) => { if (!turnStarts.length || turnStarts.at(-1).turn !== one.turn) turnStarts.push({ turn: one.turn, at: i }); });
+  for (const one of turnStarts) { const option = el("option", one.turn ? "Turn " + one.turn : "Opening hands"); option.value = String(one.at); $("turns").append(option); }
+  views.forEach((view, i) => { const button = el("button", view.label); button.onclick = () => look(i); $("views").append(button); });
+  const swatch = (i) => { const dot = el("span", undefined, "dot"); dot.style.background = G.colors[i % G.colors.length]; return dot; };
+  const named = (i) => { const span = el("span"); span.append(swatch(i), G.seats[i]); return span; };
+  function table(target, head, rows) {
+    target.replaceChildren(); const tr = el("tr"); head.forEach((cell) => tr.append(el("th", cell))); target.append(tr);
+    for (const row of rows) { const line = el("tr"); row.forEach((cell) => { const td = el("td"); if (cell instanceof Node) td.append(cell); else td.textContent = String(cell); line.append(td); }); target.append(line); }
+  }
+
+  // The board itself: this moment's scene for this viewer, drawn by cardboard. Images the scenes share are named, not repeated.
+  const image = (value) => value?.startsWith("@") ? G.images[value.slice(1)] : value;
+  function scene() {
+    const one = structuredClone(moments[at].views[seen].scene);
+    one.decks = [deck]; one.activeDeckId = "board";
+    for (const player of one.players) if (player.avatarUrl) player.avatarUrl = image(player.avatarUrl);
+    if (one.view.mtg.backgroundUrl) one.view.mtg.backgroundUrl = image(one.view.mtg.backgroundUrl);
+    one.extras = { ...one.extras, focus };
+    return one;
+  }
+  const draw = () => { $("stage").innerHTML = T.renderDetailed(T.normalize(scene()), { assets }).svg; };
+
+  // A card's printed text and its state now, beside the pointer.
+  function tip(event) {
+    const card = event.target.closest?.("[data-card-id]"), box = $("tip");
+    if (!card || focus) { box.style.display = "none"; return; }
+    const id = card.getAttribute("data-card-id"), info = G.cards[id], definition = byId.get(id);
+    if (!info) { box.style.display = "none"; return; }
+    const ref = { playerId: card.getAttribute("data-player"), zoneId: card.getAttribute("data-zone"), index: Number(card.getAttribute("data-card-index")) };
+    const marks = moments[at].views[seen].scene.extras.cards.find((one) => one.target.playerId === ref.playerId && one.target.zoneId === ref.zoneId && one.target.index === ref.index);
+    const art = definition?.scryfallId ? assets.get(T.scryfallAssetKey(definition)) : undefined;
+    box.replaceChildren(...[art?.image && Object.assign(el("img"), { src: art.image }), el("div", info.name + (info.cost ? "  " + info.cost : ""), "name"),
+      info.type && el("div", info.type + (info.stats ? " · " + info.stats : ""), "type"), info.text && el("div", info.text, "text"),
+      marks && el("div", [marks.tapped ? "Tapped" : "", marks.badge ?? "", ...(marks.tags ?? []), ...(marks.counters ?? []).map((one) => one.count + " " + one.name)].filter(Boolean).join(" · "), "state"),
+      art?.artist && el("div", "Illustrated by " + art.artist + " · Scryfall", "credit")].filter(Boolean));
+    box.style.display = "block";
+    const wide = box.offsetWidth, high = box.offsetHeight;
+    box.style.left = Math.min(event.clientX + 18, innerWidth - wide - 8) + "px";
+    box.style.top = Math.max(8, Math.min(event.clientY - high / 2, innerHeight - high - 8)) + "px";
+  }
+  $("stage").addEventListener("mousemove", tip);
+  $("stage").addEventListener("mouseleave", () => { $("tip").style.display = "none"; });
+  // Click a card to bring it forward; click again, or Escape, to put it back.
+  $("stage").addEventListener("click", (event) => {
+    const card = event.target.closest?.("[data-card-id]");
+    focus = focus || !card ? null : { target: { playerId: card.getAttribute("data-player"), zoneId: card.getAttribute("data-zone"), index: Number(card.getAttribute("data-card-index")) }, layout: "spotlight" };
+    $("tip").style.display = "none"; draw();
+  });
+
+  // Life over the game, one line per seat; the marker is this moment.
+  const lives = moments.map((one) => one.counts.map((seat) => seat[0])), high = Math.max(20, ...lives.flat()), low = Math.min(0, ...lives.flat());
+  function chart() {
+    const w = 1000, h = 110, x = (i) => total > 1 ? i / (total - 1) * w : 0, y = (life) => h - 6 - (life - low) / (high - low || 1) * (h - 12);
+    let out = '<line x1="0" x2="' + w + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="var(--line)"/>';
+    for (const t of turnStarts) out += '<line x1="' + x(t.at) + '" x2="' + x(t.at) + '" y1="0" y2="' + h + '" stroke="var(--raised)"/>';
+    G.seats.forEach((_, s) => { out += '<polyline fill="none" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke="' + G.colors[s % G.colors.length] + '" points="' + lives.map((one, i) => x(i) + "," + y(one[s])).join(" ") + '"/>'; });
+    out += '<line x1="' + x(at) + '" x2="' + x(at) + '" y1="0" y2="' + h + '" stroke="var(--ink)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>';
+    $("chart").setAttribute("viewBox", "0 0 " + w + " " + h); $("chart").innerHTML = out;
+  }
+  $("chart").addEventListener("click", (event) => { const box = $("chart").getBoundingClientRect(); show(Math.round((event.clientX - box.left) / box.width * (total - 1))); });
+
+  const turnOf = () => turnStarts.findLastIndex((t) => t.at <= at);
+  function show(next) {
+    at = Math.max(0, Math.min(total - 1, next)); focus = null;
+    const one = moments[at];
+    draw();
+    $("when").textContent = one.when; $("lines").replaceChildren(...one.views[seen].lines.map((line) => el("li", line)));
+    table($("now"), ["", "Life", "Hand", "Library", "Board", "Grave", "Exile"], one.counts.map((seat, i) => [named(i), ...seat]));
+    $("scrub").value = String(at); $("count").textContent = (at + 1) + " / " + total; $("turns").value = String(turnStarts[turnOf()].at);
+    chart();
+    location.replace("#" + (at + 1) + "/" + views[seen].key);
+  }
+  // A perspective is the board that viewer saw, what it saw happen, and the colours of its board.
+  function look(i) {
+    seen = (i + views.length) % views.length;
+    for (const [name, value] of Object.entries(views[seen].theme)) document.documentElement.style.setProperty("--" + name, value);
+    [...$("views").children].forEach((button, b) => button.setAttribute("aria-pressed", String(b === seen)));
+    show(at);
+  }
+  // Back goes to the start of this turn first, as a music player's back does.
+  const turnJump = (step) => { const here = turnOf(), to = step < 0 && turnStarts[here].at < at ? here : here + step; show(turnStarts[Math.max(0, Math.min(turnStarts.length - 1, to))].at); };
+  function play(on) { clearInterval(timer); timer = on ? setInterval(() => { if (at >= total - 1) play(false); else show(at + 1); }, 1500) : null; $("play").textContent = on ? "Pause" : "Play"; }
+  $("first").onclick = () => show(0); $("last").onclick = () => show(total - 1); $("prev").onclick = () => show(at - 1); $("next").onclick = () => show(at + 1);
+  $("play").onclick = () => play(!timer); $("scrub").oninput = (event) => show(Number(event.target.value)); $("turns").onchange = (event) => show(Number(event.target.value));
+  document.addEventListener("keydown", (event) => {
+    if (event.target.tagName === "SELECT" || event.target.tagName === "INPUT" && event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    const keys = { ArrowRight: () => show(at + 1), ArrowLeft: () => show(at - 1), Home: () => show(0), End: () => show(total - 1), PageDown: () => turnJump(1), PageUp: () => turnJump(-1),
+      " ": () => play(!timer), v: () => look(seen + 1), V: () => look(seen - 1), Escape: () => { if (focus) { focus = null; draw(); } } };
+    if (keys[event.key]) { event.preventDefault(); keys[event.key](); }
+  });
+
+  if (G.stats) {
+    const names = G.stats.seats[0]?.counts.map((one) => one[0]) ?? [];
+    table($("perseat"), ["", ...G.stats.seats.map((seat) => seat.name)],
+      [["Deck", ...G.stats.seats.map((seat) => seat.deck)], ...(G.stats.seats.some((seat) => seat.result) ? [["Result", ...G.stats.seats.map((seat) => seat.result ?? "")]] : []),
+        ...names.map((name, row) => [name, ...G.stats.seats.map((seat) => seat.counts[row][1])])]);
+    $("perseat").querySelectorAll("tr:first-child th").forEach((th, i) => { if (i) th.prepend(swatch(i - 1)); });
+    $("game").replaceChildren(...G.stats.game.flatMap(([label, value]) => [el("dt", label), el("dd", value)]));
+  } else { $("totals").remove(); $("facts").remove(); }
+  const [moment, key] = location.hash.slice(1).split("/");
+  at = Math.max(0, Math.min(total - 1, Number(moment) - 1 || 0));
+  look(Math.max(0, views.findIndex((view) => view.key === key)));
+}
+
+// A game file is game.js as /magic replay writes it, or the same object as JSON.
+async function load(file) {
+  const text = await file.text();
+  start(JSON.parse(text.replace(/^\s*window\.GAME\s*=\s*/, "").replace(/;\s*$/, "")));
+}
+if (window.GAME) start(window.GAME);
+else {
+  $("open").hidden = false;
+  $("file").onchange = (event) => event.target.files[0] && load(event.target.files[0]);
+  document.addEventListener("dragover", (event) => event.preventDefault());
+  document.addEventListener("drop", (event) => { event.preventDefault(); if (event.dataTransfer.files[0]) load(event.dataTransfer.files[0]); });
+}
+</script></body></html>

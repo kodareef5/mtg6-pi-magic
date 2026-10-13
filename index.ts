@@ -28,7 +28,7 @@ import { choose, chooseColors, defaults, named, type Art, type Colors, type Look
 import { boardSnapshot } from "./src/board/snapshot.ts";
 import { menu, person, type Mode, type Person } from "./src/seating/person.ts";
 import { panel } from "./src/seating/panel.ts";
-import { cardboardRenderer } from "./src/board/cardboard.ts";
+import { cardboardArt, cardboardRenderer } from "./src/board/cardboard.ts";
 import { Type } from "typebox";
 
 import {
@@ -77,8 +77,8 @@ import {
 import { load as loadRules, search as searchRules } from "./src/core/rules.ts";
 import type { Table } from "./src/core/table.ts";
 import type { SeatId, Viewer } from "./src/core/types.ts";
-import { drawSeries, playByPlay } from "./src/board/series.ts";
-import { gameStats, type Run } from "./src/board/viewer.ts";
+import { playByPlay } from "./src/board/series.ts";
+import { gameStats, writeReplay, type Run } from "./src/board/replay.ts";
 import { project, render } from "./src/core/view.ts";
 import { CommandsSchema, commands } from "./src/core/work-language.ts";
 import { editWork, workFrame } from "./src/core/work-tools.ts";
@@ -182,33 +182,29 @@ export default function (pi: ExtensionAPI) {
 	}
 
 	/**
-	 * A saved game as a play-by-play picture series, drawn beside the session:
-	 * its journal replays, calling no models, and every moment something visible
-	 * happened becomes a picture as the spectator or one seat saw it, with an
-	 * index of what happened.
+	 * A saved game as a page to replay in a browser: its journal replays,
+	 * calling no models, and every moment something visible happened is kept as
+	 * a scene for the audience and each seat, which the page draws with
+	 * cardboard-api. Seconds to write, where pictures took minutes.
 	 */
-	async function pictureGame(ctx: ExtensionContext, id: string | undefined, viewer: Viewer) {
+	async function replayPage(ctx: ExtensionContext, id: string | undefined) {
 		const game = id ?? (table ? basename(games.get(table)?.path ?? "", ".jsonl") : saved()[0]);
 		const path = game && join(GAMES, `${game}.jsonl`);
 		if (!path || !existsSync(path)) { ctx.ui.notify(game ? `No game ${game} in ${GAMES}.` : "No saved games yet.", "warning"); return; }
-		const drawer = await (renderer ??= cardboardRenderer(artIds(), join(CACHE, "art")));
-		if (!drawer) { ctx.ui.notify("No board renderer is installed (optional dependency cardboard-api).", "warning"); return; }
 		const cards = universe(standard.name);
 		let series: ReturnType<typeof playByPlay> | undefined;
 		const back = replayGame(path, (saved) => {
 			const opened = start(standard, saved.seats.map((at) => ({ name: at.name, deck: at.deck })), saved.seed, cards);
-			series = playByPlay(viewer, opened.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck.name })));
+			series = playByPlay(opened.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck.name })));
 			return opened;
 		}, undefined, { cards, rules: loadRules(RULES) }, { observe: (seen) => series!.take(seen) });
-		if (viewer !== "spectator" && !back.header.seats[viewer]) { ctx.ui.notify(`${game} has no seat ${viewer}.`, "warning"); return; }
 		series!.take(back.table);
-		const seen = viewer === "spectator" ? "spectator" : `seat-${viewer}`, dir = join(GAMES, `${game}-pictures`, seen), moments = series!.moments;
-		const stats = gameStats(back.table, back.header.created, runOf(game)), title = back.table.seats.map((one) => one.name).join(" vs ");
-		ctx.ui.notify(`Drawing ${moments.length} pictures of ${game} as ${viewer === "spectator" ? "the spectator" : `seat ${viewer}`} saw it, into ${dir}.`, "info");
-		void drawSeries(moments, drawer, dir, title, { subtitle: `${game} · play by play as ${viewer === "spectator" ? "the spectator" : `seat ${viewer}`} saw it`, stats, dress: dressOf(back.header, viewer),
-			progress: (done, total) => { if (ctx.hasUI) ctx.ui.setWidget("magic-pictures", done < total ? [`Drawing ${game}: ${done} of ${total} pictures.`] : undefined); } })
-			.then(({ files, failed }) => ctx.ui.notify(`Drew ${files.length} pictures of ${game}${failed ? `; ${failed} failed and are noted in the index` : ""}. Open ${join(dir, "index.html")} to flip through them.`, failed ? "warning" : "info"),
-				(error) => { if (ctx.hasUI) ctx.ui.setWidget("magic-pictures", undefined); ctx.ui.notify(`The pictures stopped: ${error instanceof Error ? error.message : String(error)}`, "error"); });
+		const { moments, viewers } = series!, dir = join(GAMES, `${game}-replay`);
+		const art = (definitions: Record<string, string>[]) => cardboardArt(definitions, join(CACHE, "art"));
+		if (!await art([])) { ctx.ui.notify("The replay draws with cardboard-api, which is not installed (an optional dependency).", "warning"); return; }
+		const written = await writeReplay(dir, moments, viewers, { title: back.table.seats.map((one) => one.name).join(" vs "), subtitle: `${game} · play by play`,
+			stats: gameStats(back.table, back.header.created, runOf(game)), dress: (viewer) => dressOf(back.header, viewer), art: artIds(), cards, resolveArt: art });
+		ctx.ui.notify(`Wrote a replay of ${game}: ${moments.length} moments from ${viewers.length} perspectives, ${(written.bytes / 1e6).toFixed(1)} MB. Open ${join(dir, "index.html")}.`, "info");
 	}
 
 	/**
@@ -273,7 +269,7 @@ export default function (pi: ExtensionAPI) {
 				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck, ...(from.setAs ? { setAs: from.setAs[at.id]! } : {}), ...from.looks?.[at.id] })),
 				...(from.clock ? { clock: from.clock } : {}),
 				...(from.background ? { background: from.background } : {}),
-...(from.colors ? { colors: from.colors } : {}),
+				...(from.colors ? { colors: from.colors } : {}),
 				cards: { path: cards.path, generated: cards.generated, ...(cards.faces ? { faces: cards.faces } : {}), ...(cards.names ? { names: cards.names } : {}) },
 				rules: { path: RULES, effective: rules.effective },
 				created: new Date().toISOString(),
@@ -453,10 +449,10 @@ export default function (pi: ExtensionAPI) {
 	};
 
 	/** Colours set over a background's own, for the table widget. */
-const tinted = (colors: Colors | undefined) => colors ? ` in ${colors.primary}/${colors.secondary}` : "";
+	const tinted = (colors: Colors | undefined) => colors ? ` in ${colors.primary}/${colors.secondary}` : "";
 
-/** The defaults a look can take, for a command given no value. */
-const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"}: ${defaults(kind).join(", ")}. Or random, or an http(s) image URL.`;
+	/** The defaults a look can take, for a command given no value. */
+	const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"}: ${defaults(kind).join(", ")}. Or random, or an http(s) image URL.`;
 
 /** Admitted alpha decks: legal main decks whose cards all have standing assessments. */
 	const pool = (ctx: ExtensionContext) =>
@@ -520,7 +516,7 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 			...(ours.lobby.clock ? { clock: ours.lobby.clock } : {}),
 			...((asking) => asking?.clock && asking.seat === seat && !ours.hold?.paused() ? { remaining: Math.max(0, asking.since + asking.clock * 1000 - Date.now()) } : {})(ours.hold?.asking()),
 			...(seat !== undefined && seat >= 0 ? { seat, seats: (game?.seats.map((one) => ({ id: one.id, name: one.name, deck: one.deck })) ?? decks.map((name, at) => ({ id: at, name: names[at]!, deck: alpha(deck(name)) })))
-	.map((one) => ({ ...one, ...ours.lobby.seats[one.id]?.look })) } : {}),
+				.map((one) => ({ ...one, ...ours.lobby.seats[one.id]?.look })) } : {}),
 			recaps: (host === ours ? seated?.chronicle.recaps ?? [] : []).map((one) => ({ ...one })),
 			// Known once preparation has seated the table's roles.
 			...(game && host === ours && seated ? { judge: !!seated.judge } : {}),
@@ -583,7 +579,7 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 			const remote = Object.fromEntries(setup.seats.flatMap((one, at) => one.by === "remote" ? [[at, ours.wire!.open(one.setAs!, one.deck).chair.player]] : []));
 			try {
 				const { opened, sitting } = await open(ctx, { seed: id, decks, alpha: true, setAs: order, remote, ...(Object.keys(remote).length ? { clock: setup.clock } : {}),
-	looks: setup.seats.map((one) => one.look), background: setup.background, ...(setup.colors ? { colors: setup.colors } : {}) });
+					looks: setup.seats.map((one) => one.look), background: setup.background, ...(setup.colors ? { colors: setup.colors } : {}) });
 				// A table replaced while this one prepared keeps its own game: this preparation is closed, not installed.
 				if (host !== ours) { await Promise.all(Object.values(sitting.players).map((player) => player.close())); return; }
 				table = opened; seated = sitting;
@@ -711,8 +707,8 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 	type Seating = { client: Guest; leaving: AbortController; state?: State; player?: Player; preparing?: Promise<boolean>; spend: ReturnType<typeof newTally>; gaps: string[];
 		/** A person at this seat, with the autopilot behind them; absent while the seat prepares. */
 		person?: Person; mode: Mode; pictured?: string;
-	/** This Pi's own choice of background and frame colours for the seat's pictures, over the host's. */
-	background?: string; colors?: Colors };
+		/** This Pi's own choice of background and frame colours for the seat's pictures, over the host's. */
+		background?: string; colors?: Colors };
 	let guest: Seating | null = null;
 
 	// A component rather than lines: Pi cuts a text widget at ten lines, and a person's seat needs the whole question.
@@ -908,12 +904,12 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 		},
 	});
 
-	const VERBS = ["host", "seat", "first", "clock", "background", "colors", "pictures", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
+	const VERBS = ["host", "seat", "first", "clock", "background", "colors", "replay", "start", "begin", "pause", "continue", "rollback", "end", "status", "join", "leave", "pick", "ok", "show", "mode", "concede", "pass", "stops", "tell", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
 	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | seat <n> open | seat <n> ai | seat <n> avatar|background <name|url|random> | " +
 	"seat <n> colors <primary> <secondary> | auto | first <coin|n> | clock <seconds|off> | background <name|url|random> | colors <primary> <secondary> | auto | start | begin | " +
 		"join <invite> [suggest|auto|manual] | pick <n> | ok | pass [turn] | stops <smart|all> | show <n> | tell <words> | mode <suggest|auto|manual> | concede | leave | " +
 		"pause | continue | rollback <version> [why] | end [why] | status | resume <game> | clone <game> <version> <new-id> | " +
-		"models [why|<role> <pattern> [seat]] | board | pictures [game] [spectator|<seat>] | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
+		"models [why|<role> <pattern> [seat]] | board | replay [game] | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
 
 	pi.registerCommand("magic", {
 		description: "Host a Magic table: host, start, begin, pause, rollback, end, resume, models, and more. /magic alone opens the menu.",
@@ -1014,13 +1010,13 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 					if (host.wire?.guest(at)) { ctx.ui.notify(`A guest holds seat ${at}. Set a new table to change who answers it.`, "warning"); return; }
 					host.lobby.seats[at] = { ...host.lobby.seats[at]!, by: "ai" };
 				} else if (words[2] === "colors") {
-	const at = Number(words[1]), one = host.lobby.seats[at];
-	if (!one) { ctx.ui.notify("/magic seat <n> colors <primary> <secondary> | auto", "warning"); return; }
-	try {
-		const { colors: _, ...rest } = one.look;
-		host.lobby.seats[at] = { ...one, look: words[3] === "auto" ? rest : { ...rest, colors: chooseColors(words[3], words[4]) } };
-	} catch (error) { ctx.ui.notify(error instanceof Error ? error.message : String(error), "warning"); return; }
-} else if (words[2] === "avatar" || words[2] === "background") {
+					const at = Number(words[1]), one = host.lobby.seats[at];
+					if (!one) { ctx.ui.notify("/magic seat <n> colors <primary> <secondary> | auto", "warning"); return; }
+					try {
+						const { colors: _, ...rest } = one.look;
+						host.lobby.seats[at] = { ...one, look: words[3] === "auto" ? rest : { ...rest, colors: chooseColors(words[3], words[4]) } };
+					} catch (error) { ctx.ui.notify(error instanceof Error ? error.message : String(error), "warning"); return; }
+				} else if (words[2] === "avatar" || words[2] === "background") {
 					const at = Number(words[1]), part = words[2], kind: Art = part === "avatar" ? "avatars" : "backgrounds", one = host.lobby.seats[at];
 					if (!one) { ctx.ui.notify("/magic seat <n> avatar|background <name|url|random>", "warning"); return; }
 					if (!words[3]) { ctx.ui.notify(choices(kind), "info"); return; }
@@ -1085,15 +1081,13 @@ const choices = (kind: Art) => `${kind === "avatars" ? "Avatars" : "Backgrounds"
 				return;
 			}
 
-			if (verb === "pictures") {
-	const [first, second] = words.slice(1), named = first !== undefined && !/^(\d+|spectator)$/.test(first);
-	const seat = named ? second : first;
-	try { await pictureGame(ctx, named ? first : undefined, seat === undefined || seat === "spectator" ? "spectator" : Number(seat)); }
-	catch (error) { ctx.ui.notify(`Could not picture the game: ${error instanceof Error ? error.message : String(error)}`, "error"); }
-	return;
-}
+			if (verb === "replay") {
+				try { await replayPage(ctx, words[1]); }
+				catch (error) { ctx.ui.notify(`Could not write the replay: ${error instanceof Error ? error.message : String(error)}`, "error"); }
+				return;
+			}
 
-if (verb === "board") {
+			if (verb === "board") {
 				if (!table) { ctx.ui.notify("No table. /magic host sets one.", "warning"); return; }
 				const board = feedFor(ctx, table);
 				board.take(`now-${table.cursor.clock}`);

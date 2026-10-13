@@ -91,11 +91,23 @@ export function cardboardScene(snapshot: BoardSnapshot, art: ReadonlyMap<string,
 	};
 }
 
+type Tabletop = { renderAsync(request: unknown): Promise<string>; resolveScryfall(cards: unknown[]): Promise<Map<string, string>> };
+/** cardboard-api, or null when it is not installed. Card art is cached under `cache`. */
+async function tabletop(cache?: string): Promise<Tabletop | null> {
+	if (cache) process.env.TABLETOP_SCRYFALL_CACHE ??= cache;
+	try { return (await import("cardboard-api/tabletop.mjs" as string)).default as Tabletop; } catch { return null; }
+}
+
+/** Card art for scene definitions, keyed as cardboard looks it up, so a page can draw them with no network. Null without the package. */
+export async function cardboardArt(definitions: Record<string, string>[], cache?: string): Promise<Record<string, string> | null> {
+	const Tabletop = await tabletop(cache);
+	return Tabletop && Object.fromEntries(await Tabletop.resolveScryfall(definitions));
+}
+
 /** The renderer, or null when cardboard-api is not installed. Card art is cached under `cache`. */
 export async function cardboardRenderer(art: ReadonlyMap<string, string>, cache?: string): Promise<BoardRenderer | null> {
-	if (cache) process.env.TABLETOP_SCRYFALL_CACHE ??= cache;
-	let Tabletop: { renderAsync(request: unknown): Promise<string> };
-	try { Tabletop = (await import("cardboard-api/tabletop.mjs" as string)).default; } catch { return null; }
+	const Tabletop = await tabletop(cache);
+	if (!Tabletop) return null;
 	return { name: "cardboard-api", async svg(snapshot, size, dress = {}) {
 		const avatars = Object.fromEntries(await Promise.all(snapshot.seats.map(async (seat) => [seat.id, await portrait(dress.avatars?.[seat.id], seat.id)] as const)));
 		const background = imageOf("backgrounds", dress.background), colors = dress.colors ?? colorsFor(dress.background);
@@ -104,7 +116,7 @@ export async function cardboardRenderer(art: ReadonlyMap<string, string>, cache?
 }
 
 /** A seat's portrait to draw: its own if it loads, else a default, so a seat is never only an initial. */
-async function portrait(look: string | undefined, seat: SeatId): Promise<string | undefined> {
+export async function portrait(look: string | undefined, seat: SeatId): Promise<string | undefined> {
 	const own = !look ? undefined : isUrl(look) ? await fetchImage(look) && look : imageOf("avatars", look);
 	const standing = defaults("avatars");
 	return own || imageOf("avatars", standing[seat % standing.length]);
