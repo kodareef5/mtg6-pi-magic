@@ -220,6 +220,59 @@ test("the host pilots a seat from its terminal: it answers by number, its assist
 	} finally { await hostPi.shutdown(); }
 });
 
+test("a player plays their seat from its page: they choose its models and key, agree to the table as set, and answer its questions", async () => {
+	const hostPi = fakePi(), key = `sk-or-v1-${"a".repeat(40)}`;
+	try {
+		await hostPi.magic("host Mardu Discard vs Jund Sacrifice");
+		await hostPi.magic("first 0");
+		await hostPi.magic("seat 1 player");
+		assert.match(hostPi.notes.at(-1)!, /needs this Pi to show its games/);
+		await hostPi.magic("watch local");
+		await hostPi.magic("seat 1 link");
+		const link = /(http:\/\/127\.0\.0\.1:\d+)\/seat\/#(\S+)/.exec(hostPi.notes.at(-1)!)!, [base, code] = [link[1]!, link[2]!];
+		const seat = (body?: object, query = "") => fetch(`${base}/api/seat${query}`, { headers: { authorization: `Bearer ${code}` }, ...(body ? { method: "POST", body: JSON.stringify(body) } : {}) }).then((one) => one.json());
+		type Seen = { agreement?: string; question?: { ask: number; options: { suggested?: true }[] }; stage: string; mode?: string; key: string; seats: { pilot: string; models: Record<string, string> }[] };
+		const awaiting = async (done: (state: Seen) => boolean, what: string): Promise<Seen> => {
+			let got = await seat();
+			for (const begun = Date.now(); !done(got.state); got = await seat(undefined, `?after=${got.serial}`))
+				if (Date.now() - begun > 20_000) throw new Error(`The seat's page never showed ${what}. Last: ${JSON.stringify(got.state).slice(0, 300)}`);
+			return got.state;
+		};
+		let now: Seen = (await seat()).state;
+		assert.deepEqual(now.seats.map((one) => [one.pilot, one.models.decide]), [["its AI", "fake/jev-a"], ["a player, here", "fake/jev-b"]], "the page shows the table as set");
+		assert.match((await seat({ do: "model", role: "decide", pattern: "nothing-like-it" })).message, /No available model matches nothing-like-it/);
+		assert.deepEqual(await seat({ do: "model", role: "decide", pattern: "openrouter/jev-c" }), { ok: true });
+		assert.match((await seat({ do: "agree", what: "prepare", yes: true })).message, /Nothing asks this seat to prepare/);
+		assert.deepEqual(await seat({ do: "key", key }), { ok: true });
+		now = (await seat()).state;
+		assert.deepEqual([now.key, now.seats[1]!.models.decide], ["given", "openrouter/jev-c"]);
+		assert.ok(!JSON.stringify(now).includes("aaaa"), "a key given is never sent back");
+		await hostPi.magic("start");
+		await awaiting((one) => one.agreement === "prepare", "the agreement to prepare");
+		assert.match((await seat({ do: "model", role: "decide", pattern: "fake/jev-a" })).message, /asking every seat to agree/, "the table holds still while it is agreed to");
+		assert.deepEqual(await seat({ do: "agree", what: "prepare", yes: true }), { ok: true });
+		await until(() => hostPi.said(/^Prepared mardu-discard-vs-jund-sacrifice/), "preparation", hostPi.notes);
+		await hostPi.magic("begin");
+		await awaiting((one) => one.agreement === "begin", "the agreement to begin");
+		assert.deepEqual(await seat({ do: "agree", what: "begin", yes: true }), { ok: true });
+		now = await awaiting((one) => !!one.question, "a question");
+		assert.equal(now.mode, "suggest");
+		assert.ok(now.question!.options.some((one) => one.suggested), "the AI's pick is marked");
+		assert.match((await seat({ do: "choose", ask: now.question!.ask + 1, n: 1 })).message, /answered or withdrawn/, "an answer meant for another question is refused");
+		assert.deepEqual(await seat({ do: "choose", ask: now.question!.ask, n: 1 }), { ok: true });
+		const board = (await seat()).board;
+		assert.deepEqual(board.full.perspectives.map((one: { key: string }) => one.key), ["seat-1"], "the page draws the seat's own board");
+		assert.ok(hostPi.calls.some((call) => call.model === "jev-c") && hostPi.calls.every((call) => call.model !== "jev-c" || call.key === key), "the seat's AI suggests on its player's key");
+		await hostPi.magic("end Page check done.");
+		await awaiting((one) => one.stage === "over", "the end");
+		const journal = readdirSync(join(home, "magic", "games")).filter((name) => name.startsWith("mardu-discard-vs-jund-sacrifice") && name.endsWith(".jsonl"))
+			.map((name) => join(home, "magic", "games", name)).sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)[0]!;
+		const rows = readFileSync(journal, "utf8").split("\n").filter((line) => line.includes('"row"')).map((line) => JSON.parse(line).row);
+		assert.ok(rows.some((row) => row.seat === 1 && row.by === "person"), "the player's pick is the person's row");
+		assert.ok(!readFileSync(journal, "utf8").includes("aaaa"), "and the key is nowhere in the journal");
+	} finally { await hostPi.magic("watch off"); await hostPi.shutdown(); }
+});
+
 test("a table's looks are set before the start and recorded with the game", async () => {
 	const hostPi = fakePi();
 	try {

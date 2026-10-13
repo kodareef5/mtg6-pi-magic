@@ -47,7 +47,7 @@ import {
 import { degraded, restartOf, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
 import { endByHost, rollbackByHost } from "./src/core/host.ts";
 import { hold, type Hold } from "./src/seating/hold.ts";
-import { agree, GAME_TYPES, lobby, seatOf, seatOrder, type Agreement, type KeyFrom, type Lobby, type SeatSetup } from "./src/seating/lobby.ts";
+import { agree, GAME_TYPES, lobby, seatCode, seatOf, seatOrder, type Agreement, type KeyFrom, type Lobby, type SeatSetup } from "./src/seating/lobby.ts";
 import { gameResult, report, preparationFailure, saveReport } from "./tools/game-report.ts";
 import { load, type Universe } from "./src/core/cards.ts";
 import { alpha, deck, seatLabels } from "./src/core/decks.ts";
@@ -70,7 +70,7 @@ import type { Table } from "./src/core/table.ts";
 import type { SeatId } from "./src/core/types.ts";
 import { gameStats, writeReplay } from "./src/board/replay.ts";
 import { dressOf, momentsOf, runOf } from "./src/watch/games.ts";
-import { watchServer, type Watch } from "./src/watch/server.ts";
+import { watchServer, type Desk, type Watch } from "./src/watch/server.ts";
 import { quickTunnel } from "./src/watch/tunnel.ts";
 import { project, render } from "./src/core/view.ts";
 import { CommandsSchema, commands } from "./src/core/work-language.ts";
@@ -195,7 +195,7 @@ export default function (pi: ExtensionAPI) {
 		mkdirSync(CACHE, { recursive: true });
 		writeFileSync(SETTINGS, JSON.stringify({ ...settings(), watch: mode }, null, 2) + "\n");
 		if (mode === "off") { ctx.ui.notify("This Pi no longer shows its games.", "info"); showTable(ctx); return; }
-		const options = { dir: GAMES, cards: () => universe(standard.name), rules: () => loadRules(RULES), art: artIds(), paths: { cards: universe(standard.name).path, rules: RULES },
+		const options = { dir: GAMES, cards: () => universe(standard.name), rules: () => loadRules(RULES), art: artIds(), paths: { cards: universe(standard.name).path, rules: RULES }, seats: (code: string) => deskOf(ctx, code),
 			resolveArt: async (definitions: Record<string, string>[]) => await cardboardArt(definitions, join(CACHE, "art")) };
 		let server: Watch;
 		try { server = await watchServer({ ...options, port: settings().port ?? 4747 }); }
@@ -439,9 +439,13 @@ export default function (pi: ExtensionAPI) {
 		keys: Map<SeatId, string>;
 		/** The seat this terminal pilots, by its code. */
 		piloting?: string;
+		/** When each seat's page last asked anything, by seat code. */
+		seen: Map<string, number>;
+		/** The models this Pi can reach, for a seat's page to choose from while the table is set; null while they are read. */
+		models?: { chat: string[]; classifiers: string[] } | null;
 	};
 	let host: Hosting | null = null;
-	const hosting = (lobby: Lobby): Hosting => ({ lobby, feed: [], agreeing: new Map(), keys: new Map() });
+	const hosting = (lobby: Lobby): Hosting => ({ lobby, feed: [], agreeing: new Map(), keys: new Map(), seen: new Map() });
 	/** A table replaced or closed: whatever it was asking its players goes unanswered. */
 	const dismiss = (old: Hosting | null) => { for (const one of old?.agreeing.values() ?? []) one.settle(false); old?.agreeing.clear(); };
 
@@ -469,14 +473,16 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setWidget("magic-table", host ? tableLines() : undefined);
 	}
 
-	/** Something every seat may see changed: the stage, a recap, the outcome. */
+	/** Something every seat may see changed: the stage, a recap, the outcome. Their pages ask again. */
 	function told(ctx: ExtensionContext) {
 		showTable(ctx);
+		watching?.server.seatsChanged();
 	}
 
-	/** Who pilots a seat now, in words. */
+	/** Who pilots a seat now, in words. A player whose page asked anything in the last 40 seconds is here. */
 	function pilotText(one: SeatSetup, at: number): string {
-		const mode = host?.pilots?.[at]?.mode(), here = host?.piloting === one.code ? ", from this terminal" : "";
+		const mode = host?.pilots?.[at]?.mode(), seen = host?.seen.get(one.code);
+		const here = host?.piloting === one.code ? ", from this terminal" : seen === undefined ? one.pilot === "player" ? ", not yet here" : "" : Date.now() - seen < 40_000 ? ", here" : ", away";
 		if (!mode) return `${one.pilot === "ai" ? "its AI" : "a player"}${here}`;
 		if (mode === "auto") return one.pilot === "ai" && !here ? "its AI" : `its AI, handed over by its pilot${here}`;
 		return `${one.pilot === "ai" ? "a player, taken over from its AI" : "a player"}${here}, ${mode} mode`;
@@ -583,7 +589,7 @@ export default function (pi: ExtensionAPI) {
 		const ours = host, setup = ours.lobby, missing = unset(ours);
 		if (missing.length) { ctx.ui.notify(missing.join(" "), "warning"); return; }
 		const waiting = setup.seats.flatMap((one, at) => one.pilot === "player" && ours.piloting !== one.code ? [at] : []);
-		if (waiting.length) ctx.ui.notify(`The agreement waits for the player at seat ${waiting.join(" and ")}.`, "info");
+		if (waiting.length) ctx.ui.notify(`The agreement waits for the player at seat ${waiting.join(" and ")}, on their seat's page: /magic seat <n> link.`, "info");
 		void (async () => {
 			if (!await askSeats(ctx, ours, "prepare") || setup.stage !== "setting") return showTable(ctx);
 			const { order, by } = seatOrder(setup);
@@ -641,6 +647,7 @@ export default function (pi: ExtensionAPI) {
 				pilots[at] = person(game.seats[at]!.name, ai, setup.pilot === "player" ? "suggest" : "auto", (asking) => {
 					holding.clock(at, asking ? ours.lobby.clock ?? undefined : undefined);
 					if (host === ours && ours.piloting === ours.lobby.seats[at]?.code) showSeat(ctx);
+					watching?.server.seatsChanged();
 				});
 			}
 			ours.pilots = pilots;
@@ -683,7 +690,133 @@ export default function (pi: ExtensionAPI) {
 		const paths = saveReport(join(GAMES, `${id}-${sitting.timing.startedAt}.result.json`), result, opened);
 		ctx.ui.notify(`${id}${opened.outcome ? "" : ` stopped at version ${opened.ledger.length}; /magic resume ${id} seats it again`}.\n` + [...report(result), ...paths].join("\n"),
 			outcome && !degraded(opened, sitting) ? "info" : "warning");
-		showTable(ctx);
+		told(ctx);
+	}
+
+	/** Set one of a seat's own models, or give it back to the roster's. A choice that resolves to no model is refused, so the table never holds one. */
+	async function chooseModel(ctx: ExtensionContext, ours: Hosting, at: number, role: string, pattern: string): Promise<string | null> {
+		const one = ours.lobby.seats[at];
+		if (!one || !SEAT_ROLES.includes(role as Role) || !pattern) return `/magic seat <n> model <${SEAT_ROLES.join("|")}> <pattern|default>. The judge and the commentator are the table's: /magic models.`;
+		const { [role]: _, ...rest } = one.models, models = pattern === "default" ? rest : { ...rest, [role]: pattern };
+		const cast = (await roster(ctx, one.setAs ?? at, models, one.key !== "game")).find((part) => part.role === role)!;
+		if (cast.problem) return `Seat ${at}'s ${role}: ${cast.problem}`;
+		if (role === "decide" && cast.off) return "Every seat needs a decision model: its AI picks for it, or suggests to its player.";
+		if (host !== ours || ours.lobby.seats[at] !== one) return "The seat changed while its model was checked. Choose again.";
+		ours.lobby.seats[at] = { ...one, models };
+		told(ctx);
+		return null;
+	}
+
+	/** A seat's page, when this Pi shows its games. The code goes after the #, which no browser sends. */
+	const seatLink = (code: string) => watchUrl() && `${watchUrl()}/seat/#${code}`;
+
+	/** A new code for a seat, as for a link that went astray. Its key and any agreement put to it stay with the seat. */
+	function relink(ours: Hosting, at: number) {
+		const one = ours.lobby.seats[at]!, code = seatCode(), pending = ours.agreeing.get(one.code);
+		if (pending) { ours.agreeing.delete(one.code); ours.agreeing.set(code, pending); }
+		if (ours.piloting === one.code) ours.piloting = code;
+		ours.seen.delete(one.code);
+		ours.lobby.seats[at] = { ...one, code };
+	}
+
+	/**
+	 * A seat as its code holder reaches it from the seat's page: the table as
+	 * set, the agreement put to the seat, and once dealt, the question its pilot
+	 * is asked. Everything it reads is this seat's own or public.
+	 */
+	function deskOf(ctx: ExtensionContext, code: string): Desk | undefined {
+		const ours = host, at = ours ? seatOf(ours.lobby, code) : undefined;
+		if (!ours || at === undefined) return undefined;
+		const first = !ours.seen.has(code);
+		ours.seen.set(code, Date.now());
+		if (first) { showTable(ctx); ctx.ui.notify(`Seat ${at}'s page is open.`, "info"); }
+		if (ours.lobby.stage === "setting" && ours.models === undefined) {
+			const registry = ctx.modelRegistry, named = (models: readonly { provider: string; id: string }[]) => [...new Set(models.map((one) => `${one.provider}/${one.id}`))].sort();
+			ours.models = null;
+			void registry.getAvailableOfType("classifier").then((classifiers) => { ours.models = { chat: named(registry.getAvailable()), classifiers: named(classifiers) }; watching?.server.seatsChanged(); },
+				() => { delete ours.models; });
+		}
+		const journal = table && ours.lobby.stage !== "setting" ? games.get(table) : undefined;
+		return { ...(journal ? { game: basename(journal.path, ".jsonl"), viewer: at } : {}), state: () => deskState(ours, at, code), act: (post) => deskAct(ctx, ours, at, code, post) };
+	}
+
+	/** The question as the seat's page shows it: the folded menu, what each line shows, the objects it names, and the AI's pick. */
+	const question = (asking: NonNullable<ReturnType<Person["asking"]>>) => ({
+		ask: asking.ask, text: asking.frame.decision?.question ?? "Choose.", ...(asking.frame.refused?.length ? { refused: asking.frame.refused.at(-1) } : {}),
+		...(asking.frame.decision?.options.some((one) => one.id === "pass") ? { pass: true } : {}),
+		options: menu(asking).map((line) => ({ label: line.label, ...(line.option.shows ? { shows: line.option.shows } : {}),
+			objects: (line.option.objects ?? []).map((one) => one.id), ...(asking.suggestion?.option === line.option.id ? { suggested: true } : {}) })),
+	});
+
+	function deskState(ours: Hosting, at: number, code: string) {
+		const setup = ours.lobby, mine = setup.seats[at]!, pilot = ours.pilots?.[at], asking = pilot?.asking(), clock = ours.hold?.asking(), crew = loadCrew(ROSTER);
+		const game = host === ours && setup.stage !== "setting" ? table : null, journal = game && games.get(game), plan = pilot?.latest()?.view.work?.plan?.objective;
+
+		return {
+			game: GAME_TYPES[setup.game].name, stage: setup.stage, ...(ours.hold?.paused() ? { paused: true } : {}), clock: setup.clock, ...(seated?.judge ? { judge: true } : {}),
+			seat: at, name: game?.seats[at]?.name ?? mine.deck,
+			seats: setup.seats.map((one, i) => ({ seat: i, name: game?.seats[i]?.name ?? one.deck, deck: one.deck, pilot: pilotText(one, i).replace(", from this terminal", ""),
+				models: Object.fromEntries(SEAT_ROLES.map((role) => [role, one.models[role] ?? rosterFor(crew, one.setAs ?? i)[role] ?? ""])), chosen: Object.keys(one.models),
+				key: one.key === "game" ? "the game's" : one.key === "player" ? "its player's own" : "one the host named" })),
+			key: mine.key === "player" ? ours.keys.has(mine.setAs ?? at) ? "given" : "missing" : mine.key === "game" ? "game" : "host",
+			...(ours.agreeing.has(code) ? { agreement: ours.agreeing.get(code)!.what } : {}),
+			...(setup.stage === "setting" && ours.models ? { choices: ours.models } : {}),
+			...(pilot ? { mode: pilot.mode(), stops: pilot.stops() } : {}),
+			...(asking ? { question: question(asking) } : {}),
+			...(clock?.seat === at && clock.clock && !ours.hold?.paused() ? { remaining: Math.max(0, clock.since + clock.clock * 1000 - Date.now()) } : {}),
+			...(plan ? { plan } : {}),
+			...(game?.outcome ? { result: game.outcome.results[at] ?? "draw" } : {}),
+			...(journal && watchUrl() ? { replay: `${watchUrl()}/games/${basename(journal.path, ".jsonl")}/` } : {}),
+		};
+	}
+
+	/** One action from a seat's page. The table's config changes only while it is set and nobody is being asked to agree. */
+	async function deskAct(ctx: ExtensionContext, ours: Hosting, at: number, code: string, post: Record<string, unknown>): Promise<string | null> {
+		if (host !== ours) return "This table was replaced.";
+		const setup = ours.lobby, mine = setup.seats[at]!, pilot = ours.pilots?.[at], ask = typeof post.ask === "number" ? post.ask : undefined, setAs = mine.setAs ?? at;
+		const settable = setup.stage === "setting" && !ours.asking ? null : setup.stage !== "setting" ? "A seat's models and key are set before the table starts." : "The table is asking every seat to agree; decline first to change your seat.";
+		switch (post.do) {
+			case "agree": {
+				const pending = ours.agreeing.get(code);
+				if (!pending || pending.what !== post.what) return `Nothing asks this seat to ${String(post.what)} now.`;
+				if (post.yes === true && mine.key === "player" && !ours.keys.has(setAs)) return "Give your OpenRouter key first: this seat agreed to pay with it.";
+				ours.agreeing.delete(code);
+				pending.settle(post.yes === true);
+				ctx.ui.notify(`Seat ${at}'s player ${post.yes === true ? "agreed" : "declined"} to ${pending.what}.`, "info");
+				return null;
+			}
+			case "model": return settable ?? await chooseModel(ctx, ours, at, String(post.role ?? ""), String(post.pattern ?? ""));
+			case "key": {
+				// A seat that agreed to its player's key takes it again before play, as after a resume.
+				if (post.key === null) { if (settable) return settable; ours.keys.delete(setAs); setup.seats[at] = { ...mine, key: "game" }; told(ctx); return null; }
+				if (mine.key !== "player" && settable) return settable;
+				if (mine.key === "player" && (setup.stage === "playing" || setup.stage === "over")) return "This seat's key is set for the game.";
+				const key = typeof post.key === "string" ? post.key.trim() : "";
+				if (!/^\S{20,300}$/.test(key)) return "That does not look like an OpenRouter key.";
+				ours.keys.set(setAs, key);
+				setup.seats[at] = { ...mine, key: "player" };
+				ctx.ui.notify(`Seat ${at}'s player gave their own OpenRouter key: the seat's calls are theirs to pay.`, "info");
+				told(ctx);
+				return null;
+			}
+		}
+		if (!pilot) return "The game has not begun.";
+		switch (post.do) {
+			case "choose": return pilot.choose(Number(post.n), ask);
+			case "accept": return pilot.accept(ask);
+			case "pass": return pilot.pass(post.rest === "turn" ? "turn" : "now", ask);
+			case "stops": if (post.stops !== "smart" && post.stops !== "all") return "Stops are smart or all."; pilot.setStops(post.stops); return null;
+			case "tell": return pilot.tell(String(post.words ?? ""));
+			case "concede": pilot.concede(); ctx.ui.notify(`Seat ${at}'s player conceded.`, "info"); return null;
+			case "mode": {
+				const mode = (["suggest", "auto", "manual"] as const).find((one) => one === post.mode), was = pilot.mode();
+				if (!mode) return "Modes are suggest, auto and manual.";
+				const problem = await pilot.switch(mode);
+				if (!problem && mode !== was) ctx.ui.notify(mode === "auto" ? `Seat ${at}'s pilot handed it to its AI.` : `Seat ${at} is piloted from its page, in ${mode} mode.`, "info");
+				return problem;
+			}
+		}
+		return `No action ${JSON.stringify(post.do)}.`;
 	}
 
 	/** Roll back or end: through the hold while the game plays, straight to the table and its journal when it does not. */
@@ -923,8 +1056,19 @@ export default function (pi: ExtensionAPI) {
 				showTable(ctx);
 				return;
 			}
+			if (verb === "seat" && (words[2] === "link" || words[2] === "relink")) {
+				const at = Number(words[1]), one = host?.lobby.seats[at];
+				if (!host || !one) { ctx.ui.notify("/magic seat <n> link | relink", "warning"); return; }
+				if (words[2] === "relink") relink(host, at);
+				const link = seatLink(host.lobby.seats[at]!.code);
+				ctx.ui.notify(link ? `${words[2] === "relink" ? `Seat ${at} has a new link; the old one opens nothing. ` : ""}Whoever has this link sees seat ${at} and acts for it:\n${link}`
+					: "A seat's page needs this Pi to show its games: /magic watch local for this machine, or /magic watch public for anyone with the address.", link ? "info" : "warning");
+				told(ctx);
+				return;
+			}
 			if (verb === "seat" || verb === "first") {
 				if (!host || host.lobby.stage !== "setting") { ctx.ui.notify("Seats and who plays first are set before /magic start.", "warning"); return; }
+				if (host.asking) { ctx.ui.notify("The table is asking every seat to agree; a seat that declines lets it be changed.", "warning"); return; }
 				if (verb === "first") {
 					const first = words[1] === "coin" ? "coin" as const : Number(words[1]);
 					if (first !== "coin" && !host.lobby.seats[first]) { ctx.ui.notify("/magic first <coin|seat>", "warning"); return; }
@@ -933,13 +1077,12 @@ export default function (pi: ExtensionAPI) {
 					const at = Number(words[1]);
 					if (!host.lobby.seats[at]) { ctx.ui.notify("/magic seat <n> ai | player", "warning"); return; }
 					host.lobby.seats[at] = { ...host.lobby.seats[at]!, pilot: words[2] };
+					const link = words[2] === "player" && seatLink(host.lobby.seats[at]!.code);
+					if (words[2] === "player") ctx.ui.notify(link ? `Seat ${at} is for a player. Send them its link; whoever has it plays the seat:\n${link}`
+						: `Seat ${at} is for a player. Its page needs this Pi to show its games: /magic watch local or public, then /magic seat ${at} link.`, "info");
 				} else if (words[2] === "model") {
-					const at = Number(words[1]), one = host.lobby.seats[at], role = words[3] as Role, pattern = words[4];
-					if (!one || !SEAT_ROLES.includes(role) || !pattern) { ctx.ui.notify(`/magic seat <n> model <${SEAT_ROLES.join("|")}> <pattern|default>. The judge and the commentator are the table's: /magic models.`, "warning"); return; }
-					const { [role]: _, ...rest } = one.models;
-					host.lobby.seats[at] = { ...one, models: pattern === "default" ? rest : { ...rest, [role]: pattern } };
-					const cast = (await roster(ctx, at, host.lobby.seats[at]!.models, one.key !== "game")).find((part) => part.role === role)!;
-					if (cast.problem) ctx.ui.notify(`Seat ${at}'s ${role}: ${cast.problem}`, "warning");
+					const problem = await chooseModel(ctx, host, Number(words[1]), words[3] ?? "", words[4] ?? "");
+					if (problem) { ctx.ui.notify(problem, "warning"); return; }
 				} else if (words[2] === "key") {
 					const at = Number(words[1]), one = host.lobby.seats[at], from = words[3];
 					if (!one || !from || from !== "game" && !/^\$[A-Za-z_][A-Za-z0-9_]*$/.test(from)) { ctx.ui.notify("/magic seat <n> key game | $NAME, an environment variable holding an OpenRouter key. A player gives their own from their seat.", "warning"); return; }
@@ -1002,7 +1145,7 @@ export default function (pi: ExtensionAPI) {
 				if (!running || !host?.hold) { ctx.ui.notify("No game is in play.", "warning"); return; }
 				if (verb === "pause") host.hold.pause(); else host.hold.resume();
 				ctx.ui.notify(verb === "pause" ? "Paused. The next seat asked waits; /magic continue releases it." : "Play goes on.", "info");
-				showTable(ctx);
+				told(ctx);
 				return;
 			}
 

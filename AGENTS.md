@@ -242,6 +242,17 @@ key. Each seat has a code, and whoever holds it pilots the seat. The host holds
 every code: `/magic pilot <n>` pilots a seat from this terminal, and the host's
 start and begin agree for it.
 
+A player pilots from the seat's page, on the server that shows this Pi's games:
+`/magic seat <n> link` prints `<address>/seat/#<code>`, and `relink` gives the
+seat a new code. Before play the page shows the table as set; the player
+chooses their seat's models, gives their own OpenRouter key, and agrees. The
+key is held in memory, never written, and never sent back. During play the
+page draws the seat's own board, live, beside its question: the folded menu
+with the AI's pick marked, numbers to choose, Enter for the AI's pick, pass,
+the pilot's mode and stops, tell and concede. Every question is numbered, so
+an answer meant for one never lands on the next. The host's table shows
+whether each player's page is open.
+
 A seat's pilot sits over its AI as the autopilot (`src/seating/person.ts`).
 In suggest mode the autopilot proposes each choice and the person types a
 number, `ok` for its choice, or `p` to pass; auto hands the seat to the AI and
@@ -297,7 +308,7 @@ seconds.
 
 `/magic watch local|public|off` shows this Pi's games (`src/watch/`), and the
 setting holds across sessions in `settings.json` beside the roster. A
-read-only server, needing no code, serves a
+server, needing no code for anything an audience may see, serves a
 games page, searched, sorted and paged on the server, and each game's replay
 page. Whether a game is over, who won and in how many turns come from
 replaying its journal on a worker thread (`src/watch/outcomes.ts`), so a Pi
@@ -527,7 +538,10 @@ rather than adding a test for each branch.
   follow it through the coin flip, journaled as `setAs` so a resume keeps them.
   A seat's own models and key pay for its calls. A player who stops answering
   loses on the clock, and the seat's AI never answers for them. The host pilots
-  a seat from its terminal, and its picks are the person's rows.
+  a seat from its terminal, and its picks are the person's rows. A player on
+  the seat's page chooses its models and key, agrees, and answers; the key is
+  never sent back or journaled. A seat's code opens that seat alone, with its
+  own hand face up and no other, and nothing is changed without one.
 - **Alone.** A finished game reports and returns with nothing else keeping the
   process alive. Stated in a child process, since a test runner keeps the event
   loop awake and hides it.
@@ -684,7 +698,7 @@ src/seating/           who pilots a seat
 src/watch/             showing games to spectators and rewatchers: read-only, never a seat
   games.ts             saved games: summaries, search and paging, moments, looks and run cost
   outcomes.ts          a worker that replays journals, so the list knows how each game stands
-  server.ts            the watching server: the games page, replays, and a live game as it plays
+  server.ts            the watching server: the games page, replays, a live game as it plays, and each seat's page behind its code
   games.html           the games page
   tunnel.ts            a Cloudflare quick tunnel's public address
 src/board/             board pictures: no game logic, never read by a seat
@@ -775,6 +789,6 @@ verify every carried field against the source and refuse to pass on a mismatch.
   replies and errors, including the recaps each call received. The trace is
   private seat data. The forced ratio is evidence about cost, not decision
   quality; a comparison harness and version attribution remain unfinished.
-- Seats beyond this terminal. A seat's page, where its code holder plays it in
-  a browser, and the MCP adapter are next in `design-ref/pi-ux-plan-20261012.md`.
+- Clicking cards on a seat's board to choose, and the MCP adapter over the
+  seat API, are next in `design-ref/pi-ux-plan-20261012.md`.
 - Any format but Standard, and any seat count but two.

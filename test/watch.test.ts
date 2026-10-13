@@ -2,8 +2,9 @@
  * Watching. The games list is searched, sorted and paged on the server; a
  * finished game is served from every perspective and any other from the
  * audience's alone; a live game sends what is new as it plays and says when it
- * is over; nothing outside the games is served, and nothing is changed. The
- * public address comes from cloudflared's own output.
+ * is over; nothing outside the games is served, and nothing is changed without
+ * a seat's code, which opens that seat alone. The public address comes from
+ * cloudflared's own output.
  */
 import { strict as assert } from "node:assert";
 import { chmodSync, mkdtempSync, writeFileSync } from "node:fs";
@@ -128,6 +129,51 @@ test("a live game sends what is new as it plays, from the audience alone, and sa
 		const over = await (await fetch(`${server.base}/games/live-1/live.json?version=${update.version}`)).json();
 		assert.equal(over.finished, true, "a page told the game is over loads it again");
 		assert.equal((await (await fetch(`${server.base}/api/games?status=live`)).json()).total, 0);
+	} finally { await server.close(); }
+});
+
+test("a seat's code opens that seat alone: its state, its actions and its own board, with its hand and no other", async () => {
+	const { dir } = await games(), made = header("seated-1", ["Green Stompy", "Dimir Control"]), table = dealt(made), codes: [string, string] = ["0".repeat(43), "1".repeat(43)], acted: unknown[] = [];
+	open(join(dir, "seated-1.jsonl"), made);
+	let stage = "setting";
+	const server = await watchServer({ dir, cards: () => cards, rules: () => rules, art: new Map(), resolveArt: async () => ({}), seats: (code) => {
+		const at = codes.indexOf(code);
+		return at < 0 ? undefined : { ...(stage === "playing" ? { game: "seated-1", viewer: at } : {}), state: () => ({ seat: at, stage }),
+			act: async (post) => { acted.push([at, post]); return post.do === "agree" ? null : "No such action."; } };
+	} });
+	const ask = (path: string, code?: string, init: RequestInit = {}) => fetch(`${server.base}${path}`, { ...init, headers: code ? { authorization: `Bearer ${code}` } : {} });
+	const post = (code: string, body: string) => ask("/api/seat", code, { method: "POST", body });
+	try {
+		assert.equal((await ask("/api/seat")).status, 401, "no code, no seat");
+		assert.equal((await ask("/api/seat", "2".repeat(43))).status, 401);
+		assert.equal((await ask("/api/seat", undefined, { method: "POST", body: "{}" })).status, 401, "nothing is changed without a code");
+		assert.equal((await ask("/api/games", codes[0], { method: "POST" })).status, 405, "a code opens its seat and nothing else");
+		assert.match(await (await ask("/seat/")).text(), /<title>Magic replay<\/title>/);
+		assert.equal(await (await ask("/seat/game.js")).text(), "window.SEAT = true;\n");
+		const before = await (await ask("/api/seat", codes[1])).json();
+		assert.deepEqual([before.state, before.board], [{ seat: 1, stage: "setting" }, undefined], "before the deal a seat has its state and no board");
+		const waiting = ask(`/api/seat?after=${before.serial}`, codes[1]).then((one) => one.json());
+		assert.deepEqual(await (await post(codes[1], JSON.stringify({ do: "agree", what: "prepare", yes: true }))).json(), { ok: true });
+		assert.ok((await waiting).serial > before.serial, "an action wakes the seat's waiting page");
+		assert.deepEqual(acted, [[1, { do: "agree", what: "prepare", yes: true }]], "the action reached the seat its code opens");
+		const refused = await post(codes[0], JSON.stringify({ do: "dance" }));
+		assert.deepEqual([refused.status, await refused.json()], [400, { ok: false, message: "No such action." }]);
+		assert.equal((await post(codes[0], "[1]")).status, 400, "one JSON object a request");
+
+		stage = "playing";
+		const watched = await server.live("seated-1", made, table);
+		await through(table, 1, () => watched.take(table));
+		const mine = await (await ask("/api/seat", codes[0])).json(), full = mine.board.full;
+		assert.deepEqual([mine.board.game, full.seat, full.perspectives.map((one: { key: string }) => one.key)], ["seated-1", true, ["seat-0"]], "the seat's own perspective alone");
+		const hand = (seat: number) => full.moments.at(-1).views[0].scene.players[seat].zones.find((zone: { id: string }) => zone.id === "hand").cardIds;
+		assert.ok(hand(0).length > 0 && hand(1).length === 0, "its own hand face up, the other seat's hidden");
+		const audience = data(await (await fetch(`${server.base}/games/seated-1/game.js`)).text());
+		assert.deepEqual(audience.perspectives.map((one: { key: string }) => one.key), ["audience"], "the public page still shows the audience alone");
+		const next = ask(`/api/seat?after=${mine.serial}&game=seated-1&version=${full.version}&moments=${full.moments.length}&deck=${full.deck.length}&images=${Object.keys(full.images).length}`, codes[0]).then((one) => one.json());
+		await through(table, 2, () => watched.take(table));
+		const later = await next;
+		assert.ok(later.board.since.version > full.version && !later.board.full, "then only what the page lacks");
+		watched.finish();
 	} finally { await server.close(); }
 });
 
