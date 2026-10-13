@@ -115,7 +115,7 @@ remain separate evidence.
 
 The commands have separate meanings:
 
-- `/magic play [seed]` creates a game.
+- `/magic host`, then `/magic start` and `/magic begin`, creates a game.
 - `/magic clone <game> <version> <id>` copies a prefix.
 - `/magic resume <id>` replays that journal and continues it.
 
@@ -151,6 +151,13 @@ version the game went back to. On read, that line drops the lines before it
 with a later version from the game; they stay in the file, so a reader can see
 what was rolled past. A seat cannot unlearn a card revealed before the
 rollback, and every seat's view says the rollback happened.
+
+The host's directions travel the same way (`src/core/host.ts`). A rollback by
+the host is a ruling with the host as its author, kept and read exactly like
+an upheld objection, and every seat is asked for a new plan. An end by the host
+gives every seat still playing a draw and is a ruling line too. Replay ends the
+game there unless a later rollback came after it, so a clone before the end, or
+a rollback past it, plays on.
 
 ## Hosting later
 

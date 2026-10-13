@@ -81,7 +81,7 @@ test("an upheld objection takes the game back to just before the action, and the
 	save(journal, table);
 
 	assert.ok(contested.row !== undefined && rebuiltAt > contested.row, "B objected to a land A had already played");
-	assert.deepEqual(table.rulings.map((one) => [one.case.row, one.at, one.kept !== undefined]), [[contested.row, contested.row, true]], "the ruling is kept, at the version the game went back to");
+	assert.deepEqual(table.rulings.map((one) => ["case" in one && one.case.row, one.at, one.kept !== undefined]), [[contested.row, contested.row, true]], "the ruling is kept, at the version the game went back to");
 	assert.ok(project(table, 0).table.some((line) => line.startsWith("The judge upheld B's objection")), "and every seat is told");
 
 	const file = readFileSync(journal.path, "utf8").trim().split("\n").slice(1).map((line) => JSON.parse(line) as { row?: { seq: number }; ruling?: unknown });
@@ -119,7 +119,7 @@ test("a ruling that lets the action stand is recorded and play goes on; without 
 	const table = dealt(), contested: { row?: number } = {};
 	editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "role", note: "Develop lands." }] }], "initial-work");
 	await playThrough(table, { 0: steady("A"), 1: objector(table, contested) }, stands, 4);
-	assert.deepEqual(table.rulings.map((one) => [one.case.row, one.kept]), [[contested.row, undefined]]);
+	assert.deepEqual(table.rulings.map((one) => ["case" in one && one.case.row, one.kept]), [[contested.row, undefined]]);
 	assert.ok(table.ledger.length > contested.row! + 1, "play went on from where it was");
 	const dir = mkdtempSync(join(tmpdir(), "magic-ruling-history-"));
 	const journal = open(join(dir, "game.jsonl"), made);
@@ -256,7 +256,7 @@ test("the writer objects only to an action the opponent took since its last plan
 		} } });
 	await play(failed, { 1: failing }, {}, { judge: { async rule() { attempts++; throw new Error("Fixture judge failure"); }, restart: () => matchTable(failed.rng.seed) } });
 	assert.equal(attempts, 1);
-	assert.equal(failed.rulings.at(-1)!.ruling, null);
+	assert.equal((failed.rulings.at(-1) as { ruling?: unknown }).ruling, null);
 	assert.ok(heard(failed, row));
 	assert.match(project(failed, 1).table.join(" "), /did not rule.*Fixture judge failure/);
 	save(journal, failed);

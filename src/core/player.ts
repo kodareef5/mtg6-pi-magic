@@ -23,6 +23,9 @@ import { commands, type WorkCommand } from "./work-language.ts";
 /** The adapter cannot answer now. This is not an unusable selection or a pass. */
 export class PlayerUnavailable extends Error {}
 
+/** The host stopped asking, to pause, roll back or end. Not an answer, a pass or a failure: the decision stays pending and the loop leaves. */
+export class TableHalted extends Error {}
+
 export type Answer =
 	/** Take one of the moves the table listed. The cheap path, and the common one. */
 	| { kind: "pick"; option: string; actionId: string }

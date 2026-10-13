@@ -226,7 +226,23 @@ export type Crew = {
 	every?: Roster;
 	/** By seat id as a string, because this is read from and written to JSON. */
 	seats?: Record<string, Roster>;
+	/**
+	 * A seat's own key for a provider, by seat id and then provider, named as an
+	 * environment variable (`"$OPENROUTER_SEAT_1"`). The key never sits in this
+	 * file; Pi's own credentials answer every call a seat has no key for.
+	 */
+	keys?: Record<string, Record<string, string>>;
 };
+
+/** A seat's keys by provider, read from the environment. A named variable that is unset is an error, never a fallback. */
+export function seatKeys(crew: Crew, seat: number, env: NodeJS.ProcessEnv = process.env): Record<string, string> {
+	return Object.fromEntries(Object.entries(crew.keys?.[String(seat)] ?? {}).map(([provider, named]) => {
+		if (!/^\$[A-Za-z_][A-Za-z0-9_]*$/.test(named)) throw new Error(`Seat ${seat}'s ${provider} key must name an environment variable, such as "$OPENROUTER_SEAT_${seat}".`);
+		const key = env[named.slice(1)];
+		if (!key) throw new Error(`Seat ${seat}'s ${provider} key names ${named}, which is not set.`);
+		return [provider, key];
+	}));
+}
 
 /** The roster for one seat, or for the table when no seat is named. */
 export const rosterFor = (crew: Crew, seat?: number): Roster => ({

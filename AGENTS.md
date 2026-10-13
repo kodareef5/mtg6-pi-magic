@@ -26,8 +26,10 @@ sitting at that seat still want it?
   everything. This picks the slice that matters for one decision and carries the
   guidance that keeps a choice coherent with the turn. It never writes to the
   table and never advances a phase.
-- **`src/seating/`** defines the wire protocol and validates remote picks.
-  Socket hosting, joining and the pending-player adapter are unfinished.
+- **`src/seating/`** is who answers a seat: the lobby and its two agreements,
+  the host's hold on a running game, the wire protocol and remote pick
+  validation. Socket hosting, joining and the pending-player adapter are
+  unfinished.
 
 The current player adapter uses a decision model through `src/context/`.
 Future remote, human and MCP adapters use the same core interface without
@@ -202,10 +204,38 @@ without paying for a pregame again.
 **Any later version** is a position. Clone there to try a different line from it.
 
 Three commands, kept apart, because conflating two of them was a real bug.
-`/magic play [seed]` is a new game. `/magic clone <game> <version> <id>` copies
-a prefix. `/magic resume <id>` replays a journal and plays on from where it
-stops. A command that claimed to play a clone and instead started a fresh game
-carrying another game's briefs was neither of those things.
+`/magic host` sets a new table. `/magic clone <game> <version> <id>` copies a
+prefix. `/magic resume <id>` replays a journal and seats it again, ready to play
+on from where it stops. A command that claimed to play a clone and instead
+started a fresh game carrying another game's briefs was neither of those things.
+
+### Hosting a table
+
+`/magic` starts nothing by itself. It opens a menu. `/magic host` sets a table:
+the game type, a deck per seat, and who plays first. Standard alpha, main decks
+only and one on one, is the only type so far.
+
+The host is never a seat, and every seat agrees twice:
+- `/magic start` asks the seats to prepare. A coin flip orders them, decks
+  register, card assessments load and model seats write their briefs.
+- `/magic begin` asks the seats to begin. The hands are dealt and the mulligans
+  start.
+
+A model seat agrees as soon as it is asked. The game then plays beside the
+session, and the host directs it:
+- `/magic pause` and `/magic continue` hold and release the next seat asked;
+- `/magic rollback <version>` takes the game back;
+- `/magic end` ends it with no winner.
+
+Rollback and end are rulings by the host, so they are journal lines that replay
+honors. The host's view is the spectator's: the play-by-play, the table widget
+and the public board. `design-ref/pi-ux-plan-20261012.md` holds the plan for
+remote seats, people at a seat and the assistant.
+
+A seat can carry its own key for a provider, named as an environment variable
+under `keys` in the roster file (`"keys": {"1": {"openrouter": "$OPENROUTER_SEAT_1"}}`).
+That seat's own calls use it. The judge and the commentator are the table's and
+use Pi's credentials.
 
 ### What a game costs
 
@@ -253,7 +283,7 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    table talk is offered at actual phase endings. Control transitions move the
    cursor without writing an event, because a replay derives them; opening
    completion is derived from its obligations. **Running against a real decision
-   model:** `/magic play` finishes a game through Pi's classifier API. Measured
+   model:** a hosted table finishes a game through Pi's classifier API. Measured
    under the former auto-pass policy at 108 turns, 2357 decisions, 95.4% forced,
    109 model calls, 0 gaps. Jev now chooses priority passes for both seats.
    `tools/sim.ts` plays bulk games on fresh seeds, each list on the play half the time.
@@ -401,6 +431,10 @@ rather than adding a test for each branch.
   cloned again. A clone owns its preparation, so this run's roster cannot
   discard it. A resume repairs a torn last line before it appends, because a
   fragment dropped on a read and kept on disk is a lost journal one write later.
+- **Hosted.** Nothing deals until every seat agrees. A paused game asks nobody
+  and, played on, is the game it would have been. The host's rollback and end
+  are journal lines that replay honors; a clone before either, or a rollback
+  past an end, is the game without it.
 - **Alone.** A finished game reports and returns with nothing else keeping the
   process alive. Stated in a child process, since a test runner keeps the event
   loop awake and hides it.
@@ -548,7 +582,11 @@ src/context/           questions for a decision model. Its own AGENTS.md
   strategy-actions.ts, strategy-combat.ts, strategy-permissions.ts, strategy-position.ts  action text, the combat lookup, permissions, card definitions
   metrics.ts, trace.ts usage arithmetic and the bill; exact requests and replies when tracing
   playbook.ts, plan.ts the policy schema; the starting intent
-src/seating/           protocol and validation; sockets unfinished
+src/core/host.ts       the host's rollback and end, kept as rulings by the host
+src/seating/           who answers a seat; sockets unfinished
+  lobby.ts             seats, decks, who plays first, and the two agreements before dealing
+  hold.ts              the host's hold on a running game: pause, continue, and directions between loops
+  protocol.ts, host.ts the wire's messages, invites and pick judging
 src/board/             board pictures: no game logic, never read by a seat
   snapshot.ts          the board as one viewer may see it, renderer-neutral and pure
   render.ts            the renderer seam, the art map, and SVG to PNG through resvg

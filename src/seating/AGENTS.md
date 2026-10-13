@@ -1,9 +1,10 @@
 # Seats over a socket
 
-This directory lets another agent take a seat at a table this Pi owns. It is
-written, type checked, partly tested, and deliberately not wired in. It waits
-until the games played by AI seats are good. Nothing outside this directory
-imports from it.
+This directory is who answers a seat. `lobby.ts` and `hold.ts` are wired in:
+the host's table before dealing, and its hold on a running game. The wire below
+lets another agent take a seat at a table this Pi owns. It is written, type
+checked, partly tested, and not wired in yet; milestone 2 of
+`design-ref/pi-ux-plan-20261012.md` wires it.
 
 `docs/SEATING.md` is the reasoning, written for a reader with no code. The
 short version:

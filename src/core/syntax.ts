@@ -55,7 +55,9 @@ export type Reason =
 	| "cost-payment"
 	| "announcement"
 	| "combat"
-	| "game-setup";
+	| "game-setup"
+	/** The host's own direction, never a seat's: a game the host ended. */
+	| "host";
 
 /**
  * The motions this milestone needs. design-ref/archive/SYNTAX.md section 2 lists all of

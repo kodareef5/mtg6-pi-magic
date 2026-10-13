@@ -27,6 +27,7 @@ import type { WorkEntry } from "./work.ts";
 import { activate } from "./procedures.ts";
 import type { Deck } from "./decks.ts";
 import type { Ruled, Case, Ruling } from "./judge.ts";
+import { ended } from "./host.ts";
 
 export type Header = {
 	/** Missing on historical flat-menu journals. A later version preserves the old prefix. */
@@ -364,15 +365,16 @@ export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry
  * go back to that version too. Save the journal first: what the rolled-back
  * table no longer holds cannot be written afterwards.
  */
-export function rollback(table: Table, ruled: { case: Case; ruling: Ruling }, restart: () => Table): void {
-	const to = ruled.case.row;
+export function rollback(table: Table, ruled: { case: Case; ruling: Ruling } | { by: "host"; note: string; to: number }, restart: () => Table): void {
+	const to = "by" in ruled ? ruled.to : ruled.case.row;
 	const fresh = relive(restart(), table.ledger.slice(0, to), table.workLog.filter((entry) => entry.at <= to));
 	fresh.workLog = table.workLog.filter((entry) => entry.at <= to).map((entry) => structuredClone(entry));
 	fresh.work = {};
 	for (const entry of fresh.workLog) fresh.work[entry.seat] = structuredClone(entry.workspace);
 	fresh.said = table.said.filter((one) => one.at <= to);
 	fresh.gaps = [...table.gaps];
-	fresh.rulings = [...table.rulings, { ...structuredClone(ruled), at: to, kept: linesOf(fresh).length }];
+	const kept = linesOf(fresh).length;
+	fresh.rulings = [...table.rulings, "by" in ruled ? { by: "host", note: ruled.note, at: to, kept } : { ...structuredClone(ruled), at: to, kept }];
 	for (const key of Object.keys(table)) delete (table as Record<string, unknown>)[key];
 	Object.assign(table, fresh);
 }
@@ -441,6 +443,7 @@ export function replay(
 	restoreWork(table, lines, upTo);
 	table.said = lines.flatMap((line) => "said" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.said)] : []);
 	table.rulings = lines.flatMap((line) => "ruling" in line ? [structuredClone(line.ruling)] : []);
+	ended(table);
 	return {
 		table,
 		header,

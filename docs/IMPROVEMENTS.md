@@ -91,7 +91,7 @@ gaps, rulings and replay checks. [Status](STATUS.md) holds the current evidence.
 4. **Any two decks.** `tools/matchup.ts --decks "A,B"` seats two collection
    decks by name with short labels; `tools/sim.ts --random N` draws seeded
    random pairings, alternates who plays first, and runs two games at a time.
-   `/magic play random` draws only admitted imported main decks, with no
+   `/magic host random` draws only admitted imported main decks, with no
    sideboards. `tools/sim.ts --random N --alpha` uses the same admission check;
    an explicitly named alpha pool refuses any list without standing coverage.
    Ordinary named games keep their full tournament lists.

@@ -1,7 +1,7 @@
 /**
  * Seating a whole table of model-backed seats.
  *
- * One place that turns a resolved roster into a playable table, so `/magic play`
+ * One place that turns a resolved roster into a playable table, so a hosted game
  * and `tools/smoke.ts` do not each assemble it differently and then disagree
  * about what a game costs.
  *
@@ -20,9 +20,9 @@ import type { Universe } from "../core/cards.ts";
 import type { Rules } from "../core/rules.ts";
 import { keep, save, type Journal } from "../core/journal.ts";
 import type { Intent } from "../core/intent.ts";
-import { play, type Judge, type Watcher } from "../core/loop.ts";
+import { play, type Judge, type PlayOptions, type Watcher } from "../core/loop.ts";
 import { start } from "../core/commit.ts";
-import type { Player } from "../core/player.ts";
+import { TableHalted, type Player } from "../core/player.ts";
 import type { Seat, Table } from "../core/table.ts";
 import type { Outcome, SeatId } from "../core/types.ts";
 import { brief, current, emptyBrief, type Brief } from "./brief.ts";
@@ -109,8 +109,11 @@ export async function seat(
 		 * to check them against.
 		 */
 		prepared?: { seat: SeatId; made: unknown }[];
+		/** A seat's own calls, such as one made with that seat's key. The table's judge uses `inference`. */
+		seatInference?: (seat: SeatId) => Inference;
 	},
 ): Promise<Seated> {
+	const of = (at: SeatId) => options.seatInference?.(at) ?? inference;
 	const timing: RunTiming = { startedAt: Date.now(), turns: [] };
 	const fromVersion = table.ledger.length;
 	const counted = tally();
@@ -152,7 +155,7 @@ export async function seat(
 		intents[at.id] = startingIntent(at.id);
 		const strategy = pick(parts.get(at.id)!, "strategy");
 		const planning = strategy && !strategy.off && strategy.model && strategy.model.type !== "classifier"
-			? reasoner({ role: "strategy", seat: at.id, stream: inference.stream, model: strategy.model as Model<Api>, tally: counted,
+			? reasoner({ role: "strategy", seat: at.id, stream: of(at.id).stream, model: strategy.model as Model<Api>, tally: counted,
 				...(strategy.thinkingLevel ? { thinking: strategy.thinkingLevel } : {}) }) : undefined;
 		// The brief handles the opening and upkeep. Strategy is due after the first draw window.
 		if (planning && !table.work[at.id]?.eachTurn) {
@@ -165,7 +168,7 @@ export async function seat(
 			editWork(table, at.id, [{ do: "plan.keep", reason: "The brief covers the opening; strategy follows the draw." }], `opening-covered-${at.id}`);
 		players[at.id] = aiSeat({
 			name: at.name, judge: !!judging && !!options.rules,
-			api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>, { tally: counted, seat: at.id }),
+			api: decisionApi(of(at.id).classify, decide.model as ClassifierModel<ClassifierApi>, { tally: counted, seat: at.id }),
 			intent: intents[at.id]!,
 			chronicle,
 			...(options.rules ? { rules: options.rules } : {}),
@@ -205,7 +208,7 @@ export async function seat(
 	for (const seat of new Set(jobs.map((job) => job.seat))) {
 		const role = pick(parts.get(seat)!, "pregame");
 		if (!role?.model || role.off || role.model.type === "classifier") return refuse(`Seat ${seat} needs a pregame model to assess its cards before play, or a clone carrying standing assessments and use inventories.`);
-		assessors.set(seat, reasoner({ role: "pregame", seat, stream: inference.stream, model: role.model as Model<Api>, tally: counted,
+		assessors.set(seat, reasoner({ role: "pregame", seat, stream: of(seat).stream, model: role.model as Model<Api>, tally: counted,
 			...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}) }));
 	}
 	let next = 0;
@@ -270,7 +273,7 @@ export async function seat(
 			const written = await brief(at, others, universe, () => reasoner({
 				role: "pregame",
 				seat: at.id,
-				stream: inference.stream,
+				stream: of(at.id).stream,
 				model: role.model as Model<Api>,
 				...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}),
 				tally: counted,
@@ -304,13 +307,17 @@ export async function seat(
 export function judgeFor(table: Table, seated: Seated, journal?: Journal): Judge | undefined {
 	const judging = seated.judge;
 	if (!judging) return undefined;
-	const entrants = table.seats.map((at) => ({ name: at.name, deck: at.deck }));
 	return { rule: async (now, open) => {
 		seated.judged.cases++;
 		try { return await rule(now, open, judging.reasoner, judging); }
 		catch (error) { seated.judged.failed++; throw error; }
-	}, restart: () => start(table.format, entrants, table.rng.seed, judging.universe, { announcementsFrom: table.announcementsFrom, excessManaFrom: table.excessManaFrom, searchesFrom: table.searchesFrom, deathtouchFrom: table.deathtouchFrom, discardsFrom: table.discardsFrom }),
-		flush: () => { if (journal) save(journal, table); } };
+	}, restart: restartOf(table, judging.universe), flush: () => { if (journal) save(journal, table); } };
+}
+
+/** A fresh table for the same seats, decks, seed and journal boundaries: where a rollback rebuilds from. */
+export function restartOf(table: Table, universe: Universe): () => Table {
+	const entrants = table.seats.map((at) => ({ name: at.name, deck: at.deck }));
+	return () => start(table.format, entrants, table.rng.seed, universe, { announcementsFrom: table.announcementsFrom, excessManaFrom: table.excessManaFrom, searchesFrom: table.searchesFrom, deathtouchFrom: table.deathtouchFrom, discardsFrom: table.discardsFrom });
 }
 
 /**
@@ -345,6 +352,12 @@ export async function run(
 	grace = 30_000,
 	/** Told as each turn ends, for a picture of the board. Never awaited. */
 	turnEnded?: (turn: number) => void,
+	/**
+	 * The host's hold, when a host runs the game: its checkpoint stops the loop,
+	 * and `halted` applies the host's direction to the stopped table. True plays
+	 * on, with every seat's private work reset; false ends the run.
+	 */
+	host?: { checkpoint(): void; halted(table: Table): boolean },
 ): Promise<Outcome | null> {
 	seated.timing.playStartedAt = Date.now();
 	delete seated.timing.finishedAt;
@@ -369,7 +382,7 @@ export async function run(
 	const judge = judgeFor(table, seated, journal);
 	const flight: Promise<void>[] = [];
 	let outcome: Outcome | null;
-	try { outcome = await play(table, seated.players, seated.intents, { watch, onTurn: (turn, active, from) => {
+	const options: PlayOptions = { watch, ...(host ? { checkpoint: host.checkpoint } : {}), onTurn: (turn, active, from) => {
 		turnEnded?.(turn);
 		// A reasoner that has given up is one problem, not one per turn. The gap
 		// it wrote on the way down says the rest of the game ran without recaps.
@@ -396,20 +409,31 @@ export async function run(
 					);
 				}),
 		);
-	}, judge, onTurnStart: (turn, active) => seated.timing.turns!.push({ at: Date.now(), turn, active, source: "recorded" }) }); }
+	}, judge, onTurnStart: (turn, active) => seated.timing.turns!.push({ at: Date.now(), turn, active, source: "recorded" }) };
+	// The game is saved first and the commentary is waited on after. A recap is
+	// not part of the game, so a recap that never answers must not be able to
+	// lose a finished one, which is what appending after the wait allowed. A run
+	// that throws is saved too. Only what the file does not hold is written,
+	// because a resumed game is appended to and the lines its replay rebuilt are
+	// already in it.
+	try {
+		for (;;) {
+			try { outcome = await play(table, seated.players, seated.intents, options); break; }
+			catch (error) {
+				if (!host || !(error instanceof TableHalted)) throw error;
+				if (journal) save(journal, table);
+				if (!host.halted(table)) { outcome = table.outcome; break; }
+				if (journal) save(journal, table);
+				for (const player of Object.values(seated.players)) player.reset?.();
+			}
+		}
+	}
 	finally {
 		seated.timing.playEndedAt = Date.now();
 		await Promise.all(Object.values(seated.players).map((player) => player.close()));
 		seated.timing.finishedAt = Date.now();
+		if (journal) save(journal, table);
 	}
-
-	// The game is saved first and the commentary is waited on after. A recap is
-	// not part of the game, so a recap that never answers must not be able to
-	// lose a finished one, which is what appending after the wait allowed.
-	//
-	// Only what the file does not hold, because a resumed game is appended to
-	// and the lines its replay rebuilt are already in it.
-	if (journal) save(journal, table);
 
 	// Bounded, so an unanswered recap delays the report rather than holding the
 	// command open. What is still outstanding is said rather than waited for.

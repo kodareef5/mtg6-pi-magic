@@ -44,16 +44,23 @@ export type Ruling = { legal: boolean; rule: string; remedy: "rollback" | "stand
  * A ruling as the game keeps it. `at` is the version it applies at: for a
  * rollback, the version the game went back to. `kept` is how many journal lines
  * the rolled-back table holds, so the journal knows where its next line goes.
+ *
+ * The host's directions travel the same way: no seat raised them and no judge
+ * ruled, but a rollback by the host shortens the game exactly as an upheld
+ * objection does, and an end by the host is a line replay must honor.
  */
-export type Ruled = { case: Case; at: number } & (
+export type Ruled = ({ case: Case; at: number } & (
 	{ ruling: Ruling; kept?: number; failed?: never } | { ruling: null; failed: string; kept?: never }
-);
+)) | HostDirection;
+
+/** The host rolled the game back to `at` (with `kept`), or ended it there with no winner (`ended`). */
+export type HostDirection = { by: "host"; at: number; note: string; kept?: number; ended?: true };
 
 /** A heard case still belongs to this branch unless a later rollback replaced its row. */
 export function heard(table: Table, row: number): Ruled | undefined {
 	for (const entry of [...table.rulings].reverse()) {
-		if (entry.kept !== undefined && entry.case.row <= row) return undefined;
-		if (entry.case.row === row) return entry;
+		if (entry.kept !== undefined && entry.at <= row) return undefined;
+		if ("case" in entry && entry.case.row === row) return entry;
 	}
 	return undefined;
 }
@@ -68,13 +75,13 @@ export function recentBlock(table: Table) {
 	if (!block || block.do !== "block") return undefined;
 	const result = heard(table, row.seq);
 	return { row: row.seq, clock: receipt.clock, seat: row.seat, blockers: structuredClone(block.blockers), heard: !!result,
-		...(result ? { result: result.ruling ? { ruling: structuredClone(result.ruling) } : { failed: result.failed } } : {}) };
+		...(result && "case" in result ? { result: result.ruling ? { ruling: structuredClone(result.ruling) } : { failed: result.failed } } : {}) };
 }
 
 /** Keep an upheld ruling beside the pending block being revised, across provisional picks and work. */
 export function pendingBlockRuling(table: Table) {
 	const rolled = table.rulings.findLast((entry) => entry.kept !== undefined);
-	if (!rolled?.ruling || table.cursor.steps[0] !== "declare-blockers" || table.cursor.stepDone ||
+	if (!rolled || !("case" in rolled) || !rolled.ruling || table.cursor.steps[0] !== "declare-blockers" || table.cursor.stepDone ||
 		table.ledger.slice(rolled.case.row).some((row) => row.situation !== "turn-based" ||
 			row.picked === "block:done" || !/^(?:un)?block:/.test(row.picked))) return undefined;
 	return { row: rolled.case.row, ruling: structuredClone(rolled.ruling) };

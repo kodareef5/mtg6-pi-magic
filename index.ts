@@ -16,9 +16,9 @@
  */
 
 import { claudeCli } from "./src/context/claude-cli.ts";
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Image } from "@earendil-works/pi-tui";
@@ -36,13 +36,17 @@ import {
 	ROLES,
 	rosterFor,
 	save as saveCrew,
+	seatKeys,
 	type Cast,
 	type Role,
 } from "./src/context/roles.ts";
-import { degraded, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
+import { degraded, restartOf, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
+import { endByHost, rollbackByHost } from "./src/core/host.ts";
+import { hold, type Hold } from "./src/seating/hold.ts";
+import { agree, GAME_TYPES, lobby, seatOrder, type Lobby } from "./src/seating/lobby.ts";
 import { gameResult, report, preparationFailure, saveReport } from "./tools/game-report.ts";
 import { load, type Universe } from "./src/core/cards.ts";
-import { alpha, collection, deck, seatLabels } from "./src/core/decks.ts";
+import { alpha, deck, seatLabels } from "./src/core/decks.ts";
 import { admittedAlpha } from "./src/core/packages.ts";
 import { start } from "./src/core/commit.ts";
 import { nextDecision } from "./src/core/decisions.ts";
@@ -66,8 +70,9 @@ import { editWork, workFrame } from "./src/core/work-tools.ts";
 import { planState } from "./src/core/planning.ts";
 
 /**
- * A new game seats two practice decks from decks/collection. Setup registers
- * them against the card universe, as it would any tournament list.
+ * A table set without naming decks, where no menu can ask, seats two practice
+ * decks from decks/collection. Setup registers them against the card universe,
+ * as it would any tournament list.
  */
 const PLAY = ["Green Stompy", "Red Burn"];
 
@@ -107,12 +112,14 @@ async function roster(ctx: ExtensionContext, seat?: SeatId): Promise<Cast[]> {
 	});
 }
 
-/** What a game needs from Pi: one classifier call and one chat call. */
-const inference = (ctx: ExtensionContext): Inference => ({
-	classify: (model, request, options) => ctx.modelRegistry.classify(model, request, options),
+/** What a game needs from Pi: one classifier call and one chat call, with a seat's own key for a provider when it has one. */
+const inference = (ctx: ExtensionContext, keys: Record<string, string> = {}): Inference => ({
+	classify: (model, request, options) => ctx.modelRegistry.classify(model, request, { ...options, ...(keys[model.provider] ? { apiKey: keys[model.provider] } : {}) }),
 	stream: (model, context, options) =>
-		ctx.modelRegistry.streamSimple(model, context as never, options as never) as never,
+		ctx.modelRegistry.streamSimple(model, context as never, { ...options, ...(keys[model.provider] ? { apiKey: keys[model.provider] } : {}) } as never) as never,
 });
+
+const slug = (text: string) => text.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase();
 
 export default function (pi: ExtensionAPI) {
 	pi.registerProvider(claudeCli());
@@ -124,7 +131,7 @@ export default function (pi: ExtensionAPI) {
 	// editor where the terminal draws images; elsewhere the widget names the file.
 	let renderer: Promise<BoardRenderer | null> | undefined;
 	const feedFor = (ctx: ExtensionContext, game: Table) => boardFeed(game, renderer ??= cardboardRenderer(artIds(), join(CACHE, "art")),
-		join(GAMES, `${games.get(game)?.header.id ?? "table"}-boards`),
+		join(GAMES, `${basename(games.get(game)?.path ?? "table", ".jsonl")}-boards`),
 		(png, path) => {
 			if (ctx.hasUI) ctx.ui.setWidget("magic-board", (_tui, theme) => new Image(Buffer.from(png).toString("base64"), "image/png",
 				{ fallbackColor: (text) => theme.fg("dim", text) }, { maxWidthCells: 120, filename: path }));
@@ -151,7 +158,7 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(
 		ctx: ExtensionContext,
-		from: { seed: string; decks?: [string, string]; alpha?: true } | { resume: string },
+		from: { seed: string; decks?: string[]; alpha?: true } | { resume: string },
 	): Promise<Table> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
@@ -203,6 +210,7 @@ export default function (pi: ExtensionAPI) {
 			format: standard.name,
 			reusePackages: !resuming,
 			packageNotice: (message) => ctx.ui.notify(message, "warning"),
+			seatInference: (at) => inference(ctx, seatKeys(loadCrew(ROSTER), at)),
 			journal,
 			// The rules are already loaded for the replay check, so the dialer costs
 			// nothing to switch on: a seat may look a rule up mid decision.
@@ -301,71 +309,263 @@ export default function (pi: ExtensionAPI) {
 			`Roster in ${ROSTER}. Edit it there, or with /magic models <role> <pattern> [seat].`,
 			`/magic models why says what each default was chosen for.`,
 		];
+		const keys = loadCrew(ROSTER).keys ?? {};
 		for (const at of seats) {
 			lines.push("", `Seat ${at.id}, ${at.name}:`, ...mine(await roster(ctx, at.id), "seat"));
+			for (const [provider, named] of Object.entries(keys[String(at.id)] ?? {}))
+				lines.push(`  ${provider} calls use this seat's key from ${named}${process.env[named.replace(/^\$/, "")] ? "" : ", which is not set"}.`);
 		}
 		lines.push("", "The table:", ...mine(await roster(ctx), "table"));
 		ctx.ui.notify(lines.join("\n"), "info");
 	}
 
+	/**
+	 * The table the host is running: its lobby, the hold on a game in play, and
+	 * the game's run. The host is never a seat, so nothing here answers a
+	 * decision; the host's view is the spectator's.
+	 */
+	let host: { lobby: Lobby; hold?: Hold; game?: Promise<void>; ticker?: ReturnType<typeof setInterval>; feed: string[] } | null = null;
+
+	/** The host's status widget: the game type, the stage, each seat, and who the table is waiting on. */
+	function showTable(ctx: ExtensionContext) {
+		if (!ctx.hasUI) return;
+		ctx.ui.setWidget("magic-table", host ? tableLines() : undefined);
+	}
+
+	function tableLines(): string[] {
+		if (!host) return ["No table. /magic host sets one."];
+		const { lobby: setup, hold: holding } = host;
+		const lines = [`Magic · ${GAME_TYPES[setup.game].name} · ${setup.stage}${holding?.paused() ? " · paused" : ""}`];
+		const view = table && setup.stage !== "setting" ? project(table, "spectator") : undefined;
+		setup.seats.forEach((one, at) => {
+			const life = view?.players?.find((facts) => facts.id === at)?.life;
+			lines.push(`  Seat ${at}  ${table?.seats[at]?.name ?? one.deck}  ${one.by === "ai" ? "model" : one.by}${life !== undefined ? `  life ${life}` : ""}`);
+		});
+		if (view?.window.kind === "turn") lines.push(`  Turn ${view.window.turn}, ${table!.seats[view.window.active]?.name}'s ${view.window.step.replace(/-/g, " ")}. Version ${table!.ledger.length}.`);
+		const asking = holding?.asking();
+		if (asking) lines.push(`  Waiting on seat ${asking.seat} for ${Math.round((Date.now() - asking.since) / 1000)}s.`);
+		// Pi shows ten lines of a text widget: the status, the last few public lines, and what the host can do next.
+		if (setup.stage === "playing") lines.push(...host.feed.slice(-FEED).map((line) => `  · ${line.length > 110 ? `${line.slice(0, 107)}...` : line}`));
+		lines.push(`  ${setup.stage === "prepared" && table?.ledger.length ? `/magic begin asks every seat to play on from version ${table.ledger.length}.` : NEXT[setup.stage]}`);
+		return lines;
+	}
+
+	/** Public lines the host's widget keeps in view; the turn recaps also go to the chat. */
+	const FEED = 4;
+	const NEXT: Record<Lobby["stage"], string> = {
+		setting: "/magic seat <n> deck <name|random>, /magic first <coin|n>, then /magic start asks every seat to prepare.",
+		preparing: "Decks register, card assessments load and model seats write their briefs.",
+		prepared: "/magic begin asks every seat to begin: the hands are dealt and the mulligans start.",
+		playing: "/magic pause | continue | rollback <version> [why] | end [why]",
+		over: "/magic host sets a new table. /magic rollback <version> rewinds this one; /magic resume seats it again.",
+	};
+
+	/** Admitted alpha decks: legal main decks whose cards all have standing assessments. */
+	const pool = (ctx: ExtensionContext) =>
+		admittedAlpha(universe(standard.name), { notice: (message) => ctx.ui.notify(message, "warning") }).map((one) => one.name);
+
+	/**
+	 * Set a table. Decks come from the words (`A vs B`, `random`), or from a menu
+	 * per seat. Nothing is prepared or dealt: the two agreements come later.
+	 */
+	async function setTable(ctx: ExtensionContext, rest: string) {
+		if (running) { ctx.ui.notify("A game is in play. /magic end it, or /magic pause and leave it, first.", "warning"); return; }
+		const decks = pool(ctx);
+		const random = () => decks[Math.floor(Math.random() * decks.length)]!;
+		let chosen: string[];
+		if (/^random\b/.test(rest)) { chosen = [random()]; while (chosen.length < 2) { const next = random(); if (!chosen.includes(next)) chosen.push(next); } }
+		else if (/ vs /.test(rest)) chosen = rest.split(/ vs /).map((one) => one.trim());
+		else if (ctx.hasUI) {
+			chosen = [];
+			for (const at of [0, 1]) {
+				const picked = await ctx.ui.select(`Seat ${at}: which deck?`, ["Random", ...decks]);
+				if (!picked) return;
+				chosen.push(picked === "Random" ? random() : picked);
+			}
+		} else chosen = [...PLAY];
+		const unknown = chosen.filter((name) => !decks.includes(name));
+		if (unknown.length) { ctx.ui.notify(`Not an admitted deck: ${unknown.join(", ")}. The decks are: ${decks.join(", ")}.`, "warning"); return; }
+		await Promise.all(Object.values(seated?.players ?? {}).map((player) => player.close()));
+		host = { lobby: lobby(chosen), feed: [] };
+		table = null; seated = null;
+		showTable(ctx);
+		ctx.ui.notify(`Table set: ${chosen.join(" vs ")}. Both seats are model seats. ${NEXT.setting}`, "info");
+	}
+
+	/** First agreement: every seat agrees to prepare. The coin flip orders the seats, then preparation runs beside the session. */
+	async function startTable(ctx: ExtensionContext) {
+		if (!host || host.lobby.stage !== "setting") { ctx.ui.notify(host ? `The table is ${host.lobby.stage}.` : "No table. /magic host sets one.", "warning"); return; }
+		const setup = host.lobby;
+		const declined = await agree(setup, "prepare", async () => true);
+		if (declined.length) { ctx.ui.notify(`Seat ${declined.join(", ")} did not agree to prepare.`, "warning"); return; }
+		const { order, by } = seatOrder(setup);
+		setup.seats = order.map((at) => setup.seats[at]!);
+		const decks = setup.seats.map((one) => one.deck);
+		const id = `${slug(decks[0]!)}-vs-${slug(decks[1]!)}-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "")}`;
+		setup.stage = "preparing";
+		showTable(ctx);
+		ctx.ui.notify(`Every seat agreed to prepare. ${by === "coin" ? "The coin flip" : "The host"} put ${decks[0]} on the play. Preparing ${id}.`, "info");
+		const ours = host;
+		void open(ctx, { seed: id, decks, alpha: true }).then(
+			() => { ours.lobby.stage = "prepared"; ctx.ui.notify(`Prepared ${id}. ${NEXT.prepared}`, "info"); },
+			(error) => { ours.lobby.stage = "setting"; ctx.ui.notify(`Preparation failed: ${error instanceof Error ? error.message : String(error)}`, "error"); },
+		).finally(() => showTable(ctx));
+	}
+
+	/** Second agreement: every seat agrees to begin, and the game plays beside the session so the host can still direct it. */
+	async function beginTable(ctx: ExtensionContext) {
+		if (!host || host.lobby.stage !== "prepared" || !table || !seated) { ctx.ui.notify(host ? `The table is ${host.lobby.stage}, not prepared.` : "No table. /magic host sets one.", "warning"); return; }
+		const declined = await agree(host.lobby, "begin", async () => true);
+		if (declined.length) { ctx.ui.notify(`Seat ${declined.join(", ")} did not agree to begin.`, "warning"); return; }
+		const holding = hold(restartOf(table, universe(standard.name)), (direction, now) => {
+			if (direction.do !== "rollback") return;
+			host?.feed.push(`The host rolled the game back to version ${direction.to}: ${direction.note}`);
+			ctx.ui.notify(`Rolled back to version ${direction.to}. Every seat plans again.`, "info");
+			const board = feedFor(ctx, now);
+			board.take(`rolled-back-to-${direction.to}`);
+		});
+		seated.players = Object.fromEntries(Object.entries(seated.players).map(([id, player]) => [id, holding.seat(player, Number(id))]));
+		Object.assign(host, { hold: holding, ticker: setInterval(() => showTable(ctx), 5_000) });
+		host.lobby.stage = "playing";
+		showTable(ctx);
+		ctx.ui.notify(`Every seat agreed to begin. ${table.ledger.length ? "Play goes on." : "Dealing; the mulligans come first."}`, "info");
+		host.game = playOn(ctx, table, seated, host);
+	}
+
+	/** The game's run, the board pictures and the report. Never awaited by a command. */
+	async function playOn(ctx: ExtensionContext, opened: Table, sitting: Seated, ours: NonNullable<typeof host>) {
+		const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
+		running = true;
+		const board = feedFor(ctx, opened);
+		let outcome, failure: unknown;
+		const watch = (line: string) => {
+			ours.feed.push(line);
+			if (ours.feed.length > 200) ours.feed.splice(0, ours.feed.length - 200);
+			if (/^Turn \d+: /.test(line)) ctx.ui.notify(line, "info");
+			showTable(ctx);
+		};
+		try { outcome = await run(opened, sitting, inference(ctx), commentator, watch, games.get(opened), 30_000,
+			(turn) => board.take(`after-turn-${String(turn).padStart(2, "0")}`), ours.hold); }
+		catch (error) { failure = error; }
+		finally { running = false; clearInterval(ours.ticker); }
+		board.take("final");
+		await board.settled();
+		// The run closed its seats either way; a stopped game is seated again by resuming it.
+		ours.lobby.stage = "over";
+		// The file's own name: a clone's header still carries the game it was copied from.
+		const id = basename(games.get(opened)?.path ?? "game", ".jsonl");
+		const result = gameResult(opened, sitting, { journal: games.get(opened)?.path, ...(failure ? { error: String(failure) } : {}) });
+		const paths = saveReport(join(GAMES, `${id}-${sitting.timing.startedAt}.result.json`), result, opened);
+		ctx.ui.notify(`${id}${opened.outcome ? "" : ` stopped at version ${opened.ledger.length}; /magic resume ${id} seats it again`}.\n` + [...report(result), ...paths].join("\n"),
+			outcome && !degraded(opened, sitting) ? "info" : "warning");
+		showTable(ctx);
+	}
+
+	/** Roll back or end: through the hold while the game plays, straight to the table and its journal when it does not. */
+	function direct(ctx: ExtensionContext, words: string[]) {
+		const [verb, at, ...why] = words;
+		if (!table) { ctx.ui.notify("No game. /magic resume <game> opens a saved one.", "warning"); return; }
+		const journal = games.get(table);
+		if (verb === "rollback") {
+			const to = Number(at), note = why.join(" ") || "The host rolled the game back.";
+			if (!Number.isInteger(to)) { ctx.ui.notify(`/magic rollback <version> [why]. The game is at version ${table.ledger.length}.`, "warning"); return; }
+			if (running && host?.hold) { host.hold.direct({ do: "rollback", to, note }); ctx.ui.notify(`Rolling back to version ${to}.${host.hold.paused() ? " Still paused: /magic continue." : ""}`, "info"); return; }
+			rollbackByHost(table, to, note, restartOf(table, universe(standard.name)));
+			if (journal) saveGame(journal, table);
+			if (host) host.lobby.stage = "over";
+			ctx.ui.notify(`Rolled back to version ${to} and saved. /magic resume ${journal ? basename(journal.path, ".jsonl") : "<game>"} seats it again.`, "info");
+		} else {
+			const note = [at, ...why].filter(Boolean).join(" ") || "The host ended the game.";
+			if (running && host?.hold) { host.hold.direct({ do: "end", note }); return; }
+			if (table.outcome) { ctx.ui.notify("The game is already over.", "warning"); return; }
+			endByHost(table, note);
+			if (journal) saveGame(journal, table);
+			if (host) host.lobby.stage = "over";
+			ctx.ui.notify(`Ended with no winner at version ${table.ledger.length}, and saved.`, "info");
+		}
+		showTable(ctx);
+	}
+
+	/** Saved games, newest first. */
+	const saved = () => existsSync(GAMES) ? readdirSync(GAMES).filter((name) => name.endsWith(".jsonl"))
+		.map((name) => ({ id: name.slice(0, -6), at: statSync(join(GAMES, name)).mtimeMs })).sort((a, b) => b.at - a.at).map((one) => one.id) : [];
+
+	async function resumeGame(ctx: ExtensionContext, id: string) {
+		if (running) { ctx.ui.notify("A game is in play. /magic end it, or let it finish, first.", "warning"); return; }
+		const opened = await open(ctx, { resume: id });
+		host = { lobby: { ...lobby(opened.seats.map((one) => one.deck.name)), stage: "prepared" }, feed: [] };
+		showTable(ctx);
+		ctx.ui.notify(`Resumed ${id} at version ${opened.ledger.length}. ${NEXT.prepared}`, "info");
+	}
+
+	const VERBS = ["host", "seat", "first", "start", "begin", "pause", "continue", "rollback", "end", "status", "resume", "clone", "models", "board", "step", "work", "log", "export", "cards", "rules"];
+	const USAGE = "/magic opens the menu. /magic host [A vs B | random] | seat <n> deck <name|random> | first <coin|n> | start | begin | " +
+		"pause | continue | rollback <version> [why] | end [why] | status | resume <game> | clone <game> <version> <new-id> | " +
+		"models [why|<role> <pattern> [seat]] | board | step | work [seat] | log | export <game> [public|full|<seat>] | cards [format|universe] | rules <query|build>";
+
 	pi.registerCommand("magic", {
-		description: "play [seed] | resume <game> | clone <game> <version> <id> | work [seat] | models | step | log | export | cards | rules",
+		description: "Host a Magic table: host, start, begin, pause, rollback, end, resume, models, and more. /magic alone opens the menu.",
+		getArgumentCompletions: (prefix) => prefix.includes(" ") ? null : VERBS.filter((verb) => verb.startsWith(prefix)).map((verb) => ({ value: verb, label: verb })),
 		handler: async (args, ctx) => {
 			const words = args.trim().split(/\s+/).filter(Boolean);
-			const verb = words[0] ?? "";
+			let verb = words[0] ?? "";
 			const seed = words[1] ?? String(table?.log.length ?? 0);
+			const rest = args.trim().slice(verb.length).trim();
+
+			// Nothing starts by itself: the menu sets a table or opens a saved game.
+			if (!verb) {
+				if (!ctx.hasUI) { ctx.ui.notify(USAGE, "info"); return; }
+				const choice = await ctx.ui.select("Magic", [...(host ? ["Table status"] : []), "Host a table", "Resume a saved game", "Models", "Help"]);
+				if (choice === "Host a table") return setTable(ctx, "");
+				if (choice === "Table status") verb = "status";
+				else if (choice === "Models") return models(["models"], ctx);
+				else if (choice === "Help") { ctx.ui.notify(USAGE, "info"); return; }
+				else if (choice === "Resume a saved game") {
+					const id = await ctx.ui.select("Which game?", saved().slice(0, 15));
+					if (id) await resumeGame(ctx, id);
+					return;
+				} else return;
+			}
+
+			if (verb === "host" || verb === "play") return setTable(ctx, rest);
+			if (verb === "start") return startTable(ctx);
+			if (verb === "begin") return beginTable(ctx);
+			if (verb === "status") { ctx.ui.notify(tableLines().join("\n"), "info"); return; }
+			if (verb === "rollback" || verb === "end") return direct(ctx, words);
+			if (verb === "resume") return resumeGame(ctx, seed);
+
+			if (verb === "seat" || verb === "first") {
+				if (!host || host.lobby.stage !== "setting") { ctx.ui.notify("Seats and who plays first are set before /magic start.", "warning"); return; }
+				if (verb === "first") {
+					const first = words[1] === "coin" ? "coin" as const : Number(words[1]);
+					if (first !== "coin" && !host.lobby.seats[first]) { ctx.ui.notify("/magic first <coin|seat>", "warning"); return; }
+					host.lobby.first = first;
+				} else {
+					const at = Number(words[1]), name = words.slice(3).join(" "), decks = pool(ctx);
+					if (!host.lobby.seats[at] || words[2] !== "deck" || !name) { ctx.ui.notify("/magic seat <n> deck <name|random>", "warning"); return; }
+					const chosen = name === "random" ? decks[Math.floor(Math.random() * decks.length)]! : name;
+					if (!decks.includes(chosen)) { ctx.ui.notify(`Not an admitted deck: ${chosen}. The decks are: ${decks.join(", ")}.`, "warning"); return; }
+					host.lobby.seats[at] = { ...host.lobby.seats[at]!, deck: chosen };
+				}
+				showTable(ctx);
+				return;
+			}
+
+			if (verb === "pause" || verb === "continue") {
+				if (!running || !host?.hold) { ctx.ui.notify("No game is in play.", "warning"); return; }
+				if (verb === "pause") host.hold.pause(); else host.hold.resume();
+				ctx.ui.notify(verb === "pause" ? "Paused. The next seat asked waits; /magic continue releases it." : "Play goes on.", "info");
+				showTable(ctx);
+				return;
+			}
 
 			if (verb === "models") {
 				await models(words, ctx);
 				return;
 			}
 
-			if (verb === "play" || verb === "resume") {
-				// Every new game registers main decks only while the alpha has no sideboard work; random play draws from admitted lists.
-				const rest = args.trim().slice(verb.length).trim();
-				let decks: [string, string] | undefined, playSeed = seed, alphaGame = false;
-				if (verb === "play" && /^random\b/.test(rest)) {
-					const pool = admittedAlpha(universe(standard.name), { notice: (message) => ctx.ui.notify(message, "warning") }).map((one) => one.name);
-					if (pool.length < 2) throw new Error("Random alpha play needs two legal imported main decks with complete standing assessments.");
-					alphaGame = true;
-					const first = pool[Math.floor(Math.random() * pool.length)]!; let second = first;
-					while (second === first) second = pool[Math.floor(Math.random() * pool.length)]!;
-					decks = [first, second]; playSeed = rest.replace(/^random\s*/, "") || `random-${Date.now()}`;
-				} else if (verb === "play" && / vs /.test(rest)) {
-					const [left, right] = rest.split(/ vs /).map((one) => one.trim());
-					const tail = right!.split(/\s+/); const named = tail.length > 1 && !collection().has(right!) ? tail.slice(0, -1).join(" ") : right!;
-					decks = [left!, named]; alphaGame = true; playSeed = named === right ? `${left}-vs-${right}`.replace(/[^A-Za-z0-9-]+/g, "-") : tail.at(-1)!;
-				}
-				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed: playSeed, ...(decks ? { decks } : {}), ...(alphaGame ? { alpha: true as const } : {}) });
-				const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
-				running = true;
-				const board = feedFor(ctx, opened);
-				let outcome, failure: unknown;
-				try { outcome = await run(
-					opened,
-					seated!,
-					inference(ctx),
-					commentator,
-					(line) => ctx.ui.notify(line, "info"),
-					games.get(opened),
-					30_000,
-					(turn) => board.take(`after-turn-${String(turn).padStart(2, "0")}`),
-				); } catch (error) { failure = error; } finally { running = false; }
-				board.take("final");
-				await board.settled();
-				const result = gameResult(opened, seated!, { journal: games.get(opened)?.path, ...(failure ? { error: String(failure) } : {}) });
-				const resultPath = join(GAMES, `${playSeed}-${seated!.timing.startedAt}.result.json`);
-				const paths = saveReport(resultPath, result, opened);
-				ctx.ui.notify(
-					`${verb === "resume" ? "Resumed" : "Seed"} ${playSeed}.\n` +
-						[...report(result), ...paths].join("\n"),
-					outcome && !degraded(opened, seated!) ? "info" : "warning",
-				);
-				return;
-			}
-
 			if (verb === "board") {
-				if (!table) { ctx.ui.notify("No table. /magic play opens one.", "warning"); return; }
+				if (!table) { ctx.ui.notify("No table. /magic host sets one.", "warning"); return; }
 				const board = feedFor(ctx, table);
 				board.take(`now-${table.cursor.clock}`);
 				await board.settled();
@@ -465,7 +665,7 @@ export default function (pi: ExtensionAPI) {
 
 			if (verb === "log") {
 				if (!table || !seated) {
-					ctx.ui.notify("No table. Run /magic play.", "warning");
+					ctx.ui.notify("No table. /magic host sets one.", "warning");
 					return;
 				}
 				ctx.ui.notify(
@@ -477,20 +677,16 @@ export default function (pi: ExtensionAPI) {
 				return;
 			}
 
-			ctx.ui.notify(
-				"Usage: /magic play [seed] | /magic play random [seed] | /magic play <deck A> vs <deck B> [seed] | /magic resume <game> | " +
-					"/magic clone <game> <version> <new-id> | " +
-					"/magic models [why|<role> <pattern> [seat]] | /magic step | /magic board | /magic work [seat] | /magic log | " +
-					"/magic export <game> [public|full|<seat>] | " +
-					"/magic cards [format|universe] | /magic rules <query|build>",
-				"info",
-			);
+			ctx.ui.notify(USAGE, "info");
 		},
 	});
 
+	// A closing Pi leaves a game in play resumable: it stops the run and writes no end.
 	pi.on("session_shutdown", async () => {
+		if (running && host?.hold) { host.hold.direct({ do: "leave" }); await host.game; }
 		await Promise.all(Object.values(seated?.players ?? {}).map((player) => player.close()));
 		table = null;
 		seated = null;
+		host = null;
 	});
 }

@@ -35,12 +35,19 @@ npm install
 npm test
 ```
 
-Inside Pi, load the extension from the checkout and play a game:
+Inside Pi, load the extension from the checkout and host a game:
 
 ```
 node node_modules/@earendil-works/pi-coding-agent/dist/cli.js -e ./index.ts
-/magic play
+/magic host Izzet Spellementals vs Mardu Discard
+/magic start
+/magic begin
 ```
+
+`/magic` alone opens a menu. Nothing starts until every seat has agreed to
+prepare (`start`) and then to begin (`begin`). While the game plays, the host
+can `/magic pause`, `/magic continue`, `/magic rollback <version>` and
+`/magic end`.
 
 Or install the package with `pi install npm:pi-magic`. It needs Pi 1.0 or newer.
 
@@ -49,7 +56,7 @@ Or install the package with `pi install npm:pi-magic`. It needs Pi 1.0 or newer.
 
 ## Game reports and timelines
 
-`matchup`, `smoke` and `/magic play` save a `.result.json` and an interactive
+`matchup`, `smoke` and hosted games save a `.result.json` and an interactive
 `.timeline.html` beside the journal. A private `.source-review.md` lists new
 card meanings and announced programs beside their pinned source text. Resuming a game writes a new report for that
 run. The console prints their paths. Preparation failures also keep their bill.

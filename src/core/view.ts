@@ -185,7 +185,13 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		lines.push(`Waiting to go on the stack: ${seat(table, trigger.controller).name}'s ${source && source.incarnation === trigger.source?.incarnation ? publicName(source) : "trigger"}: ${trigger.basis}`);
 	}
 	// A rollback does not make anyone forget: every seat is told it happened.
-	for (const { case: open, ruling, kept, failed } of table.rulings) {
+	for (const ruled of table.rulings) {
+		if (!("case" in ruled)) {
+			lines.push(ruled.ended ? `The host ended the game at action ${ruled.at} with no winner: ${ruled.note}`
+				: `The host rolled the game back to action ${ruled.at}: ${ruled.note} What was seen since stays known.`);
+			continue;
+		}
+		const { case: open, ruling, kept, failed } = ruled;
 		const by = seat(table, open.raisedBy).name;
 		if (!ruling) { lines.push(`The judge did not rule on ${by}'s objection to action ${open.row}: ${failed}. No verdict was recorded.`); continue; }
 		lines.push(kept !== undefined ? `The judge upheld ${by}'s objection to action ${open.row} (${ruling.rule}: ${ruling.because}); the game went back to just before it, and what was seen since stays known.`
