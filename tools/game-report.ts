@@ -1,5 +1,6 @@
 /** One saved result and one rendering for matchup, smoke and /magic. No prompts or hidden card data. */
 import { writeFileSync } from "node:fs";
+import { basename } from "node:path";
 import type { Table } from "../src/core/table.ts";
 import type { Outcome } from "../src/core/types.ts";
 import type { Planned } from "../src/context/seat.ts";
@@ -90,7 +91,8 @@ export function report(result: GameResult): string[] {
 	const outcome = result.outcome ? Object.entries(result.outcome.results).map(([seat, end]) => `${result.seats?.find((one) => String(one.id) === seat)?.name ?? `seat ${seat}`} ${end}`).join(", ") : "no outcome";
 	const diff = (end: number | undefined, start: number | undefined) => end !== undefined && start !== undefined ? end - start : undefined;
 	return [
-		`game      ${result.seed} | ${state}, turn ${result.turn} | ${outcome}`,
+		// A hosted game's seed is secret and says nothing; its journal names it.
+		`game      ${result.journal ? basename(result.journal, ".jsonl") : result.seed} | ${state}, turn ${result.turn} | ${outcome}`,
 		`health    replay ${result.replayMatches === undefined ? "unchecked" : result.replayMatches ? "matched" : "MISMATCH"}  gaps ${result.gaps.length}  fallback ${reasons?.fallback ?? "?"}`,
 		`time      wall ${duration(result.elapsedMs)}  prepare ${duration(diff(timing?.preparedAt ?? (!timing?.playStartedAt ? timing?.finishedAt : undefined), timing?.startedAt))}  play ${duration(timing && !timing.playStartedAt ? 0 : diff(timing?.playEndedAt, timing?.playStartedAt))}  finish ${duration(diff(timing?.finishedAt, timing?.playEndedAt ?? timing?.preparedAt))}  strategy wait ${result.planned ? duration(waitedMs) : "?"}`,
 		`scope     calls and waits: this run; game counters: retained prefix${result.fromVersion === undefined ? "" : ` (started at decision ${result.fromVersion}, now ${result.version})`}`,

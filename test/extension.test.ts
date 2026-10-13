@@ -160,7 +160,10 @@ test("a seat's own models and key are chosen before the start, journaled, and pa
 		assert.ok(hostPi.calls.every((call) => call.model === "jev-c" ? call.key === "key-for-seat-zero" : call.model === "jev-b" && call.key === "key-for-seat-one"),
 			"seat 0 plays the model it chose on its own OpenRouter key; seat 1 the one the roster file gives it, with the roster's key");
 		await hostPi.magic("end Test over.");
-		await until(() => /· over/.test(hostPi.notes.filter((note) => note.startsWith("Magic ·")).at(-1) ?? "") || hostPi.said(/finished, turn/), "the end", hostPi.notes);
+		await until(() => hostPi.said(/^game {6}/m), "the report", hostPi.notes);
+		const report = hostPi.notes.find((note) => /^game {6}/m.test(note))!;
+		assert.match(report, new RegExp(`^game {6}${id} \\|`, "m"), "the report names the game by its id");
+		assert.ok(!report.includes(header.seed), "and never shows its secret seed");
 	} finally { await hostPi.shutdown(); }
 });
 
