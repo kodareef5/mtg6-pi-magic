@@ -624,7 +624,7 @@ export default function (pi: ExtensionAPI) {
 		const setup = lobby(opened.seats.map((one) => one.deck.name));
 		host = { lobby: { ...setup, seats: setup.seats.map((one, at) => ({ ...one, setAs: setAs?.[at]?.setAs ?? at })), stage: "prepared" }, feed: [] };
 		showTable(ctx);
-		ctx.ui.notify(`Resumed ${id} at version ${opened.ledger.length}. ${NEXT.prepared}`, "info");
+		ctx.ui.notify(`Resumed ${id} at version ${opened.ledger.length}. ${opened.ledger.length ? `/magic begin asks every seat to play on from version ${opened.ledger.length}.` : NEXT.prepared}`, "info");
 	}
 
 	/**
